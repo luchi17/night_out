@@ -8,33 +8,76 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @State private var selectedTab: Int = 0
+    
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house")
-                }
+        VStack {
+            // Contenido principal basado en la pestaña seleccionada
+            Spacer()
+            switch selectedTab {
+            case 0:
+                HomeView()
+            case 1:
+                SearchView()
+            case 2:
+                AddView()
+            case 3:
+                DiscotecasMapView()
+            default:
+                UserView()
+            }
+            Spacer()
             
-            DiscotecasMapView() // Aquí agregas el mapa con las discotecas
-                .tabItem {
-                    Image(systemName: "magnifyingglass")
+            // Barra de navegación personalizada
+            HStack {
+                Button(action: {
+                    selectedTab = 0
+                }) {
+                    VStack {
+                        Image(systemName: "house.fill")
+                    }
                 }
-            
-            AddView()
-                .tabItem {
-                    Image(systemName: "heart")
+                .frame(maxWidth: .infinity)
+                
+                Button(action: {
+                    selectedTab = 1
+                }) {
+                    VStack {
+                        Image(systemName: "magnifyingglass")
+                    }
                 }
-            
-            DiscoView()
-                .tabItem {
-                    Image(systemName: "heart")
+                .frame(maxWidth: .infinity)
+                
+                Button(action: {
+                    selectedTab = 2
+                }) {
+                    VStack {
+                        Image(systemName: "plus")
+                    }
                 }
-            
-            UserView()
-                .tabItem {
-                    Image(systemName: "person")
+                .frame(maxWidth: .infinity)
+                
+                Button(action: {
+                    selectedTab = 3
+                }) {
+                    VStack {
+                        Image(systemName: "map")
+                    }
                 }
+                .frame(maxWidth: .infinity)
+                
+                Button(action: {
+                    selectedTab = 4
+                }) {
+                    VStack {
+                        Image(systemName: "person.fill")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .padding()
+            .background(Color(.white))
         }
-        .background(Color.white)
     }
 }

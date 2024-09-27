@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-struct DiscoView: View {
+struct SearchView: View {
     var body: some View {
         NavigationView {
                     VStack {
-                        Text("Disco View")
+                        Text("Search View")
 //                        NavigationLink(destination: DetailView()) {
 //                            Text("Go to Detail")
 //                        }
                     }
-                    .navigationTitle("Disco")
+                    .navigationTitle("Search")
                 }
     }
 }

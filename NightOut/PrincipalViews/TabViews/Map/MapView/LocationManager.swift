@@ -58,14 +58,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             
             var newLocations: [LocationModel] = []
             for item in response.mapItems {
-                let placeCoordinate = item.placemark.coordinate
                 let model = LocationModel(name: item.name ?? "Sin Nombre",
-                                             coordinate: placeCoordinate,
+                                             coordinate: item.placemark.coordinate,
                                              description: "Descripción de \(item.name ?? "Sin Nombre")") // Aquí puedes agregar más info
-                let distance = location.distance(from: CLLocation(latitude: placeCoordinate.latitude, longitude: placeCoordinate.longitude))
-                if distance <= 8000 { // Filtra por discotecas dentro de 8 km
-                     newLocations.append(model)
-                }
+                newLocations.append(model)
             }
             DispatchQueue.main.async {
                 self.locations = newLocations

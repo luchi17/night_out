@@ -22,11 +22,7 @@ struct MapView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-            // Cambia el region solo si ha cambiado
-            if uiView.region.center.latitude != region.center.latitude ||
-                uiView.region.center.longitude != region.center.longitude {
-                uiView.setRegion(region, animated: true)
-            }
+            uiView.setRegion(region, animated: true)
 
             uiView.removeAnnotations(uiView.annotations)
 
