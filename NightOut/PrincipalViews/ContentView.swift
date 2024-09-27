@@ -22,7 +22,7 @@ struct ContentView: View {
             
             AddView()
                 .tabItem {
-                    Image(systemName: "plus")
+                    Image(systemName: "heart")
                 }
             
             DiscoView()
@@ -35,10 +35,6 @@ struct ContentView: View {
                     Image(systemName: "person")
                 }
         }
+        .background(Color.white)
     }
-}
-
-
-#Preview {
-    ContentView()
 }

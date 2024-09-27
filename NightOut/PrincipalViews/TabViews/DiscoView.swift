@@ -21,7 +21,3 @@ struct DiscoView: View {
     }
 }
 
-
-#Preview {
-    DiscoView()
-}

@@ -13,7 +13,3 @@ struct AddView: View {
     }
 }
 
-
-#Preview {
-    AddView()
-}

@@ -7,7 +7,6 @@
 
 import UIKit
 
-@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Método llamado cuando la app ha terminado de lanzarse

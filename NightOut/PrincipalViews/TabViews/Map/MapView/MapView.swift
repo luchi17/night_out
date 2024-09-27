@@ -11,6 +11,7 @@ import MapKit
 struct MapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
     var annotations: [MKPointAnnotation]
+    var onRegionChange: ((MKCoordinateRegion) -> Void)?
 
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -45,6 +46,11 @@ struct MapView: UIViewRepresentable {
             annotationView.markerTintColor = .blue // Color del pin
             annotationView.canShowCallout = true // Muestra el nombre de la discoteca
             return annotationView
+        }
+        
+        func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+                    // Cuando la región cambia, llamamos al closure onRegionChange
+            parent.onRegionChange?(mapView.region)
         }
     }
 }
