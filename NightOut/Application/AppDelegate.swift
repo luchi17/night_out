@@ -16,7 +16,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Configuración inicial de Firebase, analíticas u otros servicios
       //  FirebaseApp.configure()
 
-        // Configuración inicial, si es necesario
         return true
     }
 

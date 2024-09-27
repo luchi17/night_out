@@ -54,11 +54,22 @@
 			);
 			target = 18AE86132CA6A903007448F3 /* NightOutUITests */;
 		};
+		18AE864A2CA6B549007448F3 /* Exceptions for "NightOut" folder in "NightOut" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				PrincipalViews/TabViews/Map/MapView/LocationManager.swift,
+			);
+			target = 18AE85F92CA6A900007448F3 /* NightOut */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		18AE85FC2CA6A900007448F3 /* NightOut */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				18AE864A2CA6B549007448F3 /* Exceptions for "NightOut" folder in "NightOut" target */,
+			);
 			path = NightOut;
 			sourceTree = "<group>";
 		};
@@ -420,8 +431,10 @@
 				DEVELOPMENT_TEAM = 4QM99W37M3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NightOut/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = NightOut;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show nearby discotecas";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -456,8 +469,10 @@
 				DEVELOPMENT_TEAM = 4QM99W37M3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NightOut/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = NightOut;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show nearby discotecas";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
