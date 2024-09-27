@@ -29,20 +29,47 @@
 		18AE86142CA6A903007448F3 /* NightOutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		18AE86302CA6AC29007448F3 /* Exceptions for "Tests" folder in "NightOut" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				NightOutTests/NightOutTests.swift,
+				NightOutUITests/NightOutUITests.swift,
+				NightOutUITests/NightOutUITestsLaunchTests.swift,
+			);
+			target = 18AE85F92CA6A900007448F3 /* NightOut */;
+		};
+		18AE86312CA6AC29007448F3 /* Exceptions for "Tests" folder in "NightOutTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				NightOutTests/NightOutTests.swift,
+			);
+			target = 18AE86092CA6A903007448F3 /* NightOutTests */;
+		};
+		18AE86322CA6AC29007448F3 /* Exceptions for "Tests" folder in "NightOutUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				NightOutUITests/NightOutUITests.swift,
+				NightOutUITests/NightOutUITestsLaunchTests.swift,
+			);
+			target = 18AE86132CA6A903007448F3 /* NightOutUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		18AE85FC2CA6A900007448F3 /* NightOut */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NightOut;
 			sourceTree = "<group>";
 		};
-		18AE860D2CA6A903007448F3 /* NightOutTests */ = {
+		18AE86272CA6AC23007448F3 /* Tests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NightOutTests;
-			sourceTree = "<group>";
-		};
-		18AE86172CA6A903007448F3 /* NightOutUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NightOutUITests;
+			exceptions = (
+				18AE86302CA6AC29007448F3 /* Exceptions for "Tests" folder in "NightOut" target */,
+				18AE86312CA6AC29007448F3 /* Exceptions for "Tests" folder in "NightOutTests" target */,
+				18AE86322CA6AC29007448F3 /* Exceptions for "Tests" folder in "NightOutUITests" target */,
+			);
+			path = Tests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -76,8 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				18AE85FC2CA6A900007448F3 /* NightOut */,
-				18AE860D2CA6A903007448F3 /* NightOutTests */,
-				18AE86172CA6A903007448F3 /* NightOutUITests */,
+				18AE86272CA6AC23007448F3 /* Tests */,
 				18AE85FB2CA6A900007448F3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -109,6 +135,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				18AE85FC2CA6A900007448F3 /* NightOut */,
+				18AE86272CA6AC23007448F3 /* Tests */,
 			);
 			name = NightOut;
 			packageProductDependencies = (
@@ -130,9 +157,6 @@
 			dependencies = (
 				18AE860C2CA6A903007448F3 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				18AE860D2CA6A903007448F3 /* NightOutTests */,
-			);
 			name = NightOutTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +176,6 @@
 			);
 			dependencies = (
 				18AE86162CA6A903007448F3 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				18AE86172CA6A903007448F3 /* NightOutUITests */,
 			);
 			name = NightOutUITests;
 			packageProductDependencies = (
@@ -399,9 +420,13 @@
 				DEVELOPMENT_TEAM = 4QM99W37M3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = NightOut;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -411,9 +436,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NightOut.NightOut;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -428,9 +456,13 @@
 				DEVELOPMENT_TEAM = 4QM99W37M3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = NightOut;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -440,9 +472,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NightOut.NightOut;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
