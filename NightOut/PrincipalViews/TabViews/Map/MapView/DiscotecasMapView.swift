@@ -5,15 +5,22 @@ struct DiscotecasMapView: View {
     @StateObject private var locationManager = LocationManager()
     @State private var searchText = "Discoteca"
     @State private var showFilterOptions = false // Estado para mostrar el filtro
+    @State private var selectedLocation: LocationModel? // Estado para la discoteca seleccionada
     
     var body: some View {
         ZStack {
             // Mapa que ocupa toda la pantalla
-            MapView(region: $locationManager.region, annotations: locationManager.discotecas) { newRegion in
-                            // Llamamos a la función de búsqueda con la nueva región
-                            locationManager.region = newRegion
-                            locationManager.fetchNearbyPlaces(query: searchText)
-                        }
+            MapView(
+                region: $locationManager.region,
+                locations: $locationManager.locations,
+                onSelectLocation: { location in
+                    selectedLocation = location // Guardar la discoteca seleccionada
+                },
+                onRegionChange: { newRegion in
+                                    // Actualiza la región sin causar un ciclo infinito
+                    locationManager.region = newRegion
+                    locationManager.regionDidChange(to: newRegion, query: searchText)
+            })
             .edgesIgnoringSafeArea(.horizontal)
             
             VStack {
@@ -41,8 +48,15 @@ struct DiscotecasMapView: View {
         .sheet(isPresented: $showFilterOptions) {
             MapFilterOptionsView() // Aquí puedes definir una vista con tus opciones de filtro
         }
+        .sheet(item: $selectedLocation) { location in
+                    // Mostrar información de la discoteca en una hoja
+            LocationDetailView(location: location)
+        }
         .onChange(of: searchText) { newSearchTerm in
-            locationManager.fetchNearbyPlaces(query: newSearchTerm)
+            locationManager.fetchNearbyPlaces(
+                region: locationManager.region,
+                query: newSearchTerm
+            )
         }
         .alert(isPresented: $locationManager.locationPermissionDenied) {
             Alert(

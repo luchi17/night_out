@@ -10,33 +10,48 @@ import MapKit
 
 struct MapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
-    var annotations: [MKPointAnnotation]
+    @Binding var locations: [LocationModel]
+    var onSelectLocation: ((LocationModel) -> Void)?
     var onRegionChange: ((MKCoordinateRegion) -> Void)?
-
+    
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true // Muestra la ubicación del usuario
         return mapView
     }
+    
+    func updateUIView(_ uiView: MKMapView, context: Context) {
+            // Cambia el region solo si ha cambiado
+            if uiView.region.center.latitude != region.center.latitude ||
+                uiView.region.center.longitude != region.center.longitude {
+                uiView.setRegion(region, animated: true)
+            }
 
-    func updateUIView(_ mapView: MKMapView, context: Context) {
-        mapView.setRegion(region, animated: true)
-        mapView.removeAnnotations(mapView.annotations)
-        mapView.addAnnotations(annotations) // Añade los pines (anotaciones) de discotecas
-    }
+            uiView.removeAnnotations(uiView.annotations)
 
+            // Agregar las anotaciones
+            let annotations = locations.map { location in
+                let annotation = MKPointAnnotation()
+                annotation.title = location.name
+                annotation.coordinate = location.coordinate
+                return annotation
+            }
+
+            uiView.addAnnotations(annotations)
+        }
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
-
+    
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: MapView
-
+        
         init(_ parent: MapView) {
             self.parent = parent
         }
-
+        
         // Manejo de la vista de anotaciones
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
             if annotation is MKUserLocation {
@@ -49,8 +64,17 @@ struct MapView: UIViewRepresentable {
         }
         
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-                    // Cuando la región cambia, llamamos al closure onRegionChange
-            parent.onRegionChange?(mapView.region)
+            // Cuando la región cambia, llamamos al closure onRegionChange
+            DispatchQueue.main.async {
+                self.parent.onRegionChange?(mapView.region)
+            }
+        }
+        
+        func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            guard let title = view.annotation?.title,
+                    let selectedLocation = parent.locations.first(where: { $0.name == title }) else { return }
+            // Llamar al closure cuando se selecciona un lugar
+            parent.onSelectLocation?(selectedLocation)
         }
     }
 }

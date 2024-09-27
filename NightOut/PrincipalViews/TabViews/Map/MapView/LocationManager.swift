@@ -5,19 +5,20 @@ import Combine
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
-
+    
     @Published var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
                                                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-    @Published var discotecas: [MKPointAnnotation] = []
+    @Published var query: String = ""
+    @Published var locations: [LocationModel] = []
     @Published var locationPermissionDenied = false // Variable para permisos de localización
-
+    
     override init() {
         super.init()
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
     }
-
+    
     // Manejar cambios en el estado de autorización
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
@@ -32,38 +33,48 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             break
         }
     }
-
+    
     // Método para manejar las actualizaciones de ubicación
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
         region = MKCoordinateRegion(center: location.coordinate,
                                     span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        fetchNearbyPlaces(query: "Discoteca")
+        fetchNearbyPlaces(region: region, query: self.query)
     }
-
+    
     // Método para buscar lugares cercanos
-    func fetchNearbyPlaces(query: String) {
-        guard let location = locationManager.location else { return }
-
+    func fetchNearbyPlaces(region: MKCoordinateRegion, query: String) {
+        guard let location = self.locationManager.location else { return }
+        
         let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = query
-        request.region = MKCoordinateRegion(center: location.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-
+        request.naturalLanguageQuery = query // Filtro
+        request.region = region
+        
+        self.query = query
+        
         let search = MKLocalSearch(request: request)
         search.start { response, error in
             guard let response = response else { return }
-
-            var newAnnotations: [MKPointAnnotation] = []
+            
+            var newLocations: [LocationModel] = []
             for item in response.mapItems {
-                let annotation = MKPointAnnotation()
-                annotation.title = item.name
-                annotation.coordinate = item.placemark.coordinate
-                newAnnotations.append(annotation)
+                let placeCoordinate = item.placemark.coordinate
+                let model = LocationModel(name: item.name ?? "Sin Nombre",
+                                             coordinate: placeCoordinate,
+                                             description: "Descripción de \(item.name ?? "Sin Nombre")") // Aquí puedes agregar más info
+                let distance = location.distance(from: CLLocation(latitude: placeCoordinate.latitude, longitude: placeCoordinate.longitude))
+                if distance <= 8000 { // Filtra por discotecas dentro de 8 km
+                     newLocations.append(model)
+                }
             }
             DispatchQueue.main.async {
-                self.discotecas = newAnnotations
+                self.locations = newLocations
             }
         }
+    }
+    
+    func regionDidChange(to newRegion: MKCoordinateRegion, query: String) {
+        fetchNearbyPlaces(region: newRegion, query: query) // Actualizar la búsqueda de lugares cercanos
     }
 }
 
