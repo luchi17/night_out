@@ -6,15 +6,18 @@ struct DiscotecasMapView: View {
     @State private var searchText = "Discoteca"
     @State private var showFilterOptions = false // Estado para mostrar el filtro
     @State private var selectedLocation: LocationModel? // Estado para la discoteca seleccionada
-    
+    @State private var annotationPosition: CGPoint = .zero // Posición de la anotación seleccionada
+    @State private var filteredLocations: [LocationModel] = [] // Localizaciones filtradas
+
     var body: some View {
         ZStack {
             // Mapa que ocupa toda la pantalla
             MapView(
                 region: $locationManager.region,
-                locations: $locationManager.locations,
-                onSelectLocation: { location in
+                locations: filteredLocations.isEmpty ? $locationManager.locations : $filteredLocations,
+                onSelectLocation: { location, position in
                     selectedLocation = location // Guardar la discoteca seleccionada
+                    annotationPosition = position
                 },
                 onRegionChange: { newRegion in
                                     // Actualiza la región sin causar un ciclo infinito
@@ -26,7 +29,7 @@ struct DiscotecasMapView: View {
             VStack {
                 // Barra de búsqueda en la parte superior
                 SearchBar(searchText: $searchText)
-                    .padding(.top, 30)
+                .padding()
                 
                 Spacer()
                 
@@ -43,14 +46,14 @@ struct DiscotecasMapView: View {
                 }
                 .padding(.bottom, 30) // Asegurar que esté a una distancia del borde inferior
             }
+            LocationDetailView(
+                selectedLocation: $selectedLocation,
+                annotationPosition: annotationPosition
+            )
         }
         // Alert o acción relacionada con los filtros
         .sheet(isPresented: $showFilterOptions) {
             MapFilterOptionsView() // Aquí puedes definir una vista con tus opciones de filtro
-        }
-        .sheet(item: $selectedLocation) { location in
-                    // Mostrar información de la discoteca en una hoja
-            LocationDetailView(location: location)
         }
         .onChange(of: searchText) { newSearchTerm in
             locationManager.fetchNearbyPlaces(
@@ -71,4 +74,15 @@ struct DiscotecasMapView: View {
             )
         }
     }
+    
+    // Función para filtrar las discotecas
+        private func filterLocations() {
+            if searchText.isEmpty {
+                filteredLocations = []
+            } else {
+                filteredLocations = locationManager.locations.filter {
+                    $0.name.lowercased().contains(searchText.lowercased())
+                }
+            }
+        }
 }
