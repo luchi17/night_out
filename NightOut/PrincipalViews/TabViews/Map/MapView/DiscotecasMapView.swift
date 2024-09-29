@@ -48,8 +48,9 @@ struct DiscotecasMapView: View {
             }
             LocationDetailView(
                 selectedLocation: $selectedLocation,
-                annotationPosition: annotationPosition
-            )
+                annotationPosition: annotationPosition) {
+                    selectedLocation = nil
+                }
         }
         // Alert o acción relacionada con los filtros
         .sheet(isPresented: $showFilterOptions) {
