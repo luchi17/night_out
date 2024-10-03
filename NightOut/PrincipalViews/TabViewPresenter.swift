@@ -2,22 +2,18 @@ import SwiftUI
 import Combine
 
 protocol TabViewPresenter {
-    var openTab: InputClosure<TabType> { get }
+    func onTapSelected(tabType: TabType)
     var viewModel: TabViewModel { get }
 }
 
 class TabViewModel: ObservableObject {
     
-    public var selectedTab: TabType?
+    @Published var selectedTab: TabType?
+    @Published var viewToShow: AnyView?
 
     // MARK: - Lifecycle
     public init(selectedTab: TabType?) {
         self.selectedTab = selectedTab
-    }
-    
-    // Aquí puedes agregar más propiedades o métodos según sea necesario
-    func selectTab(_ type: TabType) {
-        selectedTab = type
     }
 }
 
@@ -25,18 +21,22 @@ class TabViewModel: ObservableObject {
 struct TabViewPresenterImpl: TabViewPresenter {
     
     var viewModel: TabViewModel
-    var openTab: InputClosure<TabType>
+    var openTab: (TabType) -> AnyView
 
     init(
         viewModel: TabViewModel,
-        openTab: @escaping InputClosure<TabType>
+        openTab: @escaping (TabType) -> AnyView
     ) {
         self.viewModel = viewModel
         self.openTab = openTab
+        
+        if let tab = viewModel.selectedTab {
+            viewModel.viewToShow = openTab(tab)
+        }
     }
 
     func onTapSelected(tabType: TabType) {
-        openTab(tabType)
+        viewModel.viewToShow = openTab(tabType)
     }
 }
 

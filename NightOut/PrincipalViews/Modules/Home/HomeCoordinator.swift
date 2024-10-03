@@ -2,20 +2,14 @@
 import SwiftUI
 import Combine
 
-public struct HomeCoordinator: CoordinatorType {
-    private let router: RouterType
+class HomeCoordinator: ObservableObject {
     
-    public init(router: RouterType) {
-        self.router = router
+    
+    init() {
     }
     
-    public func start() {
-        let vc = HostingController(rootView: HomeView())
-        router.pushViewController(vc, animated: true)
-    }
-    
-    public func close(_ completion: VoidClosure?) {
-        router.close(completion)
+    func start() -> HomeView {
+        return HomeView()
     }
 }
 

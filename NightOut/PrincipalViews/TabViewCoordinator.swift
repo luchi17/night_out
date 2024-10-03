@@ -1,10 +1,3 @@
-//
-//  TabViewModel.swift
-//  NightOut
-//
-//  Created by Apple on 29/9/24.
-//
-
 import SwiftUI
 import Combine
 
@@ -25,101 +18,72 @@ enum TabType: Equatable {
     }
 }
 
-class TabViewCoordinator: CoordinatorType {
+class TabViewCoordinator: ObservableObject, Hashable {
     
-    private let router: RouterType
-    private let selectedTab: TabType?
     private let openMaps: (Double, Double) -> Void
+    @Published var path: NavigationPath
+    
+    let id = UUID()
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: TabViewCoordinator, rhs: TabViewCoordinator) -> Bool {
+        return lhs.id == rhs.id
+    }
     
     init(
-        router: RouterType,
-        selectedTab: TabType?,
+        path: NavigationPath,
         openMaps: @escaping (Double, Double) -> Void
     ) {
-        self.router = router
-        self.selectedTab = selectedTab
+        self.path = path
         self.openMaps = openMaps
     }
     
-    func start() {
-        navigateToTabBarView(selectedTab: selectedTab)
-    }
-
-    func close(_ completion: VoidClosure?) {
-        router.close(completion)
-    }
-    
-    public func makeTabBar(selectedTab: TabType?,
-                           flowFactory: @escaping (TabType) -> UIViewController) -> UIViewController {
-        let viewModel = TabViewModel(selectedTab: selectedTab)
-//        return TabBarViewController(
-//            tabFactory: TabBarFactory(
-//                tabFlowFactory: flowFactory
-//            ),
-//            viewModel: viewModel
-//        )
-//        
-        let view = TabViewScreen(viewModel: viewModel)
-        
-        return HostingController(rootView: view)
-    }
-    
-    func navigateToTabBarView(selectedTab: TabType?) {
-        let vc = makeTabBar(selectedTab: selectedTab, flowFactory: {
-            switch $0 {
+    @ViewBuilder
+    func build() -> some View {
+        let viewModel = TabViewModel(selectedTab: .home)
+        let presenter = TabViewPresenterImpl(viewModel: viewModel) { selectedTab in
+            switch selectedTab {
             case .home:
-                return self.makeHomeFlow()
+                self.makeHomeFlow()
             case .search:
-                return self.makeSearchFlow()
+                self.makeHomeFlow()
             case .publish:
-                return self.makePublishFlow()
+                self.makeHomeFlow()
             case .map:
-                return self.makeMapsFlow()
+                self.makeMapsFlow()
             case .user:
-                return self.makeUserFlow()
+                self.makeHomeFlow()
             }
-        })
-        router.pushViewController(vc, animated: true)
+        }
+        TabViewScreen(presenter: presenter)
     }
     
-    func makeHomeFlow() -> UIViewController {
-        let navigationController = NavigationController()
-        let router = HorizontalRouter(navigationController: navigationController)
-        let coordinator = HomeCoordinator(router: router)
-        coordinator.start()
-        return navigationController
+    func makeHomeFlow() -> AnyView {
+        let coordinator = HomeCoordinator()
+        return AnyView(coordinator.start())
     }
     
-    func makeMapsFlow()-> UIViewController  {
-        let navigationController = NavigationController()
-        let router = HorizontalRouter(navigationController: navigationController)
-        let coordinator = MapCoordinator(router: router, openMaps: openMaps)
-        coordinator.start()
-        return navigationController
+    func makeMapsFlow() -> AnyView {
+        let coordinator = MapCoordinator(openMaps: openMaps)
+        return  AnyView(coordinator.start())
     }
     
-    func makeUserFlow() -> UIViewController {
-        let navigationController = NavigationController()
-        let router = HorizontalRouter(navigationController: navigationController)
-        let coordinator = UserCoordinator(router: router)
-        coordinator.start()
-        return navigationController
-    }
-    
-    func makePublishFlow() -> UIViewController  {
-        let navigationController = NavigationController()
-        let router = HorizontalRouter(navigationController: navigationController)
-        let coordinator = PublishCoordinator(router: router)
-        coordinator.start()
-        return navigationController
-    }
-    
-    func makeSearchFlow() -> UIViewController {
-        let navigationController = NavigationController()
-        let router = HorizontalRouter(navigationController: navigationController)
-        let coordinator = SearchCoordinator(router: router)
-        coordinator.start()
-        return navigationController
-    }
+//    func makeUserFlow() -> some View {
+//        return UserCoordinator().start()
+//    }
+//    
+//    func makePublishFlow() -> some View {
+//        let coordinator = PublishCoordinator()
+//        return coordinator.start()
+//        
+//    }
+//    
+//    func makeSearchFlow() -> some View {
+//        let coordinator = SearchCoordinator()
+//        return coordinator.start()
+//    }
     
 }

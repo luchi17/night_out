@@ -2,20 +2,13 @@
 import SwiftUI
 import Combine
 
-public struct UserCoordinator: CoordinatorType {
-    private let router: RouterType
+public struct UserCoordinator {
     
-    public init(router: RouterType) {
-        self.router = router
+    public init() {
     }
     
-    public func start() {
-        let vc = HostingController(rootView: UserView())
-        router.pushViewController(vc, animated: true)
-    }
-    
-    public func close(_ completion: VoidClosure?) {
-        router.close(completion)
+    public func start() -> any View {
+        return UserView()
     }
 }
 

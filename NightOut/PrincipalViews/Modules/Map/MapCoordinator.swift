@@ -2,27 +2,19 @@
 import SwiftUI
 import Combine
 
-public struct MapCoordinator: CoordinatorType {
-    private let router: RouterType
+class MapCoordinator: ObservableObject {
+    
     private let openMaps: (Double, Double) -> Void
     
-    public init(router: RouterType,
-                openMaps: @escaping (Double, Double) -> Void) {
-        self.router = router
+    init(openMaps: @escaping (Double, Double) -> Void) {
         self.openMaps = openMaps
     }
     
-    public func start() {
+    func start() -> LocationsMapView {
         let presenter = LocationsMapPresenterImpl(
             useCases: .init(),
             actions: .init(onOpenMaps: openMaps)
         )
-        let view = LocationsMapView(presenter: presenter)
-        let vc = HostingController(rootView: view)
-        router.pushViewController(vc, animated: true)
-    }
-    
-    public func close(_ completion: VoidClosure?) {
-        router.close(completion)
+        return LocationsMapView(presenter: presenter)
     }
 }

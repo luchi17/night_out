@@ -2,21 +2,15 @@
 import SwiftUI
 import Combine
 
-public struct PublishCoordinator: CoordinatorType {
-    private let router: RouterType
+public struct PublishCoordinator {
     
-    public init(router: RouterType) {
-        self.router = router
+    public init() {
     }
     
-    public func start() {
-        let vc = HostingController(rootView: AddView())
-        router.pushViewController(vc, animated: true)
+    public func start() -> any View {
+        return AddView()
     }
-    
-    public func close(_ completion: VoidClosure?) {
-        router.close(completion)
-    }
+
 }
 
 

@@ -1,6 +1,6 @@
 import UIKit
 
-@main
+
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
@@ -11,7 +11,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
       //  FirebaseApp.configure()
         
-        initializeAppCoordinatorAndWindow()
+//        initializeAppCoordinatorAndWindow()
         return true
     }
 
@@ -29,14 +29,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension AppDelegate {
     func initializeAppCoordinatorAndWindow() {
-        let window = Window(frame: UIScreen.main.bounds)
-        window.backgroundColor = .black
-        window.makeKeyAndVisible()
-        self.window = window
-
-        let appCoordinator = AppCoordinator(window: window)
-        self.appCoordinator = appCoordinator
-
-        appCoordinator.start()
+//        let window = Window(frame: UIScreen.main.bounds)
+//        window.makeKeyAndVisible()
+//        self.window = window
+//
+//        let appCoordinator = AppCoordinator()
+//        self.appCoordinator = AppCoordinator()
+//        appCoordinator.start()
     }
 }

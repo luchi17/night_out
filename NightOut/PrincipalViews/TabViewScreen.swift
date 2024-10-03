@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  NightOut
-//
-//  Created by Apple on 27/9/24.
-//
-
 import SwiftUI
 
 struct TabViewScreen: View {
@@ -22,10 +15,11 @@ struct TabViewScreen: View {
             // Contenido principal basado en la pestaña seleccionada
             Spacer()
             
+            viewModel.viewToShow
             // Barra de navegación personalizada
             HStack {
                 Button(action: {
-                    presenter.openTab(.home)
+                    presenter.onTapSelected(tabType: .home)
                 }) {
                     VStack {
                         Image(systemName: "house.fill")
@@ -34,7 +28,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    presenter.openTab(.search)
+                    presenter.onTapSelected(tabType: .search)
                 }) {
                     VStack {
                         Image(systemName: "magnifyingglass")
@@ -43,7 +37,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    presenter.openTab(.publish)
+                    presenter.onTapSelected(tabType: .publish)
                 }) {
                     VStack {
                         Image(systemName: "plus")
@@ -52,7 +46,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    presenter.openTab(.map)
+                    presenter.onTapSelected(tabType: .map)
                 }) {
                     VStack {
                         Image(systemName: "map")
@@ -61,7 +55,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    presenter.openTab(.user)
+                    presenter.onTapSelected(tabType: .user)
                 }) {
                     VStack {
                         Image(systemName: "person.fill")
@@ -72,5 +66,6 @@ struct TabViewScreen: View {
             .padding()
             .background(Color(.white))
         }
+        .navigationBarBackButtonHidden()
     }
 }

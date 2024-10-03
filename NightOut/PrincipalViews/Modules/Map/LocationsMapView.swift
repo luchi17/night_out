@@ -1,7 +1,8 @@
 import SwiftUI
 import MapKit
+import Combine
 
-struct LocationsMapView: View {
+struct LocationsMapView: View, Hashable {
     @StateObject private var locationManager = LocationManager()
     @State private var searchText = "Discoteca"
     @State private var showFilterOptions = false // Estado para mostrar el filtro
@@ -10,7 +11,16 @@ struct LocationsMapView: View {
     @State private var filteredLocations: [LocationModel] = [] // Localizaciones filtradas
     @State private var showingDetail = false
     
-    var openMaps: (Double, Double) -> Void
+    private let openMapsPublisher = PassthroughSubject<(Double, Double), Never>()
+    public let id = UUID()
+    
+    static func == (lhs: LocationsMapView, rhs: LocationsMapView) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id) // Combina el id para el hash
+    }
     
     @ObservedObject var viewModel: LocationsMapViewModel
     let presenter: LocationsMapPresenter
@@ -20,6 +30,7 @@ struct LocationsMapView: View {
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
+        bindViewModel()
     }
 
     var body: some View {
@@ -69,7 +80,7 @@ struct LocationsMapView: View {
                 LocationDetailSheet(
                     selectedLocation: location,
                     openMaps: {
-                        self.openMaps(location.coordinate.latitude, location.coordinate.longitude)
+                        self.openMapsPublisher.send((location.coordinate.latitude, location.coordinate.longitude))
                     }
                 )
                     .presentationDetents([.medium]) // Definimos que la sheet puede ser mediana
@@ -109,4 +120,12 @@ struct LocationsMapView: View {
                 }
             }
         }
+}
+
+private extension LocationsMapView {
+    
+    func bindViewModel() {
+        let input = LocationsMapPresenterImpl.ViewInputs(openMaps: self.openMapsPublisher.eraseToAnyPublisher())
+        presenter.transform(input: input)
+    }
 }

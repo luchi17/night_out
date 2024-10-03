@@ -1,19 +1,21 @@
 
 import UIKit
+import SwiftUI
 
-@MainActor
 final class CoordinatorFactoryImpl {
     
-    init() {
+    init() { }
+    
+    func makeTabBarCoordinator(path: NavigationPath) -> TabViewCoordinator {
+        return TabViewCoordinator(path: path, openMaps: openGoogleMaps(latitude:longitude:))
     }
     
-    func makeTabBarCoordinator(router: RouterType, selectedTab: TabType?) -> CoordinatorType {
-        
-        return TabViewCoordinator(
-            router: router,
-            selectedTab: selectedTab,
-            openMaps: openGoogleMaps(latitude:longitude:)
-            )
+    func makeLogin() -> LoginCoordinator {
+        return LoginCoordinator()
+    }
+    
+    func makeSplash(actions: SplashPresenterImpl.Actions) -> SplashCoordinator {
+        return SplashCoordinator(actions: actions)
     }
     
     func openGoogleMaps(latitude: Double, longitude: Double) {

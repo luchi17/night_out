@@ -1,10 +1,10 @@
 import SwiftUI
 
-struct HomeView: View, Hashable {
+struct LoginView: View, Hashable {
     
     public let id = UUID()
     
-    static func == (lhs: HomeView, rhs: HomeView) -> Bool {
+    static func == (lhs: LoginView, rhs: LoginView) -> Bool {
         return lhs.id == rhs.id
     }
     
@@ -12,15 +12,15 @@ struct HomeView: View, Hashable {
         hasher.combine(id) // Combina el id para el hash
     }
     
+    
     var body: some View {
-        NavigationView {
-                    VStack {
-                        Text("Home View")
+        VStack {
+            Text("Login View")
 //                        NavigationLink(destination: DetailView()) {
 //                            Text("Go to Detail")
 //                        }
-                    }
-                    .navigationTitle("Home")
-                }
+        }
     }
 }
+
+

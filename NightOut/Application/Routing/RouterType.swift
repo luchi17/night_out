@@ -1,5 +1,10 @@
 import UIKit
 
+public protocol CoordinatorType {
+    func start()
+    func close()
+}
+
 public enum PresentationType {
     case fullScreen
     case pageSheet(dismissOnSwipeDown: Bool)
