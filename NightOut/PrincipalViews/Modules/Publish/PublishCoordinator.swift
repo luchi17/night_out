@@ -2,13 +2,14 @@
 import SwiftUI
 import Combine
 
-public struct PublishCoordinator {
+struct PublishCoordinator {
     
-    public init() {
+    init() {
     }
     
-    public func start() -> any View {
-        return AddView()
+    @ViewBuilder
+    func build() -> some View {
+        AddView()
     }
 
 }

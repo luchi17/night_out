@@ -2,11 +2,12 @@
 import SwiftUI
 import Combine
 
-public struct SearchCoordinator {
-    public init() { }
+struct SearchCoordinator {
+    init() { }
     
-    public func start() -> any View {
-        return SearchView()
+    @ViewBuilder
+    func build() -> some View {
+        SearchView()
     }
 }
 

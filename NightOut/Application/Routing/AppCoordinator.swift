@@ -26,7 +26,7 @@ private extension AppCoordinator {
 //            router: router,
 //            onCompletion: setMainFlow
 //        )
-//        onboardingCoordinator.start()
+//        onboardingCoordinator.build()
 //        window.setRootViewController(onboardingNVC)
     }
 }
@@ -59,7 +59,7 @@ final class AppCoordinator: ObservableObject {
     
     private func splashView() -> some View {
         let coord = coordinatorFactory.makeSplash(actions: makeSplashActions())
-        let splashView = coord.start()
+        let splashView = coord.build()
         return splashView
     }
 //

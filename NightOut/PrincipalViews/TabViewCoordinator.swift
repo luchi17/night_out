@@ -49,13 +49,13 @@ class TabViewCoordinator: ObservableObject, Hashable {
             case .home:
                 self.makeHomeFlow()
             case .search:
-                self.makeHomeFlow()
+                self.makeSearchFlow()
             case .publish:
-                self.makeHomeFlow()
+                self.makePublishFlow()
             case .map:
                 self.makeMapsFlow()
             case .user:
-                self.makeHomeFlow()
+                self.makeUserFlow()
             }
         }
         TabViewScreen(presenter: presenter)
@@ -63,27 +63,28 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     func makeHomeFlow() -> AnyView {
         let coordinator = HomeCoordinator()
-        return AnyView(coordinator.start())
+        return AnyView(coordinator.build())
     }
     
     func makeMapsFlow() -> AnyView {
         let coordinator = MapCoordinator(openMaps: openMaps)
-        return  AnyView(coordinator.start())
+        return AnyView(coordinator.build())
     }
     
-//    func makeUserFlow() -> some View {
-//        return UserCoordinator().start()
-//    }
-//    
-//    func makePublishFlow() -> some View {
-//        let coordinator = PublishCoordinator()
-//        return coordinator.start()
-//        
-//    }
-//    
-//    func makeSearchFlow() -> some View {
-//        let coordinator = SearchCoordinator()
-//        return coordinator.start()
-//    }
+    func makeUserFlow() -> AnyView {
+        let coordinator = UserCoordinator()
+        return AnyView(coordinator.build())
+    }
+    
+    func makePublishFlow() -> AnyView {
+        let coordinator = PublishCoordinator()
+        return AnyView(coordinator.build())
+        
+    }
+    
+    func makeSearchFlow() -> AnyView {
+        let coordinator = SearchCoordinator()
+        return AnyView(coordinator.build())
+    }
     
 }

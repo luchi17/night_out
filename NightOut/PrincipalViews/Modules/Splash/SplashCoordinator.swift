@@ -10,12 +10,13 @@ class SplashCoordinator {
         self.actions = actions
     }
     
-    func start() -> SplashView {
+    @ViewBuilder
+    func build() -> some View {
         let presenter = SplashPresenterImpl(
             actions: self.actions,
             useCases: .init()
         )
-        return SplashView(presenter: presenter)
+        SplashView(presenter: presenter)
     }
 }
 

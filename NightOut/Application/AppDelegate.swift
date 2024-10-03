@@ -10,8 +10,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
       //  FirebaseApp.configure()
-        
-//        initializeAppCoordinatorAndWindow()
         return true
     }
 
@@ -25,16 +23,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // Otros métodos opcionales del ciclo de vida de la aplicación...
-}
-
-extension AppDelegate {
-    func initializeAppCoordinatorAndWindow() {
-//        let window = Window(frame: UIScreen.main.bounds)
-//        window.makeKeyAndVisible()
-//        self.window = window
-//
-//        let appCoordinator = AppCoordinator()
-//        self.appCoordinator = AppCoordinator()
-//        appCoordinator.start()
-    }
 }

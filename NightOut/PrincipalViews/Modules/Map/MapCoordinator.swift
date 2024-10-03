@@ -2,7 +2,7 @@
 import SwiftUI
 import Combine
 
-class MapCoordinator: ObservableObject {
+class MapCoordinator {
     
     private let openMaps: (Double, Double) -> Void
     
@@ -10,11 +10,12 @@ class MapCoordinator: ObservableObject {
         self.openMaps = openMaps
     }
     
-    func start() -> LocationsMapView {
+    @ViewBuilder
+    func build() -> some View {
         let presenter = LocationsMapPresenterImpl(
             useCases: .init(),
             actions: .init(onOpenMaps: openMaps)
         )
-        return LocationsMapView(presenter: presenter)
+        LocationsMapView(presenter: presenter)
     }
 }

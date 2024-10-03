@@ -2,14 +2,15 @@
 import SwiftUI
 import Combine
 
-class HomeCoordinator: ObservableObject {
+class HomeCoordinator {
     
     
     init() {
     }
     
-    func start() -> HomeView {
-        return HomeView()
+    @ViewBuilder
+    func build() -> some View {
+      HomeView()
     }
 }
 

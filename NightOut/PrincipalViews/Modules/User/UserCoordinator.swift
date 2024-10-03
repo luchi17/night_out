@@ -2,13 +2,14 @@
 import SwiftUI
 import Combine
 
-public struct UserCoordinator {
+struct UserCoordinator {
     
-    public init() {
+    init() {
     }
     
-    public func start() -> any View {
-        return UserView()
+    @ViewBuilder
+    func build() -> some View {
+        UserView()
     }
 }
 
