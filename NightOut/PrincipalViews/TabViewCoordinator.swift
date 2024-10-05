@@ -21,6 +21,7 @@ enum TabType: Equatable {
 class TabViewCoordinator: ObservableObject, Hashable {
     
     private let openMaps: (Double, Double) -> Void
+    private let locationManager: LocationManager
     @Published var path: NavigationPath
     
     let id = UUID()
@@ -35,9 +36,11 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     init(
         path: NavigationPath,
+        locationManager: LocationManager,
         openMaps: @escaping (Double, Double) -> Void
     ) {
         self.path = path
+        self.locationManager = locationManager
         self.openMaps = openMaps
     }
     
@@ -67,7 +70,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makeMapsFlow() -> AnyView {
-        let coordinator = MapCoordinator(openMaps: openMaps)
+        let coordinator = MapCoordinator(actions: mapActions(), locationManager: locationManager)
         return AnyView(coordinator.build())
     }
     
@@ -87,4 +90,17 @@ class TabViewCoordinator: ObservableObject, Hashable {
         return AnyView(coordinator.build())
     }
     
+}
+
+private extension TabViewCoordinator {
+    func mapActions() -> LocationsMapPresenterImpl.Actions {
+        .init(
+            onOpenMaps: openMaps,
+            onFilterSelected: onMapFilterSelected
+        )
+    }
+    
+    func onMapFilterSelected(type: MapFilterType) {
+        
+    }
 }

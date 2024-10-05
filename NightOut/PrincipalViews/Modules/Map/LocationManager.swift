@@ -4,13 +4,15 @@ import MapKit
 import Combine
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    
+    public static let shared = LocationManager()
     private let locationManager = CLLocationManager()
     
-    @Published var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-                                               span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+    @Published var region = MKCoordinateRegion()
     @Published var query: String = ""
     @Published var locations: [LocationModel] = []
     @Published var locationPermissionDenied = false // Variable para permisos de localización
+    @Published var userLocation: CLLocationCoordinate2D?
     
     override init() {
         super.init()
@@ -37,7 +39,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     // Método para manejar las actualizaciones de ubicación
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
-        region = MKCoordinateRegion(center: location.coordinate,
+        self.userLocation = location.coordinate
+        print(userLocation?.latitude)
+        print(userLocation?.longitude)
+        let region = MKCoordinateRegion(center: location.coordinate,
                                     span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
         fetchNearbyPlaces(region: region, query: self.query)
     }
@@ -46,10 +51,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     func fetchNearbyPlaces(region: MKCoordinateRegion, query: String) {
         
         let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = query // Filtro
+        request.naturalLanguageQuery = query
         request.region = region
         
         self.query = query
+        self.region = region
         
         let search = MKLocalSearch(request: request)
         search.start { response, error in

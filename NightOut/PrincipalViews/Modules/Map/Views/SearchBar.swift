@@ -1,19 +1,13 @@
-//
-//  SearchBar.swift
-//  NightOut
-//
-//  Created by Apple on 27/9/24.
-//
-
 import SwiftUI
 
 struct SearchBar: View {
     @Binding var searchText: String
     @State private var isEditing = false
+    var onSearch: VoidClosure
 
     var body: some View {
         HStack {
-            TextField("Search for places...", text: $searchText)
+            TextField("Search for places...", text: $searchText, onCommit: onSearch)
                 .padding(7)
                 .padding(.horizontal, 25)
                 .background(Color(.systemGray6))

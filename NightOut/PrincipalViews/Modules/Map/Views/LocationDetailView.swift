@@ -7,31 +7,26 @@ struct LocationDetailView: View {
     var onDismiss: () -> Void // Closure para manejar el cierre
 
     var body: some View {
-        if let selectedLocation = selectedLocation {
-            HStack {
-                content
-                VStack {
-                    Button(action: {
-                        onDismiss() // Cierra el banner
-                    }) {
-                        Image(systemName: "xmark")
-                            .padding(.trailing)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                    }
-                    Spacer()
+        HStack {
+            content
+            VStack {
+                Button(action: {
+                    onDismiss() // Cierra el banner
+                }) {
+                    Image(systemName: "xmark")
+                        .padding(.trailing)
+                        .background(Color.white)
+                        .clipShape(Circle())
                 }
+                Spacer()
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(10)
-            .shadow(radius: 10)
-            .padding(.horizontal, 40)
-            .frame(maxHeight: 300)
-            
-        } else {
-            EmptyView()
         }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(10)
+        .shadow(radius: 10)
+        .padding(.horizontal, 40)
+        .frame(maxHeight: 300)
     }
     
     // Contenido principal de la vista

@@ -4,17 +4,20 @@ import Combine
 
 class MapCoordinator {
     
-    private let openMaps: (Double, Double) -> Void
+    private let actions: LocationsMapPresenterImpl.Actions
+    private let locationManager: LocationManager
     
-    init(openMaps: @escaping (Double, Double) -> Void) {
-        self.openMaps = openMaps
+    init(actions: LocationsMapPresenterImpl.Actions, locationManager: LocationManager) {
+        self.actions = actions
+        self.locationManager = locationManager
     }
     
     @ViewBuilder
     func build() -> some View {
         let presenter = LocationsMapPresenterImpl(
             useCases: .init(),
-            actions: .init(onOpenMaps: openMaps)
+            actions: actions,
+            locationManager: locationManager
         )
         LocationsMapView(presenter: presenter)
     }
