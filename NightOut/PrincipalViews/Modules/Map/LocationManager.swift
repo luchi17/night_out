@@ -12,11 +12,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var query: String = ""
     @Published var locations: [LocationModel] = []
     @Published var locationPermissionDenied = false // Variable para permisos de localización
-    @Published var userLocation: CLLocationCoordinate2D?
     
     override init() {
         super.init()
         locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
     }
@@ -39,9 +39,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     // Método para manejar las actualizaciones de ubicación
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
-        self.userLocation = location.coordinate
-        print(userLocation?.latitude)
-        print(userLocation?.longitude)
         let region = MKCoordinateRegion(center: location.coordinate,
                                     span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
         fetchNearbyPlaces(region: region, query: self.query)
@@ -55,7 +52,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         request.region = region
         
         self.query = query
-        self.region = region
+        // So the map view updates the region
+        DispatchQueue.main.async {
+            self.region = region
+        }
         
         let search = MKLocalSearch(request: request)
         search.start { response, error in
