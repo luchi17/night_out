@@ -3,7 +3,6 @@ import MapKit
 import Combine
 
 struct LocationsMapView: View {
-    @State private var showFilterOptions = false // Estado para mostrar el filtro
     @State private var annotationPosition: CGPoint = .zero // Posición de la anotación seleccionada
     @State private var filteredLocations: [LocationModel] = [] // Localizaciones filtradas
     @State private var showingDetail = false
@@ -11,7 +10,8 @@ struct LocationsMapView: View {
     private let openMapsPublisher = PassthroughSubject<(Double, Double), Never>()
     private let filterSelectedPublisher = PassthroughSubject<MapFilterType, Never>()
     private let searchSpecificLocationPublisher = PassthroughSubject<Void, Never>()
-    private let regionChangedPublisher = CurrentValueSubject<MKCoordinateRegion, Never>(.init())
+    private let regionChangedPublisher = PassthroughSubject<MKCoordinateRegion, Never>()
+    private let locationSelectedPublisher = PassthroughSubject<LocationModel, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     @ObservedObject var viewModel: LocationsMapViewModel
@@ -78,24 +78,6 @@ struct LocationsMapView: View {
         }
     }
     
-    // Función para filtrar las discotecas
-    private mutating func filterLocations() {
-        //            if searchText.isEmpty {
-        //                filteredLocations = []
-        //            } else {
-        //                filteredLocations = viewModel.locationManager.locations.filter {
-        //                    $0.name.lowercased().contains(searchText.lowercased())
-        //                }
-        //            }
-        filterSelectedPublisher
-            .sink { type in
-                print("+++++")
-                print(type)
-            }
-            .store(in: &cancellables)
-        
-    }
-    
     private func searchLocation() {
         if viewModel.searchQuery.isEmpty {
             filteredLocations = []
@@ -115,7 +97,8 @@ private extension LocationsMapView {
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
             onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
             locationBarSearch: searchSpecificLocationPublisher.eraseToAnyPublisher(),
-            regionChanged: regionChangedPublisher.eraseToAnyPublisher()
+            regionChanged: regionChangedPublisher.eraseToAnyPublisher(),
+            locationSelected: locationSelectedPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

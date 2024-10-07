@@ -40,7 +40,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
         let region = MKCoordinateRegion(center: location.coordinate,
-                                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                                        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
         fetchNearbyPlaces(region: region, query: self.query)
     }
     
@@ -52,10 +52,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         request.region = region
         
         self.query = query
-        // So the map view updates the region
-        DispatchQueue.main.async {
-            self.region = region
-        }
+        self.region = region
         
         let search = MKLocalSearch(request: request)
         search.start { response, error in
@@ -63,9 +60,12 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             
             var newLocations: [LocationModel] = []
             for item in response.mapItems {
-                let model = LocationModel(name: item.name ?? "Sin Nombre",
-                                             coordinate: item.placemark.coordinate,
-                                             description: "Descripción de \(item.name ?? "Sin Nombre")") // Aquí puedes agregar más info
+                let model = LocationModel(
+                    name: item.name ?? "Sin Nombre",
+                    coordinate: item.placemark.coordinate,
+                    description: "Descripción de \(item.name ?? "Sin Nombre")",
+                    image: ""
+                ) // Aquí puedes agregar más info
                 newLocations.append(model)
             }
             DispatchQueue.main.async {
