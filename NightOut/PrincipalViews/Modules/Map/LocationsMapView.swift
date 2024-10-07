@@ -46,23 +46,8 @@ struct LocationsMapView: View {
                 
                 Spacer()
                 
-                // Botón "Filtrar" en la parte inferior
-                Button(action: {
-                    showFilterOptions.toggle()
-                }) {
-                    Text("Filtrar")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-                .padding(.bottom, 30)
+                MapFilterOptionsView(filterSelected: filterSelectedPublisher.send)
             }
-        }
-        // Alert o acción relacionada con los filtros
-        .sheet(isPresented: $showFilterOptions) {
-            MapFilterOptionsView(filterSelected: filterSelectedPublisher.send)
         }
         .sheet(isPresented: $showingDetail) {
             if let location = viewModel.selectedLocation {

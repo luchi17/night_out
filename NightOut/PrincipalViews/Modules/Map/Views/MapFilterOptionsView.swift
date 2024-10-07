@@ -16,49 +16,65 @@ struct MapFilterOptionsView: View {
 
             // Opciones desplegables cuando el botón de filtrar es pulsado
             if showOptions {
-                VStack(spacing: 10) {
+                VStack(spacing: 2) {
                     Button(action: {
                         selectedFilter = .near
-                        showOptions = false
+                        hideOptions()
                     }) {
-                        Text("Cerca de mí")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(8)
+                        
+                        HStack(alignment: .center,spacing: 10) {
+                            Text(MapFilterType.near.title)
+                            Image(systemName: MapFilterType.near.image)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(8)
                     }
                     
                     Button(action: {
                         selectedFilter = .people
-                        showOptions = false
+                        hideOptions()
                     }) {
-                        Text("Distancia")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(8)
+                        
+                        HStack(alignment: .center, spacing: 10) {
+                            Text(MapFilterType.people.title)
+                            Image(systemName: MapFilterType.people.image)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(8)
                     }
                 }
-                .transition(.move(edge: .bottom))
-                .padding(.bottom, 10)
+                .opacity(showOptions ? 1 : 0)  // Controla la opacidad
+                .transition(.move(edge: .bottom).combined(with: .opacity)) // Combina movimiento con opacidad
+                .animation(.easeInOut(duration: 0.3), value: showOptions)
             }
             
             // Botón de Filtrar con un tap gesture para mostrar el menú
             Button(action: {
                 withAnimation {
-                    showOptions.toggle() // Alterna la visibilidad del menú con animación
+                    showOptions.toggle()
                 }
             }) {
-                Text("Filtrar")
+                Text(showOptions ? "Cerrar" : "Filtrar")
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
-            .padding()
+            .padding(.bottom, 30)
         }
+        .padding(.horizontal)
     }
+    
+    private func hideOptions() {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showOptions = false
+            }
+        }
 }
 
 enum MapFilterType: CaseIterable {
@@ -79,7 +95,7 @@ enum MapFilterType: CaseIterable {
         case .near:
             return "location.circle"
         case .people:
-            return "arrow.up.and.down.circle"
+            return "person.3.fill"
         }
     }
 }
