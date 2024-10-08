@@ -26,6 +26,9 @@ struct LocationsListView: View {
             .background(Color.gray.opacity(0.2))
             .padding(.horizontal)
             .padding(.bottom, 8)
+            .onTapGesture {
+                onLocationSelected(location)
+            }
         }
     }
     

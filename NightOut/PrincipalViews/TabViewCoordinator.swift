@@ -94,13 +94,6 @@ class TabViewCoordinator: ObservableObject, Hashable {
 
 private extension TabViewCoordinator {
     func mapActions() -> LocationsMapPresenterImpl.Actions {
-        .init(
-            onOpenMaps: openMaps,
-            onFilterSelected: onMapFilterSelected
-        )
-    }
-    
-    func onMapFilterSelected(type: MapFilterType) {
-        
+        .init(onOpenMaps: openMaps)
     }
 }

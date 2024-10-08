@@ -10,6 +10,7 @@ final class LocationsMapViewModel: ObservableObject {
     @Published var selectedLocation: LocationModel? // Discoteca seleccionada
     
     @Published var locationManager: LocationManager
+    @Published var filteredLocations: [LocationModel] = []
     
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
@@ -30,7 +31,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     
     struct Actions {
         let onOpenMaps: InputClosure<(Double, Double)>
-        let onFilterSelected: InputClosure<MapFilterType>
     }
     
     struct ViewInputs {
@@ -38,6 +38,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
         let onFilterSelected: AnyPublisher<MapFilterType, Never>
         let locationBarSearch: AnyPublisher<Void, Never>
         let regionChanged: AnyPublisher<MKCoordinateRegion, Never>
+        let locationSelected: AnyPublisher<LocationModel, Never>
     }
     
     var viewModel: LocationsMapViewModel
@@ -69,8 +70,11 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
         input
             .onFilterSelected
             .withUnretained(self)
-            .sink { presenter, data in
-                self.actions.onFilterSelected(data)
+            .sink { presenter, filter in
+                //DO LOGIC, ROW BELOW WRONG
+                // update viewmodel locations
+                self.viewModel.filteredLocations = self.viewModel.locationManager.locations
+                // Call use case to retrieve locations according to the type selected
             }
             .store(in: &cancellables)
         
@@ -90,6 +94,16 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                     to: newRegion,
                     query: self.viewModel.searchQuery
                 )
+            }
+            .store(in: &cancellables)
+        
+        input
+            .locationSelected
+            .withUnretained(self)
+            .sink { presenter, locationSelected in
+                // Update map to move to the specific location
+                // sirve actualizar con la region como en searchSpecificLocation ?
+                self.viewModel.filteredLocations = []
             }
             .store(in: &cancellables)
             

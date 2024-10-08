@@ -46,6 +46,13 @@ struct LocationsMapView: View {
                 
                 Spacer()
                 
+                if !viewModel.filteredLocations.isEmpty {
+                    LocationsListView(
+                        locations: $viewModel.filteredLocations,
+                        onLocationSelected: locationSelectedPublisher.send
+                    )
+                }
+                
                 MapFilterOptionsView(filterSelected: filterSelectedPublisher.send)
             }
         }
