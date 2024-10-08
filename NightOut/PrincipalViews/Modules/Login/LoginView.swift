@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct LoginView: View, Hashable {
     
@@ -10,6 +11,19 @@ struct LoginView: View, Hashable {
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id) // Combina el id para el hash
+    }
+    
+    @ObservedObject var viewModel: LoginViewModel
+    let presenter: LoginPresenter
+    
+    private let loginPublisher = PassthroughSubject<Void, Never>()
+    
+    init(
+        presenter: LoginPresenter
+    ) {
+        self.presenter = presenter
+        viewModel = presenter.viewModel
+        bindViewModel()
     }
     
     var body: some View {
@@ -29,7 +43,7 @@ struct LoginView: View, Hashable {
                     .padding(.top, 90)
                 
                 // Email Input
-                TextField("Email...", text: .constant(""))
+                TextField("Email...", text: $viewModel.email)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding()
                     .background(Color.white.opacity(0.2)) // Custom input background color
@@ -37,7 +51,7 @@ struct LoginView: View, Hashable {
                     .cornerRadius(10)
                 
                 // Password Input
-                SecureField("Password...", text: .constant(""))
+                SecureField("Password...", text: $viewModel.password)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding()
                     .background(Color.white.opacity(0.2)) // Custom input background color
@@ -46,7 +60,7 @@ struct LoginView: View, Hashable {
                 
                 // Login Button
                 Button(action: {
-                    // Action for login
+                    loginPublisher.send()
                 }) {
                     Text("Log in")
                         .font(.system(size: 17, weight: .bold))
@@ -93,5 +107,15 @@ struct LoginView: View, Hashable {
             .padding([.leading, .trailing], 20)
         }
         .background(Color.orange)
+    }
+}
+
+private extension LoginView {
+    
+    func bindViewModel() {
+        let input = LoginPresenterImpl.ViewInputs(
+            login: loginPublisher.eraseToAnyPublisher()
+        )
+        presenter.transform(input: input)
     }
 }
