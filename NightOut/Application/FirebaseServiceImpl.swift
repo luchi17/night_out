@@ -1,10 +1,15 @@
 import UIKit
 import Firebase
 import Foundation
+import FirebaseAuth
 
 final class FirebaseServiceImpl {
     static let shared = FirebaseServiceImpl()
-
+    
+    var currentUser: User? {
+        return Auth.auth().currentUser
+    }
+    
     func configure() {
         self.setupFirebase()
     }
