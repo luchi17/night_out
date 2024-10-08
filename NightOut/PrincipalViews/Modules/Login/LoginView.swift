@@ -12,15 +12,86 @@ struct LoginView: View, Hashable {
         hasher.combine(id) // Combina el id para el hash
     }
     
-    
     var body: some View {
-        VStack {
-            Text("Login View")
-//                        NavigationLink(destination: DetailView()) {
-//                            Text("Go to Detail")
-//                        }
+        ZStack {
+            // Background Image
+            Image("imagen_inicio")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .aspectRatio(contentMode: .fill)
+            
+            VStack(spacing: 20) {
+                // Logo
+                Image("logo_amarillo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 162, height: 157)
+                    .padding(.top, 90)
+                
+                // Email Input
+                TextField("Email...", text: .constant(""))
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding()
+                    .background(Color.white.opacity(0.2)) // Custom input background color
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                
+                // Password Input
+                SecureField("Password...", text: .constant(""))
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding()
+                    .background(Color.white.opacity(0.2)) // Custom input background color
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                
+                // Login Button
+                Button(action: {
+                    // Action for login
+                }) {
+                    Text("Log in")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.yellow) // Adjust as needed for your button style
+                        .cornerRadius(25)
+                        .shadow(radius: 4)
+                }
+                .padding(.top, 20)
+                
+                // Google Sign In Button
+                Button(action: {
+                    // Action for Google Sign In
+                }) {
+                    Text("Iniciar sesión con Google")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(Color.yellow)
+                        .frame(width: 340)
+                        .padding()
+                        .background(Color.gray.opacity(0.2)) // Adjust as needed
+                        .cornerRadius(25)
+                }
+                .padding(.top, 16)
+                
+                Spacer()
+                
+                // Sign Up Button
+                Button(action: {
+                    // Action for sign up
+                }) {
+                    Text("Need new account? Sign up")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.purple) // Adjust as needed for your button style
+                        .cornerRadius(25)
+                        .shadow(radius: 4)
+                }
+                .padding(.bottom, 20)
+            }
+            .padding([.leading, .trailing], 20)
         }
+        .background(Color.orange)
     }
 }
-
-
