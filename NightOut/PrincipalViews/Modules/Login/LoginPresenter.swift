@@ -24,6 +24,7 @@ final class LoginPresenterImpl: LoginPresenter {
     
     struct UseCases {
         let loginUseCase: LoginUseCase
+        let signupUseCase: SignupUseCase
     }
     
     struct Actions {
@@ -32,6 +33,7 @@ final class LoginPresenterImpl: LoginPresenter {
     
     struct ViewInputs {
         let login: AnyPublisher<Void, Never>
+        let signup: AnyPublisher<Void, Never>
     }
     
     var viewModel: LoginViewModel
@@ -52,6 +54,7 @@ final class LoginPresenterImpl: LoginPresenter {
     
     func transform(input: LoginPresenterImpl.ViewInputs) {
         loginListener(input: input)
+        signupListener(input: input)
     }
     
     func loginListener(input: LoginPresenterImpl.ViewInputs) {
@@ -67,7 +70,7 @@ final class LoginPresenterImpl: LoginPresenter {
                     switch error {
                     case .invalidCredentials:
                         return .makeCustom(title: "Contraseña errónea", description: "")
-                    case .unknown(let error):
+                    case .unknown:
                         return .generic
                     }
                 }
@@ -77,7 +80,7 @@ final class LoginPresenterImpl: LoginPresenter {
                 self.viewModel.loading = loading
             }, onError: { [weak self] error in
                 guard let self = self else { return }
-                print("Error de login: \(error)")
+                print("Error de login: \(String(describing: error))")
                 if error == nil {
                     self.viewModel.headerError = nil
                 } else {
@@ -87,6 +90,39 @@ final class LoginPresenterImpl: LoginPresenter {
             })
             .sink(receiveValue: { [weak self] _ in
                 print("Login exitoso")
+                self?.actions.goToTabView()
+            })
+            .store(in: &cancellables)
+    }
+    
+    func signupListener(input: LoginPresenterImpl.ViewInputs) {
+        input
+            .signup
+            .withUnretained(self)
+            .performRequest(request: { presenter, _ in
+                presenter.useCases.signupUseCase.execute(
+                    email: self.viewModel.email,
+                    password: self.viewModel.password
+                )
+                .mapError { error -> ErrorPresentationType in
+                    return .generic
+                }
+                .eraseToAnyPublisher()
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { [weak self] error in
+                guard let self = self else { return }
+                print("Error de signup: \(String(describing: error))")
+                if error == nil {
+                    self.viewModel.headerError = nil
+                } else {
+                    guard self.viewModel.loading else { return }
+                    self.viewModel.headerError = ErrorState(errorOptional: error)
+                }
+            })
+            .sink(receiveValue: { [weak self] _ in
+                print("registro exitoso")
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)

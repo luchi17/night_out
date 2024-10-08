@@ -4,6 +4,7 @@ import FirebaseAuth
 
 protocol AccountDatasource {
     func login(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
+    func signup(email: String, password: String) -> AnyPublisher<Void, Error>
 }
 
 struct AccountDatasourceImpl: AccountDatasource {
@@ -30,6 +31,24 @@ struct AccountDatasourceImpl: AccountDatasource {
                 publisher.send(completion: .finished)
             }
         }
+        return publisher.eraseToAnyPublisher()
+    }
+    
+    func signup(email: String, password: String) -> AnyPublisher<Void, Error> {
+        // Lógica con Firebase Auth para registrar el usuario
+        let publisher = PassthroughSubject<Void, Error>()
+        
+        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                // Manejar los errores específicos de Firebase
+                publisher.send(completion: .failure(error))
+            } else {
+                // Signup exitoso
+                publisher.send()
+                publisher.send(completion: .finished)
+            }
+        }
+        
         return publisher.eraseToAnyPublisher()
     }
 }

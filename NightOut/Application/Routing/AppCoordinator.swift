@@ -39,7 +39,7 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func showLogin() {
-        let loginCoordinator = coordinatorFactory.makeLogin()
+        let loginCoordinator = coordinatorFactory.makeLogin(actions: makeLoginActions())
         self.push(loginCoordinator)
     }
     
@@ -51,5 +51,9 @@ private extension AppCoordinator {
             onMainFlow: showTabView,
             onLogin: showLogin
         )
+    }
+    
+    func makeLoginActions() -> LoginPresenterImpl.Actions {
+        return .init(goToTabView: showTabView)
     }
 }

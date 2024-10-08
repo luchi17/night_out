@@ -14,8 +14,8 @@ final class CoordinatorFactoryImpl {
         )
     }
     
-    func makeLogin() -> LoginCoordinator {
-        return LoginCoordinator()
+    func makeLogin(actions: LoginPresenterImpl.Actions) -> LoginCoordinator {
+        return LoginCoordinator(actions: actions)
     }
     
     func makeSplash(actions: SplashPresenterImpl.Actions) -> SplashCoordinator {

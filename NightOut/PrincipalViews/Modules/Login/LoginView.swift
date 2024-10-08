@@ -17,6 +17,7 @@ struct LoginView: View, Hashable {
     let presenter: LoginPresenter
     
     private let loginPublisher = PassthroughSubject<Void, Never>()
+    private let signupPublisher = PassthroughSubject<Void, Never>()
     
     init(
         presenter: LoginPresenter
@@ -29,10 +30,10 @@ struct LoginView: View, Hashable {
     var body: some View {
         ZStack {
             // Background Image
-            Image("imagen_inicio")
-                .resizable()
-                .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
+//            Image("imagen_inicio")
+//                .resizable()
+//                .edgesIgnoringSafeArea(.all)
+//                .aspectRatio(contentMode: .fill)
             
             VStack(spacing: 20) {
                 // Logo
@@ -88,10 +89,10 @@ struct LoginView: View, Hashable {
                 .padding(.top, 16)
                 
                 Spacer()
-                
+                    
                 // Sign Up Button
                 Button(action: {
-                    // Action for sign up
+                    signupPublisher.send()
                 }) {
                     Text("Need new account? Sign up")
                         .font(.system(size: 17, weight: .bold))
@@ -114,7 +115,8 @@ private extension LoginView {
     
     func bindViewModel() {
         let input = LoginPresenterImpl.ViewInputs(
-            login: loginPublisher.eraseToAnyPublisher()
+            login: loginPublisher.eraseToAnyPublisher(),
+            signup: signupPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
