@@ -89,3 +89,15 @@ final class SplashPresenterImpl: SplashPresenter {
     
     
 }
+
+
+#warning("TODO CHECK if usuario ya está autenticado ")
+//func checkAuthenticationStatus() {
+//    if let user = FirebaseServiceImpl.shared.currentUser {
+//        // El usuario ya está autenticado
+//        navigateToHome()
+//    } else {
+//        // mostrar la pantalla de login
+//        navigateToLogin()
+//    }
+//}

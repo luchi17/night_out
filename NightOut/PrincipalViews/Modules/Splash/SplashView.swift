@@ -64,3 +64,16 @@ private extension SplashView {
         presenter.transform(input: input)
     }
 }
+
+#warning("TODO launch view chatgpt")
+struct LaunchScreen: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        guard let view = Bundle.main.loadNibNamed("LaunchScreen", owner: nil)?.first as? UIView else {
+            return UIView()
+        }
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}
+
