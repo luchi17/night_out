@@ -8,38 +8,38 @@ public extension Publisher where Failure == Never {
     /// - Parameter onLoading: Emit true when the request starts and false when the request has completed/failed or once an output is received .
     /// - Parameter onError: Errors behaviour will be handled here.
     ///
-//    func performRequest<T, E: Error>(
-//        request: @escaping (Output) -> AnyPublisher<T, E>,
-//        loadingClosure: InputClosure<Bool>? = nil,
-//        onError: InputClosure<E?>? = nil
-//    ) -> AnyPublisher<T, Never> {
-//        self.flatMapLatest { value -> AnyPublisher<T, Never> in
-//            return request(value)
-//                .handleEvents(
-//                    receiveOutput: { _ in
-//                        onError?(nil)
-//                        loadingClosure?(false)
-//                    },
-//                    receiveCompletion: { completion in
-//                        switch completion {
-//                        case .finished:
-//                            loadingClosure?(false)
-//                        case .failure(let error):
-//                            onError?(error)
-//                            loadingClosure?(false)
-//                        }
-//                    },
-//                    receiveCancel: {
-//                        // If we cancel loading closure here. We get autocancel pull to refresh animations in the places that we were still listening changes.
-//                    },
-//                    receiveRequest: { _ in
-//                        loadingClosure?(true)
-//                    }
-//                )
-//                .ignoreFailure()
-//        }
-//        .eraseToAnyPublisher()
-//    }
+    func performRequest<T, E: Error>(
+        request: @escaping (Output) -> AnyPublisher<T, E>,
+        loadingClosure: InputClosure<Bool>? = nil,
+        onError: InputClosure<E?>? = nil
+    ) -> AnyPublisher<T, Never> {
+        self.flatMapLatest { value -> AnyPublisher<T, Never> in
+            return request(value)
+                .handleEvents(
+                    receiveOutput: { _ in
+                        onError?(nil)
+                        loadingClosure?(false)
+                    },
+                    receiveCompletion: { completion in
+                        switch completion {
+                        case .finished:
+                            loadingClosure?(false)
+                        case .failure(let error):
+                            onError?(error)
+                            loadingClosure?(false)
+                        }
+                    },
+                    receiveCancel: {
+                        // If we cancel loading closure here. We get autocancel pull to refresh animations in the places that we were still listening changes.
+                    },
+                    receiveRequest: { _ in
+                        loadingClosure?(true)
+                    }
+                )
+                .ignoreFailure()
+        }
+        .eraseToAnyPublisher()
+    }
 }
 
 private extension Publisher {
@@ -122,6 +122,21 @@ public extension Publisher {
         Publishers.CombineLatest(self, gate)
             .filter { $0.1 }
             .map { $0.0 }
+            .eraseToAnyPublisher()
+    }
+}
+
+extension Publisher {
+    func flatMapLatest<T: Publisher>(_ transform: @escaping (Output) -> T) -> AnyPublisher<T.Output, Failure> where T.Failure == Failure {
+        self.map(transform)
+            .switchToLatest()
+            .eraseToAnyPublisher()
+    }
+}
+
+extension Publisher {
+    func ignoreFailure() -> AnyPublisher<Output, Never> {
+        self.catch { _ in Empty() }
             .eraseToAnyPublisher()
     }
 }
