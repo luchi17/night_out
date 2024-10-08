@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		181656052CB57879005063A9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 181656042CB57879005063A9 /* GoogleService-Info.plist */; };
+		181656E52CB57BC1005063A9 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E42CB57BC1005063A9 /* FirebaseAnalytics */; };
+		181656E72CB57BC1005063A9 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E62CB57BC1005063A9 /* FirebaseAuth */; };
+		181656E92CB57BC1005063A9 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E82CB57BC1005063A9 /* FirebaseCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		18AE860B2CA6A903007448F3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +31,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		181656042CB57879005063A9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		18AE85FA2CA6A900007448F3 /* NightOut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NightOut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AE860A2CA6A903007448F3 /* NightOutTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AE86142CA6A903007448F3 /* NightOutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +97,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				181656E52CB57BC1005063A9 /* FirebaseAnalytics in Frameworks */,
+				181656E92CB57BC1005063A9 /* FirebaseCore in Frameworks */,
+				181656E72CB57BC1005063A9 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,11 +120,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		181656E32CB57BC1005063A9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		18AE85F12CA6A900007448F3 = {
 			isa = PBXGroup;
 			children = (
+				181656042CB57879005063A9 /* GoogleService-Info.plist */,
 				18AE85FC2CA6A900007448F3 /* NightOut */,
 				18AE86272CA6AC23007448F3 /* Tests */,
+				181656E32CB57BC1005063A9 /* Frameworks */,
 				18AE85FB2CA6A900007448F3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -149,6 +169,9 @@
 			);
 			name = NightOut;
 			packageProductDependencies = (
+				181656E42CB57BC1005063A9 /* FirebaseAnalytics */,
+				181656E62CB57BC1005063A9 /* FirebaseAuth */,
+				181656E82CB57BC1005063A9 /* FirebaseCore */,
 			);
 			productName = NightOut;
 			productReference = 18AE85FA2CA6A900007448F3 /* NightOut.app */;
@@ -226,6 +249,9 @@
 			);
 			mainGroup = 18AE85F12CA6A900007448F3;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 18AE85FB2CA6A900007448F3 /* Products */;
 			projectDirPath = "";
@@ -243,6 +269,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				181656052CB57879005063A9 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -446,7 +473,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.NightOut;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.night-out.NightOut";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -484,7 +511,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.NightOut;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.night-out.NightOut";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -607,6 +634,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = exactVersion;
+				version = 11.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		181656E42CB57BC1005063A9 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		181656E62CB57BC1005063A9 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		181656E82CB57BC1005063A9 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 18AE85F22CA6A900007448F3 /* Project object */;
 }

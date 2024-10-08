@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCBik0-vmm-pZvAG-fwClLClbZVHVfLpXg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>714999336065</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.night-out.NightOut</string>
+	<key>PROJECT_ID</key>
+	<string>nighoutios-6f453</string>
+	<key>STORAGE_BUCKET</key>
+	<string>nighoutios-6f453.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:714999336065:ios:3943757b254ab33ec0d180</string>
+	<key>DATABASE_URL</key>
+	<string>https://nighoutios-6f453-default-rtdb.europe-west1.firebasedatabase.app</string>
+</dict>
+</plist>
