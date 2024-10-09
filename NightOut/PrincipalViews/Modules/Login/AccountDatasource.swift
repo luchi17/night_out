@@ -1,10 +1,14 @@
 import Combine
+import GoogleSignIn
 import Foundation
+import Firebase
 import FirebaseAuth
 import FirebaseDatabase
 
 protocol AccountDatasource {
     func login(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
+    func loginGoogle() -> AnyPublisher<Void, Error>
+    func loginApple() -> AnyPublisher<Void, Error>
     func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never>
 }
@@ -47,6 +51,53 @@ struct AccountDatasourceImpl: AccountDatasource {
         return publisher.eraseToAnyPublisher()
     }
     
+    func loginApple() -> AnyPublisher<Void, Error> {
+        return .empty()
+    }
+    
+    func loginGoogle() -> AnyPublisher<Void, Error> {
+        
+        let publisher = PassthroughSubject<Void, Error>()
+        
+//        guard let clientID = FirebaseApp.app()?.options.clientID else {
+//            publisher.send(completion: .failure(NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Client ID not found"])))
+//            return publisher.eraseToAnyPublisher()
+//        }
+
+        GIDSignIn.sharedInstance.signIn(withPresenting: getRootViewController()) { signInResult, error in
+            if let error = error {
+                publisher.send(completion: .failure(error))
+                return
+            }
+            
+            guard let user = signInResult?.user,
+                  let idToken = user.idToken?.tokenString else {
+               
+                publisher.send(completion: .failure(NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to obtain authentication tokens"])))
+                return
+            }
+            
+            let credential = GoogleAuthProvider.credential(
+                withIDToken: idToken,
+                accessToken: user.accessToken.tokenString
+            )
+            
+            Auth.auth().signIn(with: credential) { authResult, error in
+                if let error = error {
+                    publisher.send(completion: .failure(error))
+                    return
+                }
+                
+                // El inicio de sesión fue exitoso
+                publisher.send(())
+                // Finaliza el publisher
+                publisher.send(completion: .finished)
+            }
+        }
+        
+        return publisher.eraseToAnyPublisher()
+    }
+    
     func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError> {
         // Lógica con Firebase Auth para registrar el usuario
         let publisher = PassthroughSubject<Void, SignupNetworkError>()
@@ -71,13 +122,13 @@ struct AccountDatasourceImpl: AccountDatasource {
                 // Signup exitoso
                 print("Signup exitoso.")
                 // Obtener el UID del usuario creado
-//                if let uid = authResult?.user.uid {
-//                    self.saveUser()
-//                    publisher.send()
-//                    publisher.send(completion: .finished)
-//                } else {
-//                    publisher.send(completion: .failure(.custom(message: "Identificador del usuario no encontrado.")))
-//                }
+                //                if let uid = authResult?.user.uid {
+                //                    self.saveUser()
+                //                    publisher.send()
+                //                    publisher.send(completion: .finished)
+                //                } else {
+                //                    publisher.send(completion: .failure(.custom(message: "Identificador del usuario no encontrado.")))
+                //                }
                 publisher.send()
                 publisher.send(completion: .finished)
                 
@@ -111,6 +162,15 @@ struct AccountDatasourceImpl: AccountDatasource {
             }
         }
         return publisher.eraseToAnyPublisher()
+    }
+}
+
+extension AccountDatasourceImpl {
+    private func getRootViewController() -> UIViewController {
+        guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else {
+            fatalError("No root view controller found")
+        }
+        return rootViewController
     }
 }
 

@@ -3,6 +3,8 @@ import FirebaseAuth
 
 protocol LoginUseCase {
     func execute(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
+    func executeApple() -> AnyPublisher<Void, Error>
+    func executeGoogle() -> AnyPublisher<Void, Error>
 }
 
 struct LoginUseCaseImpl: LoginUseCase {
@@ -15,6 +17,16 @@ struct LoginUseCaseImpl: LoginUseCase {
     func execute(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError> {
         return repository
             .login(email: email, password: password)
+            .eraseToAnyPublisher()
+    }
+    
+    func executeApple() -> AnyPublisher<Void, Error> {
+        return .empty()
+    }
+    
+    func executeGoogle() -> AnyPublisher<Void, Error> {
+        return repository
+            .loginGoogle()
             .eraseToAnyPublisher()
     }
 }

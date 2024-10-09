@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import GoogleSignInSwift
 
 struct LoginView: View, Hashable {
     
@@ -18,22 +19,30 @@ struct LoginView: View, Hashable {
     
     private let loginPublisher = PassthroughSubject<Void, Never>()
     private let signupPublisher = PassthroughSubject<Void, Never>()
+    private let signupGooglePublisher = PassthroughSubject<Void, Never>()
+    private let signupApplePublisher = PassthroughSubject<Void, Never>()
+    
+    @ObservedObject var googleButtonViewModel = GoogleSignInButtonViewModel()
     
     init(
         presenter: LoginPresenter
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
+        googleButtonViewModel = GoogleSignInButtonViewModel(
+            scheme: .light,
+            style: .wide
+        )
         bindViewModel()
     }
     
     var body: some View {
         ZStack {
             // Background Image
-//            Image("imagen_inicio")
-//                .resizable()
-//                .edgesIgnoringSafeArea(.all)
-//                .aspectRatio(contentMode: .fill)
+            //            Image("imagen_inicio")
+            //                .resizable()
+            //                .edgesIgnoringSafeArea(.all)
+            //                .aspectRatio(contentMode: .fill)
             
             VStack(spacing: 20) {
                 // Logo
@@ -74,45 +83,78 @@ struct LoginView: View, Hashable {
                 }
                 .padding(.top, 20)
                 
-                // Google Sign In Button
-                Button(action: {
-                    // Action for Google Sign In
-                }) {
-                    Text("Iniciar sesión con Google")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(Color.yellow)
-                        .frame(width: 340)
-                        .padding()
-                        .background(Color.gray.opacity(0.2)) // Adjust as needed
-                        .cornerRadius(25)
-                }
-                .padding(.top, 16)
+                Spacer()
+                
+                // Apple Sign In Button
+                appleLoginButton
+
+                googleLoginButton
                 
                 Spacer()
-                    
-                // Sign Up Button
-                Button(action: {
-                    signupPublisher.send()
-                }) {
-                    Text("Need new account? Sign up")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.purple) // Adjust as needed for your button style
-                        .cornerRadius(25)
-                        .shadow(radius: 4)
-                }
-                .padding(.bottom, 20)
+                
+                signupButton
+                
             }
-            .padding([.leading, .trailing], 20)
+            .padding(.horizontal, 20)
         }
-        .background(Color.orange)
+        .background(Color.green.opacity(0.2))
         .applyStates(
             error: (state: viewModel.headerError, onReload: { }),
             isIdle: viewModel.loading
         )
     }
+    
+    private var googleLoginButton: some View {
+        Button(action: {
+            signupGooglePublisher.send()
+        }) {
+            HStack {
+                Image("google", bundle: .main)
+                    .frame(width: 30, height: 30)
+                    .scaledToFit()
+                    .padding(.leading, 12)
+                Text("Iniciar sesión con Google")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(Color.black)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.vertical, 12)
+            .background(Color.gray.opacity(0.5))
+        }
+        .cornerRadius(25)
+    }
+    
+    private var signupButton: some View {
+        Button(action: {
+            signupPublisher.send()
+        }) {
+            Text("Need new account? Sign up")
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.purple) // Adjust as needed for your button style
+                .cornerRadius(25)
+                .shadow(radius: 4)
+        }
+        .padding(.bottom, 40)
+    }
+    
+    private var appleLoginButton: some View {
+        Button(action: {
+            signupApplePublisher.send()
+        }) {
+            Text("Iniciar sesión con Apple")
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(Color.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.gray.opacity(0.2)) // Adjust as needed
+                .cornerRadius(25)
+        }
+        .padding(.top, 16)
+    }
+    
 }
 
 private extension LoginView {
@@ -120,7 +162,9 @@ private extension LoginView {
     func bindViewModel() {
         let input = LoginPresenterImpl.ViewInputs(
             login: loginPublisher.eraseToAnyPublisher(),
-            signup: signupPublisher.eraseToAnyPublisher()
+            signup: signupPublisher.eraseToAnyPublisher(),
+            signupWithGoogle: signupGooglePublisher.eraseToAnyPublisher(),
+            signupWithApple: signupApplePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
