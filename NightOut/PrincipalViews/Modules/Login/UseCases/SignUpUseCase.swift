@@ -2,7 +2,7 @@ import Combine
 import FirebaseAuth
 
 protocol SignupUseCase {
-    func execute(email: String, password: String) -> AnyPublisher<Void, Error>
+    func execute(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
 }
 
 struct SignupUseCaseImpl: SignupUseCase {
@@ -12,7 +12,7 @@ struct SignupUseCaseImpl: SignupUseCase {
         self.repository = repository
     }
 
-    func execute(email: String, password: String) -> AnyPublisher<Void, Error> {
+    func execute(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError> {
         return repository
             .signup(email: email, password: password)
             .eraseToAnyPublisher()

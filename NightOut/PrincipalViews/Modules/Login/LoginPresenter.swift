@@ -66,16 +66,7 @@ final class LoginPresenterImpl: LoginPresenter {
                     password: self.viewModel.password
                 )
                 .mapError { error -> ErrorPresentationType in
-                    switch error {
-                    case .invalidCredentials:
-                        return .makeCustom(title: "Error", description: "Contraseña errónea")
-                    case .unknown(let error):
-                        return .makeCustom(title: "Error", description: error.localizedDescription)
-                    case .userDisabled:
-                        return .makeCustom(title: "Error", description: "User disabled")
-                    case .wrongPassword:
-                        return .makeCustom(title: "Error", description: "Wrong password")
-                    }
+                    return .makeCustom(title: "Error", description: error.localizedDescription)
                 }
                 .eraseToAnyPublisher()
             }, loadingClosure: { [weak self] loading in
@@ -107,7 +98,7 @@ final class LoginPresenterImpl: LoginPresenter {
                     password: self.viewModel.password
                 )
                 .mapError { error -> ErrorPresentationType in
-                    return .makeCustom(title: "Unable to register", description: "")
+                    return .makeCustom(title: "Unable to register", description: error.localizedDescription)
                 }
                 .eraseToAnyPublisher()
             }, loadingClosure: { [weak self] loading in
