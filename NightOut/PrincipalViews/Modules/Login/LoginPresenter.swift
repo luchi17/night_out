@@ -7,7 +7,6 @@ final class LoginViewModel: ObservableObject {
     
     @Published var email: String = ""
     @Published var password: String = ""
-    @Published var errorMessage: String = ""
     @Published var loading: Bool = false
     @Published var headerError: ErrorState?
     
@@ -69,13 +68,13 @@ final class LoginPresenterImpl: LoginPresenter {
                 .mapError { error -> ErrorPresentationType in
                     switch error {
                     case .invalidCredentials:
-                        return .makeCustom(title: "Contraseña errónea", description: "")
-                    case .unknown:
-                        return .generic
+                        return .makeCustom(title: "Error", description: "Contraseña errónea")
+                    case .unknown(let error):
+                        return .makeCustom(title: "Error", description: error.localizedDescription)
                     case .userDisabled:
-                        return .generic
+                        return .makeCustom(title: "Error", description: "User disabled")
                     case .wrongPassword:
-                        return .generic
+                        return .makeCustom(title: "Error", description: "Wrong password")
                     }
                 }
                 .eraseToAnyPublisher()
@@ -108,7 +107,7 @@ final class LoginPresenterImpl: LoginPresenter {
                     password: self.viewModel.password
                 )
                 .mapError { error -> ErrorPresentationType in
-                    return .generic
+                    return .makeCustom(title: "Unable to register", description: "")
                 }
                 .eraseToAnyPublisher()
             }, loadingClosure: { [weak self] loading in

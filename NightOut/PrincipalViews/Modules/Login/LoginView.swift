@@ -108,6 +108,10 @@ struct LoginView: View, Hashable {
             .padding([.leading, .trailing], 20)
         }
         .background(Color.orange)
+        .applyStates(
+            error: (state: viewModel.headerError, onReload: { }),
+            isIdle: viewModel.loading
+        )
     }
 }
 

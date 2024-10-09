@@ -183,30 +183,37 @@ public struct ErrorView: View {
     }
 }
 
-struct ErrorView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            ScrollView {
-                Rectangle()
-                    .fill(Color.red)
-                    .frame(height: 2000)
+public extension View {
+    @ViewBuilder
+    func applyStates(
+        error: (state: ErrorState?, onReload: () -> Void)?,
+        isIdle: Bool
+    ) -> some View {
+        VStack(spacing: 0) {
+            if error?.state == nil, isIdle {
+                ZStack(alignment: .top) {
+                    self.opacity(0)
+                    DefaultIdleView()
+                }
+            } else {
+                self
+                    .ifLet(error) { error, view in
+                        view.applyErrorView(error.state, onReload: error.onReload)
+                    }
             }
-            .applyErrorView(
-                ErrorState(
-                    error: .custom(
-                        .init(
-                            iconName: "errorWarning",
-                            title: "Title\nSubtitle",
-                            description: "Description",
-                            buttonTitle: "Button Title"
-                        )
-                    )
-                ),
-                onReload: { }
-            )
-            ErrorView(state: ErrorState(error: .generic), retryHandler: { })
-                .previewLayout(.fixed(width: 300, height: 600))
         }
     }
 }
 
+public struct DefaultIdleView: View {
+    public init() { }
+
+    public var body: some View {
+        VStack(spacing: 0) {
+            ProgressView()
+                .padding(.top, 32)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
