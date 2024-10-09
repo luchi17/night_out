@@ -18,15 +18,25 @@ struct AccountDatasourceImpl: AccountDatasource {
         let publisher = PassthroughSubject<Void, LoginNetworkError>()
         
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-            if let error = error {
+            if let error = error as NSError? {
                 // Mapeo de errores de Firebase a NetworkError
-                if (error as NSError).code == AuthErrorCode.wrongPassword.rawValue {
+                switch AuthErrorCode(rawValue: error.code) {
+                case .invalidCredential:
+                    print("Las credenciales proporcionadas son inválidas o han caducado.")
                     publisher.send(completion: .failure(.invalidCredentials))
-                } else {
+                case .userDisabled:
+                    print("La cuenta del usuario ha sido deshabilitada.")
+                    publisher.send(completion: .failure(.userDisabled))
+                case .wrongPassword:
+                    print("Contraseña incorrecta.")
+                    publisher.send(completion: .failure(.wrongPassword))
+                default:
+                    print("Error desconocido: \(error.localizedDescription)")
                     publisher.send(completion: .failure(.unknown(error)))
                 }
             } else {
                 // Login exitoso
+                print("Login exitoso.")
                 publisher.send()
                 publisher.send(completion: .finished)
             }
@@ -41,9 +51,11 @@ struct AccountDatasourceImpl: AccountDatasource {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error {
                 // Manejar los errores específicos de Firebase
+                print("Error signup: \(error.localizedDescription)")
                 publisher.send(completion: .failure(error))
             } else {
                 // Signup exitoso
+                print("Signup exitoso.")
                 publisher.send()
                 publisher.send(completion: .finished)
             }
@@ -56,5 +68,7 @@ struct AccountDatasourceImpl: AccountDatasource {
 // Define tu NetworkError
 enum LoginNetworkError: Error {
     case invalidCredentials
+    case wrongPassword
     case unknown(Error)
+    case userDisabled
 }

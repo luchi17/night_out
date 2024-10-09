@@ -72,6 +72,10 @@ final class LoginPresenterImpl: LoginPresenter {
                         return .makeCustom(title: "Contraseña errónea", description: "")
                     case .unknown:
                         return .generic
+                    case .userDisabled:
+                        return .generic
+                    case .wrongPassword:
+                        return .generic
                     }
                 }
                 .eraseToAnyPublisher()
@@ -80,7 +84,6 @@ final class LoginPresenterImpl: LoginPresenter {
                 self.viewModel.loading = loading
             }, onError: { [weak self] error in
                 guard let self = self else { return }
-                print("Error de login: \(String(describing: error))")
                 if error == nil {
                     self.viewModel.headerError = nil
                 } else {
@@ -89,12 +92,12 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
-                print("Login exitoso")
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
     }
     
+    #warning("Move to view with user data")
     func signupListener(input: LoginPresenterImpl.ViewInputs) {
         input
             .signup
@@ -113,7 +116,6 @@ final class LoginPresenterImpl: LoginPresenter {
                 self.viewModel.loading = loading
             }, onError: { [weak self] error in
                 guard let self = self else { return }
-                print("Error de signup: \(String(describing: error))")
                 if error == nil {
                     self.viewModel.headerError = nil
                 } else {
@@ -122,7 +124,6 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
-                print("registro exitoso")
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)

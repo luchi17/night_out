@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		181656052CB57879005063A9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 181656042CB57879005063A9 /* GoogleService-Info.plist */; };
 		181656E52CB57BC1005063A9 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E42CB57BC1005063A9 /* FirebaseAnalytics */; };
 		181656E72CB57BC1005063A9 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E62CB57BC1005063A9 /* FirebaseAuth */; };
 		181656E92CB57BC1005063A9 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E82CB57BC1005063A9 /* FirebaseCore */; };
+		18E1755E2CB6772800E3CA07 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 18E1755D2CB6772700E3CA07 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,10 +31,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		181656042CB57879005063A9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		18AE85FA2CA6A900007448F3 /* NightOut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NightOut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AE860A2CA6A903007448F3 /* NightOutTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AE86142CA6A903007448F3 /* NightOutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		18E1755D2CB6772700E3CA07 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -130,7 +130,7 @@
 		18AE85F12CA6A900007448F3 = {
 			isa = PBXGroup;
 			children = (
-				181656042CB57879005063A9 /* GoogleService-Info.plist */,
+				18E1755D2CB6772700E3CA07 /* GoogleService-Info.plist */,
 				18AE85FC2CA6A900007448F3 /* NightOut */,
 				18AE86272CA6AC23007448F3 /* Tests */,
 				181656E32CB57BC1005063A9 /* Frameworks */,
@@ -269,7 +269,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				181656052CB57879005063A9 /* GoogleService-Info.plist in Resources */,
+				18E1755E2CB6772800E3CA07 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
