@@ -26,6 +26,10 @@ final class AppCoordinator: ObservableObject {
         path.append(coordinator)
     }
     
+    private func pop() {
+        path.removeLast()
+    }
+    
     
     private func splashView() -> some View {
         let coord = coordinatorFactory.makeSplash(actions: makeSplashActions())
@@ -36,6 +40,11 @@ final class AppCoordinator: ObservableObject {
     private func showTabView() {
         let tabBarCoordinator = coordinatorFactory.makeTabBarCoordinator(path: path)
         self.push(tabBarCoordinator)
+    }
+    
+    private func showRegisterUserView() {
+        let signupCoordinator = coordinatorFactory.makeRegister(actions: makeRegisterActions())
+        self.push(signupCoordinator)
     }
     
     private func showLogin() {
@@ -54,6 +63,16 @@ private extension AppCoordinator {
     }
     
     func makeLoginActions() -> LoginPresenterImpl.Actions {
-        return .init(goToTabView: showTabView)
+        return .init(
+            goToTabView: showTabView,
+            goToRegisterUser: showRegisterUserView
+        )
+    }
+    
+    func makeRegisterActions() -> SignupPresenterImpl.Actions {
+        return .init(
+            goToTabView: showTabView,
+            backToLogin: self.pop
+        )
     }
 }

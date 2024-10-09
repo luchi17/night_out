@@ -1,6 +1,5 @@
 import SwiftUI
 import Combine
-import GoogleSignInSwift
 
 struct LoginView: View, Hashable {
     
@@ -22,17 +21,11 @@ struct LoginView: View, Hashable {
     private let signupGooglePublisher = PassthroughSubject<Void, Never>()
     private let signupApplePublisher = PassthroughSubject<Void, Never>()
     
-    @ObservedObject var googleButtonViewModel = GoogleSignInButtonViewModel()
-    
     init(
         presenter: LoginPresenter
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
-        googleButtonViewModel = GoogleSignInButtonViewModel(
-            scheme: .light,
-            style: .wide
-        )
         bindViewModel()
     }
     

@@ -22,8 +22,7 @@ class LoginCoordinator: ObservableObject, Hashable {
     @ViewBuilder
     func build() -> some View {
         LoginView(presenter: LoginPresenterImpl(
-            useCases: .init(loginUseCase: LoginUseCaseImpl(repository: AccountRepositoryImpl.shared),
-                            signupUseCase: SignupUseCaseImpl(repository: AccountRepositoryImpl.shared)),
+            useCases: .init(loginUseCase: LoginUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: actions
         ))
     }

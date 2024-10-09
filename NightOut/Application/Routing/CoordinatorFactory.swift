@@ -18,6 +18,10 @@ final class CoordinatorFactoryImpl {
         return LoginCoordinator(actions: actions)
     }
     
+    func makeRegister(actions: SignupPresenterImpl.Actions) -> SignupCoordinator {
+        return SignupCoordinator(actions: actions)
+    }
+    
     func makeSplash(actions: SplashPresenterImpl.Actions) -> SplashCoordinator {
         return SplashCoordinator(actions: actions)
     }
