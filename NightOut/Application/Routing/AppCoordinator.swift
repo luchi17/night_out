@@ -17,7 +17,7 @@ final class AppCoordinator: ObservableObject {
     func build() -> some View {
         splashView()
     }
-    
+
     init(path: NavigationPath) {
         self.path = path
     }

@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-class LoginCoordinator: ObservableObject, Hashable {
+class LoginCoordinator: Hashable {
     
     let id = UUID()
     

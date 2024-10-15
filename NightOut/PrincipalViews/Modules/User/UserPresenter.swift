@@ -51,7 +51,7 @@ final class UserPresenterImpl: UserPresenter {
             .viewIsLoaded
             .withUnretained(self)
             .sink { presenter, _ in
-                FirebaseServiceImpl.shared.appState.loadLoginState()
+                FirebaseServiceImpl.shared.loadLoginState()
             }
             .store(in: &cancellables)
         
@@ -66,8 +66,9 @@ final class UserPresenterImpl: UserPresenter {
             }, onError: { error in
                 print("Error")
             })
-            .sink(receiveValue: { _ in
-                FirebaseServiceImpl.shared.appState.isLoggedIn = false
+            .sink(receiveValue: { [weak self] _ in
+                FirebaseServiceImpl.shared.isLoggedIn = false
+#warning("TODO: do logout")
             })
             .store(in: &cancellables)
             
