@@ -55,6 +55,26 @@ struct SplashView: View, Hashable {
             onAppear.send()
         }
     }
+    
+//    var body: some View {
+//            ZStack {
+//                if viewModel.isSplashActive {
+//                    // La vista del splash screen
+//                    VStack {
+//                        Text("Splash Screen")
+//                            .font(.largeTitle)
+//                            .bold()
+//                        ProgressView() // Indicador de carga, opcional
+//                    }
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    .background(Color.blue)
+//                } else {
+//                    // La siguiente vista que aparece cuando se oculta el splash
+//                    MainView()
+//                }
+//            }
+//            .animation(.easeInOut, value: viewModel.isSplashActive) // Para animar la transición
+//        }
 }
 
 // MARK: - Private methods

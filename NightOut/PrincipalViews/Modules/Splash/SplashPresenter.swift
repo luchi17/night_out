@@ -119,3 +119,21 @@ final class SplashPresenterImpl: SplashPresenter {
     
 }
 
+//import SwiftUI
+//import Combine
+//
+//class SplashViewModel: ObservableObject {
+//    @Published var isSplashActive: Bool = true // Para controlar cuándo ocultar la SplashView
+//    private var cancellables = Set<AnyCancellable>()
+//    
+//    init() {
+//        // Usamos un temporizador que dura 2 segundos
+//        Timer.publish(every: 2.0, on: .main, in: .default)
+//            .autoconnect()
+//            .sink { [weak self] _ in
+//                self?.isSplashActive = false // Cambia el estado después de 2 segundos
+//            }
+//            .store(in: &cancellables)
+//    }
+//}
+//
