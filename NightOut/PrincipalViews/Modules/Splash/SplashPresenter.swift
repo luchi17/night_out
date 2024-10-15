@@ -12,7 +12,7 @@ class SplashViewModel: ObservableObject {
     @Published var state: State
     @Published var isLoading: Bool
     @Published var isShowingErrorAlert: Bool
-
+    
     init(
         state: State,
         isLoading: Bool,
@@ -34,8 +34,6 @@ final class SplashPresenterImpl: SplashPresenter {
     
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
-//        let updateApplication: AnyPublisher<Void, Never>
-//        let reload: AnyPublisher<Void, Never>
         let login: AnyPublisher<Void, Never>
         let tabview: AnyPublisher<Void, Never>
     }
@@ -45,9 +43,7 @@ final class SplashPresenterImpl: SplashPresenter {
     
     struct Actions {
         let onMainFlow: VoidClosure
-//        let onOnboardingFlow: VoidClosure
         let onLogin: VoidClosure
-        //       , let onUpdateApplication: VoidClosure
     }
     
     // MARK: - Stored Properties

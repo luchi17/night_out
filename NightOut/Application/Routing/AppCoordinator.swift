@@ -30,7 +30,6 @@ final class AppCoordinator: ObservableObject {
         path.removeLast()
     }
     
-    
     private func splashView() -> some View {
         let coord = coordinatorFactory.makeSplash(actions: makeSplashActions())
         let splashView = coord.build()
