@@ -1,15 +1,20 @@
-
 import SwiftUI
 import Combine
 
 struct UserCoordinator {
     
-    init() {
+    private let actions: UserPresenterImpl.Actions
+    
+    init(actions: UserPresenterImpl.Actions) {
+        self.actions = actions
     }
     
     @ViewBuilder
     func build() -> some View {
-        UserView()
+        UserProfileView(presenter: UserPresenterImpl(
+            actions: actions,
+            useCases: .init(signOutUseCase: SignOutUseCaseImpl(repository: AccountRepositoryImpl.shared))
+        ))
     }
 }
 

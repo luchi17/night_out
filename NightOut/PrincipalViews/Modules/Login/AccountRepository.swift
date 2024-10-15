@@ -7,6 +7,7 @@ protocol AccountRepository {
     func loginApple() -> AnyPublisher<Void, Error>
     func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never>
+    func signOut() -> AnyPublisher<Void, Error>
 }
 
 struct AccountRepositoryImpl: AccountRepository {
@@ -47,6 +48,12 @@ struct AccountRepositoryImpl: AccountRepository {
     func loginApple() -> AnyPublisher<Void, any Error> {
         return network
             .loginApple()
+            .eraseToAnyPublisher()
+    }
+    
+    func signOut() -> AnyPublisher<Void, Error> {
+        return network
+            .signOut()
             .eraseToAnyPublisher()
     }
     

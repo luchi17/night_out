@@ -11,6 +11,7 @@ protocol AccountDatasource {
     func loginApple() -> AnyPublisher<Void, Error>
     func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never>
+    func signOut() -> AnyPublisher<Void, Error>
 }
 
 struct AccountDatasourceImpl: AccountDatasource {
@@ -59,12 +60,7 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         let publisher = PassthroughSubject<Void, Error>()
         
-//        guard let clientID = FirebaseApp.app()?.options.clientID else {
-//            publisher.send(completion: .failure(NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Client ID not found"])))
-//            return publisher.eraseToAnyPublisher()
-//        }
-
-        GIDSignIn.sharedInstance.signIn(withPresenting: getRootViewController()) { signInResult, error in
+        GIDSignIn.sharedInstance.signIn(withPresenting: AppCoordinator.getRootViewController()) { signInResult, error in
             if let error = error {
                 publisher.send(completion: .failure(error))
                 return
@@ -120,7 +116,7 @@ struct AccountDatasourceImpl: AccountDatasource {
             }
             else {
                 // Signup exitoso
-                print("Signup exitoso.")
+                print("Registro exitoso.")
                 // Obtener el UID del usuario creado
                 //                if let uid = authResult?.user.uid {
                 //                    self.saveUser()
@@ -137,20 +133,20 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         return publisher.eraseToAnyPublisher()
     }
-    
+#warning("TODO: Save USER")
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never> {
         // Obtener el UID del usuario creado
         
         let publisher = PassthroughSubject<Bool, Never>()
         
-        guard let uid = FirebaseServiceImpl.shared.currentUser?.uid else {
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
             publisher.send(false)
             return publisher.eraseToAnyPublisher()
         }
         
         let userData = structToDictionary(model)
         // Referencia a la sección "Users" en la base de datos
-        let ref = Database.database().reference().child("Users").child(uid)
+        let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: uid)
         
         ref.setValue(userData) { error, _ in
             if let error = error {
@@ -163,14 +159,18 @@ struct AccountDatasourceImpl: AccountDatasource {
         }
         return publisher.eraseToAnyPublisher()
     }
-}
+    
 
-extension AccountDatasourceImpl {
-    private func getRootViewController() -> UIViewController {
-        guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else {
-            fatalError("No root view controller found")
+    func signOut() -> AnyPublisher<Void, Error> {
+        return Future<Void, Error> { promise in
+            do {
+                try Auth.auth().signOut()
+                promise(.success(()))
+            } catch let signOutError as NSError {
+                promise(.failure(signOutError))
+            }
         }
-        return rootViewController
+        .eraseToAnyPublisher()
     }
 }
 

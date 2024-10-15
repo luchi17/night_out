@@ -86,12 +86,12 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
+                FirebaseServiceImpl.shared.appState.isLoggedIn = true
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
     }
     
-    #warning("Move to view with user data")
     func signupListener(input: LoginPresenterImpl.ViewInputs) {
         input
             .signup
@@ -125,6 +125,7 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
+                FirebaseServiceImpl.shared.appState.isLoggedIn = true
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
@@ -138,6 +139,3 @@ final class LoginPresenterImpl: LoginPresenter {
         
     }
 }
-
-#warning("donde compruebo si user is loggedin, userdefaults")
-//self.isAuthenticated = Auth.auth().currentUser != nil

@@ -75,7 +75,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makeUserFlow() -> AnyView {
-        let coordinator = UserCoordinator()
+        let coordinator = UserCoordinator(actions: .init())
         return AnyView(coordinator.build())
     }
     

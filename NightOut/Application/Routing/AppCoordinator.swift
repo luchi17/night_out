@@ -76,3 +76,12 @@ private extension AppCoordinator {
         )
     }
 }
+
+extension AppCoordinator {
+    static func getRootViewController() -> UIViewController {
+        guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else {
+            fatalError("No root view controller found")
+        }
+        return rootViewController
+    }
+}

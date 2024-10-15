@@ -1,6 +1,5 @@
-
 import Combine
-import UIKit
+import SwiftUI
 
 class SplashViewModel: ObservableObject {
     
@@ -34,7 +33,7 @@ final class SplashPresenterImpl: SplashPresenter {
     var viewModel: SplashViewModel
     
     struct Input {
-//        let viewIsLoaded: AnyPublisher<Void, Never>
+        let viewIsLoaded: AnyPublisher<Void, Never>
 //        let updateApplication: AnyPublisher<Void, Never>
 //        let reload: AnyPublisher<Void, Never>
         let login: AnyPublisher<Void, Never>
@@ -56,8 +55,6 @@ final class SplashPresenterImpl: SplashPresenter {
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
     
-    var timer: DispatchSourceTimer?
-    
     // MARK: - Lifecycle
     init(actions: Actions, useCases: UseCases) {
         self.viewModel = SplashViewModel(
@@ -70,34 +67,55 @@ final class SplashPresenterImpl: SplashPresenter {
     }
     
     func transform(input: Input) {
-        input
-            .login
+        let timerPublisher =
+        Timer.publish(every: 2.0, on: .main, in: .default)
+            .autoconnect()
             .withUnretained(self)
-            .sink { _ in
-            self.actions.onLogin()
-        }
-        .store(in: &cancellables)
+            .map { _ in }
+            .eraseToAnyPublisher()
         
         input
-            .tabview
+            .viewIsLoaded
             .withUnretained(self)
-            .sink { _ in
-                self.actions.onMainFlow()
+            .sink { presenter, _ in
+                FirebaseServiceImpl.shared.appState.loadLoginState()
             }
             .store(in: &cancellables)
+        
+        input
+            .viewIsLoaded
+            .map { _ in }
+            .merge(with: timerPublisher)
+            .withUnretained(self)
+            .sink { presenter, _ in
+                print("Evento recibido (vista cargada o timer cumplido)")
+                FirebaseServiceImpl.shared.appState.checkUserStatus() // Verificar con Firebase si está autenticado
+                
+                if FirebaseServiceImpl.shared.appState.isLoggedIn {
+                    presenter.actions.onLogin()
+                } else {
+                    presenter.actions.onMainFlow()
+                }
+            }
+            .store(in: &cancellables)
+        
+//        input
+//            .login
+//            .withUnretained(self)
+//            .sink { _ in
+//            self.actions.onLogin()
+//        }
+//        .store(in: &cancellables)
+//        
+//        input
+//            .tabview
+//            .withUnretained(self)
+//            .sink { _ in
+//                self.actions.onMainFlow()
+//            }
+//            .store(in: &cancellables)
     }
     
     
 }
 
-
-#warning("TODO CHECK if usuario ya está autenticado ")
-//func checkAuthenticationStatus() {
-//    if let user = FirebaseServiceImpl.shared.currentUser {
-//        // El usuario ya está autenticado
-//        navigateToHome()
-//    } else {
-//        // mostrar la pantalla de login
-//        navigateToLogin()
-//    }
-//}
