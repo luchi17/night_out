@@ -3,6 +3,7 @@ import CoreLocation
 import MapKit
 import Combine
 
+#warning("TODO: get locations from user")
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     public static let shared = LocationManager()
