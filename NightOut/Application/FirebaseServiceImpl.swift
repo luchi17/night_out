@@ -16,6 +16,7 @@ final class FirebaseServiceImpl: ObservableObject {
     }
     
     func checkUserStatus() {
+        loadLoginState()
         // Verificar si el usuario sigue autenticado en Firebase
         if let _ = Auth.auth().currentUser {
             // El usuario está autenticado, actualizar el estado
@@ -26,7 +27,7 @@ final class FirebaseServiceImpl: ObservableObject {
         }
     }
     
-    func loadLoginState() {
+    private func loadLoginState() {
         // Cargar el estado de login guardado en UserDefaults
         self.isLoggedIn = UserDefaults.isUserLoggedIn()
     }
@@ -44,7 +45,7 @@ final class FirebaseServiceImpl: ObservableObject {
     }
     
     func getUserInDatabaseFrom(uid: String) -> DatabaseReference {
-        return Database.database().reference().child("Users").child(uid)
+        return getUsers().child(uid)
     }
     
     func getCurrentUserUid() -> String? {

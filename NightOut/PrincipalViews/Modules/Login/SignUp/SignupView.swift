@@ -4,6 +4,8 @@ import Combine
 struct SignupView: View {
     
     @ObservedObject var viewModel: SignupViewModel
+    @State private var termsAccepted: Bool = false
+    
     let presenter: SignupPresenter
     
     private let signupPublisher = PassthroughSubject<Void, Never>()
@@ -41,7 +43,7 @@ struct SignupView: View {
                     .cornerRadius(10)
                 
                 // Password Input
-                SecureField("User Name...", text: $viewModel.userName)
+                TextField("User Name...", text: $viewModel.userName)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding()
                     .background(Color.white.opacity(0.2)) // Custom input background color
@@ -64,10 +66,9 @@ struct SignupView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
                 
-                TermsAndConditionsView()
+                TermsAndConditionsView(isAccepted: $termsAccepted)
                 
                 Spacer()
-                
                 
                 registerButton
                 
@@ -78,12 +79,12 @@ struct SignupView: View {
             }
             .padding(.horizontal, 20)
         }
-        .background(Color.green.opacity(0.2))
+        .background(Color.green)
         .applyStates(
             error: (state: viewModel.headerError, onReload: { }),
             isIdle: viewModel.loading
         )
-        .navigationBarBackButtonHidden()
+//        .navigationBarBackButtonHidden()
     }
     
     private var registerButton: some View {
@@ -95,11 +96,14 @@ struct SignupView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.yellow) // Adjust as needed for your button style
+                .background(!termsAccepted ? Color.gray : Color.yellow)
+                .foregroundColor(.white)
                 .cornerRadius(25)
                 .shadow(radius: 4)
         }
+        .disabled(!termsAccepted)
         .padding(.bottom, 40)
+        
     }
     
     private var alreadyHaveAnAccountButton: some View {
@@ -111,7 +115,7 @@ struct SignupView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.purple) // Adjust as needed for your button style
+                .background(Color.purple)
                 .cornerRadius(25)
                 .shadow(radius: 4)
         }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TermsAndConditionsView: View {
-    @State private var isAccepted: Bool = false
+    @Binding var isAccepted: Bool
     @State private var showTermsSheet: Bool = false
     
     var body: some View {

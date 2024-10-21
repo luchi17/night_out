@@ -90,7 +90,7 @@ struct LoginView: View, Hashable {
             }
             .padding(.horizontal, 20)
         }
-        .background(Color.green.opacity(0.2))
+        .background(Color.green)
         .applyStates(
             error: (state: viewModel.headerError, onReload: { }),
             isIdle: viewModel.loading

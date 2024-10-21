@@ -22,7 +22,9 @@ class SignupCoordinator: ObservableObject, Hashable {
     @ViewBuilder
     func build() -> some View {
         SignupView(presenter: SignupPresenterImpl(
-            useCases: .init(signupUseCase: SignupUseCaseImpl(repository: AccountRepositoryImpl.shared)),
+            useCases: .init(
+                signupUseCase: SignupUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: actions
         ))
     }

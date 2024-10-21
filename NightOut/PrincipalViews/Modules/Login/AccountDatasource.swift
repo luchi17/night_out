@@ -115,16 +115,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                 return
             }
             else {
-                // Signup exitoso
                 print("Registro exitoso.")
-                // Obtener el UID del usuario creado
-                //                if let uid = authResult?.user.uid {
-                //                    self.saveUser()
-                //                    publisher.send()
-                //                    publisher.send(completion: .finished)
-                //                } else {
-                //                    publisher.send(completion: .failure(.custom(message: "Identificador del usuario no encontrado.")))
-                //                }
                 publisher.send()
                 publisher.send(completion: .finished)
                 
@@ -133,10 +124,9 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         return publisher.eraseToAnyPublisher()
     }
-#warning("TODO: Save USER")
+
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never> {
-        // Obtener el UID del usuario creado
-        
+
         let publisher = PassthroughSubject<Bool, Never>()
         
         guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
@@ -165,8 +155,10 @@ struct AccountDatasourceImpl: AccountDatasource {
         return Future<Void, Error> { promise in
             do {
                 try Auth.auth().signOut()
+                print("logout success")
                 promise(.success(()))
             } catch let signOutError as NSError {
+                print("logout failure")
                 promise(.failure(signOutError))
             }
         }
@@ -188,7 +180,7 @@ enum LoginNetworkError: Error {
         case .wrongPassword:
             return "Contraseña errónea"
         case .unknown(let error):
-            return "Ocurrió desconocido: \(error.localizedDescription)."
+            return "Error desconocido: \(error.localizedDescription)."
         case .userDisabled:
             return "Usuario desabilitado"
         }

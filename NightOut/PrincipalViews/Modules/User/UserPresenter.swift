@@ -48,14 +48,6 @@ final class UserPresenterImpl: UserPresenter {
     
     func transform(input: Input) {
         input
-            .viewIsLoaded
-            .withUnretained(self)
-            .sink { presenter, _ in
-                FirebaseServiceImpl.shared.loadLoginState()
-            }
-            .store(in: &cancellables)
-        
-        input
             .logout
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
@@ -64,11 +56,13 @@ final class UserPresenterImpl: UserPresenter {
                 guard let self = self else { return }
                 self.viewModel.loading = loading
             }, onError: { error in
-                print("Error")
+                if let error = error {
+                    print("Error: " + error.localizedDescription)
+                }
             })
-            .sink(receiveValue: { [weak self] _ in
+            .sink(receiveValue: { _ in
                 FirebaseServiceImpl.shared.isLoggedIn = false
-#warning("TODO: do logout")
+                #warning("TODO: check logout")
             })
             .store(in: &cancellables)
             

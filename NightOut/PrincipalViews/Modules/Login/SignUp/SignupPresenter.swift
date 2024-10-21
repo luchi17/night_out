@@ -24,6 +24,7 @@ final class SignupPresenterImpl: SignupPresenter {
     
     struct UseCases {
         let signupUseCase: SignupUseCase
+        let saveUserUseCase: SaveUserUseCase
     }
     
     struct Actions {
@@ -66,6 +67,7 @@ final class SignupPresenterImpl: SignupPresenter {
     }
     
     func signupListener(input: SignupPresenterImpl.ViewInputs) {
+        let signuppublisher =
         input
             .signup
             .withUnretained(self)
@@ -90,8 +92,31 @@ final class SignupPresenterImpl: SignupPresenter {
                     self.viewModel.headerError = ErrorState(errorOptional: error)
                 }
             })
-            .sink(receiveValue: { [weak self] _ in
-                self?.actions.goToTabView()
+           
+        signuppublisher
+            .withUnretained(self)
+            .performRequest(request: { presenter, _ in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just(false)
+                        .eraseToAnyPublisher()
+                }
+                let model = UserModel(
+                    uid: uid,
+                    fullName: self.viewModel.fullName,
+                    userName: self.viewModel.userName,
+                    email: self.viewModel.email
+                )
+                return presenter.useCases.saveUserUseCase.execute(model: model)
+                    .eraseToAnyPublisher()
+            })
+            .sink(receiveValue: { [weak self] saved in
+                if saved {
+                    #warning("TODO: save userModel somewhere, user defaults?")
+                    self?.actions.goToTabView()
+                } else {
+                    self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "User ID not found"))
+                }
+               
             })
             .store(in: &cancellables)
     }
