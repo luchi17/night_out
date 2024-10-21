@@ -64,7 +64,6 @@ final class UserPresenterImpl: UserPresenter {
             .sink(receiveValue: { [weak self] _ in
                 FirebaseServiceImpl.shared.isLoggedIn = false
                 self?.actions.backToLogin()
-                #warning("TODO: check logout")
             })
             .store(in: &cancellables)
             
