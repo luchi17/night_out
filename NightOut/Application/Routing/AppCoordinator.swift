@@ -37,7 +37,7 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func showTabView() {
-        let tabBarCoordinator = coordinatorFactory.makeTabBarCoordinator(path: path)
+        let tabBarCoordinator = coordinatorFactory.makeTabBarCoordinator(path: path, showLogin: showLogin)
         self.push(tabBarCoordinator)
     }
     

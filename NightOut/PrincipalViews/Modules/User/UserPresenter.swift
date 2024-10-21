@@ -30,6 +30,7 @@ final class UserPresenterImpl: UserPresenter {
     }
     
     struct Actions {
+        let backToLogin: VoidClosure
     }
     
     // MARK: - Stored Properties
@@ -60,8 +61,9 @@ final class UserPresenterImpl: UserPresenter {
                     print("Error: " + error.localizedDescription)
                 }
             })
-            .sink(receiveValue: { _ in
+            .sink(receiveValue: { [weak self] _ in
                 FirebaseServiceImpl.shared.isLoggedIn = false
+                self?.actions.backToLogin()
                 #warning("TODO: check logout")
             })
             .store(in: &cancellables)

@@ -18,7 +18,7 @@ final class FirebaseServiceImpl: ObservableObject {
     func checkUserStatus() {
         loadLoginState()
         // Verificar si el usuario sigue autenticado en Firebase
-        if let _ = Auth.auth().currentUser {
+        if let _ = currentUser {
             // El usuario está autenticado, actualizar el estado
             self.isLoggedIn = true
         } else {

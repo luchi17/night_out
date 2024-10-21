@@ -6,11 +6,12 @@ final class CoordinatorFactoryImpl {
     
     init() { }
     
-    func makeTabBarCoordinator(path: NavigationPath) -> TabViewCoordinator {
+    func makeTabBarCoordinator(path: NavigationPath, showLogin: @escaping VoidClosure) -> TabViewCoordinator {
         return TabViewCoordinator(
             path: path,
             locationManager: LocationManager.shared,
-            openMaps: openGoogleMaps(latitude:longitude:)
+            openMaps: openGoogleMaps(latitude:longitude:),
+            goToLogin: showLogin
         )
     }
     

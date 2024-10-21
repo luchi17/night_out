@@ -26,6 +26,10 @@ struct ContentView: View {
                 })
                 .navigationDestination(for: TabViewCoordinator.self, destination: { coordinator in
                     coordinator.build()
+                        .navigationDestination(for: LoginCoordinator.self) { coordinator in
+                            coordinator.build()
+                        }
+                        .transition(.identity)
                 })
         }
         .environmentObject(appCoordinator)
