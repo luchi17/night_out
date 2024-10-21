@@ -2,21 +2,16 @@ import SwiftUI
 
 public extension View {
     @ViewBuilder
-    func applyErrorView(_ error: ErrorState?, onReload: @escaping () -> Void) -> some View {
+    func applyErrorView(_ error: ErrorState?, onReload: @escaping () -> Void, closeButton: VoidClosure?) -> some View {
         if let error = error {
-            ErrorViewBuilder.errorView(
-                error: error,
-                onReload: onReload
+            ErrorView(
+                state: error,
+                retryHandler: onReload,
+                showCloseButton: closeButton
             )
         } else {
             self
         }
-    }
-}
-
-public enum ErrorViewBuilder {
-    public static func errorView(error: ErrorState, onReload: @escaping () -> Void) -> some View {
-        return ErrorView(state: error, retryHandler: onReload)
     }
 }
 
@@ -115,14 +110,17 @@ public struct ErrorViewDescriptor {
 
 public struct ErrorView: View {
     @ObservedObject private var state: ErrorState
-    private let retryHandler: () -> Void
-
+    private let retryHandler: VoidClosure
+    private let showCloseButton: VoidClosure?
+    
     public init(
         state: ErrorState,
-        retryHandler: @escaping () -> Void
+        retryHandler: @escaping VoidClosure,
+        showCloseButton: VoidClosure?
     ) {
         self.state = state
         self.retryHandler = retryHandler
+        self.showCloseButton = showCloseButton
     }
 
     public var body: some View {
@@ -178,6 +176,17 @@ public struct ErrorView: View {
             )
             Spacer()
         }
+        .if(showCloseButton != nil, transform: { view in
+            view
+                .overlay(alignment: .topTrailing, content: {
+                Button(action: {
+                    showCloseButton?()
+                }) {
+                    Image(systemName: "xmark") // Icono de cerrar estándar
+                        .font(.system(size: 20, weight: .bold))
+                }
+            })
+        })
         .padding(32)
         .background(.white)
     }
@@ -187,7 +196,8 @@ public extension View {
     @ViewBuilder
     func applyStates(
         error: (state: ErrorState?, onReload: () -> Void)?,
-        isIdle: Bool
+        isIdle: Bool,
+        showCloseButton: VoidClosure? = nil
     ) -> some View {
         VStack(spacing: 0) {
             if error?.state == nil, isIdle {
@@ -196,10 +206,15 @@ public extension View {
                     DefaultIdleView()
                 }
             } else {
-                self
-                    .ifLet(error) { error, view in
-                        view.applyErrorView(error.state, onReload: error.onReload)
-                    }
+                if let error = error, let errorState = error.state {
+                    ErrorView(
+                        state: errorState,
+                        retryHandler: error.onReload,
+                        showCloseButton: showCloseButton
+                    )
+                } else {
+                    self
+                }
             }
         }
     }
