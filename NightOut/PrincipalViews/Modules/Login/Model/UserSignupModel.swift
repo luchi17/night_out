@@ -2,8 +2,8 @@ import Foundation
 
 struct UserModel: Codable {
     var uid: String = ""
-    var fullName: String = ""
-    var userName: String = ""
+    var fullname: String = ""
+    var username: String = ""
     var email: String = ""
     var gender: String?
     var image: String?
