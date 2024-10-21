@@ -82,9 +82,13 @@ struct SignupView: View {
         .background(Color.green)
         .applyStates(
             error: (state: viewModel.headerError, onReload: { }),
-            isIdle: viewModel.loading
+            isIdle: viewModel.loading,
+            showCloseButton: {
+                //Resetting headerError
+                self.viewModel.headerError = nil
+            }
         )
-//        .navigationBarBackButtonHidden()
+        .navigationBarBackButtonHidden()
     }
     
     private var registerButton: some View {
