@@ -66,70 +66,35 @@ final class SplashPresenterImpl: SplashPresenter {
         let timerPublisher =
         Timer.publish(every: 2.0, on: .main, in: .default)
             .autoconnect()
-            .withUnretained(self)
+            .first()
             .map { _ in }
             .eraseToAnyPublisher()
         
-        input
-            .viewIsLoaded
-            .withUnretained(self)
-            .sink { presenter, _ in
-                FirebaseServiceImpl.shared.appState.loadLoginState()
-            }
-            .store(in: &cancellables)
-        
-        input
-            .viewIsLoaded
+        timerPublisher
             .map { _ in }
-            .merge(with: timerPublisher)
-            .withUnretained(self)
-            .sink { presenter, _ in
-                print("Evento recibido (vista cargada o timer cumplido)")
-                FirebaseServiceImpl.shared.appState.checkUserStatus() // Verificar con Firebase si está autenticado
-                
-                if FirebaseServiceImpl.shared.appState.isLoggedIn {
-                    presenter.actions.onLogin()
+            .combineLatest(input.viewIsLoaded)
+            .sink { [weak self] _ in
+                print("Time publisher")
+                FirebaseServiceImpl.shared.checkUserStatus()
+                if FirebaseServiceImpl.shared.isLoggedIn {
+                    self?.actions.onMainFlow()
                 } else {
-                    presenter.actions.onMainFlow()
+                    self?.actions.onLogin()
                 }
             }
             .store(in: &cancellables)
         
 //        input
 //            .login
-//            .withUnretained(self)
 //            .sink { _ in
-//            self.actions.onLogin()
-//        }
-//        .store(in: &cancellables)
-//        
+//                self.actions.onLogin()
+//            }
+//            .store(in: &cancellables)
 //        input
 //            .tabview
-//            .withUnretained(self)
 //            .sink { _ in
 //                self.actions.onMainFlow()
 //            }
 //            .store(in: &cancellables)
     }
-    
-    
 }
-
-//import SwiftUI
-//import Combine
-//
-//class SplashViewModel: ObservableObject {
-//    @Published var isSplashActive: Bool = true // Para controlar cuándo ocultar la SplashView
-//    private var cancellables = Set<AnyCancellable>()
-//    
-//    init() {
-//        // Usamos un temporizador que dura 2 segundos
-//        Timer.publish(every: 2.0, on: .main, in: .default)
-//            .autoconnect()
-//            .sink { [weak self] _ in
-//                self?.isSplashActive = false // Cambia el estado después de 2 segundos
-//            }
-//            .store(in: &cancellables)
-//    }
-//}
-//

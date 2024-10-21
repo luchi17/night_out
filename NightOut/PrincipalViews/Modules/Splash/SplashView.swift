@@ -28,53 +28,26 @@ struct SplashView: View, Hashable {
     
     var body: some View {
         VStack {
-            Button(action: {
-                goToTabView.send()
-            }) {
-                Text("TabView")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            
-            Button(action: {
-                goToLogin.send()
-            }) {
-                Text("Login")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
+//            Button(action: {
+//                goToTabView.send()
+//            }) {
+//                Text("TabView")
+//            }
+//            
+//            Button(action: {
+//                goToLogin.send()
+//            }) {
+//                Text("Login")
+//            }
+            Spacer()
+            Text("Image pending...")
+            Spacer()
         }
         .navigationTitle("Splash")
         .onAppear {
             onAppear.send()
         }
     }
-    
-//    var body: some View {
-//            ZStack {
-//                if viewModel.isSplashActive {
-//                    // La vista del splash screen
-//                    VStack {
-//                        Text("Splash Screen")
-//                            .font(.largeTitle)
-//                            .bold()
-//                        ProgressView() // Indicador de carga, opcional
-//                    }
-//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                    .background(Color.blue)
-//                } else {
-//                    // La siguiente vista que aparece cuando se oculta el splash
-//                    MainView()
-//                }
-//            }
-//            .animation(.easeInOut, value: viewModel.isSplashActive) // Para animar la transición
-//        }
 }
 
 // MARK: - Private methods
