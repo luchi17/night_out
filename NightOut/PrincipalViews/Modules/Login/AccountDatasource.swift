@@ -10,7 +10,9 @@ protocol AccountDatasource {
     func loginGoogle() -> AnyPublisher<Void, Error>
     func loginApple() -> AnyPublisher<Void, Error>
     func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
+    func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never>
+    func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
     func signOut() -> AnyPublisher<Void, Error>
 }
 
@@ -124,6 +126,37 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         return publisher.eraseToAnyPublisher()
     }
+    
+    func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError> {
+        // Lógica con Firebase Auth para registrar el usuario
+        let publisher = PassthroughSubject<Void, SignupNetworkError>()
+        
+        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+            if let error = error as NSError? {
+                switch AuthErrorCode(rawValue: error.code) {
+                case .invalidEmail:
+                    publisher.send(completion:.failure(.invalidEmail))
+                case .emailAlreadyInUse:
+                    publisher.send(completion: .failure(.emailAlreadyInUse))
+                case .weakPassword:
+                    publisher.send(completion:.failure(.weakPassword))
+                case .networkError:
+                    publisher.send(completion:.failure(.networkError))
+                default:
+                    publisher.send(completion: .failure(.unknown(error)))
+                }
+                return
+            }
+            else {
+                print("Registro exitoso de empresa.")
+                publisher.send()
+                publisher.send(completion: .finished)
+                
+            }
+        }
+        
+        return publisher.eraseToAnyPublisher()
+    }
 
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never> {
 
@@ -136,7 +169,32 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         let userData = structToDictionary(model)
         // Referencia a la sección "Users" en la base de datos
-        let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: uid)
+        let ref = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: uid)
+        
+        ref.setValue(userData) { error, _ in
+            if let error = error {
+                print("Error al guardar la empresa en la base de datos: \(error.localizedDescription)")
+                publisher.send(false)
+            } else {
+                print("Empresa guardada exitosamente en la base de datos")
+                publisher.send(true)
+            }
+        }
+        return publisher.eraseToAnyPublisher()
+    }
+    
+    func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never> {
+
+        let publisher = PassthroughSubject<Bool, Never>()
+        
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            publisher.send(false)
+            return publisher.eraseToAnyPublisher()
+        }
+        
+        let userData = structToDictionary(model)
+        // Referencia a la sección "Users" en la base de datos
+        let ref = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: uid)
         
         ref.setValue(userData) { error, _ in
             if let error = error {
