@@ -23,6 +23,9 @@ struct ContentView: View {
                         .navigationDestination(for: SignupCoordinator.self) { coordinator in
                             coordinator.build()
                         }
+                        .navigationDestination(for: SignUpCompanyCoordinator.self) { coordinator in
+                            coordinator.build()
+                        }
                 })
                 .navigationDestination(for: TabViewCoordinator.self, destination: { coordinator in
                     coordinator.build()
