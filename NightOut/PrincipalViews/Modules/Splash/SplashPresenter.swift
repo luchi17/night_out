@@ -75,7 +75,6 @@ final class SplashPresenterImpl: SplashPresenter {
             .combineLatest(input.viewIsLoaded)
             .sink { [weak self] _ in
                 print("Time publisher")
-                FirebaseServiceImpl.shared.checkUserStatus()
                 if FirebaseServiceImpl.shared.isLoggedIn {
                     self?.actions.onMainFlow()
                 } else {

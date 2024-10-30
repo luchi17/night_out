@@ -1,5 +1,6 @@
 import Foundation
 
+//Remove: not used
 private let userLoggedIn: String = "userLoggedIn"
 
 extension UserDefaults {

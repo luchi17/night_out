@@ -8,28 +8,8 @@ import SwiftUI
 final class FirebaseServiceImpl: ObservableObject {
     static let shared = FirebaseServiceImpl()
     
-    @Published var isLoggedIn: Bool = false {
-        didSet {
-            // Guardar el estado de login en UserDefaults
-            UserDefaults.setUserLoggedin(isLoggedIn)
-        }
-    }
-    
-    func checkUserStatus() {
-        loadLoginState()
-        // Verificar si el usuario sigue autenticado en Firebase
-        if let _ = currentUser {
-            // El usuario está autenticado, actualizar el estado
-            self.isLoggedIn = true
-        } else {
-            // El usuario no está autenticado, actualizar el estado
-            self.isLoggedIn = false
-        }
-    }
-    
-    private func loadLoginState() {
-        // Cargar el estado de login guardado en UserDefaults
-        self.isLoggedIn = UserDefaults.isUserLoggedIn()
+    var isLoggedIn: Bool {
+        return currentUser != nil
     }
     
     var currentUser: User? {
@@ -46,6 +26,14 @@ final class FirebaseServiceImpl: ObservableObject {
     
     func getUserInDatabaseFrom(uid: String) -> DatabaseReference {
         return getUsers().child(uid)
+    }
+    
+    func getCompanies() -> DatabaseReference {
+        return Database.database().reference().child("Company_Users")
+    }
+    
+    func getCompanyInDatabaseFrom(uid: String) -> DatabaseReference {
+        return getCompanies().child(uid)
     }
     
     func getCurrentUserUid() -> String? {

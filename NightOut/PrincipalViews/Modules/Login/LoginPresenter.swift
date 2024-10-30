@@ -89,7 +89,6 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
-                FirebaseServiceImpl.shared.isLoggedIn = true
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
@@ -138,7 +137,6 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
-                FirebaseServiceImpl.shared.isLoggedIn = true
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
