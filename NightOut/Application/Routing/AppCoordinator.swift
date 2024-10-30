@@ -37,7 +37,10 @@ final class AppCoordinator: ObservableObject {
             path: path,
             locationManager: LocationManager.shared,
             openMaps: openGoogleMaps(latitude:longitude:),
-            goToLogin: showLogin
+            goToLogin: {
+                self.pop()
+                self.showLogin()
+            }
         )
         self.push(tabBarCoordinator)
     }
