@@ -6,10 +6,6 @@ import Combine
 
 final class AppCoordinator: ObservableObject {
     @Published var path: NavigationPath
-    
-    var coordinatorFactory: CoordinatorFactoryImpl = {
-        return CoordinatorFactoryImpl()
-    }()
 
     // MARK: - Stored Properties for redirections
 
@@ -31,23 +27,33 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func splashView() -> some View {
-        let coord = coordinatorFactory.makeSplash(actions: makeSplashActions())
+        let coord = SplashCoordinator(actions: makeSplashActions())
         let splashView = coord.build()
         return splashView
     }
     
     private func showTabView() {
-        let tabBarCoordinator = coordinatorFactory.makeTabBarCoordinator(path: path, showLogin: showLogin)
+        let tabBarCoordinator = TabViewCoordinator(
+            path: path,
+            locationManager: LocationManager.shared,
+            openMaps: openGoogleMaps(latitude:longitude:),
+            goToLogin: showLogin
+        )
         self.push(tabBarCoordinator)
     }
     
     private func showRegisterUserView() {
-        let signupCoordinator = coordinatorFactory.makeRegister(actions: makeRegisterActions())
+        let signupCoordinator = SignupCoordinator(actions: makeRegisterUserActions())
+        self.push(signupCoordinator)
+    }
+    
+    private func showRegisterCompanyView() {
+        let signupCoordinator = SignUpCompanyCoordinator(actions: makeRegisterCompanyActions())
         self.push(signupCoordinator)
     }
     
     private func showLogin() {
-        let loginCoordinator = coordinatorFactory.makeLogin(actions: makeLoginActions())
+        let loginCoordinator = LoginCoordinator(actions: makeLoginActions())
         self.push(loginCoordinator)
     }
     
@@ -64,11 +70,19 @@ private extension AppCoordinator {
     func makeLoginActions() -> LoginPresenterImpl.Actions {
         return .init(
             goToTabView: showTabView,
-            goToRegisterUser: showRegisterUserView
+            goToRegisterUser: showRegisterUserView,
+            goToRegisterCompany: showRegisterCompanyView
         )
     }
     
-    func makeRegisterActions() -> SignupPresenterImpl.Actions {
+    func makeRegisterUserActions() -> SignupPresenterImpl.Actions {
+        return .init(
+            goToTabView: showTabView,
+            backToLogin: self.pop
+        )
+    }
+    
+    func makeRegisterCompanyActions() -> SignupCompanyPresenterImpl.Actions {
         return .init(
             goToTabView: showTabView,
             backToLogin: self.pop
@@ -83,4 +97,17 @@ extension AppCoordinator {
         }
         return rootViewController
     }
+    
+    func openGoogleMaps(latitude: Double, longitude: Double) {
+            let urlString = "comgooglemaps://?q=\(latitude),\(longitude)"
+            if let url = URL(string: urlString) {
+                if UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                } else {
+                    // Fallback to open in Safari if Google Maps is not installed
+                    let browserUrl = URL(string: "https://www.google.com/maps/search/?api=1&query=\(latitude),\(longitude)")!
+                    UIApplication.shared.open(browserUrl, options: [:], completionHandler: nil)
+                }
+            }
+        }
 }
