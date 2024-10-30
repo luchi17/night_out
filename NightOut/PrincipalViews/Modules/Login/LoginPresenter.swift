@@ -28,11 +28,13 @@ final class LoginPresenterImpl: LoginPresenter {
     struct Actions {
         var goToTabView: VoidClosure
         var goToRegisterUser: VoidClosure
+        var goToRegisterCompany: VoidClosure
     }
     
     struct ViewInputs {
         let login: AnyPublisher<Void, Never>
-        let signup: AnyPublisher<Void, Never>
+        let signupUser: AnyPublisher<Void, Never>
+        let signupCompany: AnyPublisher<Void, Never>
         let signupWithGoogle: AnyPublisher<Void, Never>
         let signupWithApple: AnyPublisher<Void, Never>
     }
@@ -56,6 +58,7 @@ final class LoginPresenterImpl: LoginPresenter {
     func transform(input: LoginPresenterImpl.ViewInputs) {
         loginListener(input: input)
         signupListener(input: input)
+        signupCompanyListener(input: input)
         loginGoogleListener(input: input)
         loginAppleListener(input: input)
     }
@@ -94,10 +97,20 @@ final class LoginPresenterImpl: LoginPresenter {
     
     func signupListener(input: LoginPresenterImpl.ViewInputs) {
         input
-            .signup
+            .signupUser
             .withUnretained(self)
             .sink(receiveValue: { presenter, _ in
                 self.actions.goToRegisterUser()
+            })
+            .store(in: &cancellables)
+    }
+    
+    func signupCompanyListener(input: LoginPresenterImpl.ViewInputs) {
+        input
+            .signupCompany
+            .withUnretained(self)
+            .sink(receiveValue: { presenter, _ in
+                self.actions.goToRegisterCompany()
             })
             .store(in: &cancellables)
     }

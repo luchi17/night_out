@@ -17,9 +17,12 @@ struct LoginView: View, Hashable {
     let presenter: LoginPresenter
     
     private let loginPublisher = PassthroughSubject<Void, Never>()
-    private let signupPublisher = PassthroughSubject<Void, Never>()
+    private let signupUserPublisher = PassthroughSubject<Void, Never>()
+    private let signupCompanyPublisher = PassthroughSubject<Void, Never>()
     private let signupGooglePublisher = PassthroughSubject<Void, Never>()
     private let signupApplePublisher = PassthroughSubject<Void, Never>()
+    
+    @State private var showRegisterAlert = false  // Estado para mostrar la alerta
     
     init(
         presenter: LoginPresenter
@@ -90,6 +93,20 @@ struct LoginView: View, Hashable {
             }
             .padding(.horizontal, 20)
         }
+        .alert(isPresented: $showRegisterAlert) {
+                        Alert(
+                            title: Text("Selecciona una opción"),
+                            message: Text("¿Cómo quieres registrarte?"),
+                            primaryButton: .default(Text("Registrar Empresa"), action: {
+                                showRegisterAlert.toggle()
+                                signupCompanyPublisher.send()
+                            }),
+                            secondaryButton: .default(Text("Registrar Persona"), action: {
+                                showRegisterAlert.toggle()
+                                signupUserPublisher.send()
+                            })
+                        )
+                    }
         .background(Color.green)
         .applyStates(
             error: (state: viewModel.headerError, onReload: { }),
@@ -99,6 +116,7 @@ struct LoginView: View, Hashable {
                 self.viewModel.headerError = nil
             }
         )
+        
         .navigationBarBackButtonHidden()
     }
     
@@ -124,7 +142,7 @@ struct LoginView: View, Hashable {
     
     private var signupButton: some View {
         Button(action: {
-            signupPublisher.send()
+            showRegisterAlert.toggle()
         }) {
             Text("Need new account? Sign up")
                 .font(.system(size: 17, weight: .bold))
@@ -160,7 +178,8 @@ private extension LoginView {
     func bindViewModel() {
         let input = LoginPresenterImpl.ViewInputs(
             login: loginPublisher.eraseToAnyPublisher(),
-            signup: signupPublisher.eraseToAnyPublisher(),
+            signupUser: signupUserPublisher.eraseToAnyPublisher(),
+            signupCompany: signupCompanyPublisher.eraseToAnyPublisher(),
             signupWithGoogle: signupGooglePublisher.eraseToAnyPublisher(),
             signupWithApple: signupApplePublisher.eraseToAnyPublisher()
         )
