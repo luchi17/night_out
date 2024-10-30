@@ -75,7 +75,6 @@ struct SignupCompanyView: View {
                 
                 HStack(spacing: 20) {
                     registerButton
-                    Spacer()
                     signInButton
                 }
                 .padding(.bottom, 20)
