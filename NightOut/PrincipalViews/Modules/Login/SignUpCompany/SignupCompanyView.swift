@@ -1,10 +1,10 @@
 import SwiftUI
 import Combine
 
-#warning("TODO: show company register")
 struct SignupCompanyView: View {
     
     @ObservedObject var viewModel: SignupCompanyViewModel
+    @State private var showTagSelection = false
     
     let presenter: SignupCompanyPresenter
     
@@ -185,15 +185,23 @@ struct SignupCompanyView: View {
     
     private var selectTag: some View {
         Button(action: {
-            
+            showTagSelection.toggle()
         }) {
-            Text("SELECT TAG")
+            Text(viewModel.selectedTag?.title ?? "SELECT TAG")
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color.white)
                 .shadow(radius: 4)
+        }
+        .confirmationDialog("Elija etiqueta", isPresented: $showTagSelection) {
+            Button(SelectedTag.sportCasual.title) { viewModel.selectedTag = .sportCasual }
+            Button(SelectedTag.informal.title) { viewModel.selectedTag = .informal  }
+            Button(SelectedTag.semiInformal.title) { viewModel.selectedTag = .semiInformal  }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Elija etiqueta")
         }
     }
     

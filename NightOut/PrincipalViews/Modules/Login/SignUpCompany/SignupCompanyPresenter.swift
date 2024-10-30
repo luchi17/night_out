@@ -2,6 +2,23 @@ import SwiftUI
 import Combine
 import FirebaseAuth
 
+enum SelectedTag {
+    case sportCasual
+    case informal
+    case semiInformal
+    
+    var title: String {
+        switch self {
+        case .sportCasual:
+            return "Sport-Casual"
+        case .informal:
+            return "Informal"
+        case .semiInformal:
+            return "Semi-informal"
+        }
+    }
+}
+
 final class SignupCompanyViewModel: ObservableObject {
     
     @Published var userName: String = ""
@@ -10,7 +27,7 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var endTime: String = ""
     @Published var startTime: String = ""
-    @Published var selectedTag: String = ""
+    @Published var selectedTag: SelectedTag?
     @Published var image: String = ""
     @Published var location: String = ""
     @Published var loading: Bool = false
@@ -102,16 +119,15 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
         signuppublisher
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
-                #warning("TODO: checkUID when company registered")
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(false)
                         .eraseToAnyPublisher()
                 }
-                #warning("TODO: model of company")
+       
                 let model = CompanyModel(
                     email: self.viewModel.email,
                     endTime: self.viewModel.endTime,
-                    selectedTag: self.viewModel.selectedTag,
+                    selectedTag: self.viewModel.selectedTag?.title ?? "Etiqueta",
                     fullname: self.viewModel.fullName,
                     username: self.viewModel.userName,
                     image: self.viewModel.image,
