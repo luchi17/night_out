@@ -6,6 +6,7 @@ enum SelectedTag {
     case sportCasual
     case informal
     case semiInformal
+    case label
     
     var title: String {
         switch self {
@@ -15,6 +16,8 @@ enum SelectedTag {
             return "Informal"
         case .semiInformal:
             return "Semi-informal"
+        case .label:
+            return "Etiqueta"
         }
     }
 }
@@ -27,7 +30,7 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var endTime: String = ""
     @Published var startTime: String = ""
-    @Published var selectedTag: SelectedTag?
+    @Published var selectedTag: SelectedTag = .label
     @Published var image: String = ""
     @Published var location: String = ""
     @Published var loading: Bool = false
@@ -89,7 +92,6 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
     }
     
     func signupListener(input: SignupCompanyPresenterImpl.ViewInputs) {
-#warning("TODO: company usecase")
         let signuppublisher =
         input
             .signupCompany
@@ -127,7 +129,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                 let model = CompanyModel(
                     email: self.viewModel.email,
                     endTime: self.viewModel.endTime,
-                    selectedTag: self.viewModel.selectedTag?.title ?? "Etiqueta",
+                    selectedTag: self.viewModel.selectedTag.title,
                     fullname: self.viewModel.fullName,
                     username: self.viewModel.userName,
                     image: self.viewModel.image,

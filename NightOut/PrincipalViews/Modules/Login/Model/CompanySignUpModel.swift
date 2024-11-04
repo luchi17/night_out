@@ -86,19 +86,6 @@ struct PaymentMethodModel: Codable {
 //            startActivityForResult(intent, REQUEST_IMAGE_SELECTION)
 //        }
 //
-//        binding.startTimeButton.setOnClickListener {
-//            showTimePickerDialog(binding.startTimeButton)
-//        }
-//
-//        binding.endTimeButton.setOnClickListener {
-//            showTimePickerDialog(binding.endTimeButton)
-//        }
-//
-//        binding.selectTagBtn.setOnClickListener {
-//            val tags = arrayOf("Sport-Casual", "Informal", "Semi-informal", "Etiqueta")
-//            showTagSelectionDialog(tags)
-//        }
-//
 //        binding.locationEditText.setOnClickListener {
 //            openMapsActivity()
 //        }
@@ -174,25 +161,6 @@ struct PaymentMethodModel: Codable {
 //        } else {
 //            showAlertDialog("Error", "Complete todos los campos y elija una foto de perfil.")
 //        }
-//    }
-//
-//    private fun showTimePickerDialog(button: Button) {
-//        val calendar = Calendar.getInstance()
-//        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
-//        val currentMinute = calendar.get(Calendar.MINUTE)
-//
-//        val timePickerDialog = TimePickerDialog(
-//            this,
-//            { _, hourOfDay, minute ->
-//                val selectedTime = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)
-//                button.text = selectedTime
-//            },
-//            currentHour,
-//            currentMinute,
-//            true
-//        )
-//
-//        timePickerDialog.show()
 //    }
 //
 //    private fun openMapsActivity() {

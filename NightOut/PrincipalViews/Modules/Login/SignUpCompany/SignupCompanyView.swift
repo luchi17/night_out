@@ -1,10 +1,13 @@
 import SwiftUI
 import Combine
 
+#warning("TODO: check start and end tiem check")
 struct SignupCompanyView: View {
     
     @ObservedObject var viewModel: SignupCompanyViewModel
     @State private var showTagSelection = false
+    @State private var selectedTime = Date()
+    @State private var showTimePicker = false
     
     let presenter: SignupCompanyPresenter
     
@@ -66,11 +69,16 @@ struct SignupCompanyView: View {
                     .cornerRadius(10)
                 
                 locationButton
-                startTimeButton
-                endTimeButton
+                TimeButtonView(
+                    title: "START TIME",
+                    selectedTimeString: $viewModel.endTime
+                )
+                TimeButtonView(
+                    title: "END TIME",
+                    selectedTimeString: $viewModel.endTime
+                )
                 selectTag
                 
-               
                 Spacer()
                 
                 HStack(spacing: 20) {
@@ -155,39 +163,11 @@ struct SignupCompanyView: View {
         }
     }
     
-    private var startTimeButton: some View {
-        Button(action: {
-            
-        }) {
-            Text("START TIME")
-                .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.white)
-                .shadow(radius: 4)
-        }
-    }
-    
-    private var endTimeButton: some View {
-        Button(action: {
-            
-        }) {
-            Text("END TIME")
-                .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.white)
-                .shadow(radius: 4)
-        }
-    }
-    
     private var selectTag: some View {
         Button(action: {
             showTagSelection.toggle()
         }) {
-            Text(viewModel.selectedTag?.title ?? "SELECT TAG")
+            Text(!showTagSelection ? "SELECT TAG" : viewModel.selectedTag.title)
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
@@ -199,7 +179,9 @@ struct SignupCompanyView: View {
             Button(SelectedTag.sportCasual.title) { viewModel.selectedTag = .sportCasual }
             Button(SelectedTag.informal.title) { viewModel.selectedTag = .informal  }
             Button(SelectedTag.semiInformal.title) { viewModel.selectedTag = .semiInformal  }
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {
+                viewModel.selectedTag = .label
+            }
         } message: {
             Text("Elija etiqueta")
         }
@@ -217,3 +199,6 @@ private extension SignupCompanyView {
         presenter.transform(input: input)
     }
 }
+
+
+
