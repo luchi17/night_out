@@ -39,7 +39,6 @@ final class AppCoordinator: ObservableObject {
             openMaps: openGoogleMaps(latitude:longitude:),
             goToLogin: {
                 self.pop()
-                self.showLogin()
             }
         )
         self.push(tabBarCoordinator)
@@ -80,14 +79,20 @@ private extension AppCoordinator {
     
     func makeRegisterUserActions() -> SignupPresenterImpl.Actions {
         return .init(
-            goToTabView: showTabView,
+            goToTabView: {
+                self.pop()
+                self.showTabView()
+            },
             backToLogin: self.pop
         )
     }
     
     func makeRegisterCompanyActions() -> SignupCompanyPresenterImpl.Actions {
         return .init(
-            goToTabView: showTabView,
+            goToTabView: {
+                self.pop()
+                self.showTabView()
+            },
             backToLogin: self.pop
         )
     }
