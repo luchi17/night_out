@@ -5,13 +5,15 @@ struct TimeButtonView: View {
     var title: String
     @State private var showTimePicker: Bool = false
     @State private var selectedTime = Date()
+    @State private var firstTime: Bool = true
     @Binding var selectedTimeString: String
     
     var body: some View {
         Button(action: {
+            firstTime = false
             showTimePicker.toggle()
         }) {
-            Text(!showTimePicker ? timeString(from: selectedTime): title)
+            Text(firstTime ? title : selectedTimeString)
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
@@ -26,7 +28,7 @@ struct TimeButtonView: View {
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
                     .onChange(of: selectedTime, { _ , newValue in
-                        showTimePicker = false // Cierra el picker al seleccionar
+//                        showTimePicker.toggle() // Cierra el picker al seleccionar
                         selectedTimeString = timeString(from: selectedTime)
                     })
                     .padding()

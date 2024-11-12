@@ -3,6 +3,7 @@ import FirebaseAuth
 
 protocol SaveCompanyUseCase {
     func execute(model: CompanyModel) -> AnyPublisher<Bool, Never>
+    func executeGetImageUrl(imageData: Data) -> AnyPublisher<String?, Never>
 }
 
 struct SaveCompanyUseCaseImpl: SaveCompanyUseCase {
@@ -15,6 +16,12 @@ struct SaveCompanyUseCaseImpl: SaveCompanyUseCase {
     func execute(model: CompanyModel) -> AnyPublisher<Bool, Never> {
         return repository
             .saveCompany(model: model)
+            .eraseToAnyPublisher()
+    }
+    
+    func executeGetImageUrl(imageData: Data) -> AnyPublisher<String?, Never> {
+        return repository
+            .getUrlCompanyImage(imageData: imageData)
             .eraseToAnyPublisher()
     }
 }

@@ -9,6 +9,7 @@ protocol AccountRepository {
     func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never>
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
+    func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>
     func signOut() -> AnyPublisher<Void, Error>
 }
 
@@ -50,6 +51,12 @@ struct AccountRepositoryImpl: AccountRepository {
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never> {
         return network
             .saveCompany(model: model)
+            .eraseToAnyPublisher()
+    }
+    
+    func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never> {
+        return network
+            .getUrlCompanyImage(imageData: imageData)
             .eraseToAnyPublisher()
     }
     

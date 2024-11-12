@@ -6,7 +6,7 @@ struct CompanyModel: Codable {
     var selectedTag: String = ""
     var fullname: String? = ""
     var username: String? = ""
-    var image: String? = ""
+    var imageUrl: String?
     var location: String? = ""
     var startTime: String = ""
     var uid: String = ""
@@ -17,7 +17,6 @@ struct CompanyModel: Codable {
             case entradas
             case email
             case fullname
-            case image
             case location
             case selectedTag = "selected_tag"
             case startTime = "start_time"
@@ -25,6 +24,7 @@ struct CompanyModel: Codable {
             case uid
             case username
             case payment = "Metodos_De_Pago"
+            case imageUrl = "image"
         }
 }
 

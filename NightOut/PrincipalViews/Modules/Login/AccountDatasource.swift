@@ -4,6 +4,8 @@ import Foundation
 import Firebase
 import FirebaseAuth
 import FirebaseDatabase
+import FirebaseFirestore
+import FirebaseStorage
 
 protocol AccountDatasource {
     func login(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
@@ -13,6 +15,7 @@ protocol AccountDatasource {
     func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never>
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
+    func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>
     func signOut() -> AnyPublisher<Void, Error>
 }
 
@@ -173,13 +176,41 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         ref.setValue(userData) { error, _ in
             if let error = error {
-                print("Error al guardar la empresa en la base de datos: \(error.localizedDescription)")
+                print("Error al guardar el usuario en la base de datos: \(error.localizedDescription)")
                 publisher.send(false)
             } else {
-                print("Empresa guardada exitosamente en la base de datos")
+                print("Usuario guardado exitosamente en la base de datos")
                 publisher.send(true)
             }
         }
+        return publisher.eraseToAnyPublisher()
+    }
+    
+#warning("TODO: firebase storage Object profile_pictures/PgUHF5pTC0SytVrqlwOfdhS91Di1.jpg does not exist.")
+    func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>  {
+        let publisher = PassthroughSubject<String?, Never>()
+        
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                publisher.send(nil)
+                return publisher.eraseToAnyPublisher()
+        }
+        // Referencia a Firebase Storage
+        let storageRef = Storage.storage().reference()
+        let imageRef = storageRef.child("profile_pictures/\(uid).jpg")
+        
+        // Subir la imagen a Firebase Storage
+        imageRef.putData(imageData, metadata: nil) { metadata, error in
+            if let error = error {
+                print("Error al subir imagen: \(error.localizedDescription)")
+                publisher.send(nil)
+            }
+
+            // Obtener la URL de la imagen
+            imageRef.downloadURL { url, error in
+                publisher.send(url?.absoluteString)
+            }
+        }
+        
         return publisher.eraseToAnyPublisher()
     }
     
@@ -198,10 +229,10 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         ref.setValue(userData) { error, _ in
             if let error = error {
-                print("Error al guardar el usuario en la base de datos: \(error.localizedDescription)")
+                print("Error al guardar la empresa en la base de datos: \(error.localizedDescription)")
                 publisher.send(false)
             } else {
-                print("Usuario guardado exitosamente en la base de datos")
+                print("Empresa guardada exitosamente en la base de datos")
                 publisher.send(true)
             }
         }
@@ -267,6 +298,23 @@ enum SignupNetworkError: Error {
             return "Ocurrió desconocido: \(error.localizedDescription)."
         case .custom(let message):
             return message
+        }
+    }
+}
+
+enum SaveCompanyError: Error {
+    case noUid
+    case noImage
+    case dataNotSaved
+    
+    var localizedDescription: String {
+        switch self {
+        case .noImage:
+            return "La imagen no se ha podido guardar."
+        case .dataNotSaved:
+            return "Los datos de la empresa no se han podido guardar."
+        case .noUid:
+            return "Usuario no encontrado."
         }
     }
 }

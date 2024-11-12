@@ -1,7 +1,6 @@
 import SwiftUI
 import Combine
 
-#warning("TODO: check start and end tiem check")
 struct SignupCompanyView: View {
     
     @ObservedObject var viewModel: SignupCompanyViewModel
@@ -34,8 +33,8 @@ struct SignupCompanyView: View {
                 // Logo
                 
                 Spacer()
-                
-                selectPhotoButton
+
+                ImagePickerView(imageData: $viewModel.imageData)
                 
                 TextField("Full Name...", text: $viewModel.fullName)
                     .textFieldStyle(PlainTextFieldStyle())
@@ -71,13 +70,13 @@ struct SignupCompanyView: View {
                 locationButton
                 TimeButtonView(
                     title: "START TIME",
-                    selectedTimeString: $viewModel.endTime
+                    selectedTimeString: $viewModel.startTime
                 )
                 TimeButtonView(
                     title: "END TIME",
                     selectedTimeString: $viewModel.endTime
                 )
-                selectTag
+                selectTagButton
                 
                 Spacer()
                 
@@ -134,21 +133,6 @@ struct SignupCompanyView: View {
         }
     }
     
-    private var selectPhotoButton: some View {
-        Button(action: {
-            
-        }) {
-            Text("SELECT PROFILE PHOTO")
-                .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.white)
-                .shadow(radius: 4)
-        }
-        .padding(.bottom, 10)
-    }
-    
     private var locationButton: some View {
         Button(action: {
             
@@ -163,11 +147,11 @@ struct SignupCompanyView: View {
         }
     }
     
-    private var selectTag: some View {
+    private var selectTagButton: some View {
         Button(action: {
             showTagSelection.toggle()
         }) {
-            Text(!showTagSelection ? "SELECT TAG" : viewModel.selectedTag.title)
+            Text(showTagSelection ? "SELECT TAG" : viewModel.selectedTag.title)
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
@@ -180,7 +164,7 @@ struct SignupCompanyView: View {
             Button(SelectedTag.informal.title) { viewModel.selectedTag = .informal  }
             Button(SelectedTag.semiInformal.title) { viewModel.selectedTag = .semiInformal  }
             Button("Cancel", role: .cancel) {
-                viewModel.selectedTag = .label
+                viewModel.selectedTag = .none
             }
         } message: {
             Text("Elija etiqueta")

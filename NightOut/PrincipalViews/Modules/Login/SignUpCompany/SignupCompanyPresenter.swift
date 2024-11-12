@@ -6,7 +6,7 @@ enum SelectedTag {
     case sportCasual
     case informal
     case semiInformal
-    case label
+    case none
     
     var title: String {
         switch self {
@@ -16,8 +16,8 @@ enum SelectedTag {
             return "Informal"
         case .semiInformal:
             return "Semi-informal"
-        case .label:
-            return "Etiqueta"
+        case .none:
+            return "SELECT TAG"
         }
     }
 }
@@ -30,13 +30,25 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var endTime: String = ""
     @Published var startTime: String = ""
-    @Published var selectedTag: SelectedTag = .label
-    @Published var image: String = ""
+    @Published var selectedTag: SelectedTag = .none
+    @Published var imageData: Data? = nil
     @Published var location: String = ""
     @Published var loading: Bool = false
     @Published var headerError: ErrorState?
     
-    init() { }
+    var imageUrl: String?
+    
+    init() {
+        self.startTime = timeString(from: Date())
+        self.endTime = timeString(from: Date())
+    }
+    
+    // Formatear la fecha en una cadena de hora:minuto
+    func timeString(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: date)
+    }
     
 }
 
@@ -97,7 +109,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
             .signupCompany
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
-                presenter.useCases.signupUseCase.execute(
+                return presenter.useCases.signupUseCase.executeCompany(
                     email: self.viewModel.email,
                     password: self.viewModel.password
                 )
@@ -118,9 +130,31 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                 }
             })
            
-        signuppublisher
+        let saveImagePublisher = signuppublisher
             .withUnretained(self)
-            .performRequest(request: { presenter, _ in
+            .performRequest(request: { presenter, _ -> AnyPublisher<String?, Never> in
+                guard let imageData = presenter.viewModel.imageData else {
+                    return Just(nil)
+                        .eraseToAnyPublisher()
+                }
+                return presenter.useCases.saveCompanyUseCase.executeGetImageUrl(imageData: imageData)
+                    .eraseToAnyPublisher()
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in  })
+            .handleEvents(receiveOutput: { [weak self] imageUrl in
+                if let imageUrl = imageUrl {
+                    self?.viewModel.imageUrl = imageUrl
+                } else {
+                    print("Image url no se ha podido obtener")
+                }
+            })
+            .eraseToAnyPublisher()
+        
+        saveImagePublisher
+            .withUnretained(self)
+            .performRequest(request: { presenter, imageUrl in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(false)
                         .eraseToAnyPublisher()
@@ -129,22 +163,34 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                 let model = CompanyModel(
                     email: self.viewModel.email,
                     endTime: self.viewModel.endTime,
-                    selectedTag: self.viewModel.selectedTag.title,
+                    selectedTag: self.viewModel.selectedTag == .none ? "Etiqueta" : self.viewModel.selectedTag.title,
                     fullname: self.viewModel.fullName,
                     username: self.viewModel.userName,
-                    image: self.viewModel.image,
+                    imageUrl: self.viewModel.imageUrl,
                     location: self.viewModel.location,
                     startTime: self.viewModel.startTime,
                     uid: uid
                 )
                 return presenter.useCases.saveCompanyUseCase.execute(model: model)
                     .eraseToAnyPublisher()
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { [weak self] error in
+                guard let self = self else { return }
+                if error == nil {
+                    self.viewModel.headerError = nil
+                } else {
+                    guard self.viewModel.loading else { return }
+                    self.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "Could not save company"))
+                }
             })
             .sink(receiveValue: { [weak self] saved in
                 if saved {
+                    self?.viewModel.headerError = nil
                     self?.actions.goToTabView()
                 } else {
-                    self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "User ID not found"))
+                    self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "Could not save user"))
                 }
                
             })

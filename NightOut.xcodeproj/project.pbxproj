@@ -10,6 +10,8 @@
 		181656E52CB57BC1005063A9 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E42CB57BC1005063A9 /* FirebaseAnalytics */; };
 		181656E72CB57BC1005063A9 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E62CB57BC1005063A9 /* FirebaseAuth */; };
 		181656E92CB57BC1005063A9 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 181656E82CB57BC1005063A9 /* FirebaseCore */; };
+		187F203E2CD939F7005469B5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 187F203D2CD939F7005469B5 /* FirebaseFirestore */; };
+		187F20402CD93A04005469B5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 187F203F2CD93A04005469B5 /* FirebaseStorage */; };
 		18E1755E2CB6772800E3CA07 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 18E1755D2CB6772700E3CA07 /* GoogleService-Info.plist */; };
 		18E175F22CB6893E00E3CA07 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F12CB6893E00E3CA07 /* FirebaseDatabase */; };
 		18E175F72CB6991A00E3CA07 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F62CB6991A00E3CA07 /* GoogleSignIn */; };
@@ -105,7 +107,9 @@
 				181656E92CB57BC1005063A9 /* FirebaseCore in Frameworks */,
 				18E175F92CB6991A00E3CA07 /* GoogleSignInSwift in Frameworks */,
 				18E175F22CB6893E00E3CA07 /* FirebaseDatabase in Frameworks */,
+				187F20402CD93A04005469B5 /* FirebaseStorage in Frameworks */,
 				181656E72CB57BC1005063A9 /* FirebaseAuth in Frameworks */,
+				187F203E2CD939F7005469B5 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -181,6 +185,8 @@
 				18E175F12CB6893E00E3CA07 /* FirebaseDatabase */,
 				18E175F62CB6991A00E3CA07 /* GoogleSignIn */,
 				18E175F82CB6991A00E3CA07 /* GoogleSignInSwift */,
+				187F203D2CD939F7005469B5 /* FirebaseFirestore */,
+				187F203F2CD93A04005469B5 /* FirebaseStorage */,
 			);
 			productName = NightOut;
 			productReference = 18AE85FA2CA6A900007448F3 /* NightOut.app */;
@@ -478,6 +484,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -516,6 +523,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -679,6 +687,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCore;
+		};
+		187F203D2CD939F7005469B5 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		187F203F2CD93A04005469B5 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 		18E175F12CB6893E00E3CA07 /* FirebaseDatabase */ = {
 			isa = XCSwiftPackageProductDependency;
