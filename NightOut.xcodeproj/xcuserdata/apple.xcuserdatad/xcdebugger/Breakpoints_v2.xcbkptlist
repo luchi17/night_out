@@ -18,36 +18,6 @@
             endingLineNumber = "164"
             landmarkName = "signupListener(input:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "1DEC9F08-9108-43F5-AECE-E4DCB4F51C84 - 96e9065b9b66bc1a"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #8 (NightOut.SignupCompanyPresenterImpl, Swift.Optional&lt;Swift.String&gt;) -&gt; Combine.AnyPublisher&lt;Swift.Bool, Swift.Never&gt; in NightOut.SignupCompanyPresenterImpl.signupListener(input: NightOut.SignupCompanyPresenterImpl.ViewInputs) -&gt; ()"
-                  moduleName = "NightOut.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/apple/Documents/NightOut/NightOut/PrincipalViews/Modules/Signup/SignUpCompany/SignupCompanyPresenter.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "165"
-                  endingLineNumber = "165">
-               </Location>
-               <Location
-                  uuid = "1DEC9F08-9108-43F5-AECE-E4DCB4F51C84 - 96e9065b9b66bc3b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #8 (NightOut.SignupCompanyPresenterImpl, Swift.Optional&lt;Swift.String&gt;) -&gt; Combine.AnyPublisher&lt;Swift.Bool, Swift.Never&gt; in NightOut.SignupCompanyPresenterImpl.signupListener(input: NightOut.SignupCompanyPresenterImpl.ViewInputs) -&gt; ()"
-                  moduleName = "NightOut.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/apple/Documents/NightOut/NightOut/PrincipalViews/Modules/Signup/SignUpCompany/SignupCompanyPresenter.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "164"
-                  endingLineNumber = "164">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

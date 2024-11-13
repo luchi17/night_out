@@ -50,12 +50,19 @@ struct MapView: UIViewRepresentable {
         
         // Manejo de la vista de anotaciones
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            if annotation is MKUserLocation {
-                return nil // No cambiar la anotación de la ubicación del usuario
+            guard annotation is MKPointAnnotation else { return nil }
+            
+            let identifier = "CustomAnnotation"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? CustomAnnotationViewWrapper
+            if annotationView == nil {
+                annotationView = CustomAnnotationViewWrapper(annotation: annotation, reuseIdentifier: identifier)
+            } else {
+                annotationView?.annotation = annotation
             }
-            let annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: "discoteca")
-            annotationView.markerTintColor = .blue // Color del pin
-            annotationView.canShowCallout = true // Muestra el nombre de la discoteca
+            
+            annotationView?.setupContent()
+            annotationView?.canShowCallout = true
+
             return annotationView
         }
         
