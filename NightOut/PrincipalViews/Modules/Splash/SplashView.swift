@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct SplashView: View, Hashable {
-    
+
     private let presenter: SplashPresenter
     @ObservedObject private var viewModel: SplashViewModel
     
@@ -16,41 +16,37 @@ struct SplashView: View, Hashable {
         hasher.combine(id) // Combina el id para el hash
     }
     
-    
     init(presenter: SplashPresenter) {
         self.presenter = presenter
         viewModel = presenter.viewModel
         bindViewModel()
     }
     
+    private let onAppear = PassthroughSubject<Void, Never>()
     private let goToTabView = PassthroughSubject<Void, Never>()
     private let goToLogin = PassthroughSubject<Void, Never>()
     
     var body: some View {
         VStack {
-            Button(action: {
-                goToTabView.send()
-            }) {
-                Text("TabView")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            
-            Button(action: {
-                goToLogin.send()
-            }) {
-                Text("Login")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
+//            Button(action: {
+//                goToTabView.send()
+//            }) {
+//                Text("TabView")
+//            }
+//            
+//            Button(action: {
+//                goToLogin.send()
+//            }) {
+//                Text("Login")
+//            }
+            Spacer()
+            Text("Image pending...")
+            Spacer()
         }
         .navigationTitle("Splash")
+        .onAppear {
+            onAppear.send()
+        }
     }
 }
 
@@ -58,6 +54,7 @@ struct SplashView: View, Hashable {
 private extension SplashView {
     func bindViewModel() {
         let input = SplashPresenterImpl.Input(
+            viewIsLoaded: onAppear.first().eraseToAnyPublisher(),
             login: goToLogin.first().eraseToAnyPublisher(),
             tabview: goToTabView.eraseToAnyPublisher()
         )

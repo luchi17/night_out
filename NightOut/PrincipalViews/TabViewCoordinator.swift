@@ -21,6 +21,7 @@ enum TabType: Equatable {
 class TabViewCoordinator: ObservableObject, Hashable {
     
     private let openMaps: (Double, Double) -> Void
+    private let goToLogin: VoidClosure
     private let locationManager: LocationManager
     @Published var path: NavigationPath
     
@@ -37,11 +38,13 @@ class TabViewCoordinator: ObservableObject, Hashable {
     init(
         path: NavigationPath,
         locationManager: LocationManager,
-        openMaps: @escaping (Double, Double) -> Void
+        openMaps: @escaping (Double, Double) -> Void,
+        goToLogin: @escaping VoidClosure
     ) {
         self.path = path
         self.locationManager = locationManager
         self.openMaps = openMaps
+        self.goToLogin = goToLogin
     }
     
     @ViewBuilder
@@ -75,7 +78,9 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makeUserFlow() -> AnyView {
-        let coordinator = TicketsCoordinator()
+        let coordinator = TicketsCoordinator(actions: .init(backToLogin: {
+            self.goToLogin()
+        }))
         return AnyView(coordinator.build())
     }
     

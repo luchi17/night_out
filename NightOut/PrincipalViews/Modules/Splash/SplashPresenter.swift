@@ -1,6 +1,5 @@
-
 import Combine
-import UIKit
+import SwiftUI
 
 class SplashViewModel: ObservableObject {
     
@@ -13,7 +12,7 @@ class SplashViewModel: ObservableObject {
     @Published var state: State
     @Published var isLoading: Bool
     @Published var isShowingErrorAlert: Bool
-
+    
     init(
         state: State,
         isLoading: Bool,
@@ -34,9 +33,7 @@ final class SplashPresenterImpl: SplashPresenter {
     var viewModel: SplashViewModel
     
     struct Input {
-//        let viewIsLoaded: AnyPublisher<Void, Never>
-//        let updateApplication: AnyPublisher<Void, Never>
-//        let reload: AnyPublisher<Void, Never>
+        let viewIsLoaded: AnyPublisher<Void, Never>
         let login: AnyPublisher<Void, Never>
         let tabview: AnyPublisher<Void, Never>
     }
@@ -46,17 +43,13 @@ final class SplashPresenterImpl: SplashPresenter {
     
     struct Actions {
         let onMainFlow: VoidClosure
-//        let onOnboardingFlow: VoidClosure
         let onLogin: VoidClosure
-        //       , let onUpdateApplication: VoidClosure
     }
     
     // MARK: - Stored Properties
     private let actions: Actions
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
-    
-    var timer: DispatchSourceTimer?
     
     // MARK: - Lifecycle
     init(actions: Actions, useCases: UseCases) {
@@ -70,22 +63,37 @@ final class SplashPresenterImpl: SplashPresenter {
     }
     
     func transform(input: Input) {
-        input
-            .login
-            .withUnretained(self)
-            .sink { _ in
-            self.actions.onLogin()
-        }
-        .store(in: &cancellables)
+        let timerPublisher =
+        Timer.publish(every: 2.0, on: .main, in: .default)
+            .autoconnect()
+            .first()
+            .map { _ in }
+            .eraseToAnyPublisher()
         
-        input
-            .tabview
-            .withUnretained(self)
-            .sink { _ in
-                self.actions.onMainFlow()
+        timerPublisher
+            .map { _ in }
+            .combineLatest(input.viewIsLoaded)
+            .sink { [weak self] _ in
+                print("Time publisher")
+                if FirebaseServiceImpl.shared.isLoggedIn {
+                    self?.actions.onMainFlow()
+                } else {
+                    self?.actions.onLogin()
+                }
             }
             .store(in: &cancellables)
+        
+//        input
+//            .login
+//            .sink { _ in
+//                self.actions.onLogin()
+//            }
+//            .store(in: &cancellables)
+//        input
+//            .tabview
+//            .sink { _ in
+//                self.actions.onMainFlow()
+//            }
+//            .store(in: &cancellables)
     }
-    
-    
 }
