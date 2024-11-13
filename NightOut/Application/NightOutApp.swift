@@ -28,7 +28,9 @@ struct ContentView: View {
                         }
                 })
                 .navigationDestination(for: TabViewCoordinator.self, destination: { coordinator in
-                    coordinator.build()
+                    coordinator
+                        .build()
+                        .edgesIgnoringSafeArea(.top)
                 })
         }
         .environmentObject(appCoordinator)
