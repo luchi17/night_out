@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import FirebaseAuth
+import CoreLocation
 
 enum SelectedTag {
     case sportCasual
@@ -32,7 +33,7 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var startTime: String = ""
     @Published var selectedTag: SelectedTag = .none
     @Published var imageData: Data? = nil
-    @Published var location: String = ""
+    @Published var locationString = ""
     @Published var loading: Bool = false
     @Published var headerError: ErrorState?
     
@@ -167,7 +168,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     fullname: self.viewModel.fullName,
                     username: self.viewModel.userName,
                     imageUrl: self.viewModel.imageUrl,
-                    location: self.viewModel.location,
+                    location: self.viewModel.locationString,
                     startTime: self.viewModel.startTime,
                     uid: uid
                 )
