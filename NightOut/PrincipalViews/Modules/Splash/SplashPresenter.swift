@@ -34,8 +34,6 @@ final class SplashPresenterImpl: SplashPresenter {
     
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
-        let login: AnyPublisher<Void, Never>
-        let tabview: AnyPublisher<Void, Never>
     }
     
     struct UseCases {
@@ -82,18 +80,5 @@ final class SplashPresenterImpl: SplashPresenter {
                 }
             }
             .store(in: &cancellables)
-        
-//        input
-//            .login
-//            .sink { _ in
-//                self.actions.onLogin()
-//            }
-//            .store(in: &cancellables)
-//        input
-//            .tabview
-//            .sink { _ in
-//                self.actions.onMainFlow()
-//            }
-//            .store(in: &cancellables)
     }
 }
