@@ -1,7 +1,7 @@
 import Combine
 import SwiftUI
 
-class UserViewModel: ObservableObject {
+class TicketsViewModel: ObservableObject {
 
     @Published var loading: Bool
     
@@ -12,13 +12,13 @@ class UserViewModel: ObservableObject {
     }
 }
 
-protocol UserPresenter {
-    var viewModel: UserViewModel { get }
-    func transform(input: UserPresenterImpl.Input)
+protocol TicketsPresenter {
+    var viewModel: TicketsViewModel { get }
+    func transform(input: TicketsPresenterImpl.Input)
 }
 
-final class UserPresenterImpl: UserPresenter {
-    var viewModel: UserViewModel
+final class TicketsPresenterImpl: TicketsPresenter {
+    var viewModel: TicketsViewModel
     
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
@@ -40,7 +40,7 @@ final class UserPresenterImpl: UserPresenter {
     
     // MARK: - Lifecycle
     init(actions: Actions, useCases: UseCases) {
-        self.viewModel = UserViewModel(
+        self.viewModel = TicketsViewModel(
             loading: false
         )
         self.actions = actions

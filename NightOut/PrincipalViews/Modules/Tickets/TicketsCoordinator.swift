@@ -4,13 +4,17 @@ import Combine
 
 struct TicketsCoordinator {
     
-    init() {
+    private let actions: TicketsPresenterImpl.Actions
+    
+    init(actions: TicketsPresenterImpl.Actions) {
+        self.actions = actions
     }
     
     @ViewBuilder
     func build() -> some View {
-        TicketsView()
+        TicketsView(presenter: TicketsPresenterImpl(
+            actions: actions,
+            useCases: .init(signOutUseCase: SignOutUseCaseImpl(repository: AccountRepositoryImpl.shared))
+        ))
     }
 }
-
-
