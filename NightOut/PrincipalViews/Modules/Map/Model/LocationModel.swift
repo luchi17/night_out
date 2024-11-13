@@ -3,10 +3,10 @@ import MapKit
 
 struct LocationModel: Identifiable, Equatable {
     let id = UUID()
-    let name: String
-    let coordinate: CLLocationCoordinate2D
-    let description: String // Agregar una descripción para mostrar
-    let image: String
+    var name: String = ""
+    var coordinate = CLLocationCoordinate2D()
+    var description: String = "" // Agregar una descripción para mostrar
+    var image: String = ""
     
     static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs.id == rhs.id

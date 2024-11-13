@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import CoreLocation
 
 struct SignupCompanyView: View {
     
@@ -7,6 +8,9 @@ struct SignupCompanyView: View {
     @State private var showTagSelection = false
     @State private var selectedTime = Date()
     @State private var showTimePicker = false
+    @State private var showLocation = false
+    @State private var locationName = ""
+    @State private var locationModel = LocationModel()
     
     let presenter: SignupCompanyPresenter
     
@@ -89,6 +93,18 @@ struct SignupCompanyView: View {
             .padding(.horizontal, 20)
         }
         .background(Color.gray)
+        .sheet(
+            isPresented: $showLocation,
+            onDismiss: {
+                viewModel.locationString = locationModel.coordinate.latitude.description + "," + locationModel.coordinate.longitude.description
+                locationName = locationModel.name.isEmpty ? ( "(" + viewModel.locationString + ")") : locationModel.name
+                
+            }, content: {
+                SignupMapView(locationModel: $locationModel)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
+        )
         .applyStates(
             error: (state: viewModel.headerError, onReload: { }),
             isIdle: viewModel.loading,
@@ -135,9 +151,9 @@ struct SignupCompanyView: View {
     
     private var locationButton: some View {
         Button(action: {
-            
+            showLocation.toggle()
         }) {
-            Text("LOCATION")
+            Text(locationName.isEmpty ? "LOCATION" : locationName)
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity)

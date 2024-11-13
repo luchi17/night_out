@@ -1,7 +1,6 @@
 import SwiftUI
 import Combine
 
-#warning("TODO: show company register")
 struct SignupView: View {
     
     @ObservedObject var viewModel: SignupViewModel
