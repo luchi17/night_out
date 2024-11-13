@@ -37,9 +37,9 @@ struct LocationsMapView: View {
                 },
                 onRegionChange: regionChangedPublisher.send
             )
-            .edgesIgnoringSafeArea(.horizontal)
+            .edgesIgnoringSafeArea(.all)
             
-            VStack {
+            VStack(spacing: 0) {
                 // Barra de búsqueda en la parte superior
                 SearchBar(searchText: $viewModel.searchQuery, onSearch: searchSpecificLocationPublisher.send)
                 .padding()
