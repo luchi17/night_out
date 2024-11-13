@@ -1,15 +1,15 @@
 import SwiftUI
 
-struct UserView: View {
+struct TicketsView: View {
     var body: some View {
         NavigationView {
                     VStack {
-                        Text("User View")
+                        Text("Tickets View")
 //                        NavigationLink(destination: DetailView()) {
 //                            Text("Go to Detail")
 //                        }
                     }
-                    .navigationTitle("User")
+                    .navigationTitle("Ticket")
                 }
     }
 }

@@ -2,14 +2,14 @@
 import SwiftUI
 import Combine
 
-struct UserCoordinator {
+struct TicketsCoordinator {
     
     init() {
     }
     
     @ViewBuilder
     func build() -> some View {
-        UserView()
+        TicketsView()
     }
 }
 
