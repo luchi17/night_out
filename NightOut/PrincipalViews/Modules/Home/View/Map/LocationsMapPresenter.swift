@@ -12,6 +12,9 @@ final class LocationsMapViewModel: ObservableObject {
     @Published var locationManager: LocationManager
     @Published var filteredLocations: [LocationModel] = []
     
+    @Published var loading: Bool = false
+    @Published var toastError: ToastType?
+    
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
     }
@@ -26,7 +29,7 @@ protocol LocationsMapPresenter {
 final class LocationsMapPresenterImpl: LocationsMapPresenter {
     
     struct UseCases {
-        
+        let companyLocationsUseCase: CompanyLocationsUseCase
     }
     
     struct Actions {
@@ -39,6 +42,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
         let locationBarSearch: AnyPublisher<Void, Never>
         let regionChanged: AnyPublisher<MKCoordinateRegion, Never>
         let locationSelected: AnyPublisher<LocationModel, Never>
+        let viewDidLoad: AnyPublisher<Void, Never>
     }
     
     var viewModel: LocationsMapViewModel
@@ -59,6 +63,59 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     }
     
     func transform(input: LocationsMapPresenterImpl.ViewInputs){
+        listenToInput(input: input)
+        
+        input
+            .viewDidLoad
+            .withUnretained(self)
+            .performRequest(request: { presenter, _ in
+                presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in })
+            .withUnretained(self)
+            .sink(receiveValue: { presenter, data in
+                if let data = data {
+                    self.viewModel.toastError = nil
+                    print(data)
+                } else {
+                    guard !presenter.viewModel.loading else { return }
+                    self.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load companies locations.", image: nil))
+                }
+                
+            })
+            .store(in: &cancellables)
+        
+        
+//        input
+//            .viewDidLoad
+//            .withUnretained(self)
+//            .performRequest(request: { presenter, _ in
+//                presenter.useCases.companyLocationsUseCase.fetchAttendanceData()
+//                    
+//            }, loadingClosure: { [weak self] loading in
+//                guard let self = self else { return }
+////                self.viewModel.loading = loading
+//            }, onError: { [weak self] error in
+//                guard let self = self else { return }
+////                if error == nil {
+////                    self.viewModel.headerError = nil
+////                } else {
+////                    guard self.viewModel.loading else { return }
+////                    self.viewModel.headerError = ErrorState(errorOptional: error)
+////                }
+//            })
+//            .sink(receiveValue: { [weak self] data in
+//                print("DATA")
+//                print(data)
+//            })
+//            .store(in: &cancellables)
+        
+            
+    }
+    
+    func listenToInput(input: LocationsMapPresenterImpl.ViewInputs){
         input
             .openMaps
             .withUnretained(self)
@@ -106,8 +163,8 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                 self.viewModel.filteredLocations = []
             }
             .store(in: &cancellables)
-            
     }
+    
     
     private func searchSpecificLocation() {
         // Filtrar discotecas en base al searchQuery

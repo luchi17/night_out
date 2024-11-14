@@ -116,7 +116,6 @@ struct LoginView: View, Hashable {
                 self.viewModel.headerError = nil
             }
         )
-        
         .navigationBarBackButtonHidden()
     }
     

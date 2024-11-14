@@ -21,7 +21,7 @@ class HomeCoordinator {
             actions: actions
         )
         let mapPresenter = LocationsMapPresenterImpl(
-            useCases: .init(),
+            useCases: .init(companyLocationsUseCase: CompanyLocationsUseCaseImpl(repository: LocationRepositoryImpl.shared)),
             actions: mapActions,
             locationManager: locationManager
         )

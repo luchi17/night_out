@@ -12,6 +12,7 @@ struct LocationsMapView: View {
     private let searchSpecificLocationPublisher = PassthroughSubject<Void, Never>()
     private let regionChangedPublisher = PassthroughSubject<MKCoordinateRegion, Never>()
     private let locationSelectedPublisher = PassthroughSubject<LocationModel, Never>()
+    private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     @ObservedObject var viewModel: LocationsMapViewModel
@@ -56,6 +57,10 @@ struct LocationsMapView: View {
                 MapFilterOptionsView(filterSelected: filterSelectedPublisher.send)
             }
         }
+        .showToast(
+            error: (type: viewModel.toastError, showCloseButton: true, onDismiss: { }),
+            isIdle: viewModel.loading
+        )
         .sheet(isPresented: $showingDetail) {
             if let location = viewModel.selectedLocation {
                 LocationDetailSheet(
@@ -83,6 +88,9 @@ struct LocationsMapView: View {
                 secondaryButton: .cancel()
             )
         }
+        .onAppear {
+            viewDidLoadPublisher.send()
+        }
     }
     
     private func searchLocation() {
@@ -105,7 +113,8 @@ private extension LocationsMapView {
             onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
             locationBarSearch: searchSpecificLocationPublisher.eraseToAnyPublisher(),
             regionChanged: regionChangedPublisher.eraseToAnyPublisher(),
-            locationSelected: locationSelectedPublisher.eraseToAnyPublisher()
+            locationSelected: locationSelectedPublisher.eraseToAnyPublisher(),
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
