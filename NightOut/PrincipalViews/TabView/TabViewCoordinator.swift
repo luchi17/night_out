@@ -74,8 +74,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     #warning("REDO")
     func makeMapsFlow() -> AnyView {
-        let coordinator = MapCoordinator(actions: mapActions(), locationManager: locationManager)
-        return AnyView(coordinator.build())
+        return AnyView(EmptyView())
     }
     
     func makeUserFlow() -> AnyView {
