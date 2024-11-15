@@ -31,7 +31,7 @@ struct LocationsMapView: View {
             // Mapa que ocupa toda la pantalla
             MapView(
                 region: $viewModel.locationManager.region,
-                locations: filteredLocations.isEmpty ? $viewModel.locationManager.locations : $filteredLocations,
+                locations: filteredLocations.isEmpty ? $viewModel.allClubsLocations : $filteredLocations,
                 onSelectLocation: { location, position in
                     viewModel.selectedLocation = location // Guardar la discoteca seleccionada
                     annotationPosition = position //CLEAN?

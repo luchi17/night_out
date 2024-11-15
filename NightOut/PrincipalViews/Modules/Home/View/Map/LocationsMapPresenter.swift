@@ -11,6 +11,7 @@ final class LocationsMapViewModel: ObservableObject {
     
     @Published var locationManager: LocationManager
     @Published var filteredLocations: [LocationModel] = []
+    @Published var allClubsLocations: [LocationModel] = []
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
@@ -64,7 +65,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     
     func transform(input: LocationsMapPresenterImpl.ViewInputs){
         listenToInput(input: input)
-        
+
         input
             .viewDidLoad
             .withUnretained(self)
@@ -77,8 +78,28 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
                 if let data = data {
-                    self.viewModel.toastError = nil
-                    print(data)
+                    presenter.viewModel.toastError = nil
+                    
+                    let locations = data.users.values.compactMap({ $0 })
+                    
+                    let allClubsModel = locations.compactMap { companyModel in
+                        if let components = companyModel.location?.split(separator: ","),
+                           components.indices.contains(0), components.indices.contains(1),
+                            let latitude = Double(components[0]),
+                           let longitude = Double(components[1]) {
+                            return LocationModel(
+                                name: companyModel.username ?? "",
+                                coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+                                description: companyModel.selectedTag,
+                                image: companyModel.imageUrl
+                            )
+                        }
+                        return nil
+                    }
+
+                    presenter.viewModel.allClubsLocations = allClubsModel
+                    
+                    
                 } else {
                     guard !presenter.viewModel.loading else { return }
                     self.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load companies locations.", image: nil))

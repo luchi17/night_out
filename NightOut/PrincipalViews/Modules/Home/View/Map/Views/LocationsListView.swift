@@ -9,7 +9,7 @@ struct LocationsListView: View {
             
             VStack {
                 HStack(spacing: 10) {
-                    Image(location.image)
+                    Image(location.image ?? "")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 60)
