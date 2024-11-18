@@ -28,7 +28,7 @@ struct LocationDetailSheet: View {
                                 .scaledToFit()
                                 .frame(width: 200, height: 200) // Ajusta el tamaño según sea necesario
                                 .cornerRadius(10)
-                                .padding(.bottom, 10)
+                                .padding(.vertical, 10)
                         } else {
                             placeholderImage
                         }
@@ -78,7 +78,7 @@ struct LocationDetailSheet: View {
             .scaledToFit()
             .frame(width: 150, height: 150) // Ajusta el tamaño según sea necesario
             .cornerRadius(10)
-            .padding(.bottom, 10)
+            .padding(.vertical, 10)
     }
 }
 
