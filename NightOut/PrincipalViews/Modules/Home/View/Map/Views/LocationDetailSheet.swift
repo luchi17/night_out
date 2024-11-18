@@ -5,7 +5,9 @@ struct LocationDetailSheet: View {
     var selectedLocation: LocationModel
     var openMaps: () -> Void // Closure para manejar el cierre
     
-    @State private var loadFailed = false // Estado para rastrear fallos
+    @State private var loadFailed = false
+
+#warning("PENDING: placeholder image")
     
     var body: some View {
         VStack {
@@ -26,9 +28,9 @@ struct LocationDetailSheet: View {
                                 }
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 200, height: 200) // Ajusta el tamaño según sea necesario
+                                .frame(width: 150, height: 150)
                                 .cornerRadius(10)
-                                .padding(.vertical, 10)
+                                .padding(.vertical, 30)
                         } else {
                             placeholderImage
                         }
@@ -43,13 +45,20 @@ struct LocationDetailSheet: View {
                         .foregroundColor(.gray)
                         .padding(.bottom, 10)
                     
-                    Text("Más detalles sobre la discoteca...")
-                        .padding(.bottom, 10)
-                    
-                    ForEach(0..<5, id: \.self) { _ in
-                        Text("Información adicional sobre la discoteca")
-                            .padding(.bottom, 5)
+                    if let endTime = selectedLocation.endTime, let startTime = selectedLocation.startTime {
+                        Text("Horario: \(startTime) - \(endTime)")
+                            .font(.subheadline)
+                            .padding(.bottom, 10)
                     }
+                    if selectedLocation.selectedTag != LocationSelectedTag.none {
+                        Text("Etiqueta: \(String(describing: selectedLocation.selectedTag?.title))")
+                            .font(.subheadline)
+                            .padding(.bottom, 10)
+                    }
+                    
+                    Text("Asistentes: \(String(describing: selectedLocation.usersGoing))")
+                        .font(.subheadline)
+                        .padding(.bottom, 10)
                 }
                 .padding(.bottom, 20)
             }
@@ -76,9 +85,8 @@ struct LocationDetailSheet: View {
         Image("placeholder")
             .resizable()
             .scaledToFit()
-            .frame(width: 150, height: 150) // Ajusta el tamaño según sea necesario
+            .frame(width: 150, height: 150)
             .cornerRadius(10)
-            .padding(.vertical, 10)
+            .padding(.vertical, 30)
     }
 }
-
