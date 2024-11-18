@@ -22,10 +22,15 @@ struct MapView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-            uiView.setRegion(region, animated: true)
-
+        if uiView.region.center.latitude != region.center.latitude ||
+            uiView.region.center.longitude != region.center.longitude ||
+            uiView.region.span.latitudeDelta != region.span.latitudeDelta ||
+            uiView.region.span.longitudeDelta != region.span.longitudeDelta {
+            
+            uiView.setRegion(region, animated: false)
+            
             uiView.removeAnnotations(uiView.annotations)
-
+            
             // Agregar las anotaciones
             let annotations = locations.map { location in
                 let annotation = MKPointAnnotation()
