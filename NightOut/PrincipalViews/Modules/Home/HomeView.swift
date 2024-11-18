@@ -3,8 +3,6 @@ import Combine
 
 struct HomeView: View {
     
-    @State private var selectedTab: HomeSelectedTab = .feed
-    
     @ObservedObject var viewModel: HomeViewModel
     
     let presenter: HomePresenter
@@ -24,12 +22,11 @@ struct HomeView: View {
     
     var body: some View {
         VStack {
-            
             topButtonView
             
-            HomePickerView(selectedTab: $selectedTab)
+            HomePickerView(selectedTab: $viewModel.selectedTab)
             
-            if selectedTab == .map {
+            if viewModel.selectedTab == .map {
                 LocationsMapView(presenter: mapPresenter)
             } else {
                 FeedView()

@@ -17,7 +17,7 @@ enum HomeSelectedTab {
 
 
 final class HomeViewModel: ObservableObject {
-
+    @Published var selectedTab: HomeSelectedTab = .feed
 }
 
 protocol HomePresenter {
