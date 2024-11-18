@@ -4,37 +4,40 @@ struct SearchBar: View {
     @Binding var searchText: String
     @State private var isEditing = false
     var onSearch: VoidClosure
-
+    
     var body: some View {
         HStack {
-            TextField("Search for...", text: $searchText, onCommit: onSearch)
-                .padding(7)
-                .padding(.horizontal, 25)
-                .background(Color(.systemGray6))
-                .cornerRadius(8)
-                .overlay(
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
-                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                            .padding(.leading, 8)
-
-                        if isEditing {
-                            Button(action: {
-                                self.searchText = ""
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 8)
-                            }
+            TextField("Search for...",
+                      text: $searchText,
+                      onEditingChanged: { focused in
+                        self.isEditing = focused
+                    },
+                      onCommit: onSearch
+            )
+            .padding(7)
+            .padding(.horizontal, 25)
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+            .overlay(
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 8)
+                    
+                    if isEditing {
+                        Button(action: {
+                            self.searchText = ""
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.gray)
+                                .padding(.trailing, 8)
                         }
                     }
-                )
-                .padding(.horizontal, 10)
-                .onTapGesture {
-                    self.isEditing = true
                 }
-
+            )
+            .padding(.horizontal, 10)
+            
             if isEditing {
                 Button("Cancel") {
                     self.isEditing = false
