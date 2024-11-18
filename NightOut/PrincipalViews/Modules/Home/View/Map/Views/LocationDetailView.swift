@@ -60,32 +60,3 @@ struct LocationDetailView: View {
         }
     }
 }
-
-// Imagen de la discoteca con un placeholder
-//            AsyncImage(url: URL(string: discoteca.imageURL)) { phase in
-//                switch phase {
-//                case .empty:
-//                    // Placeholder
-//                    Image("placeholder") // Asegúrate de tener un placeholder en tus assets
-//                        .resizable()
-//                        .scaledToFit()
-//                        .frame(height: 150) // Ajusta la altura según sea necesario
-//                        .cornerRadius(10)
-//                case .success(let image):
-//                    image
-//                        .resizable()
-//                        .scaledToFit()
-//                        .frame(height: 150)
-//                        .cornerRadius(10)
-//                case .failure:
-//                    // Placeholder en caso de error
-//                    Image("placeholder") // Asegúrate de tener un placeholder en tus assets
-//                        .resizable()
-//                        .scaledToFit()
-//                        .frame(height: 150)
-//                        .cornerRadius(10)
-//                @unknown default:
-//                    EmptyView()
-//                }
-//            }
-//            .padding(.bottom, 10)
