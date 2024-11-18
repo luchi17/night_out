@@ -72,5 +72,6 @@ struct TabViewScreen: View {
             .background(Color(.black))
         }
         .navigationBarBackButtonHidden()
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
