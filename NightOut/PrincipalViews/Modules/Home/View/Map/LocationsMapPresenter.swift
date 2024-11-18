@@ -91,12 +91,16 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                                 name: companyModel.username ?? "",
                                 coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
                                 description: companyModel.selectedTag,
-                                image: companyModel.imageUrl
+                                image: companyModel.imageUrl,
+                                startTime: companyModel.startTime,
+                                endTime: companyModel.endTime,
+                                selectedTag: LocationSelectedTag(rawValue: companyModel.selectedTag),
+                                usersGoing: 0
                             )
                         }
                         return nil
                     }
-
+                    
                     presenter.viewModel.allClubsLocations = allClubsModel
                     
                     
