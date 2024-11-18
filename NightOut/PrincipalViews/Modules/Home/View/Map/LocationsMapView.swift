@@ -30,19 +30,23 @@ struct LocationsMapView: View {
         ZStack {
             // Mapa que ocupa toda la pantalla
             MapView(
-                region: $viewModel.locationManager.region,
+                region: Binding(
+                        get: { viewModel.locationManager.region ?? viewModel.locationManager.userRegion },
+                        set: { viewModel.locationManager.region = $0 }),
                 locations: filteredLocations.isEmpty ? $viewModel.allClubsLocations : $filteredLocations,
                 onSelectLocation: { location, position in
                     viewModel.selectedLocation = location // Guardar la discoteca seleccionada
                     annotationPosition = position //CLEAN?
-                },
-                onRegionChange: regionChangedPublisher.send
+                }
             )
             .edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 0) {
                 // Barra de búsqueda en la parte superior
-                SearchBar(searchText: $viewModel.searchQuery, onSearch: searchSpecificLocationPublisher.send)
+                SearchBar(
+                    searchText: $viewModel.searchQuery,
+                    onSearch: searchSpecificLocationPublisher.send
+                )
                 .padding()
                 
                 Spacer()
@@ -112,7 +116,6 @@ private extension LocationsMapView {
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
             onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
             locationBarSearch: searchSpecificLocationPublisher.eraseToAnyPublisher(),
-            regionChanged: regionChangedPublisher.eraseToAnyPublisher(),
             locationSelected: locationSelectedPublisher.eraseToAnyPublisher(),
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
         )

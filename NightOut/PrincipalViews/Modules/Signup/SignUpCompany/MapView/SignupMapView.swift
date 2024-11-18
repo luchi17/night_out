@@ -15,7 +15,9 @@ struct SignupMapView: View {
         ZStack {
             // Mapa que ocupa toda la pantalla
             MapView(
-                region: $locationManager.region,
+                region: Binding(
+                    get: { locationManager.region ?? locationManager.userRegion },
+                    set: { locationManager.region = $0 }),
                 locations: $locationManager.locations,
                 onSelectLocation: { _ , _ in },
                 onRegionChange: nil

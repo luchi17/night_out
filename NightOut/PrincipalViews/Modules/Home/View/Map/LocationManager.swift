@@ -3,16 +3,18 @@ import CoreLocation
 import MapKit
 import Combine
 
-#warning("TODO: get locations from user")
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     public static let shared = LocationManager()
     private let locationManager = CLLocationManager()
     
-    @Published var region = MKCoordinateRegion()
+    @Published var region: MKCoordinateRegion?
+    @Published var userRegion = MKCoordinateRegion()
     @Published var query: String = ""
     @Published var locations: [LocationModel] = []
     @Published var locationPermissionDenied = false // Variable para permisos de localización
+    
+    @Published var userLocation: CLLocationCoordinate2D?
     
     override init() {
         super.init()
@@ -40,41 +42,26 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     // Método para manejar las actualizaciones de ubicación
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
-        let region = MKCoordinateRegion(center: location.coordinate,
+//        guard let location = locations.last else { return }
+        let userRegion = MKCoordinateRegion(center: location.coordinate,
                                         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        fetchNearbyPlaces(region: region, query: self.query)
+        self.userRegion = userRegion
+        
+        
+      //TODO
+//        if let location = locations.last {
+//                    userLocation = location.coordinate
+//                    locationManager.stopUpdatingLocation()  // Deja de actualizar para conservar batería
+//                }
     }
     
-    // Método para buscar lugares cercanos
-    func fetchNearbyPlaces(region: MKCoordinateRegion, query: String) {
-        
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = query
-        request.region = region
-        
-        self.query = query
+    func updateRegion(coordinate: CLLocationCoordinate2D) {
+        let region = MKCoordinateRegion(center: coordinate,
+                                        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
         self.region = region
-        
-        let search = MKLocalSearch(request: request)
-        search.start { response, error in
-            guard let response = response else { return }
-            
-            var newLocations: [LocationModel] = []
-            for item in response.mapItems {
-                let model = LocationModel(
-                    name: item.name ?? "Sin Nombre",
-                    coordinate: item.placemark.coordinate,
-                    description: "Descripción de \(item.name ?? "Sin Nombre")",
-                    image: ""
-                ) // Aquí puedes agregar más info
-                newLocations.append(model)
-            }
-            DispatchQueue.main.async {
-                self.locations = newLocations
-            }
-        }
     }
     
+#warning("TODO: disco info")
     func searchLocation(searchQuery: String) {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchQuery
@@ -86,8 +73,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                 return
             }
             DispatchQueue.main.async {
-                self.region.center = item.placemark.coordinate
-                self.region.span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+                self.updateRegion(coordinate: item.placemark.coordinate)
                 self.locations.append(
                     LocationModel(
                         name: item.name ?? "Sin Nombre",
@@ -95,14 +81,50 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                         description: "",
                         image: ""
                     )
-                    
                 )
             }
         }
     }
     
-    func regionDidChange(to newRegion: MKCoordinateRegion, query: String) {
-        fetchNearbyPlaces(region: newRegion, query: query) // Actualizar la búsqueda de lugares cercanos
+    func checkKnownLocationCoordinate(searchQuery: String) -> CLLocationCoordinate2D {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = searchQuery
+        
+        var searchedLocation = CLLocationCoordinate2D()
+        
+        let search = MKLocalSearch(request: request)
+        search.start { response, error in
+            guard let response = response, let item = response.mapItems.first else {
+                print("Ubicación no encontrada: \(error?.localizedDescription ?? "Error desconocido")")
+                return
+            }
+            DispatchQueue.main.async {
+                searchedLocation = item.placemark.coordinate
+            }
+        }
+        return searchedLocation
+    }
+    
+    
+    func areLocationsEqual(location1: CLLocationDegrees, location2: CLLocationDegrees, decimalPlaces: Int) -> Bool {
+        let factor = pow(10.0, Double(decimalPlaces))
+        let roundedLocation1 = (location1 * factor).rounded() / factor
+        let roundedLocation2 = (location2 * factor).rounded() / factor
+        return roundedLocation1 == roundedLocation2
+    }
+
+    func areCoordinatesEqual(coordinate1: CLLocationCoordinate2D, coordinate2: CLLocationCoordinate2D, decimalPlaces: Int = 6) -> Bool {
+        let latitudeEqual = areLocationsEqual(
+            location1: coordinate1.latitude,
+            location2: coordinate2.latitude,
+            decimalPlaces: decimalPlaces
+        )
+        let longitudeEqual = areLocationsEqual(
+            location1: coordinate1.longitude,
+            location2: coordinate2.longitude,
+            decimalPlaces: decimalPlaces
+        )
+        return latitudeEqual && longitudeEqual
     }
 }
 

@@ -12,7 +12,7 @@ struct MapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
     @Binding var locations: [LocationModel]
     var onSelectLocation: ((LocationModel, CGPoint) -> Void)?
-    var onRegionChange: ((MKCoordinateRegion) -> Void)?
+    var onRegionChange: ((MKCoordinateRegion) -> Void)? = nil
     
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -38,9 +38,10 @@ struct MapView: UIViewRepresentable {
                 annotation.coordinate = location.coordinate
                 return annotation
             }
-
+            
             uiView.addAnnotations(annotations)
         }
+    }
     
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -67,15 +68,17 @@ struct MapView: UIViewRepresentable {
             
             annotationView?.setupContent()
             annotationView?.canShowCallout = true
-
+            
             return annotationView
         }
         
+        // Remove ?
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             // Cuando la región cambia, llamamos al closure onRegionChange
-            DispatchQueue.main.async {
-                self.parent.onRegionChange?(mapView.region)
-            }
+            //            DispatchQueue.main.async {
+            //                self.parent.onRegionChange?(mapView.region)
+            //            }
+            parent.region = mapView.region
         }
         
         func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
@@ -83,7 +86,7 @@ struct MapView: UIViewRepresentable {
                   let title = view.annotation?.title,
                   let selectedLocation = parent.locations.first(where: { $0.name == title })
             else { return }
-
+            
             // Convertir las coordenadas de la anotación a la vista
             let annotationPoint = mapView.convert(annotation.coordinate, toPointTo: mapView)
             
