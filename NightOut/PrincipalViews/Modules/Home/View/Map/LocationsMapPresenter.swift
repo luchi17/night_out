@@ -41,7 +41,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
         let openMaps: AnyPublisher<(Double, Double), Never>
         let onFilterSelected: AnyPublisher<MapFilterType, Never>
         let locationBarSearch: AnyPublisher<Void, Never>
-        let regionChanged: AnyPublisher<MKCoordinateRegion, Never>
         let locationSelected: AnyPublisher<LocationModel, Never>
         let viewDidLoad: AnyPublisher<Void, Never>
     }
@@ -66,6 +65,10 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     func transform(input: LocationsMapPresenterImpl.ViewInputs){
         listenToInput(input: input)
 
+#warning("TODO: usersGoing")
+#warning("PENDING: filtered locations")
+
+        
         input
             .viewDidLoad
             .withUnretained(self)
@@ -164,18 +167,32 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .locationBarSearch
             .withUnretained(self)
             .sink { presenter, _ in
-                self.searchSpecificLocation()
+                let searchedLocationCcoordinate = self.viewModel.locationManager.checkKnownLocationCoordinate(searchQuery: self.viewModel.searchQuery)
+                let allClubsCoordinates = self.viewModel.allClubsLocations.map({ $0.coordinate })
+                
+                let foundClub = allClubsCoordinates.first(where: {
+                    self.viewModel.locationManager.areCoordinatesEqual(
+                        coordinate1: $0,
+                        coordinate2: searchedLocationCcoordinate
+                )})
+                
+                if let foundClub = foundClub {
+                    self.viewModel.locationManager.updateRegion(coordinate: foundClub)
+                }
+                else {
+                    #warning("TODO: Show message error of club not found?")
+                }
             }
             .store(in: &cancellables)
         
-        input
-            .regionChanged
+        
+        viewModel
+            .$selectedLocation
             .withUnretained(self)
-            .sink { presenter, newRegion in
-                self.viewModel.locationManager.regionDidChange(
-                    to: newRegion,
-                    query: self.viewModel.searchQuery
-                )
+            .sink { presenter, locationSelected in
+                if let coordinate = locationSelected?.coordinate {
+                    self.viewModel.locationManager.updateRegion(coordinate: coordinate)
+                }
             }
             .store(in: &cancellables)
         
@@ -188,18 +205,5 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                 self.viewModel.filteredLocations = []
             }
             .store(in: &cancellables)
-    }
-    
-    
-    private func searchSpecificLocation() {
-        // Filtrar discotecas en base al searchQuery
-        if let selectedLocation = viewModel.locations.first(where: { $0.name.lowercased().contains(viewModel.searchQuery.lowercased()) }) {
-            viewModel.selectedLocation = selectedLocation
-            let newRegion = MKCoordinateRegion(center: selectedLocation.coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
-            viewModel.locationManager.regionDidChange(
-                to: newRegion,
-                query: viewModel.searchQuery
-            )
-        }
     }
 }
