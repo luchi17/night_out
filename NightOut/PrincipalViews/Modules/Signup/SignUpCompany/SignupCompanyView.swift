@@ -176,9 +176,9 @@ struct SignupCompanyView: View {
                 .shadow(radius: 4)
         }
         .confirmationDialog("Elija etiqueta", isPresented: $showTagSelection) {
-            Button(SelectedTag.sportCasual.title) { viewModel.selectedTag = .sportCasual }
-            Button(SelectedTag.informal.title) { viewModel.selectedTag = .informal  }
-            Button(SelectedTag.semiInformal.title) { viewModel.selectedTag = .semiInformal  }
+            Button(LocationSelectedTag.sportCasual.title) { viewModel.selectedTag = .sportCasual }
+            Button(LocationSelectedTag.informal.title) { viewModel.selectedTag = .informal  }
+            Button(LocationSelectedTag.semiInformal.title) { viewModel.selectedTag = .semiInformal  }
             Button("Cancel", role: .cancel) {
                 viewModel.selectedTag = .none
             }
