@@ -4,15 +4,15 @@ import Combine
 
 struct LocationsMapView: View {
     @State private var annotationPosition: CGPoint = .zero // Posición de la anotación seleccionada
-    @State private var filteredLocations: [LocationModel] = [] // Localizaciones filtradas
     @State private var showingDetail = false
+    @State private var showingListView = false
     
     private let openMapsPublisher = PassthroughSubject<(Double, Double), Never>()
     private let filterSelectedPublisher = PassthroughSubject<MapFilterType, Never>()
     private let searchSpecificLocationPublisher = PassthroughSubject<Void, Never>()
     private let regionChangedPublisher = PassthroughSubject<MKCoordinateRegion, Never>()
     private let locationSelectedPublisher = PassthroughSubject<LocationModel, Never>()
-    private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
+    private let viewDidLoadPublisher = CurrentValueSubject<Void, Never>(())
     private var cancellables = Set<AnyCancellable>()
     
     @ObservedObject var viewModel: LocationsMapViewModel
@@ -33,11 +33,12 @@ struct LocationsMapView: View {
                 region: Binding(
                         get: { viewModel.locationManager.region ?? viewModel.locationManager.userRegion },
                         set: { viewModel.locationManager.region = $0 }),
-                locations: filteredLocations.isEmpty ? $viewModel.allClubsLocations : $filteredLocations,
+                locations: viewModel.filteredLocations.isEmpty ? $viewModel.allClubsModels : $viewModel.filteredLocations,
                 onSelectLocation: { location, position in
                     viewModel.selectedLocation = location // Guardar la discoteca seleccionada
                     annotationPosition = position //CLEAN?
-                }
+                },
+                forceUpdateView: viewModel.forceUpdateMapView
             )
             .edgesIgnoringSafeArea(.all)
             
@@ -45,13 +46,14 @@ struct LocationsMapView: View {
                 // Barra de búsqueda en la parte superior
                 SearchBar(
                     searchText: $viewModel.searchQuery,
-                    onSearch: searchSpecificLocationPublisher.send
+                    onSearch: searchSpecificLocationPublisher.send,
+                    forceUpdateView: $viewModel.forceUpdateMapView
                 )
                 .padding()
                 
                 Spacer()
                 
-                if !viewModel.filteredLocations.isEmpty {
+                if showingListView {
                     LocationsListView(
                         locations: $viewModel.filteredLocations,
                         onLocationSelected: locationSelectedPublisher.send
@@ -59,6 +61,9 @@ struct LocationsMapView: View {
                 }
                 
                 MapFilterOptionsView(filterSelected: filterSelectedPublisher.send)
+                    .onTapGesture {
+                        showingListView.toggle()
+                    }
             }
         }
         .showToast(
@@ -94,17 +99,6 @@ struct LocationsMapView: View {
         }
         .onAppear {
             viewDidLoadPublisher.send()
-        }
-    }
-    
-    private func searchLocation() {
-        if viewModel.searchQuery.isEmpty {
-            filteredLocations = []
-        } else {
-            filteredLocations = viewModel.locationManager.locations.filter {
-                $0.name.lowercased().contains(viewModel.searchQuery.lowercased())
-            }
-            
         }
     }
 }

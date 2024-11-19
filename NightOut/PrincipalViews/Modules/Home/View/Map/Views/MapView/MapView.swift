@@ -13,6 +13,7 @@ struct MapView: UIViewRepresentable {
     @Binding var locations: [LocationModel]
     var onSelectLocation: ((LocationModel, CGPoint) -> Void)?
     var onRegionChange: ((MKCoordinateRegion) -> Void)? = nil
+    var forceUpdateView: Bool = false
     
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -22,25 +23,31 @@ struct MapView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        if uiView.region.center.latitude != region.center.latitude ||
+        if (uiView.region.center.latitude != region.center.latitude ||
             uiView.region.center.longitude != region.center.longitude ||
             uiView.region.span.latitudeDelta != region.span.latitudeDelta ||
-            uiView.region.span.longitudeDelta != region.span.longitudeDelta {
+            uiView.region.span.longitudeDelta != region.span.longitudeDelta) || forceUpdateView {
             
-            uiView.setRegion(region, animated: false)
-            
-            uiView.removeAnnotations(uiView.annotations)
-            
-            // Agregar las anotaciones
-            let annotations = locations.map { location in
-                let annotation = MKPointAnnotation()
-                annotation.title = location.name
-                annotation.coordinate = location.coordinate
-                return annotation
-            }
-            
-            uiView.addAnnotations(annotations)
+            updateView(uiView)
+        } else {
+            print("same region")
         }
+    }
+    
+    func updateView(_ uiView: MKMapView) {
+        uiView.setRegion(region, animated: false)
+        
+        uiView.removeAnnotations(uiView.annotations)
+        
+        // Agregar las anotaciones
+        let annotations = locations.map { location in
+            let annotation = MKPointAnnotation()
+            annotation.title = location.name
+            annotation.coordinate = location.coordinate
+            return annotation
+        }
+        
+        uiView.addAnnotations(annotations)
     }
     
     func makeCoordinator() -> Coordinator {

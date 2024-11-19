@@ -11,10 +11,12 @@ final class LocationsMapViewModel: ObservableObject {
     
     @Published var locationManager: LocationManager
     @Published var filteredLocations: [LocationModel] = []
-    @Published var allClubsLocations: [LocationModel] = []
+    @Published var allClubsModels: [LocationModel] = []
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
+    @Published var forceUpdateMapView: Bool = false
+    
     
     init(locationManager: LocationManager) {
         self.locationManager = locationManager

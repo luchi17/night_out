@@ -30,7 +30,10 @@ struct SignupMapView: View {
                     searchText: $searchQuery,
                     onSearch: {
                         locationManager.searchLocation(searchQuery: searchQuery)
-                    }
+                    },
+                    forceUpdateView: Binding(get: {
+                        true
+                    }, set: { _ in })
                 )
                 .padding()
                 
