@@ -4,6 +4,7 @@ struct SearchBar: View {
     @Binding var searchText: String
     @State private var isEditing = false
     var onSearch: VoidClosure
+    @Binding var forceUpdateView: Bool
     
     var body: some View {
         HStack {
@@ -11,6 +12,7 @@ struct SearchBar: View {
                       text: $searchText,
                       onEditingChanged: { focused in
                         self.isEditing = focused
+                        self.forceUpdateView = false
                     },
                       onCommit: onSearch
             )
