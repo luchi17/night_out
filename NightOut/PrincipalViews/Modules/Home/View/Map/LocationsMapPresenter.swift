@@ -66,83 +66,66 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     
     func transform(input: LocationsMapPresenterImpl.ViewInputs){
         listenToInput(input: input)
-
-#warning("TODO: usersGoing")
-#warning("PENDING: filtered locations")
-
         
-        input
-            .viewDidLoad
+         let companyModelsPublisher = input
+                    .viewDidLoad
+                    .withUnretained(self)
+                    .performRequest(request: { presenter, _ in
+                        presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
+                    }, loadingClosure: { [weak self] loading in
+                        guard let self = self else { return }
+                        self.viewModel.loading = loading
+                    }, onError: { _ in })
+                    .eraseToAnyPublisher()
+        
+        companyModelsPublisher
             .withUnretained(self)
-            .performRequest(request: { presenter, _ in
-                presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
-            }, loadingClosure: { [weak self] loading in
-                guard let self = self else { return }
-                self.viewModel.loading = loading
-            }, onError: { _ in })
+            .flatMap { presenter, companyUsers -> AnyPublisher<(CompanyUsersModel?, [String: Int]), Never> in
+                presenter.useCases.companyLocationsUseCase.fetchAttendanceData()
+                    .map { attendanceData in
+                        return (companyUsers, attendanceData)
+                    }
+                    .eraseToAnyPublisher()
+            }
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
-                if let data = data {
+                let companyUsers = data.0
+                let attendanceData = data.1
+                
+                if let companyUsers = companyUsers {
                     presenter.viewModel.toastError = nil
                     
-                    let locations = data.users.values.compactMap({ $0 })
+                    let locations = companyUsers.users.values.compactMap({ $0 })
                     
                     let allClubsModel = locations.compactMap { companyModel in
                         if let components = companyModel.location?.split(separator: ","),
                            components.indices.contains(0), components.indices.contains(1),
-                            let latitude = Double(components[0]),
+                           let latitude = Double(components[0]),
                            let longitude = Double(components[1]) {
                             return LocationModel(
+                                id: companyModel.uid,
                                 name: companyModel.username ?? "",
                                 coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
-                                description: companyModel.selectedTag,
                                 image: companyModel.imageUrl,
                                 startTime: companyModel.startTime,
                                 endTime: companyModel.endTime,
                                 selectedTag: LocationSelectedTag(rawValue: companyModel.selectedTag),
-                                usersGoing: 0
+                                usersGoing: attendanceData[companyModel.uid] ?? 0
                             )
                         }
                         return nil
                     }
-                    
-                    presenter.viewModel.allClubsLocations = allClubsModel
-                    
+                    presenter.viewModel.forceUpdateMapView = true
+                    presenter.viewModel.allClubsModels = allClubsModel
+#warning("Users going check changing adding in database")
                     
                 } else {
                     guard !presenter.viewModel.loading else { return }
                     self.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load companies locations.", image: nil))
                 }
-                
             })
             .store(in: &cancellables)
         
-        
-//        input
-//            .viewDidLoad
-//            .withUnretained(self)
-//            .performRequest(request: { presenter, _ in
-//                presenter.useCases.companyLocationsUseCase.fetchAttendanceData()
-//                    
-//            }, loadingClosure: { [weak self] loading in
-//                guard let self = self else { return }
-////                self.viewModel.loading = loading
-//            }, onError: { [weak self] error in
-//                guard let self = self else { return }
-////                if error == nil {
-////                    self.viewModel.headerError = nil
-////                } else {
-////                    guard self.viewModel.loading else { return }
-////                    self.viewModel.headerError = ErrorState(errorOptional: error)
-////                }
-//            })
-//            .sink(receiveValue: { [weak self] data in
-//                print("DATA")
-//                print(data)
-//            })
-//            .store(in: &cancellables)
-        
-            
     }
     
     func listenToInput(input: LocationsMapPresenterImpl.ViewInputs){

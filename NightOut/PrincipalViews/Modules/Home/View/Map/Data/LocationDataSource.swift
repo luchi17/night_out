@@ -7,7 +7,7 @@ import FirebaseFirestore
 import FirebaseStorage
 
 protocol LocationDatasource {
-    func fetchCompanyLocations() -> AnyPublisher<CompanyUsersModel?, Never> 
+    func fetchCompanyLocations() -> AnyPublisher<CompanyUsersModel?, Never>
     func fetchAttendanceData() -> AnyPublisher<[String: Int], Never>
     
 }
@@ -15,7 +15,7 @@ protocol LocationDatasource {
 struct LocationDatasourceImpl: LocationDatasource {
     
     
-    #warning("Save in user defaults? where to call it?")
+#warning("Save in user defaults? where to call it?")
     func fetchCompanyLocations() -> AnyPublisher<CompanyUsersModel?, Never> {
         let publisher = PassthroughSubject<CompanyUsersModel?, Never>()
         
@@ -44,9 +44,6 @@ struct LocationDatasourceImpl: LocationDatasource {
         return publisher.eraseToAnyPublisher()
     }
     
-
-//    var clubList: [Club] = []
-    
     func fetchAttendanceData() -> AnyPublisher<[String: Int], Never> {
         
         let publisher = PassthroughSubject<[String: Int], Never>()
@@ -61,45 +58,20 @@ struct LocationDatasourceImpl: LocationDatasource {
             }
             
             guard let children = attendanceSnapshot?.children else {
-                print("NO CHILDREN")
                 publisher.send([:])
                 return
             }
-            print("------------")
-            for snapshot in children {
-                
-                print(snapshot)
+            
+            var clubAttendanceMap = [String: Int]()
+            for clubSnapshot in children {
+                if let clubSnapshot = clubSnapshot as? DataSnapshot {
+                    let clubId = clubSnapshot.key
+                    let attendeesCount = Int(clubSnapshot.childrenCount)
+                    clubAttendanceMap[clubId] = attendeesCount
+                }
             }
-            
-            print("------------")
-            
+            publisher.send(clubAttendanceMap)
         }
-//        ref.observeSingleEvent(of: .value) { snapshot in
-//            var clubAttendanceMap = [String: Int]()
-//            
-//            for clubSnapshot in snapshot.children {
-//                if let clubSnapshot = clubSnapshot as? DataSnapshot {
-//                    let clubId = clubSnapshot.key
-//                    let attendeesCount = Int(clubSnapshot.childrenCount)
-//                    clubAttendanceMap[clubId] = attendeesCount
-//                }
-//            }
-//            orderByAttendance(clubAttendanceMap)
-//            
-//        } withCancel: { error in
-//            print("Error fetching data: \(error.localizedDescription)")
-//        }
-//        
         return publisher.eraseToAnyPublisher()
     }
-    
-//    func orderByAttendance(_ clubAttendanceMap: [String: Int]) {
-//        clubList.sort { (club1, club2) -> Bool in
-//            let attendance1 = clubAttendanceMap[club1.getUID()] ?? 0
-//            let attendance2 = clubAttendanceMap[club2.getUID()] ?? 0
-//            return attendance1 > attendance2
-//        }
-//    }
-
-
 }
