@@ -44,10 +44,6 @@ struct LocationDetailView: View {
                 Text(selectedLocation.name)
                     .font(.headline)
                     .padding(.bottom, 2)
-                Text(selectedLocation.description ?? "")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding(.bottom, 10)
 
                 Text("Más detalles sobre la discoteca...")
                     .padding(.bottom, 10)

@@ -76,9 +76,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                 self.updateRegion(coordinate: item.placemark.coordinate)
                 self.locations.append(
                     LocationModel(
+                        id: UUID().uuidString,
                         name: item.name ?? "Sin Nombre",
                         coordinate: item.placemark.coordinate,
-                        description: "",
                         image: ""
                     )
                 )

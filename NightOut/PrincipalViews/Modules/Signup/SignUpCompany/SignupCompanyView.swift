@@ -10,7 +10,7 @@ struct SignupCompanyView: View {
     @State private var showTimePicker = false
     @State private var showLocation = false
     @State private var locationName = ""
-    @State private var locationModel = LocationModel()
+    @State private var locationModel = LocationModel(id: UUID().uuidString)
     
     let presenter: SignupCompanyPresenter
     

@@ -3,11 +3,11 @@ import Kingfisher
 
 struct LocationDetailSheet: View {
     var selectedLocation: LocationModel
-    var openMaps: () -> Void // Closure para manejar el cierre
+    var openMaps: () -> Void
     
     @State private var loadFailed = false
 
-#warning("PENDING: placeholder image")
+#warning("PENDING: show correct placeholder image")
     
     var body: some View {
         VStack {
@@ -39,11 +39,6 @@ struct LocationDetailSheet: View {
                     Text(selectedLocation.name)
                         .font(.headline)
                         .padding(.bottom, 2)
-                    
-                    Text(selectedLocation.description ?? "")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .padding(.bottom, 10)
                     
                     if let endTime = selectedLocation.endTime, let startTime = selectedLocation.startTime {
                         Text("Horario: \(startTime) - \(endTime)")
