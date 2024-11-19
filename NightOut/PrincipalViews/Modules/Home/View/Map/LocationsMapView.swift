@@ -11,7 +11,7 @@ struct LocationsMapView: View {
     private let filterSelectedPublisher = PassthroughSubject<MapFilterType, Never>()
     private let searchSpecificLocationPublisher = PassthroughSubject<Void, Never>()
     private let regionChangedPublisher = PassthroughSubject<MKCoordinateRegion, Never>()
-    private let locationSelectedPublisher = PassthroughSubject<LocationModel, Never>()
+    private let locationInListSelectedPublisher = PassthroughSubject<LocationModel, Never>()
     private let viewDidLoadPublisher = CurrentValueSubject<Void, Never>(())
     private var cancellables = Set<AnyCancellable>()
     
@@ -35,7 +35,7 @@ struct LocationsMapView: View {
                         set: { viewModel.locationManager.region = $0 }),
                 locations: viewModel.filteredLocations.isEmpty ? $viewModel.allClubsModels : $viewModel.filteredLocations,
                 onSelectLocation: { location, position in
-                    viewModel.selectedLocation = location // Guardar la discoteca seleccionada
+                    viewModel.selectedMarkerLocation = location
                     annotationPosition = position //CLEAN?
                 },
                 forceUpdateView: viewModel.forceUpdateMapView
@@ -53,25 +53,26 @@ struct LocationsMapView: View {
                 
                 Spacer()
                 
-                if showingListView {
-                    LocationsListView(
-                        locations: $viewModel.filteredLocations,
-                        onLocationSelected: locationSelectedPublisher.send
-                    )
-                }
-                
                 MapFilterOptionsView(filterSelected: filterSelectedPublisher.send)
-                    .onTapGesture {
-                        showingListView.toggle()
-                    }
             }
         }
         .showToast(
             error: (type: viewModel.toastError, showCloseButton: true, onDismiss: { }),
             isIdle: viewModel.loading
         )
+        .sheet(isPresented: $showingListView) {
+            LocationsListView(
+                locations: $viewModel.filteredLocations,
+                onLocationSelected: { locationModel in
+                    viewModel.selectedFilter = nil
+                    locationInListSelectedPublisher.send(locationModel)
+                }
+            )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $showingDetail) {
-            if let location = viewModel.selectedLocation {
+            if let location = viewModel.selectedMarkerLocation {
                 LocationDetailSheet(
                     selectedLocation: location,
                     openMaps: {
@@ -82,8 +83,11 @@ struct LocationsMapView: View {
                 .presentationDragIndicator(.visible)
             }
         }
-        .onChange(of: viewModel.selectedLocation, {
-            showingDetail = viewModel.selectedLocation != nil // Mostrar la sheet cuando se selecciona una discoteca
+        .onChange(of: viewModel.selectedMarkerLocation, {
+            showingDetail = viewModel.selectedMarkerLocation != nil // Mostrar la sheet cuando se selecciona una discoteca
+        })
+        .onChange(of: viewModel.selectedFilter, {
+            showingListView = viewModel.selectedFilter != nil // Mostrar la sheet cuando se selecciona un filtro
         })
         .alert(isPresented: $viewModel.locationManager.locationPermissionDenied) {
             Alert(
@@ -110,7 +114,7 @@ private extension LocationsMapView {
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
             onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
             locationBarSearch: searchSpecificLocationPublisher.eraseToAnyPublisher(),
-            locationSelected: locationSelectedPublisher.eraseToAnyPublisher(),
+            locationInListSelected: locationInListSelectedPublisher.eraseToAnyPublisher(),
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
         )
         presenter.transform(input: input)

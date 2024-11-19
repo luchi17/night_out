@@ -7,11 +7,12 @@ final class LocationsMapViewModel: ObservableObject {
     
     @Published var searchQuery: String = ""
     @Published var locations: [LocationModel] = [] // Lista de discotecas recibida de API
-    @Published var selectedLocation: LocationModel? // Discoteca seleccionada
+    @Published var selectedMarkerLocation: LocationModel? // Discoteca seleccionada
     
     @Published var locationManager: LocationManager
     @Published var filteredLocations: [LocationModel] = []
     @Published var allClubsModels: [LocationModel] = []
+    @Published var selectedFilter: MapFilterType?
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
@@ -43,7 +44,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
         let openMaps: AnyPublisher<(Double, Double), Never>
         let onFilterSelected: AnyPublisher<MapFilterType, Never>
         let locationBarSearch: AnyPublisher<Void, Never>
-        let locationSelected: AnyPublisher<LocationModel, Never>
+        let locationInListSelected: AnyPublisher<LocationModel, Never>
         let viewDidLoad: AnyPublisher<Void, Never>
     }
     
@@ -121,7 +122,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                     
                 } else {
                     guard !presenter.viewModel.loading else { return }
-                    self.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load companies locations.", image: nil))
+                    presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load companies locations.", image: nil))
                 }
             })
             .store(in: &cancellables)
@@ -133,62 +134,90 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .openMaps
             .withUnretained(self)
             .sink { presenter, data in
-                self.actions.onOpenMaps(data)
+                presenter.actions.onOpenMaps(data)
             }
             .store(in: &cancellables)
-        
+
+#warning("check")
         input
             .onFilterSelected
             .withUnretained(self)
             .sink { presenter, filter in
-                //DO LOGIC, ROW BELOW WRONG
-                // update viewmodel locations
-                self.viewModel.filteredLocations = self.viewModel.locationManager.locations
-                // Call use case to retrieve locations according to the type selected
+                presenter.viewModel.selectedFilter = filter
+                switch filter {
+                case .near:
+                    let userCoordinates = presenter.viewModel.locationManager.userRegion.center
+                    let sortedClubsByDistance = presenter.viewModel.allClubsModels.map { club in
+                        var updatedClub = club
+                        let distance = presenter.calculateDistance(
+                            from: userCoordinates,
+                            to: club.coordinate
+                        )
+                        updatedClub.distanceToUser = distance
+                        return updatedClub
+                    }
+                    .sorted {$0.distanceToUser < $1.distanceToUser }
+                    
+                    presenter.viewModel.filteredLocations = sortedClubsByDistance
+                    
+                case .people:
+                    let sortedClubsByUsersGoing = presenter.viewModel.allClubsModels.sorted { $0.usersGoing > $1.usersGoing }
+                    presenter.viewModel.filteredLocations = sortedClubsByUsersGoing
+                }
+                
             }
             .store(in: &cancellables)
         
+#warning("check with existing location")
         input
             .locationBarSearch
             .withUnretained(self)
             .sink { presenter, _ in
-                let searchedLocationCcoordinate = self.viewModel.locationManager.checkKnownLocationCoordinate(searchQuery: self.viewModel.searchQuery)
-                let allClubsCoordinates = self.viewModel.allClubsLocations.map({ $0.coordinate })
+                presenter.viewModel.forceUpdateMapView = true
+                let searchedLocationCcoordinate = presenter.viewModel.locationManager.checkKnownLocationCoordinate(searchQuery: presenter.viewModel.searchQuery)
+                let allClubsCoordinates = self.viewModel.allClubsModels.map({ $0.coordinate })
                 
                 let foundClub = allClubsCoordinates.first(where: {
-                    self.viewModel.locationManager.areCoordinatesEqual(
+                    presenter.viewModel.locationManager.areCoordinatesEqual(
                         coordinate1: $0,
                         coordinate2: searchedLocationCcoordinate
-                )})
+                    )})
                 
                 if let foundClub = foundClub {
-                    self.viewModel.locationManager.updateRegion(coordinate: foundClub)
+                    presenter.viewModel.locationManager.updateRegion(coordinate: foundClub)
                 }
                 else {
-                    #warning("TODO: Show message error of club not found?")
+                    presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Club not found", image: nil))
                 }
             }
             .store(in: &cancellables)
         
         
         viewModel
-            .$selectedLocation
+            .$selectedMarkerLocation
             .withUnretained(self)
             .sink { presenter, locationSelected in
                 if let coordinate = locationSelected?.coordinate {
-                    self.viewModel.locationManager.updateRegion(coordinate: coordinate)
+                    presenter.viewModel.locationManager.updateRegion(coordinate: coordinate)
                 }
             }
             .store(in: &cancellables)
         
         input
-            .locationSelected
+            .locationInListSelected
             .withUnretained(self)
             .sink { presenter, locationSelected in
-                // Update map to move to the specific location
-                // sirve actualizar con la region como en searchSpecificLocation ?
-                self.viewModel.filteredLocations = []
+                presenter.viewModel.locationManager.updateRegion(coordinate: locationSelected.coordinate)
             }
             .store(in: &cancellables)
     }
+}
+
+private extension LocationsMapPresenterImpl {
+    func calculateDistance(from current: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D) -> Double {
+        let currentLoc = CLLocation(latitude: current.latitude, longitude: current.longitude)
+        let destLoc = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
+        return currentLoc.distance(from: destLoc)
+    }
+    
 }

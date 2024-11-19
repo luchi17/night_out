@@ -61,7 +61,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         self.region = region
     }
     
-#warning("TODO: disco info")
     func searchLocation(searchQuery: String) {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchQuery

@@ -3,7 +3,6 @@ import SwiftUI
 struct MapFilterOptionsView: View {
     
     @Environment(\.presentationMode) var presentationMode
-    @State private var selectedFilter: MapFilterType?
     let filters = MapFilterType.allCases
     
     var filterSelected: InputClosure<MapFilterType>
@@ -18,8 +17,8 @@ struct MapFilterOptionsView: View {
             if showOptions {
                 VStack(spacing: 2) {
                     Button(action: {
-                        selectedFilter = .near
                         hideOptions()
+                        filterSelected(.near)
                     }) {
                         
                         HStack(alignment: .center,spacing: 10) {
@@ -33,7 +32,7 @@ struct MapFilterOptionsView: View {
                     }
                     
                     Button(action: {
-                        selectedFilter = .people
+                        filterSelected(.people)
                         hideOptions()
                     }) {
                         
