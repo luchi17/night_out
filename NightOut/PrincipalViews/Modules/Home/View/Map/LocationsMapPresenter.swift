@@ -118,7 +118,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                     }
                     presenter.viewModel.forceUpdateMapView = true
                     presenter.viewModel.allClubsModels = allClubsModel
-#warning("Users going check changing adding in database")
                     
                 } else {
                     guard !presenter.viewModel.loading else { return }
@@ -138,7 +137,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             }
             .store(in: &cancellables)
 
-#warning("check")
         input
             .onFilterSelected
             .withUnretained(self)
@@ -207,6 +205,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .locationInListSelected
             .withUnretained(self)
             .sink { presenter, locationSelected in
+                presenter.viewModel.forceUpdateMapView = true
                 presenter.viewModel.locationManager.updateRegion(coordinate: locationSelected.coordinate)
             }
             .store(in: &cancellables)

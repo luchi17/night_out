@@ -17,10 +17,10 @@ struct SignupMapView: View {
             MapView(
                 region: Binding(
                     get: { locationManager.region ?? locationManager.userRegion },
-                    set: { locationManager.region = $0 }),
+                    set: { _ in }),
                 locations: $locationManager.locations,
                 onSelectLocation: { _ , _ in },
-                onRegionChange: nil
+                forceUpdateView: true
             )
             .edgesIgnoringSafeArea(.all)
             
