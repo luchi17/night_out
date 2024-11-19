@@ -19,15 +19,17 @@ struct MapView: UIViewRepresentable {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true // Muestra la ubicación del usuario
+        mapView.setRegion(region, animated: true)
         return mapView
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        if (uiView.region.center.latitude != region.center.latitude ||
-            uiView.region.center.longitude != region.center.longitude ||
-            uiView.region.span.latitudeDelta != region.span.latitudeDelta ||
-            uiView.region.span.longitudeDelta != region.span.longitudeDelta) || forceUpdateView {
-            
+        let regionChanged = LocationManager.shared.areCoordinatesEqual(
+            coordinate1: uiView.region.center,
+            coordinate2: region.center,
+            decimalPlaces: 6
+        )
+        if (regionChanged || forceUpdateView) {
             updateView(uiView)
         } else {
             print("same region")
@@ -35,7 +37,7 @@ struct MapView: UIViewRepresentable {
     }
     
     func updateView(_ uiView: MKMapView) {
-        uiView.setRegion(region, animated: false)
+        uiView.setRegion(region, animated: true)
         
         uiView.removeAnnotations(uiView.annotations)
         
