@@ -4,6 +4,7 @@ import Combine
 
 struct LocationsMapView: View {
     @State private var isSheetPresented: Bool = true
+    @State private var showingDetail = false
     
     private let openMapsPublisher = PassthroughSubject<(Double, Double), Never>()
     private let filterSelectedPublisher = PassthroughSubject<MapFilterType, Never>()
@@ -30,46 +31,48 @@ struct LocationsMapView: View {
     
     var body: some View {
         ZStack {
-            Map(position: $position, selection: Binding(get: {
-                return viewModel.selectedMarkerLocation
-            }, set: { value in
-                viewModel.selectedMarkerLocation = value
-            })) {
+            
+            Map(position: $position, selection: $viewModel.selectedMarkerLocation) {
                 Annotation("", coordinate: viewModel.locationManager.userRegion.center) {
                     UserAnnotationView()
                 }
+                .tag("user")
                 
                 ForEach(viewModel.allClubsModels) { club in
                     Annotation(club.name, coordinate: club.coordinate.location) {
-                        CustomAnnotationView()
+                        CustomAnnotationView(
+                            club: club,
+                            selection: $viewModel.selectedMarkerLocation
+                        )
                     }
+                    .tag(club)
                 }
-            }
-            .overlay(alignment: .bottom) {
-                if viewModel.selectedMarkerLocation != nil {
-                    LookAroundPreview(scene: $scene, allowsNavigation: false, badgePosition: .bottomTrailing)
-                        .frame(height: 150)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .safeAreaPadding(.bottom, 40)
-                        .padding(.horizontal, 20)
-                }
-            }
-            .overlay(alignment: .topTrailing) {
-                MapFilterOptionsView(filterSelected: filterSelectedPublisher.send)
             }
         }
         .onChange(of: viewModel.selectedMarkerLocation) {
             if let selectedMarkerLocation = viewModel.selectedMarkerLocation {
-                Task {
-                    scene = try? await fetchScene(for: selectedMarkerLocation.coordinate.location)
-                }
-                
                 let newRegion = MKCoordinateRegion(center: selectedMarkerLocation.coordinate.location,
                                                     span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
                 position = MapCameraPosition.region(newRegion)
             }
             isSheetPresented = viewModel.selectedMarkerLocation == nil
-            
+            showingDetail = viewModel.selectedMarkerLocation != nil
+        }
+        .sheet(isPresented: $showingDetail, onDismiss: {
+//            viewModel.selectedMarkerLocation = nil
+        }) {
+            if let location = viewModel.selectedMarkerLocation {
+                LocationDetailSheet(
+                    selectedLocation: location,
+                    openMaps: {
+                        openMapsPublisher.send((location.coordinate.location.latitude, location.coordinate.location.longitude))
+                    }
+                )
+                .padding()
+                .presentationDetents([.height(300), .medium])
+                .presentationBackground(.regularMaterial)
+                .presentationBackgroundInteraction(.enabled(upThrough: .large))
+            }
         }
         .sheet(isPresented: $isSheetPresented) {
             SheetView(
@@ -78,7 +81,8 @@ struct LocationsMapView: View {
                     return viewModel.filteredLocations.isEmpty ? viewModel.allClubsModels : viewModel.filteredLocations
                 }, set: { _ in }),
                 onSearch: searchSpecificLocationPublisher.send,
-                selectedLocation: locationInListSelectedPublisher.send
+                selectedLocation: locationInListSelectedPublisher.send,
+                filterSelected: filterSelectedPublisher.send
             )
         }
         .alert(isPresented: $viewModel.locationManager.locationPermissionDenied) {
@@ -128,6 +132,7 @@ struct SheetView: View {
     @Binding var searchResults: [LocationModel]
     var onSearch: VoidClosure
     var selectedLocation: InputClosure<LocationModel>
+    var filterSelected: InputClosure<MapFilterType>
     
     var body: some View {
         VStack {
@@ -149,17 +154,16 @@ struct SheetView: View {
                 searchText: $search,
                 onSearch: onSearch
             )
-            
-            Spacer()
+            MapFilterOptionsView(filterSelected: filterSelected)
             
             LocationsListView(
                 locations: $searchResults,
                 onLocationSelected: selectedLocation
             )
         }
-        .padding()
+        .padding(.top, 20)
         .interactiveDismissDisabled()
-        .presentationDetents([.height(100), .large])
+        .presentationDetents([.height(150), .large])
         .presentationBackground(.regularMaterial)
         .presentationBackgroundInteraction(.enabled(upThrough: .large))
     }

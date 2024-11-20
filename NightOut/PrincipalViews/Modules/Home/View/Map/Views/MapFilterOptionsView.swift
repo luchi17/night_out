@@ -11,21 +11,6 @@ struct MapFilterOptionsView: View {
 
     var body: some View {
         VStack {
-            // Botón de Filtrar con un tap gesture para mostrar el menú
-            Button(action: {
-                withAnimation {
-                    showOptions.toggle()
-                }
-            }) {
-                Text(showOptions ? "Cerrar" : "Filtrar")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            .padding(.top, 30)
-            
             // Opciones desplegables cuando el botón de filtrar es pulsado
             if showOptions {
                 VStack(spacing: 2) {
@@ -60,10 +45,23 @@ struct MapFilterOptionsView: View {
                     }
                 }
                 .opacity(showOptions ? 1 : 0)  // Controla la opacidad
-                .transition(.move(edge: .top).combined(with: .opacity)) // Combina movimiento con opacidad
+                .transition(.move(edge: .bottom).combined(with: .opacity)) // Combina movimiento con opacidad
                 .animation(.easeInOut(duration: 0.3), value: showOptions)
             }
-            
+            // Botón de Filtrar con un tap gesture para mostrar el menú
+            Button(action: {
+                withAnimation {
+                    showOptions.toggle()
+                }
+            }) {
+                Text(showOptions ? "Cerrar" : "Filtrar")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+            .padding(.bottom, 5)
         }
         .padding(.horizontal)
     }

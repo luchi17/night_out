@@ -4,6 +4,12 @@ import MapKit
 
 #warning("Is this an asset?")
 struct CustomAnnotationView: View {
+    
+    @State private var isSelected = false
+    
+    var club: LocationModel
+    @Binding var selection: LocationModel?
+    
     var body: some View {
         ZStack(alignment: .center) {
             Circle()
@@ -13,9 +19,18 @@ struct CustomAnnotationView: View {
                 .resizable()
                 .scaledToFit()
                 .foregroundStyle(.blue)
-                .frame(width: 25, height: 25)
+                .frame(width: isSelected ? 18 : 12)
         }
-        .frame(width: 35, height: 35)
+        .frame(width: isSelected ? 40 : 28, height: isSelected ? 40 : 28)
+        .onTapGesture { // If it is the selected `annotation` from the `ForEach`, define the selection.
+          selection = club
+          withAnimation(.bouncy) { isSelected = true }
+        }
+        .onChange(of: selection, { oldValue, newValue in
+            // If the previous selected `annotation` from the `ForEach` is unselected, perform the changes.
+            guard isSelected, newValue == nil else { return } // Avoid having actions on unselected `annotations`.
+            withAnimation(.bouncy) { isSelected = false }
+        })
     }
 }
 
@@ -30,29 +45,5 @@ struct UserAnnotationView: View {
                 .foregroundStyle(.white)
                 .frame(width: 28, height: 28) // Ajusta el tamaño de la imagen
         }
-        .frame(width: 30, height: 30)
-    }
-}
-
-
-class CustomAnnotationViewWrapper: MKAnnotationView {
-    private var hostingController: UIHostingController<CustomAnnotationView>?
-    
-    func setupContent() {
-        let customView = CustomAnnotationView()
-        
-        if hostingController == nil {
-            hostingController = UIHostingController(rootView: customView)
-            hostingController?.view.backgroundColor = .clear
-            addSubview(hostingController!.view)
-        } else {
-            hostingController?.rootView = customView
-        }
-        
-        // Ajustar el tamaño de la vista de anotación
-        hostingController?.view.frame = CGRect(x: -20, y: -30, width: 40, height: 60)
-        
-        // Ajustar el desplazamiento para que la punta de la gota esté en el punto de coordenadas
-        centerOffset = CGPoint(x: 0, y: -10) // Desplaza la anotación hacia arriba para que la punta esté en el centro de la ubicación
     }
 }
