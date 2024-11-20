@@ -8,21 +8,30 @@ struct SignupMapView: View {
     @StateObject private var locationManager = LocationManager.shared
     
     @Binding var locationModel: LocationModel
+    @State var auxModel = LocationModel()
     
     @Environment(\.presentationMode) var presentationMode
     
+    @State private var position = MapCameraPosition.automatic
+    @State private var isLoadingUserLocation = true
+    
     var body: some View {
         ZStack {
-            // Mapa que ocupa toda la pantalla
-//            MapView(
-//                region: Binding(
-//                    get: { locationManager.region ?? locationManager.userRegion },
-//                    set: { _ in }),
-//                locations: $locationManager.locations,
-//                onSelectLocation: { _ , _ in },
-//                forceUpdateView: true
-//            )
-//            .edgesIgnoringSafeArea(.all)
+            Map(position: $position) {
+                Annotation(locationModel.name, coordinate: auxModel.coordinate.location) {
+                    CustomAnnotationView(
+                        club: locationModel,
+                        selection: .constant(nil)
+                    )
+                }
+                .tag(locationModel)
+                
+                Annotation("user", coordinate: locationManager.userRegion.center) {
+                    UserAnnotationView()
+                }
+                .tag("user")
+            }
+            .edgesIgnoringSafeArea(.all)
             
             VStack {
                 // Barra de búsqueda en la parte superior
@@ -37,9 +46,7 @@ struct SignupMapView: View {
                 Spacer()
                 
                 Button(action: {
-                    if let location = locationManager.locations.first {
-                        locationModel = location
-                    }
+                    locationModel = auxModel
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("SAVE")
@@ -54,6 +61,11 @@ struct SignupMapView: View {
                 .padding(.horizontal, 20)
             }
         }
+        .onChange(of: locationManager.locations, { oldValue, newValue in
+            if let location = locationManager.locations.first {
+                auxModel = location
+            }
+        })
         .alert(isPresented: $locationManager.locationPermissionDenied) {
             Alert(
                 title: Text("Permisos de Localización Denegados"),
@@ -66,5 +78,18 @@ struct SignupMapView: View {
                 secondaryButton: .cancel()
             )
         }
+        .onChange(of: auxModel, { oldValue, newValue in
+            let region = MKCoordinateRegion(center: auxModel.coordinate.location,
+                                            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+            position = MapCameraPosition.region(region)
+        })
+        .onChange(of: locationManager.userLocation, { oldValue, newValue in
+            position = MapCameraPosition.region(locationManager.userRegion)
+            isLoadingUserLocation = newValue.location.latitude == 0.0
+        })
+        .applyStates(
+            error: nil,
+            isIdle: isLoadingUserLocation
+        )
     }
 }

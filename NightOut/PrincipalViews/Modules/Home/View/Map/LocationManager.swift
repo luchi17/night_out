@@ -14,7 +14,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var locations: [LocationModel] = []
     @Published var locationPermissionDenied = false // Variable para permisos de localización
     
-    @Published var userLocation: CLLocationCoordinate2D?
+    @Published var userLocation = LocationCoordinate()
     
     override init() {
         super.init()
@@ -44,6 +44,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         let userRegion = MKCoordinateRegion(center: location.coordinate,
                                         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+        self.userLocation = LocationCoordinate(location: userRegion.center)
         self.userRegion = userRegion
     }
     
