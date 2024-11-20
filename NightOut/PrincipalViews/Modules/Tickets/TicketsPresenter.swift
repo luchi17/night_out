@@ -62,6 +62,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
+                AppState.shared.logOut()
                 self?.actions.backToLogin()
             })
             .store(in: &cancellables)

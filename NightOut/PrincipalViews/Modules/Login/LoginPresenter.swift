@@ -89,6 +89,7 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
+                AppState.shared.logIn()
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)

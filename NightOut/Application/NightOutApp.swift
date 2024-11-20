@@ -36,3 +36,21 @@ struct ContentView: View {
         .environmentObject(appCoordinator)
     }
 }
+
+class AppState: ObservableObject {
+    static let shared = AppState()
+    @Published var isUserLoggedIn: Bool = false
+    @Published var shouldShowSplash: Bool = true
+
+    private init() {}
+
+    func logOut() {
+        isUserLoggedIn = false
+        shouldShowSplash = false // Evita mostrar el Splash después de logout
+    }
+
+    func logIn() {
+        isUserLoggedIn = true
+        shouldShowSplash = true
+    }
+}
