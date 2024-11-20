@@ -17,13 +17,13 @@ struct SearchBar: View {
             .autocorrectionDisabled()
             .padding(7)
             .padding(.horizontal, 25)
-            .background(.gray.opacity(0.1))
+            .background(.gray.opacity(0.6))
             .foregroundColor(.primary)
             .cornerRadius(8)
             .overlay(
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.primary)
+                        .foregroundColor(.white)
                         .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 8)
                     

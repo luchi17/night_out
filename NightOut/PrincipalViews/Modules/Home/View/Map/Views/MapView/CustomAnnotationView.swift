@@ -9,7 +9,6 @@ struct CustomAnnotationView: View {
             Circle()
                 .fill(.gray)
                 .stroke(Color.pink, lineWidth: 3)
-            // Imagen del vaso en el centro
             Image(systemName: "wineglass.fill")
                 .resizable()
                 .scaledToFit()
@@ -23,9 +22,8 @@ struct CustomAnnotationView: View {
 struct UserAnnotationView: View {
     var body: some View {
         ZStack(alignment: .center) {
-//            Circle()
-//                .fill(.blue)
-            // Imagen del vaso en el centro
+            Circle()
+                .fill(.blue)
             Image(systemName: "mappin.circle")
                 .resizable()
                 .scaledToFit()
