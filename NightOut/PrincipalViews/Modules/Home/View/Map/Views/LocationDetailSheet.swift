@@ -45,8 +45,8 @@ struct LocationDetailSheet: View {
                             .font(.subheadline)
                             .padding(.bottom, 10)
                     }
-                    if selectedLocation.selectedTag != LocationSelectedTag.none {
-                        Text("Etiqueta: \(String(describing: selectedLocation.selectedTag?.title))")
+                    if let selectedTag = selectedLocation.selectedTag, selectedLocation.selectedTag != LocationSelectedTag.none {
+                        Text("Etiqueta: \(selectedTag.title)")
                             .font(.subheadline)
                             .padding(.bottom, 10)
                     }
