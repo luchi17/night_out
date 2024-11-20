@@ -24,7 +24,7 @@ struct MapView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        let regionChanged = LocationManager.shared.areCoordinatesEqual(
+        let regionChanged = !LocationManager.shared.areCoordinatesEqual(
             coordinate1: uiView.region.center,
             coordinate2: region.center,
             decimalPlaces: 6
