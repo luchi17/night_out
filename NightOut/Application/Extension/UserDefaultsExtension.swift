@@ -2,6 +2,7 @@ import Foundation
 
 //Remove: not used
 private let userLoggedIn: String = "userLoggedIn"
+private let locationModels: String = "locationModels"
 
 extension UserDefaults {
     
@@ -29,5 +30,13 @@ extension UserDefaults {
 
     static func isUserLoggedIn() -> Bool {
         self.objectForKey(userLoggedIn) as? Bool ?? false
+    }
+    
+    static func setCompanies(_ value: [LocationModel]) {
+        self.setObject(value, forKey: locationModels)
+    }
+
+    static func getCompanies() -> [LocationModel] {
+        self.objectForKey(locationModels) as? [LocationModel] ?? []
     }
 }

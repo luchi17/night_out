@@ -2,18 +2,36 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>GIDClientID</key>
-	<string>714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf.apps.googleusercontent.com</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>MKDirectionsRequest</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.maps.directionsrequest</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleURLName</key>
+			<string>714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf</string>
 			</array>
-			<key>CFBundleURLName</key>
-			<string>714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf</string>
 		</dict>
+	</array>
+	<key>GIDClientID</key>
+	<string>714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf.apps.googleusercontent.com</string>
+	<key>MKDirectionsApplicationSupportedModes</key>
+	<array>
+		<string>MKDirectionsModeBike</string>
+		<string>MKDirectionsModeBus</string>
+		<string>MKDirectionsModeCar</string>
+		<string>MKDirectionsModePedestrian</string>
 	</array>
 </dict>
 </plist>

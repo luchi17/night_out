@@ -10,7 +10,7 @@ struct SignupCompanyView: View {
     @State private var showTimePicker = false
     @State private var showLocation = false
     @State private var locationName = ""
-    @State private var locationModel = LocationModel(id: UUID().uuidString)
+    @State private var locationModel = LocationModel()
     
     let presenter: SignupCompanyPresenter
     
@@ -96,7 +96,7 @@ struct SignupCompanyView: View {
         .sheet(
             isPresented: $showLocation,
             onDismiss: {
-                viewModel.locationString = locationModel.coordinate.latitude.description + "," + locationModel.coordinate.longitude.description
+                viewModel.locationString = locationModel.coordinate.location.latitude.description + "," + locationModel.coordinate.location.longitude.description
                 locationName = locationModel.name.isEmpty ? ( "(" + viewModel.locationString + ")") : locationModel.name
                 
             }, content: {

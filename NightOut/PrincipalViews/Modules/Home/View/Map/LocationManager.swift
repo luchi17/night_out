@@ -58,7 +58,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     func updateRegion(coordinate: CLLocationCoordinate2D) {
         let region = MKCoordinateRegion(center: coordinate,
                                         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        self.region = region
+        DispatchQueue.main.async {
+            self.region = region
+        }
     }
     
     func searchLocation(searchQuery: String) {
@@ -75,9 +77,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                 self.updateRegion(coordinate: item.placemark.coordinate)
                 self.locations.append(
                     LocationModel(
-                        id: UUID().uuidString,
                         name: item.name ?? "Sin Nombre",
-                        coordinate: item.placemark.coordinate,
+                        coordinate: LocationCoordinate(location: item.placemark.coordinate),
                         image: ""
                     )
                 )
@@ -85,7 +86,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
     
-    func checkKnownLocationCoordinate(searchQuery: String) -> CLLocationCoordinate2D {
+    func checkKnownLocationCoordinate(searchQuery: String, completion: @escaping InputClosure<CLLocationCoordinate2D>) {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchQuery
         
@@ -99,9 +100,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
             DispatchQueue.main.async {
                 searchedLocation = item.placemark.coordinate
+                completion(searchedLocation)
             }
         }
-        return searchedLocation
     }
     
     
@@ -112,7 +113,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         return roundedLocation1 == roundedLocation2
     }
 
-    func areCoordinatesEqual(coordinate1: CLLocationCoordinate2D, coordinate2: CLLocationCoordinate2D, decimalPlaces: Int = 6) -> Bool {
+    func areCoordinatesEqual(coordinate1: CLLocationCoordinate2D, coordinate2: CLLocationCoordinate2D, decimalPlaces: Int = 5) -> Bool {
         let latitudeEqual = areLocationsEqual(
             location1: coordinate1.latitude,
             location2: coordinate2.latitude,

@@ -4,7 +4,6 @@ struct SearchBar: View {
     @Binding var searchText: String
     @State private var isEditing = false
     var onSearch: VoidClosure
-    @Binding var forceUpdateView: Bool
     
     var body: some View {
         HStack {
@@ -12,18 +11,19 @@ struct SearchBar: View {
                       text: $searchText,
                       onEditingChanged: { focused in
                         self.isEditing = focused
-                        self.forceUpdateView = false
                     },
                       onCommit: onSearch
             )
+            .autocorrectionDisabled()
             .padding(7)
             .padding(.horizontal, 25)
-            .background(Color(.systemGray6))
+            .background(.gray.opacity(0.1))
+            .foregroundColor(.primary)
             .cornerRadius(8)
             .overlay(
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.primary)
                         .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 8)
                     
@@ -38,7 +38,7 @@ struct SearchBar: View {
                     }
                 }
             )
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 12)
             
             if isEditing {
                 Button("Cancel") {
@@ -48,7 +48,6 @@ struct SearchBar: View {
                 }
                 .padding(.trailing, 10)
                 .transition(.move(edge: .trailing))
-                .animation(.default)
             }
         }
     }

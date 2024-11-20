@@ -14,15 +14,15 @@ struct SignupMapView: View {
     var body: some View {
         ZStack {
             // Mapa que ocupa toda la pantalla
-            MapView(
-                region: Binding(
-                    get: { locationManager.region ?? locationManager.userRegion },
-                    set: { _ in }),
-                locations: $locationManager.locations,
-                onSelectLocation: { _ , _ in },
-                forceUpdateView: true
-            )
-            .edgesIgnoringSafeArea(.all)
+//            MapView(
+//                region: Binding(
+//                    get: { locationManager.region ?? locationManager.userRegion },
+//                    set: { _ in }),
+//                locations: $locationManager.locations,
+//                onSelectLocation: { _ , _ in },
+//                forceUpdateView: true
+//            )
+//            .edgesIgnoringSafeArea(.all)
             
             VStack {
                 // Barra de búsqueda en la parte superior
@@ -30,10 +30,7 @@ struct SignupMapView: View {
                     searchText: $searchQuery,
                     onSearch: {
                         locationManager.searchLocation(searchQuery: searchQuery)
-                    },
-                    forceUpdateView: Binding(get: {
-                        true
-                    }, set: { _ in })
+                    }
                 )
                 .padding()
                 

@@ -6,7 +6,6 @@ import MapKit
 final class LocationsMapViewModel: ObservableObject {
     
     @Published var searchQuery: String = ""
-    @Published var locations: [LocationModel] = [] // Lista de discotecas recibida de API
     @Published var selectedMarkerLocation: LocationModel? // Discoteca seleccionada
     
     @Published var locationManager: LocationManager
@@ -16,8 +15,7 @@ final class LocationsMapViewModel: ObservableObject {
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
-    @Published var forceUpdateMapView: Bool = false
-    
+    @Published var forceUpdateMapView: Bool = true
     
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
@@ -106,7 +104,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                             return LocationModel(
                                 id: companyModel.uid,
                                 name: companyModel.username ?? "",
-                                coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+                                coordinate: LocationCoordinate(id: companyModel.uid, location: CLLocationCoordinate2D(latitude: latitude, longitude: longitude)),
                                 image: companyModel.imageUrl,
                                 startTime: companyModel.startTime,
                                 endTime: companyModel.endTime,
@@ -116,7 +114,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                         }
                         return nil
                     }
-                    presenter.viewModel.forceUpdateMapView = true
                     presenter.viewModel.allClubsModels = allClubsModel
                     
                 } else {
@@ -141,7 +138,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .onFilterSelected
             .withUnretained(self)
             .sink { presenter, filter in
-                presenter.viewModel.selectedFilter = filter
                 switch filter {
                 case .near:
                     let userCoordinates = presenter.viewModel.locationManager.userRegion.center
@@ -149,12 +145,14 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                         var updatedClub = club
                         let distance = presenter.calculateDistance(
                             from: userCoordinates,
-                            to: club.coordinate
+                            to: club.coordinate.location
                         )
                         updatedClub.distanceToUser = distance
                         return updatedClub
                     }
-                    .sorted {$0.distanceToUser < $1.distanceToUser }
+                        .sorted { club1, club2 in
+                             return club1.distanceToUser < club2.distanceToUser
+                        }
                     
                     presenter.viewModel.filteredLocations = sortedClubsByDistance
                     
@@ -166,7 +164,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             }
             .store(in: &cancellables)
         
-#warning("check with existing location")
         input
             .locationBarSearch
             .withUnretained(self)
@@ -180,14 +177,14 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                     
                     let foundClub = allClubsCoordinates.first(where: {
                         let hola = presenter.viewModel.locationManager.areCoordinatesEqual(
-                            coordinate1: $0,
+                            coordinate1: $0.location,
                             coordinate2: searchedLocationCoordinate
                         )
                         return hola
                     })
                     
                     if let foundClub = foundClub {
-                        presenter.viewModel.locationManager.updateRegion(coordinate: foundClub)
+                        presenter.viewModel.selectedMarkerLocation = presenter.viewModel.allClubsModels.first(where: { $0.coordinate == foundClub })
                     }
                     else {
                         presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Club not found", image: nil))
@@ -202,9 +199,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .$selectedMarkerLocation
             .withUnretained(self)
             .sink { presenter, locationSelected in
-                if let coordinate = locationSelected?.coordinate {
-                    presenter.viewModel.locationManager.updateRegion(coordinate: coordinate)
-                }
+//                presenter.viewModel.selectedMarkerLocation = locationSelected
             }
             .store(in: &cancellables)
         
@@ -212,8 +207,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .locationInListSelected
             .withUnretained(self)
             .sink { presenter, locationSelected in
-                presenter.viewModel.forceUpdateMapView = true
-                presenter.viewModel.locationManager.updateRegion(coordinate: locationSelected.coordinate)
+              presenter.viewModel.selectedMarkerLocation = locationSelected
             }
             .store(in: &cancellables)
     }

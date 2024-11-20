@@ -14,11 +14,28 @@ struct CustomAnnotationView: View {
                 .resizable()
                 .scaledToFit()
                 .foregroundStyle(.blue)
-                .frame(width: 20, height: 20) // Ajusta el tamaño de la imagen
+                .frame(width: 25, height: 25)
         }
-        .frame(width: 40, height: 40) // Tamaño de la vista
+        .frame(width: 35, height: 35)
     }
 }
+
+struct UserAnnotationView: View {
+    var body: some View {
+        ZStack(alignment: .center) {
+//            Circle()
+//                .fill(.blue)
+            // Imagen del vaso en el centro
+            Image(systemName: "mappin.circle")
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(.white)
+                .frame(width: 28, height: 28) // Ajusta el tamaño de la imagen
+        }
+        .frame(width: 30, height: 30)
+    }
+}
+
 
 class CustomAnnotationViewWrapper: MKAnnotationView {
     private var hostingController: UIHostingController<CustomAnnotationView>?
