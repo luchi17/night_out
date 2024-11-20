@@ -70,10 +70,13 @@ struct LocationDetailSheet: View {
                         .background(Color.blue)
                         .cornerRadius(10)
                 }
-                .padding(.bottom, 30)
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .padding()
+        .presentationDetents([.height(300), .medium])
+        .presentationBackground(.regularMaterial)
+        .presentationBackgroundInteraction(.enabled(upThrough: .large))
     }
     
     var placeholderImage: some View {

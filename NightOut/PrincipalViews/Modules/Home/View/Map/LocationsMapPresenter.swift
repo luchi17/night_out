@@ -5,17 +5,14 @@ import MapKit
 
 final class LocationsMapViewModel: ObservableObject {
     
-    @Published var searchQuery: String = ""
     @Published var selectedMarkerLocation: LocationModel? // Discoteca seleccionada
     
     @Published var locationManager: LocationManager
-    @Published var filteredLocations: [LocationModel] = []
     @Published var allClubsModels: [LocationModel] = []
-    @Published var selectedFilter: MapFilterType?
+    @Published var currentShowingLocationList: [LocationModel] = []
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
-    @Published var forceUpdateMapView: Bool = true
     
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
@@ -41,7 +38,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     struct ViewInputs {
         let openMaps: AnyPublisher<(Double, Double), Never>
         let onFilterSelected: AnyPublisher<MapFilterType, Never>
-        let locationBarSearch: AnyPublisher<Void, Never>
         let locationInListSelected: AnyPublisher<LocationModel, Never>
         let viewDidLoad: AnyPublisher<Void, Never>
     }
@@ -114,6 +110,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                         }
                         return nil
                     }
+                    presenter.viewModel.currentShowingLocationList = allClubsModel
                     presenter.viewModel.allClubsModels = allClubsModel
                     
                 } else {
@@ -154,52 +151,13 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                              return club1.distanceToUser < club2.distanceToUser
                         }
                     
-                    presenter.viewModel.filteredLocations = sortedClubsByDistance
+                    presenter.viewModel.currentShowingLocationList = sortedClubsByDistance
                     
                 case .people:
                     let sortedClubsByUsersGoing = presenter.viewModel.allClubsModels.sorted { $0.usersGoing > $1.usersGoing }
-                    presenter.viewModel.filteredLocations = sortedClubsByUsersGoing
+                    presenter.viewModel.currentShowingLocationList = sortedClubsByUsersGoing
                 }
                 
-            }
-            .store(in: &cancellables)
-        
-        input
-            .locationBarSearch
-            .withUnretained(self)
-            .sink { presenter, _ in
-                
-//                presenter.viewModel.forceUpdateMapView = true
-                
-                presenter.viewModel.locationManager.checkKnownLocationCoordinate(searchQuery: presenter.viewModel.searchQuery) { searchedLocationCoordinate in
-                        
-                    let allClubsCoordinates = self.viewModel.allClubsModels.map({ $0.coordinate })
-                    
-                    let foundClub = allClubsCoordinates.first(where: {
-                        let hola = presenter.viewModel.locationManager.areCoordinatesEqual(
-                            coordinate1: $0.location,
-                            coordinate2: searchedLocationCoordinate
-                        )
-                        return hola
-                    })
-                    
-                    if let foundClub = foundClub {
-                        presenter.viewModel.selectedMarkerLocation = presenter.viewModel.allClubsModels.first(where: { $0.coordinate == foundClub })
-                    }
-                    else {
-                        presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Club not found", image: nil))
-                    }
-                }
-               
-            }
-            .store(in: &cancellables)
-        
-        
-        viewModel
-            .$selectedMarkerLocation
-            .withUnretained(self)
-            .sink { presenter, locationSelected in
-//                presenter.viewModel.selectedMarkerLocation = locationSelected
             }
             .store(in: &cancellables)
         

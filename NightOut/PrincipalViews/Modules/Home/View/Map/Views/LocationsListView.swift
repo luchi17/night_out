@@ -36,10 +36,15 @@ struct LocationsListView: View {
                     onLocationSelected(location)
                 }
                 .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets())
             }
+            .padding(.vertical, 5)
         }
-//        .listStyle(.plain)
+        .scrollIndicators(.hidden)
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .padding(.horizontal, 12)
     }
     
     var placeholderImage: some View {

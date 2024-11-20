@@ -1,118 +1,141 @@
-//import SwiftUI
-//import MapKit
-//import Combine
-//
-//struct LocationsMapView: View {
-//    @State private var annotationPosition: CGPoint = .zero // Posición de la anotación seleccionada
-//    @State private var showingDetail = false
-//    @State private var showingListView = false
-//    
-//    private let openMapsPublisher = PassthroughSubject<(Double, Double), Never>()
-//    private let filterSelectedPublisher = PassthroughSubject<MapFilterType, Never>()
-//    private let searchSpecificLocationPublisher = PassthroughSubject<Void, Never>()
-//    private let regionChangedPublisher = PassthroughSubject<MKCoordinateRegion, Never>()
-//    private let locationInListSelectedPublisher = PassthroughSubject<LocationModel, Never>()
-//    private let viewDidLoadPublisher = CurrentValueSubject<Void, Never>(())
-//    private var cancellables = Set<AnyCancellable>()
-//    
-//    @ObservedObject var viewModel: LocationsMapViewModel
-//    let presenter: LocationsMapPresenter
-//    
-//    init(
-//        presenter: LocationsMapPresenter
-//    ) {
-//        self.presenter = presenter
-//        viewModel = presenter.viewModel
-//        bindViewModel()
-//    }
-//    
-//    var body: some View {
-//        ZStack {
-//            // Mapa que ocupa toda la pantalla
-//            MapView(
-//                region: Binding(
-//                        get: { viewModel.locationManager.region ?? viewModel.locationManager.userRegion },
-//                        set: { viewModel.locationManager.region = $0 }),
-//                locations: viewModel.filteredLocations.isEmpty ? $viewModel.allClubsModels : $viewModel.filteredLocations,
-//                onSelectLocation: { location, position in
-//                    viewModel.selectedMarkerLocation = location
-//                    annotationPosition = position //CLEAN?
-//                },
-//                forceUpdateView: viewModel.forceUpdateMapView
-//            )
-//            .edgesIgnoringSafeArea(.all)
-//            
-//            VStack(spacing: 0) {
-//                // Barra de búsqueda en la parte superior
-//                SearchBar(
-//                    searchText: $viewModel.searchQuery,
-//                    onSearch: searchSpecificLocationPublisher.send,
-//                    forceUpdateView: $viewModel.forceUpdateMapView
-//                )
-//                .padding()
-//                
-//                Spacer()
-//                
-//                MapFilterOptionsView(filterSelected: filterSelectedPublisher.send)
-//            }
-//        }
-//        .showToast(
-//            error: (type: viewModel.toastError, showCloseButton: true, onDismiss: { }),
-//            isIdle: viewModel.loading
-//        )
-//        .sheet(isPresented: $showingListView) {
-//            LocationsListView(
-//                locations: $viewModel.filteredLocations,
-//                onLocationSelected: { locationModel in
-//                    viewModel.selectedFilter = nil
-//                    locationInListSelectedPublisher.send(locationModel)
-//                }
-//            )
-//            .presentationDetents([.large])
-//            .presentationDragIndicator(.visible)
-//        }
-//        .sheet(isPresented: $showingDetail) {
-//            if let location = viewModel.selectedMarkerLocation {
-//                LocationDetailSheet(
-//                    selectedLocation: location,
-//                    openMaps: {
-//                        openMapsPublisher.send((location.coordinate.latitude, location.coordinate.longitude))
-//                    }
-//                )
-//                .presentationDetents([.medium])
-//                .presentationDragIndicator(.visible)
-//                .presentationBackground(.regularMaterial)
-//                .presentationBackgroundInteraction(.enabled(upThrough: .large))
-//            }
-//        }
-//        .alert(isPresented: $viewModel.locationManager.locationPermissionDenied) {
-//            Alert(
-//                title: Text("Permisos de Localización Denegados"),
-//                message: Text("Por favor, habilita los permisos de localización en los ajustes para poder buscar discotecas cercanas."),
-//                primaryButton: .default(Text("Abrir Ajustes"), action: {
-//                    if let appSettings = URL(string: UIApplication.openSettingsURLString) {
-//                        UIApplication.shared.open(appSettings)
-//                    }
-//                }),
-//                secondaryButton: .cancel()
-//            )
-//        }
-//        .onAppear {
-//            viewDidLoadPublisher.send()
-//        }
-//    }
-//}
-//
-//private extension LocationsMapView {
-//    
-//    func bindViewModel() {
-//        let input = LocationsMapPresenterImpl.ViewInputs(
-//            openMaps: openMapsPublisher.eraseToAnyPublisher(),
-//            onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
-//            locationBarSearch: searchSpecificLocationPublisher.eraseToAnyPublisher(),
-//            locationInListSelected: locationInListSelectedPublisher.eraseToAnyPublisher(),
-//            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
-//        )
-//        presenter.transform(input: input)
-//    }
-//}
+import SwiftUI
+import MapKit
+import Combine
+
+struct LocationsMapView: View {
+    @State private var showingList: Bool = false
+    @State private var showingDetail: Bool = false
+    
+    private let openMapsPublisher = PassthroughSubject<(Double, Double), Never>()
+    private let filterSelectedPublisher = PassthroughSubject<MapFilterType, Never>()
+    private let locationInListSelectedPublisher = PassthroughSubject<LocationModel, Never>()
+    private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
+    private var cancellables = Set<AnyCancellable>()
+    
+    @ObservedObject var viewModel: LocationsMapViewModel
+    let presenter: LocationsMapPresenter
+    
+    @State private var scene: MKLookAroundScene?
+    
+    init(
+        presenter: LocationsMapPresenter
+    ) {
+        self.presenter = presenter
+        viewModel = presenter.viewModel
+        bindViewModel()
+    }
+    
+    @State private var position = MapCameraPosition.automatic
+    
+    var body: some View {
+        Map(position: $position, selection: $viewModel.selectedMarkerLocation) {
+            Annotation("", coordinate: viewModel.locationManager.userRegion.center) {
+                UserAnnotationView()
+            }
+            .tag("user")
+            
+            ForEach(viewModel.allClubsModels) { club in
+                Annotation(club.name, coordinate: club.coordinate.location) {
+                    CustomAnnotationView(
+                        club: club,
+                        selection: $viewModel.selectedMarkerLocation
+                    )
+                }
+                .tag(club)
+            }
+        }
+        .overlay(alignment: .top, content: {
+            MapFilterOptionsView(
+                filterSelected: { filter in
+                    filterSelectedPublisher.send(filter)
+                    showingList = true
+                }
+            )
+            .padding(.top, 10)
+            
+        })
+        .onChange(of: viewModel.selectedMarkerLocation) {
+            if let selectedMarkerLocation = viewModel.selectedMarkerLocation {
+                let newRegion = MKCoordinateRegion(center: selectedMarkerLocation.coordinate.location,
+                                                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                position = MapCameraPosition.region(newRegion)
+            }
+            showingDetail = viewModel.selectedMarkerLocation != nil
+        }
+        .sheet(isPresented: $showingDetail, onDismiss: {
+            viewModel.selectedMarkerLocation = nil
+        }) {
+            if let location = viewModel.selectedMarkerLocation {
+                LocationDetailSheet(
+                    selectedLocation: location,
+                    openMaps: {
+                        openMapsPublisher.send((location.coordinate.location.latitude, location.coordinate.location.longitude))
+                    }
+                )
+            }
+        }
+        .sheet(isPresented: $showingList, onDismiss: {
+            showingList = false
+        }) {
+            SheetView(
+                locations: $viewModel.currentShowingLocationList,
+                selectedLocation: locationInListSelectedPublisher.send
+            )
+        }
+        .alert(isPresented: $viewModel.locationManager.locationPermissionDenied) {
+            Alert(
+                title: Text("Permisos de Localización Denegados"),
+                message: Text("Por favor, habilita los permisos de localización en los ajustes para poder buscar discotecas cercanas."),
+                primaryButton: .default(Text("Abrir Ajustes"), action: {
+                    if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(appSettings)
+                    }
+                }),
+                secondaryButton: .cancel()
+            )
+        }
+        
+        .onAppear {
+            // Al aparecer la vista, centrar el mapa en la ubicación del usuario
+            position = MapCameraPosition.region(viewModel.locationManager.userRegion)
+            viewDidLoadPublisher.send()
+        }
+    }
+    
+    private func fetchScene(for coordinate: CLLocationCoordinate2D) async throws -> MKLookAroundScene? {
+        let lookAroundScene = MKLookAroundSceneRequest(coordinate: coordinate)
+        return try await lookAroundScene.scene
+    }
+}
+
+private extension LocationsMapView {
+    
+    func bindViewModel() {
+        let input = LocationsMapPresenterImpl.ViewInputs(
+            openMaps: openMapsPublisher.eraseToAnyPublisher(),
+            onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
+            locationInListSelected: locationInListSelectedPublisher.eraseToAnyPublisher(),
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
+        )
+        presenter.transform(input: input)
+    }
+}
+
+
+struct SheetView: View {
+    @Binding var locations: [LocationModel]
+    var selectedLocation: InputClosure<LocationModel>
+    
+    var body: some View {
+        LocationsListView(
+            locations: $locations,
+            onLocationSelected: selectedLocation
+        )
+        .padding(.top, 20)
+//        .interactiveDismissDisabled()
+        .presentationDetents([.large])
+        .presentationBackground(.regularMaterial)
+//        .presentationBackgroundInteraction(.enabled(upThrough: .large))
+    }
+}
+
