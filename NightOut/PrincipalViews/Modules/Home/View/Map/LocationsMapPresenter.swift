@@ -171,22 +171,29 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .locationBarSearch
             .withUnretained(self)
             .sink { presenter, _ in
-                presenter.viewModel.forceUpdateMapView = true
-                let searchedLocationCcoordinate = presenter.viewModel.locationManager.checkKnownLocationCoordinate(searchQuery: presenter.viewModel.searchQuery)
-                let allClubsCoordinates = self.viewModel.allClubsModels.map({ $0.coordinate })
                 
-                let foundClub = allClubsCoordinates.first(where: {
-                    presenter.viewModel.locationManager.areCoordinatesEqual(
-                        coordinate1: $0,
-                        coordinate2: searchedLocationCcoordinate
-                    )})
+//                presenter.viewModel.forceUpdateMapView = true
                 
-                if let foundClub = foundClub {
-                    presenter.viewModel.locationManager.updateRegion(coordinate: foundClub)
+                presenter.viewModel.locationManager.checkKnownLocationCoordinate(searchQuery: presenter.viewModel.searchQuery) { searchedLocationCoordinate in
+                        
+                    let allClubsCoordinates = self.viewModel.allClubsModels.map({ $0.coordinate })
+                    
+                    let foundClub = allClubsCoordinates.first(where: {
+                        let hola = presenter.viewModel.locationManager.areCoordinatesEqual(
+                            coordinate1: $0,
+                            coordinate2: searchedLocationCoordinate
+                        )
+                        return hola
+                    })
+                    
+                    if let foundClub = foundClub {
+                        presenter.viewModel.locationManager.updateRegion(coordinate: foundClub)
+                    }
+                    else {
+                        presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Club not found", image: nil))
+                    }
                 }
-                else {
-                    presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Club not found", image: nil))
-                }
+               
             }
             .store(in: &cancellables)
         
