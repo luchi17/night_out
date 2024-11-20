@@ -41,26 +41,16 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     // Método para manejar las actualizaciones de ubicación
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.first else { return }
-//        guard let location = locations.last else { return }
+        guard let location = locations.last else { return }
         let userRegion = MKCoordinateRegion(center: location.coordinate,
                                         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
         self.userRegion = userRegion
-        
-        
-      //TODO
-//        if let location = locations.last {
-//                    userLocation = location.coordinate
-//                    locationManager.stopUpdatingLocation()  // Deja de actualizar para conservar batería
-//                }
     }
     
     func updateRegion(coordinate: CLLocationCoordinate2D) {
         let region = MKCoordinateRegion(center: coordinate,
                                         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        DispatchQueue.main.async {
-            self.region = region
-        }
+        self.region = region
     }
     
     func searchLocation(searchQuery: String) {
@@ -86,26 +76,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
     
-    func checkKnownLocationCoordinate(searchQuery: String, completion: @escaping InputClosure<CLLocationCoordinate2D>) {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = searchQuery
-        
-        var searchedLocation = CLLocationCoordinate2D()
-        
-        let search = MKLocalSearch(request: request)
-        search.start { response, error in
-            guard let response = response, let item = response.mapItems.first else {
-                print("Ubicación no encontrada: \(error?.localizedDescription ?? "Error desconocido")")
-                return
-            }
-            DispatchQueue.main.async {
-                searchedLocation = item.placemark.coordinate
-                completion(searchedLocation)
-            }
-        }
-    }
-    
-    
     func areLocationsEqual(location1: CLLocationDegrees, location2: CLLocationDegrees, decimalPlaces: Int) -> Bool {
         let factor = pow(10.0, Double(decimalPlaces))
         let roundedLocation1 = (location1 * factor).rounded() / factor
@@ -127,37 +97,3 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         return latitudeEqual && longitudeEqual
     }
 }
-
-
-//import Foundation
-//import CoreLocation
-//import Combine
-//
-//class LocationManager: NSObject, ObservableObject {
-//    @Published var region = MKCoordinateRegion(
-//        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), // Centro predeterminado
-//        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-//    )
-//    
-//    private let locationManager = CLLocationManager()
-//
-//    override init() {
-//        super.init()
-//        locationManager.delegate = self
-//        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-//        locationManager.requestWhenInUseAuthorization()
-//        locationManager.startUpdatingLocation()
-//    }
-//}
-//
-//extension LocationManager: CLLocationManagerDelegate {
-//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        guard let location = locations.last else { return }
-//        DispatchQueue.main.async {
-//            self.region = MKCoordinateRegion(
-//                center: location.coordinate,
-//                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-//            )
-//        }
-//    }
-//}
