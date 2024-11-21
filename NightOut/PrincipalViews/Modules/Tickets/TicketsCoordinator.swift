@@ -1,21 +1,20 @@
+
 import SwiftUI
 import Combine
 
-struct UserCoordinator {
+struct TicketsCoordinator {
     
-    private let actions: UserPresenterImpl.Actions
+    private let actions: TicketsPresenterImpl.Actions
     
-    init(actions: UserPresenterImpl.Actions) {
+    init(actions: TicketsPresenterImpl.Actions) {
         self.actions = actions
     }
     
     @ViewBuilder
     func build() -> some View {
-        UserProfileView(presenter: UserPresenterImpl(
+        TicketsView(presenter: TicketsPresenterImpl(
             actions: actions,
             useCases: .init(signOutUseCase: SignOutUseCaseImpl(repository: AccountRepositoryImpl.shared))
         ))
     }
 }
-
-

@@ -32,6 +32,10 @@ final class FirebaseServiceImpl: ObservableObject {
         return Database.database().reference().child("Company_Users")
     }
     
+    func getAttendance() -> DatabaseReference {
+        return Database.database().reference().child("Attendance")
+    }
+    
     func getCompanyInDatabaseFrom(uid: String) -> DatabaseReference {
         return getCompanies().child(uid)
     }

@@ -8,4 +8,5 @@ struct UserModel: Codable {
     var gender: String?
     var image: String?
     var fcm_token: String?
+    var attendingClub: String?
 }

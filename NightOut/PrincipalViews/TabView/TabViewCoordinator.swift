@@ -68,17 +68,17 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makeHomeFlow() -> AnyView {
-        let coordinator = HomeCoordinator()
+        let coordinator = HomeCoordinator(actions: homeActions(), mapActions: mapActions(), locationManager: locationManager)
         return AnyView(coordinator.build())
     }
     
+    #warning("REDO")
     func makeMapsFlow() -> AnyView {
-        let coordinator = MapCoordinator(actions: mapActions(), locationManager: locationManager)
-        return AnyView(coordinator.build())
+        return AnyView(EmptyView())
     }
     
     func makeUserFlow() -> AnyView {
-        let coordinator = UserCoordinator(actions: .init(backToLogin: {
+        let coordinator = TicketsCoordinator(actions: .init(backToLogin: {
             self.goToLogin()
         }))
         return AnyView(coordinator.build())
@@ -100,5 +100,10 @@ class TabViewCoordinator: ObservableObject, Hashable {
 private extension TabViewCoordinator {
     func mapActions() -> LocationsMapPresenterImpl.Actions {
         .init(onOpenMaps: openMaps)
+    }
+    
+#warning("TODO")
+    func homeActions() -> HomePresenterImpl.Actions {
+        .init(onOpenProfile: {}, onOpenNotifications: {})
     }
 }

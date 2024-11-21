@@ -3,11 +3,31 @@ import Combine
 import FirebaseAuth
 import CoreLocation
 
-enum SelectedTag {
+enum LocationSelectedTag {
     case sportCasual
     case informal
     case semiInformal
     case none
+    
+    init?(rawValue: String?) {
+        guard let rawValue = rawValue else {
+            self = .none
+            return
+        }
+        if rawValue == LocationSelectedTag.sportCasual.title {
+            self = .sportCasual
+        }
+        else if rawValue == LocationSelectedTag.informal.title {
+            self = .informal
+        }
+        else if rawValue == LocationSelectedTag.semiInformal.title {
+            self = .semiInformal
+        }
+        else {
+            self = .none
+        }
+        
+    }
     
     var title: String {
         switch self {
@@ -31,7 +51,7 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var endTime: String = ""
     @Published var startTime: String = ""
-    @Published var selectedTag: SelectedTag = .none
+    @Published var selectedTag: LocationSelectedTag = .none
     @Published var imageData: Data? = nil
     @Published var locationString = ""
     @Published var loading: Bool = false

@@ -23,22 +23,9 @@ struct SplashView: View, Hashable {
     }
     
     private let onAppear = PassthroughSubject<Void, Never>()
-    private let goToTabView = PassthroughSubject<Void, Never>()
-    private let goToLogin = PassthroughSubject<Void, Never>()
     
     var body: some View {
         VStack {
-//            Button(action: {
-//                goToTabView.send()
-//            }) {
-//                Text("TabView")
-//            }
-//            
-//            Button(action: {
-//                goToLogin.send()
-//            }) {
-//                Text("Login")
-//            }
             Spacer()
             Text("Image pending...")
             Spacer()
@@ -54,9 +41,7 @@ struct SplashView: View, Hashable {
 private extension SplashView {
     func bindViewModel() {
         let input = SplashPresenterImpl.Input(
-            viewIsLoaded: onAppear.first().eraseToAnyPublisher(),
-            login: goToLogin.first().eraseToAnyPublisher(),
-            tabview: goToTabView.eraseToAnyPublisher()
+            viewIsLoaded: onAppear.first().eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

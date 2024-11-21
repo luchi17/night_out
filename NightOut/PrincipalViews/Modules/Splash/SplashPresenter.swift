@@ -34,8 +34,6 @@ final class SplashPresenterImpl: SplashPresenter {
     
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
-        let login: AnyPublisher<Void, Never>
-        let tabview: AnyPublisher<Void, Never>
     }
     
     struct UseCases {
@@ -63,6 +61,10 @@ final class SplashPresenterImpl: SplashPresenter {
     }
     
     func transform(input: Input) {
+        guard AppState.shared.shouldShowSplash else {
+            return
+        }
+        
         let timerPublisher =
         Timer.publish(every: 2.0, on: .main, in: .default)
             .autoconnect()
@@ -74,7 +76,6 @@ final class SplashPresenterImpl: SplashPresenter {
             .map { _ in }
             .combineLatest(input.viewIsLoaded)
             .sink { [weak self] _ in
-                print("Time publisher")
                 if FirebaseServiceImpl.shared.isLoggedIn {
                     self?.actions.onMainFlow()
                 } else {
@@ -82,18 +83,5 @@ final class SplashPresenterImpl: SplashPresenter {
                 }
             }
             .store(in: &cancellables)
-        
-//        input
-//            .login
-//            .sink { _ in
-//                self.actions.onLogin()
-//            }
-//            .store(in: &cancellables)
-//        input
-//            .tabview
-//            .sink { _ in
-//                self.actions.onMainFlow()
-//            }
-//            .store(in: &cancellables)
     }
 }

@@ -1,16 +1,16 @@
 import SwiftUI
 import Combine
 
-struct UserProfileView: View {
+struct TicketsView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let logoutPublisher = PassthroughSubject<Void, Never>()
     
-    @ObservedObject var viewModel: UserViewModel
-    let presenter: UserPresenter
+    @ObservedObject var viewModel: TicketsViewModel
+    let presenter: TicketsPresenter
     
     init(
-        presenter: UserPresenter
+        presenter: TicketsPresenter
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
@@ -37,10 +37,10 @@ struct UserProfileView: View {
 }
 
 
-private extension UserProfileView {
+private extension TicketsView {
     
     func bindViewModel() {
-        let input = UserPresenterImpl.Input(
+        let input = TicketsPresenterImpl.Input(
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
             logout: logoutPublisher.eraseToAnyPublisher()
         )

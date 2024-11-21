@@ -11,7 +11,7 @@ struct TabViewScreen: View {
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // Contenido principal basado en la pestaña seleccionada
             Spacer()
             
@@ -23,6 +23,7 @@ struct TabViewScreen: View {
                 }) {
                     VStack {
                         Image(systemName: "house.fill")
+                            .foregroundColor(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -32,6 +33,7 @@ struct TabViewScreen: View {
                 }) {
                     VStack {
                         Image(systemName: "magnifyingglass")
+                            .foregroundColor(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -41,6 +43,7 @@ struct TabViewScreen: View {
                 }) {
                     VStack {
                         Image(systemName: "plus")
+                            .foregroundColor(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -50,6 +53,7 @@ struct TabViewScreen: View {
                 }) {
                     VStack {
                         Image(systemName: "map")
+                            .foregroundColor(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -59,13 +63,15 @@ struct TabViewScreen: View {
                 }) {
                     VStack {
                         Image(systemName: "person.fill")
+                            .foregroundColor(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)
             }
             .padding()
-            .background(Color(.white))
+            .background(Color(.black))
         }
         .navigationBarBackButtonHidden()
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
