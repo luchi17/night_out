@@ -1,8 +1,8 @@
 import SwiftUI
 
-
 struct FeedView: View {
     let posts = ["Post 1", "Post 2", "Post 3"] // Reemplaza con datos reales
+    
     
     var body: some View {
         ScrollView {
