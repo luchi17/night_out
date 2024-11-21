@@ -9,4 +9,19 @@ struct UserModel: Codable {
     var image: String?
     var fcm_token: String?
     var attendingClub: String?
+    var misLigas: [String: Bool] = [:]
+}
+
+enum Gender {
+    case male
+    case female
+    
+    var title: String {
+        switch self {
+        case .male:
+            return "Male"
+        case .female:
+            return "Female"
+        }
+    }
 }

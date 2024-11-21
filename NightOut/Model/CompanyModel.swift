@@ -5,7 +5,7 @@ struct CompanyUsersModel: Codable {
     let users: [String: CompanyModel]  // Un diccionario de usuarios donde la clave es el UID
 
     init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DynamicKey.self)
+        let container = try decoder.container(keyedBy: DynamicCodingKey.self)
         var usersDict = [String: CompanyModel]()
         
         for key in container.allKeys {
@@ -28,6 +28,7 @@ struct CompanyModel: Codable {
     var uid: String = ""
     var entradas: [String: EntradasPorFecha]?
     var payment: PaymentMethodModel?
+    var ticketsSold: [String: [Ticket]] = [:]
     
     enum CodingKeys: String, CodingKey {
             case entradas = "Entradas"
@@ -67,7 +68,7 @@ struct EntradasPorFecha: Codable {
     let entradas: [String: EntradaModel]
 
     init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DynamicKey.self)
+        let container = try decoder.container(keyedBy: DynamicCodingKey.self)
         var entries = [String: EntradaModel]()
         
         for key in container.allKeys {
@@ -91,14 +92,31 @@ struct PaymentMethodModel: Codable {
 }
 
 // DynamicKey permite decodificar claves dinámicas en un diccionario
-struct DynamicKey: CodingKey {
+struct DynamicCodingKey: CodingKey {
     var stringValue: String
+    var intValue: Int?
+    
     init?(stringValue: String) {
         self.stringValue = stringValue
     }
-    
-    var intValue: Int?
+
     init?(intValue: Int) {
-        return nil
+        self.intValue = intValue
+        self.stringValue = "\(intValue)"
     }
+}
+
+
+struct Ticket: Codable {
+    var apellido: String?
+    var correo: String?
+    var descripcion: String?
+    var discoteca: String?
+    var dni: String?
+    var evento: String?
+    var fecha: String?
+    var nombre: String?
+    var numeroTicket: String?
+    var precio: String?
+    var qrCodeBase64: String?
 }
