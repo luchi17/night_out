@@ -61,10 +61,6 @@ final class SplashPresenterImpl: SplashPresenter {
     }
     
     func transform(input: Input) {
-        guard AppState.shared.shouldShowSplash else {
-            return
-        }
-        
         let timerPublisher =
         Timer.publish(every: 2.0, on: .main, in: .default)
             .autoconnect()
