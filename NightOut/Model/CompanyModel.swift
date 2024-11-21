@@ -26,10 +26,10 @@ struct CompanyModel: Codable {
     var location: String? = ""
     var startTime: String? = ""
     var uid: String = ""
-    var entradas: [String: EntradasPorFecha]?
+    var entradas: [String: EntradaModel]?
     var payment: PaymentMethodModel?
-    var ticketsSold: [String: [Ticket]] = [:]
-    
+    var ticketsSold:  [String: TicketVendido]? = [:]
+   
     enum CodingKeys: String, CodingKey {
             case entradas = "Entradas"
             case email
@@ -42,16 +42,17 @@ struct CompanyModel: Codable {
             case username
             case payment = "Metodos_De_Pago"
             case imageUrl = "image"
+            case ticketsSold = "TicketsVendidos"
         }
 }
 
 struct EntradaModel: Codable {
-    let capacity: String
+    let capacity: String?
     let description: String?
     let fecha: String?
     let imageURL: String?
     let name: String?
-    let price: String
+    let price: String?
 
     enum CodingKeys: String, CodingKey {
         case capacity
@@ -60,21 +61,6 @@ struct EntradaModel: Codable {
         case imageURL = "image_url"
         case name
         case price
-    }
-}
-
-// Modelo para las entradas agrupadas por fecha
-struct EntradasPorFecha: Codable {
-    let entradas: [String: EntradaModel]
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DynamicCodingKey.self)
-        var entries = [String: EntradaModel]()
-        
-        for key in container.allKeys {
-            entries[key.stringValue] = try container.decode(EntradaModel.self, forKey: key)
-        }
-        self.entradas = entries
     }
 }
 
@@ -106,17 +92,30 @@ struct DynamicCodingKey: CodingKey {
     }
 }
 
+struct TicketVendido: Codable {
+    let apellido: String
+    let correo: String
+    let descripcion: String?
+    let discoteca: String?
+    let dni: String?
+    let evento: String?
+    let fecha: String?
+    let nombre: String?
+    let numeroTicket: String
+    let precio: String?
+    let qrCodeBase64: String?
 
-struct Ticket: Codable {
-    var apellido: String?
-    var correo: String?
-    var descripcion: String?
-    var discoteca: String?
-    var dni: String?
-    var evento: String?
-    var fecha: String?
-    var nombre: String?
-    var numeroTicket: String?
-    var precio: String?
-    var qrCodeBase64: String?
+    enum CodingKeys: String, CodingKey {
+        case apellido
+        case correo
+        case descripcion
+        case discoteca
+        case dni
+        case evento
+        case fecha
+        case nombre
+        case numeroTicket
+        case precio
+        case qrCodeBase64
+    }
 }

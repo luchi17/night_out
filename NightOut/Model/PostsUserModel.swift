@@ -2,17 +2,21 @@ import Foundation
 
 // Modelo para cada post
 struct PostUserModel: Codable {
-    let description: String
+    let description: String?
     let postID: String
-    let postImage: String
-    let publisher: String
+    let postImage: String?
+    let publisherId: String
+    let location: String?
+    let isFromUser: Bool?
     
     // Mapear claves JSON a propiedades Swift
     enum CodingKeys: String, CodingKey {
         case description
         case postID = "postid"
         case postImage = "postimage"
-        case publisher
+        case publisherId = "publisher"
+        case location = "location"
+        case isFromUser = "isFromUser"
     }
 }
 
