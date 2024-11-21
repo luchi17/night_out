@@ -172,7 +172,7 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         let userData = structToDictionary(model)
         // Referencia a la sección "Users" en la base de datos
-        let ref = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: uid)
+        let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: uid)
         
         ref.setValue(userData) { error, _ in
             if let error = error {
