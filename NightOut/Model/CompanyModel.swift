@@ -14,10 +14,21 @@ struct CompanyUsersModel: Codable {
         }
         self.users = usersDict
     }
+    
+    func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: DynamicCodingKey.self)
+
+            for (key, user) in users {
+                guard let dynamicKey = DynamicCodingKey(stringValue: key) else {
+                    continue
+                }
+                try container.encode(user, forKey: dynamicKey)
+            }
+        }
 }
 
 struct CompanyModel: Codable {
-    var email: String = ""
+    var email: String? = ""
     var endTime: String? = ""
     var selectedTag: String? = ""
     var fullname: String? = ""
@@ -25,7 +36,7 @@ struct CompanyModel: Codable {
     var imageUrl: String?
     var location: String? = ""
     var startTime: String? = ""
-    var uid: String = ""
+    var uid: String
     var entradas: [String: EntradaModel]?
     var payment: PaymentMethodModel?
     var ticketsSold:  [String: TicketVendido]? = [:]
