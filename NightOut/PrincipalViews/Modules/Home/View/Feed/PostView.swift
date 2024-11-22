@@ -13,60 +13,107 @@ struct PostModel: Hashable {
 
 struct PostView: View {
     var model: PostModel
+    var openMaps: InputClosure<String> //username --> find location
+    var showUserProfile: InputClosure<String> //UID
     
     var body: some View {
         VStack {
-            HStack {
-                // Imagen de perfil del usuario
-                if let profileImageUrl = model.profileImageUrl {
-                    KFImage.url(URL(string: profileImageUrl))
-                        .resizable()
-                        .scaledToFill()
-                        .clipShape(Circle())
-                        .frame(width: 40, height: 40)
-                        .padding()
-                } else {
-                    Image("placeholder")
-                        .resizable()
-                        .scaledToFill()
-                        .clipShape(Circle())
-                        .frame(width: 40, height: 40)
-                        .padding()
-                }
-
-                // Nombre de usuario
-                Text(model.username ?? "")
-                    .font(.headline)
-
-                Spacer()
-            }
+            
+            topView
             
             if let postImage = model.postImage {
-                // Imagen de la publicación
                 KFImage.url(URL(string: postImage))
                     .resizable()
-                    .scaledToFit()
-                    .frame(maxHeight: 300)
-                    .padding()
+                    .scaledToFill()
+    
             } else {
                 Image("placeholder")
                     .resizable()
-                    .scaledToFit()
+                    .scaledToFill()
                     .frame(maxHeight: 300)
-                    .padding()
             }
             
-            // Descripción
-            Text(model.description ?? "")
-                .padding()
-                .foregroundColor(.gray)
-
-            // Ubicación
-            Text(model.location ?? "" )
-                .font(.subheadline)
-                .padding(.bottom)
+            bottomView
         }
-        .padding()
+        .background(Color.black.opacity(0.7))
+        
+    }
+    
+    var topView: some View {
+        HStack(spacing: 10) {
+            // Imagen de perfil del usuario
+            if let profileImageUrl = model.profileImageUrl {
+                KFImage.url(URL(string: profileImageUrl))
+                    .resizable()
+                    .scaledToFill()
+                    .clipShape(Circle())
+                    .frame(width: 50, height: 50, alignment: .leading)
+                    .onTapGesture {
+                        //Show user profile
+                    }
+            } else {
+                Image("placeholder")
+                    .resizable()
+                    .scaledToFill()
+                    .clipShape(Circle())
+                    .frame(width: 50, height: 50, alignment: .leading)
+            }
+            
+            VStack(alignment: .leading, spacing: 5) {
+                Text(model.username ?? "Unknown")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .onTapGesture {
+                        //Show user profile
+                    }
+                Button {
+                    if let username = model.username {
+                        openMaps(username)
+                    }
+                } label: {
+                    Text(model.location ?? "")
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 5)
+    }
+    
+    var bottomView: some View {
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 5) {
+                // Descripción
+                Text(model.description ?? "")
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+
+                // TODO
+                Text("Unknown" )
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+                
+                Text("View all comments: TODO")
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+            }
+            Spacer()
+            
+            Button {
+                // Show comments
+            } label: {
+                Image(systemName: "text.bubble")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40, alignment: .trailing)
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 5)
     }
 }
 

@@ -100,6 +100,14 @@ struct LocationsMapView: View {
             position = MapCameraPosition.region(viewModel.locationManager.userRegion)
             viewDidLoadPublisher.send()
         }
+        .showToast(
+            error: (
+                type: viewModel.toastError,
+                showCloseButton: false,
+                onDismiss: { }
+            ),
+            isIdle: viewModel.loading
+        )
     }
     
     private func fetchScene(for coordinate: CLLocationCoordinate2D) async throws -> MKLookAroundScene? {

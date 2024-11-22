@@ -33,11 +33,15 @@ final class FeedPresenterImpl: FeedPresenter {
     }
     
     struct Actions {
-        //        let onOpenMaps: InputClosure<(Double, Double)>
+        let onOpenMaps: InputClosure<(Double, Double)>
+        let onShowUserProfile: InputClosure<UserModel>
+        let onShowCompanyProfile: InputClosure<CompanyModel>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
+        let openMaps: AnyPublisher<String, Never>
+        let showUserProfile: AnyPublisher<String, Never>
     }
     
     var viewModel: FeedViewModel
@@ -108,43 +112,56 @@ final class FeedPresenterImpl: FeedPresenter {
                     self.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load posts", image: nil))
                 }
             }, receiveValue: { presenter, data in
-                
-                self.viewModel.loading = false
-                
-             presenter.viewModel.posts = data
-                
+                presenter.viewModel.loading = false
+                presenter.viewModel.posts = data
             })
             .store(in: &cancellables)
-
+        
     }
     
     private func getPostFromUserInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
-        return self.useCases.userDataUseCase.getUserInfo(uid: post.publisherId)
-            .map({ userInfo in
+        return useCases.userDataUseCase.getUserInfo(uid: post.publisherId)
+            .withUnretained(self)
+            .map({ presenter, userInfo in
                 return PostModel(
                     profileImageUrl: userInfo?.image,
                     postImage: post.postImage,
                     description: post.description,
-                    location: post.location,
+                    location: presenter.getClubNameByPostLocation(postLocation: post.location),
                     username: userInfo?.username,
                     uid: post.publisherId
                 )
             })
             .eraseToAnyPublisher()
     }
-
+    
     private func getPostFromCompanyInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
-        self.useCases.companyDataUseCase.getCompanyInfo(uid: post.publisherId)
+        useCases.companyDataUseCase.getCompanyInfo(uid: post.publisherId)
             .map({ companyInfo in
                 return PostModel(
                     profileImageUrl: companyInfo?.imageUrl,
                     postImage: post.postImage,
                     description: post.description,
-                    location: post.location,
+                    location: post.location ?? companyInfo?.location,
                     username: companyInfo?.username,
                     uid: post.publisherId
                 )
             })
             .eraseToAnyPublisher()
+    }
+    
+    private func getClubNameByPostLocation(postLocation: String?) -> String {
+        let defaultLocation = "📍 De fiesta por Narnia"
+        
+        if let postLocation = postLocation, !postLocation.isEmpty {
+            
+            let postLocationCompany = UserDefaults.getCompanies()?.users.first(where: { company in
+                return company.value.location == postLocation
+            })?.value
+            
+            return postLocationCompany?.username ?? defaultLocation
+            
+        }
+        return defaultLocation
     }
 }

@@ -108,6 +108,10 @@ private extension TabViewCoordinator {
     }
     
     func feedActions() -> FeedPresenterImpl.Actions {
-        .init()
+        .init(
+            onOpenMaps: openMaps,
+            onShowUserProfile: { _ in },
+            onShowCompanyProfile: { _ in }
+        )
     }
 }
