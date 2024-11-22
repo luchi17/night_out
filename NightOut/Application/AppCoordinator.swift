@@ -1,19 +1,21 @@
 import UIKit
 import SwiftUI
 import Combine
+import CoreLocation
+import MapKit
 
 //https://github.com/TharinduKetipe/MVVMC-SwiftUI/blob/main/Coordinator/Settings/SettingsFlowCoordinator.swift
 
 final class AppCoordinator: ObservableObject {
     @Published var path: NavigationPath
-
+    
     // MARK: - Stored Properties for redirections
-
+    
     @ViewBuilder
     func build() -> some View {
         splashView()
     }
-
+    
     init(path: NavigationPath) {
         self.path = path
     }
@@ -37,6 +39,7 @@ final class AppCoordinator: ObservableObject {
             path: path,
             locationManager: LocationManager.shared,
             openMaps: openGoogleMaps(latitude:longitude:),
+            openAppleMaps: openAppleMaps(coordinate:placeName:),
             goToLogin: {
                 self.pop()
             }
@@ -107,15 +110,24 @@ extension AppCoordinator {
     }
     
     func openGoogleMaps(latitude: Double, longitude: Double) {
-            let urlString = "comgooglemaps://?q=\(latitude),\(longitude)"
-            if let url = URL(string: urlString) {
-                if UIApplication.shared.canOpenURL(url) {
-                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                } else {
-                    // Fallback to open in Safari if Google Maps is not installed
-                    let browserUrl = URL(string: "https://www.google.com/maps/search/?api=1&query=\(latitude),\(longitude)")!
-                    UIApplication.shared.open(browserUrl, options: [:], completionHandler: nil)
-                }
+        let urlString = "comgooglemaps://?q=\(latitude),\(longitude)"
+        if let url = URL(string: urlString) {
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                // Fallback to open in Safari if Google Maps is not installed
+                let browserUrl = URL(string: "https://www.google.com/maps/search/?api=1&query=\(latitude),\(longitude)")!
+                UIApplication.shared.open(browserUrl, options: [:], completionHandler: nil)
             }
         }
+    }
+    
+    private func openAppleMaps(coordinate: CLLocationCoordinate2D, placeName: String?) {
+        let placemark = MKPlacemark(coordinate: coordinate)
+        let mapItem = MKMapItem(placemark: placemark)
+        mapItem.name = placeName
+        mapItem.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+        ])
+    }
 }
