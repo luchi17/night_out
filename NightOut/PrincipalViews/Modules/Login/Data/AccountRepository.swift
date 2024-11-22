@@ -11,6 +11,8 @@ protocol AccountRepository {
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
     func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>
     func signOut() -> AnyPublisher<Void, Error>
+    func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
+    func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
 }
 
 struct AccountRepositoryImpl: AccountRepository {
@@ -45,6 +47,18 @@ struct AccountRepositoryImpl: AccountRepository {
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never> {
         return network
             .saveUser(model: model)
+            .eraseToAnyPublisher()
+    }
+    
+    func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never> {
+        return network
+            .getUserInfo(uid: uid)
+            .eraseToAnyPublisher()
+    }
+    
+    func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never> {
+        return network
+            .getCompanyInfo(uid: uid)
             .eraseToAnyPublisher()
     }
     

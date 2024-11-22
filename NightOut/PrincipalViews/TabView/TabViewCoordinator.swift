@@ -68,7 +68,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makeHomeFlow() -> AnyView {
-        let coordinator = HomeCoordinator(actions: homeActions(), mapActions: mapActions(), locationManager: locationManager)
+        let coordinator = HomeCoordinator(actions: homeActions(), mapActions: mapActions(), feedActions: feedActions(), locationManager: locationManager)
         return AnyView(coordinator.build())
     }
     
@@ -105,5 +105,9 @@ private extension TabViewCoordinator {
 #warning("TODO")
     func homeActions() -> HomePresenterImpl.Actions {
         .init(onOpenProfile: {}, onOpenNotifications: {})
+    }
+    
+    func feedActions() -> FeedPresenterImpl.Actions {
+        .init()
     }
 }

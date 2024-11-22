@@ -7,15 +7,18 @@ struct HomeView: View {
     
     let presenter: HomePresenter
     let mapPresenter: LocationsMapPresenter
+    let feedPresenter: FeedPresenter
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
     private let openProfilePublisher = PassthroughSubject<Void, Never>()
     init(
         presenter: HomePresenter,
-        mapPresenter: LocationsMapPresenter
+        mapPresenter: LocationsMapPresenter,
+        feedPresenter: FeedPresenter
     ) {
         self.presenter = presenter
         self.mapPresenter = mapPresenter
+        self.feedPresenter = feedPresenter
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -29,7 +32,7 @@ struct HomeView: View {
             if viewModel.selectedTab == .map {
                 LocationsMapView(presenter: mapPresenter)
             } else {
-                FeedView()
+                FeedView(presenter: feedPresenter)
             }
         }
         .padding(.top, 20)

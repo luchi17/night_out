@@ -22,7 +22,9 @@ class LoginCoordinator: Hashable {
     @ViewBuilder
     func build() -> some View {
         LoginView(presenter: LoginPresenterImpl(
-            useCases: .init(loginUseCase: LoginUseCaseImpl(repository: AccountRepositoryImpl.shared)),
+            useCases: .init(
+                loginUseCase: LoginUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                companyLocationsUseCase: CompanyLocationsUseCaseImpl(repository: LocationRepositoryImpl.shared)),
             actions: actions
         ))
     }

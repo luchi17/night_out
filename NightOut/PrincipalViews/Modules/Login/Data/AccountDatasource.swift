@@ -17,6 +17,8 @@ protocol AccountDatasource {
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
     func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>
     func signOut() -> AnyPublisher<Void, Error>
+    func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
+    func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
 }
 
 struct AccountDatasourceImpl: AccountDatasource {
@@ -161,6 +163,63 @@ struct AccountDatasourceImpl: AccountDatasource {
         return publisher.eraseToAnyPublisher()
     }
 
+    func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never> {
+        
+        return Future<UserModel?, Never> { promise in
+            
+            let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: uid)
+            
+            ref.getData { error, snapshot in
+                guard error == nil else {
+                    print("Error fetching data: \(error!.localizedDescription)")
+                    promise(.success(nil))
+                    return
+                }
+                
+                do {
+                    if let userModel = try snapshot?.data(as: UserModel.self) {
+                        promise(.success(userModel))
+                    } else {
+                        promise(.success(nil))
+                    }
+                } catch {
+                    print("Error decoding data: \(error.localizedDescription)")
+                    promise(.success(nil))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never> {
+        
+        return Future<CompanyModel?, Never> { promise in
+            let ref = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: uid)
+            
+            ref.getData { error, snapshot in
+                guard error == nil else {
+                    print("Error fetching data: \(error!.localizedDescription)")
+                    promise(.success(nil))  // Envía `nil` si hay error
+                    return
+                }
+                
+                do {
+                    if let companyModel = try snapshot?.data(as: CompanyModel.self) {
+                        // Asumiendo que deseas crear un PostModel a partir de CompanyModel
+                       
+                        promise(.success(companyModel))
+                    } else {
+                        promise(.success(nil))  // Envía `nil` si no se encuentra el modelo
+                    }
+                } catch {
+                    print("Error decoding data: \(error.localizedDescription)")
+                    promise(.success(nil))  // Envía `nil` en caso de error
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never> {
 
         let publisher = PassthroughSubject<Bool, Never>()
