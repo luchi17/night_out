@@ -23,6 +23,7 @@ final class LoginPresenterImpl: LoginPresenter {
     
     struct UseCases {
         let loginUseCase: LoginUseCase
+        let companyLocationsUseCase: CompanyLocationsUseCase
     }
     
     struct Actions {
@@ -88,8 +89,11 @@ final class LoginPresenterImpl: LoginPresenter {
                     self.viewModel.headerError = ErrorState(errorOptional: error)
                 }
             })
+            .withUnretained(self)
+            .flatMap({ presenter, _ in
+                presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
+            })
             .sink(receiveValue: { [weak self] _ in
-                AppState.shared.logIn()
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
