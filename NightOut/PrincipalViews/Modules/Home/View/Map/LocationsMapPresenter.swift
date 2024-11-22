@@ -3,6 +3,7 @@ import Combine
 import CoreLocation
 import MapKit
 
+#warning("Add cache of companies with UserDefaults.getCompanies() ")
 final class LocationsMapViewModel: ObservableObject {
     
     @Published var selectedMarkerLocation: LocationModel? // Discoteca seleccionada

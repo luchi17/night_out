@@ -14,8 +14,6 @@ protocol LocationDatasource {
 
 struct LocationDatasourceImpl: LocationDatasource {
     
-    
-#warning("Save in user defaults? where to call it?")
     func fetchCompanyLocations() -> AnyPublisher<CompanyUsersModel?, Never> {
         let publisher = PassthroughSubject<CompanyUsersModel?, Never>()
         
