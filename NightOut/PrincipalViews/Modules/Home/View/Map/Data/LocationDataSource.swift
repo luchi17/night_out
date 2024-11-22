@@ -31,6 +31,7 @@ struct LocationDatasourceImpl: LocationDatasource {
             
             do {
                 if let companies = try snapshot?.data(as: CompanyUsersModel.self) {
+                    UserDefaults.setCompanies(companies)
                     publisher.send(companies)
                 } else {
                     publisher.send(nil)
