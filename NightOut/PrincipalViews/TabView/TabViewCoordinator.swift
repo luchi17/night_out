@@ -23,6 +23,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     private let openMaps: (Double, Double) -> Void
     private let openAppleMaps: (CLLocationCoordinate2D, String?) -> Void
+    private let onShowPostComments: InputClosure<PostCommentsInfo>
     private let goToLogin: VoidClosure
     private let locationManager: LocationManager
     @Published var path: NavigationPath
@@ -42,13 +43,15 @@ class TabViewCoordinator: ObservableObject, Hashable {
         locationManager: LocationManager,
         openMaps: @escaping (Double, Double) -> Void,
         openAppleMaps: @escaping (CLLocationCoordinate2D, String?) -> Void,
-        goToLogin: @escaping VoidClosure
+        goToLogin: @escaping VoidClosure,
+        onShowPostComments:  @escaping InputClosure<PostCommentsInfo>
     ) {
         self.path = path
         self.locationManager = locationManager
         self.openMaps = openMaps
         self.openAppleMaps = openAppleMaps
         self.goToLogin = goToLogin
+        self.onShowPostComments = onShowPostComments
     }
     
     @ViewBuilder
@@ -119,7 +122,8 @@ private extension TabViewCoordinator {
             onOpenMaps: openMaps,
             onOpenAppleMaps: openAppleMaps,
             onShowUserProfile: { _ in },
-            onShowCompanyProfile: { _ in }
+            onShowCompanyProfile: { _ in },
+            onShowPostComments: onShowPostComments
         )
     }
 }
