@@ -11,12 +11,14 @@ struct PostModel: Hashable {
     var publisher: String?
     var uid: String
     var isFromUser: Bool
+    var publisherId: String?
 }
 
 struct PostView: View {
     var model: PostModel
     var openMaps: InputClosure<PostModel>
     var showUserOrCompanyProfile: VoidClosure
+    var showPostComments: VoidClosure
     
     var body: some View {
         VStack {
@@ -102,7 +104,7 @@ struct PostView: View {
             Spacer()
             
             Button {
-                // Show comments
+                showPostComments()
             } label: {
                 Image(systemName: "text.bubble")
                     .resizable()

@@ -42,7 +42,8 @@ final class AppCoordinator: ObservableObject {
             openAppleMaps: openAppleMaps(coordinate:placeName:),
             goToLogin: {
                 self.pop()
-            }
+            },
+            onShowPostComments: showPostComments
         )
         self.push(tabBarCoordinator)
     }
@@ -55,6 +56,11 @@ final class AppCoordinator: ObservableObject {
     private func showRegisterCompanyView() {
         let signupCoordinator = SignUpCompanyCoordinator(actions: makeRegisterCompanyActions())
         self.push(signupCoordinator)
+    }
+    
+    private func showPostComments(info: PostCommentsInfo) {
+        let commentsCoordinator = CommentsCoordinator(actions: .init(), info: info)
+        self.push(commentsCoordinator)
     }
     
     private func showLogin() {

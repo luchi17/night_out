@@ -10,6 +10,7 @@ struct FeedView: View {
     private let openMapsPublisher = PassthroughSubject<PostModel, Never>()
     private let openAppleMapsPublisher = PassthroughSubject<PostModel, Never>()
     private let showUserProfilePublisher = PassthroughSubject<PostModel, Never>()
+    private let showPostCommentsPublisher = PassthroughSubject<PostModel, Never>()
     
     @ObservedObject var viewModel: FeedViewModel
     let presenter: FeedPresenter
@@ -37,6 +38,9 @@ struct FeedView: View {
                             },
                             showUserOrCompanyProfile: {
                                 showUserProfilePublisher.send(post)
+                            },
+                            showPostComments: {
+                                showPostCommentsPublisher.send(post)
                             }
                         )
                     }
@@ -102,7 +106,8 @@ private extension FeedView {
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
             openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher(),
-            showUserOrCompanyProfile: showUserProfilePublisher.eraseToAnyPublisher()
+            showUserOrCompanyProfile: showUserProfilePublisher.eraseToAnyPublisher(),
+            showCommentsView: showPostCommentsPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

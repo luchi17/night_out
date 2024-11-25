@@ -38,6 +38,8 @@ final class FeedPresenterImpl: FeedPresenter {
         let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
         let onShowUserProfile: InputClosure<UserModel>
         let onShowCompanyProfile: InputClosure<CompanyModel>
+        let onShowPostComments: InputClosure<PostCommentsInfo>
+        
     }
     
     struct ViewInputs {
@@ -45,6 +47,7 @@ final class FeedPresenterImpl: FeedPresenter {
         let openMaps: AnyPublisher<PostModel, Never>
         let openAppleMaps: AnyPublisher<PostModel, Never>
         let showUserOrCompanyProfile: AnyPublisher<PostModel, Never>
+        let showCommentsView: AnyPublisher<PostModel, Never>
     }
     
     var viewModel: FeedViewModel
@@ -92,7 +95,6 @@ final class FeedPresenterImpl: FeedPresenter {
             .withUnretained(self)
             .eraseToAnyPublisher()
         
-        
         userPostsPublisher
             .flatMap({ presenter, userPosts ->  AnyPublisher<[PostModel], Never> in
                 let publishers: [AnyPublisher<PostModel, Never>] = userPosts.map { post in
@@ -128,7 +130,6 @@ final class FeedPresenterImpl: FeedPresenter {
     }
     
     func listenToInput(input: FeedPresenterImpl.ViewInputs) {
-        
         input
             .openMaps
             .withUnretained(self)
@@ -162,6 +163,23 @@ final class FeedPresenterImpl: FeedPresenter {
                 //TODO
             }
             .store(in: &cancellables)
+        
+        input
+            .showCommentsView
+            .map { model in
+                PostCommentsInfo(
+                    postId: model.uid,
+                    postImageUrl: model.postImage ?? "",
+                    postIsFromUser: model.isFromUser,
+                    publisherId: model.publisher ?? ""
+                )
+            }
+            .withUnretained(self)
+            .sink { presenter, model in
+                presenter.actions.onShowPostComments(model)
+            }
+            .store(in: &cancellables)
+            
     }
 }
 
@@ -177,8 +195,9 @@ private extension FeedPresenterImpl {
                     location: presenter.getClubNameByPostLocation(postLocation: post.location),
                     username: userInfo?.username,
                     publisher: userInfo?.fullname,
-                    uid: post.publisherId,
-                    isFromUser: post.isFromUser ?? true
+                    uid: post.postID,
+                    isFromUser: post.isFromUser ?? true,
+                    publisherId: post.publisherId
                 )
             })
             .eraseToAnyPublisher()
@@ -195,8 +214,9 @@ private extension FeedPresenterImpl {
                     location: presenter.getLocationFromCompanyPost(postLocation: post.location, companylocation: companyInfo?.location),
                     username: companyInfo?.username,
                     publisher: companyInfo?.fullname,
-                    uid: post.publisherId,
-                    isFromUser: post.isFromUser ?? false
+                    uid: post.postID,
+                    isFromUser: post.isFromUser ?? false,
+                    publisherId: post.publisherId
                 )
             })
             .eraseToAnyPublisher()
@@ -254,3 +274,53 @@ private extension FeedPresenterImpl {
     
     
 }
+
+//private fun openCommentsActivity(postId: String, publisherID: String, postImageUrl: String) {
+//        val intent = Intent(context, CommentsActivity::class.java).apply {
+//            putExtra("postId", postId)
+//            putExtra("publisherId", publisherID)
+//            putExtra("postImageUrl", postImageUrl)
+//        }
+//        context.startActivity(intent)
+//    }
+//
+//    private fun openUserProfile(publisherID: String, username: String, ) {
+//        CoroutineScope(Dispatchers.Main).launch {
+//            // Obtener el número de seguidores de manera asíncrona
+//            val followersCount = getUserFollowersCount(publisherID)
+//
+//            // Crear el fragmento y pasarle los argumentos
+//            val fragment = ViewUserProfile().apply {
+//                arguments = Bundle().apply {
+//                    putString("publisherID", publisherID)
+//                    putInt("followersCount", followersCount)
+//                    putString("profileImageUrl", profileImageUrl)  // Usar la variable global
+//                    putString("username", username)  // Pasar el nombre de usuario
+//
+//                }
+//            }
+//
+//            // Reemplazar el fragmento actual con el nuevo
+//            (context as FragmentActivity).supportFragmentManager.beginTransaction()
+//                .replace(R.id.fragment_container, fragment)
+//                .addToBackStack(null)
+//                .commit()
+//        }
+//    }
+//
+
+//suspend fun getUserFollowersCount(publisherID: String): Int {
+//        return try {
+//            // Referencia al nodo 'Follow' donde está el nodo 'Followers' para el publisherID
+//            val followersSnapshot = FirebaseDatabase.getInstance()
+//                .getReference("Follow")
+//                .child(publisherID)
+//                .child("Followers")
+//                .get()
+//                .await()
+//            followersSnapshot.childrenCount.toInt()
+//        } catch (e: Exception) {
+//            // Manejo de excepciones, retornando 0 en caso de error
+//            0
+//        }
+//    }
