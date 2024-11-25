@@ -95,9 +95,9 @@ final class SignupPresenterImpl: SignupPresenter {
            
         signuppublisher
             .withUnretained(self)
-            .performRequest(request: { presenter, _ in
+            .performRequest(request: { presenter, _ -> AnyPublisher<(Bool, UserModel?), Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-                    return Just(false)
+                    return Just((false, nil))
                         .eraseToAnyPublisher()
                 }
                 let model = UserModel(
@@ -107,11 +107,13 @@ final class SignupPresenterImpl: SignupPresenter {
                     email: self.viewModel.email
                 )
                 return presenter.useCases.saveUserUseCase.execute(model: model)
+                    .map({ ($0, model)})
                     .eraseToAnyPublisher()
             })
-            .sink(receiveValue: { [weak self] saved in
-                if saved {
-                    #warning("TODO: save userModel somewhere, user defaults?")
+            .sink(receiveValue: { [weak self] data in
+                if data.0, let model = data.1 {
+                    self?.viewModel.headerError = nil
+                    UserDefaults.setUserModel(model)
                     self?.actions.goToTabView()
                 } else {
                     self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "User ID not found"))

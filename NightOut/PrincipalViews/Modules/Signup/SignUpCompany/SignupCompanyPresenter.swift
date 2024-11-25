@@ -175,9 +175,9 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
         
         saveImagePublisher
             .withUnretained(self)
-            .performRequest(request: { presenter, imageUrl in
+            .performRequest(request: { presenter, imageUrl -> AnyPublisher<(Bool, CompanyModel?), Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-                    return Just(false)
+                    return Just((false, nil))
                         .eraseToAnyPublisher()
                 }
        
@@ -193,7 +193,9 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     uid: uid
                 )
                 return presenter.useCases.saveCompanyUseCase.execute(model: model)
+                    .map({ ($0, model)})
                     .eraseToAnyPublisher()
+                   
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }
                 self.viewModel.loading = loading
@@ -206,10 +208,11 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     self.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "Could not save company"))
                 }
             })
-            .sink(receiveValue: { [weak self] saved in
-                if saved {
+            .sink(receiveValue: { [weak self] data in
+                if data.0, let model = data.1 {
                     self?.viewModel.headerError = nil
                     self?.actions.goToTabView()
+                    UserDefaults.setCompanyUserModel(model)
                 } else {
                     self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "Could not save user"))
                 }
