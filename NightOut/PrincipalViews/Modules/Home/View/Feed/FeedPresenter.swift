@@ -10,6 +10,7 @@ final class FeedViewModel: ObservableObject {
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
+    @Published var headerError: ErrorState?
     
     private var matchingPosts: [PostsUser] = []
     
@@ -68,13 +69,14 @@ final class FeedPresenterImpl: FeedPresenter {
         
         listenToInput(input: input)
         
-        viewModel.loading = true
-        
         let userPostsPublisher = input
             .viewDidLoad
             .withUnretained(self)
             .flatMap({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
                 presenter.useCases.postsUseCase.fetchFollow()
+            })
+            .handleEvents(receiveRequest: { [weak self] _ in
+                self?.viewModel.loading = true
             })
             .withUnretained(self)
             .flatMap({ presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
@@ -160,10 +162,7 @@ final class FeedPresenterImpl: FeedPresenter {
                 //TODO
             }
             .store(in: &cancellables)
-        
     }
-    
-   
 }
 
 private extension FeedPresenterImpl {
