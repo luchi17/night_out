@@ -1,9 +1,14 @@
 import Foundation
 
-// Nivel más profundo: Comentario individual
+
 struct CommentModel: Codable {
-    let comment: String?
-    let publisher: String?
+    let comment: String
+    let publisher: String
+    
+    init(comment: String, publisher: String) {
+        self.comment = comment
+        self.publisher = publisher
+    }
 }
 
 // Nodo raíz que maneja claves dinámicas en múltiples niveles

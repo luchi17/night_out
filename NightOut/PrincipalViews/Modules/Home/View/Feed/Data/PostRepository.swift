@@ -4,6 +4,8 @@ import Foundation
 protocol PostsRepository {
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never>
     func fetchFollow() -> AnyPublisher<FollowModel?, Never>
+    func getComments(postId: String) -> AnyPublisher<[String : CommentModel], Never>
+    func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
 }
 
 struct PostsRepositoryImpl: PostsRepository {
@@ -29,4 +31,19 @@ struct PostsRepositoryImpl: PostsRepository {
             .fetchFollow()
             .eraseToAnyPublisher()
     }
+    
+    
+    func getComments(postId: String) -> AnyPublisher<[String : CommentModel], Never> {
+        return network
+            .getComments(postId: postId)
+            .eraseToAnyPublisher()
+    }
+    
+    func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never> {
+        return network
+            .addComment(comment: comment, postId: postId)
+            .eraseToAnyPublisher()
+    }
+    
+    
 }

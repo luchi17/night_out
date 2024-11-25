@@ -91,6 +91,4 @@ struct AccountRepositoryImpl: AccountRepository {
             .signOut()
             .eraseToAnyPublisher()
     }
-    
-    
 }

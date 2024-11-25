@@ -2,6 +2,8 @@ import Foundation
 
 private let companies: String = "locationModels"
 private let followModel: String = "followModel"
+private let userModel: String = "userModel"
+private let companyModel: String = "companyModel"
 
 extension UserDefaults {
     
@@ -50,5 +52,21 @@ extension UserDefaults {
     
     static func getFollowModel() -> FollowModel? {
         self.objectForKey(forKey: companies, as: FollowModel.self)
+    }
+    
+    static func setUserModel(_ value: UserModel) {
+        self.setObject(value, forKey: userModel)
+    }
+    
+    static func getUserModel() -> UserModel? {
+        self.objectForKey(forKey: userModel, as: UserModel.self)
+    }
+    
+    static func setCompanyUserModel(_ value: CompanyModel) {
+        self.setObject(value, forKey: companyModel)
+    }
+    
+    static func getCompanyUserModel() -> CompanyModel? {
+        self.objectForKey(forKey: companyModel, as: CompanyModel.self)
     }
 }

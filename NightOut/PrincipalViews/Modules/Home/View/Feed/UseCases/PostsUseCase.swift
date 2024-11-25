@@ -4,6 +4,8 @@ import FirebaseAuth
 protocol PostsUseCase {
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never>
     func fetchFollow() -> AnyPublisher<FollowModel?, Never>
+    func getComments(postId: String) -> AnyPublisher<[String : CommentModel], Never>
+    func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
 }
 
 struct PostsUseCaseImpl: PostsUseCase {
@@ -22,6 +24,18 @@ struct PostsUseCaseImpl: PostsUseCase {
     func fetchFollow() -> AnyPublisher<FollowModel?, Never> {
         return repository
             .fetchFollow()
+            .eraseToAnyPublisher()
+    }
+    
+    func getComments(postId: String) -> AnyPublisher<[String : CommentModel], Never> {
+        return repository
+            .getComments(postId: postId)
+            .eraseToAnyPublisher()
+    }
+    
+    func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never> {
+        return repository
+            .addComment(comment: comment, postId: postId)
             .eraseToAnyPublisher()
     }
 }
