@@ -8,13 +8,15 @@ struct PostModel: Hashable {
     var description: String?
     var location: String?
     var username: String?
+    var publisher: String?
     var uid: String
+    var isFromUser: Bool
 }
 
 struct PostView: View {
     var model: PostModel
-    var openMaps: InputClosure<String> //username --> find location
-    var showUserProfile: InputClosure<String> //UID
+    var openMaps: InputClosure<PostModel>
+    var showUserOrCompanyProfile: VoidClosure
     
     var body: some View {
         VStack {
@@ -65,12 +67,10 @@ struct PostView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture {
-                        //Show user profile
+                        showUserOrCompanyProfile()
                     }
                 Button {
-                    if let username = model.username {
-                        openMaps(username)
-                    }
+                    openMaps(model)
                 } label: {
                     Text(model.location ?? "")
                         .font(.subheadline)
@@ -87,12 +87,11 @@ struct PostView: View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 5) {
                 // Descripción
-                Text(model.description ?? "")
+                Text(model.publisher ?? "Unknown")
                     .font(.subheadline)
                     .foregroundColor(.white)
 
-                // TODO
-                Text("Unknown" )
+                Text(model.description ?? "Unknown")
                     .font(.subheadline)
                     .foregroundColor(.white)
                 

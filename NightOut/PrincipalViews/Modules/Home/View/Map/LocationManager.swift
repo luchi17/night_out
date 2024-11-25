@@ -97,4 +97,18 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         )
         return latitudeEqual && longitudeEqual
     }
+    
+    func getCoordinatesFromString(_ location: String) -> CLLocationCoordinate2D? {
+        
+        let components = location.split(separator: ",")
+        if components.indices.contains(0), components.indices.contains(1),
+           let latitude = Double(components[0]),
+           let longitude = Double(components[1]) {
+            
+            return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            
+        }
+        return nil
+        
+    }
 }

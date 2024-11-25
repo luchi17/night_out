@@ -3,11 +3,13 @@ import Combine
 
 struct FeedView: View {
     
-    @State private var showEmptyView = false
+    @State private var showNavigationAlert = false
+    @State private var postSelectedToNavigate: PostModel?
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
-    private let openMapsPublisher = PassthroughSubject<String, Never>()
-    private let showUserProfilePublisher = PassthroughSubject<String, Never>()
+    private let openMapsPublisher = PassthroughSubject<PostModel, Never>()
+    private let openAppleMapsPublisher = PassthroughSubject<PostModel, Never>()
+    private let showUserProfilePublisher = PassthroughSubject<PostModel, Never>()
     
     @ObservedObject var viewModel: FeedViewModel
     let presenter: FeedPresenter
@@ -21,36 +23,60 @@ struct FeedView: View {
     }
     
     var body: some View {
-            ScrollView {
-                if viewModel.posts.isEmpty && !viewModel.loading {
-                    noPostsView
-                } else {
-                    VStack(spacing: 20) {
-                        ForEach(viewModel.posts, id: \.self) { post in
-                            PostView(
-                                model: post,
-                                openMaps: openMapsPublisher.send,
-                                showUserProfile: showUserProfilePublisher.send
-                            )
-                        }
+        ScrollView {
+            if viewModel.posts.isEmpty && !viewModel.loading {
+                noPostsView
+            } else {
+                VStack(spacing: 20) {
+                    ForEach(viewModel.posts, id: \.self) { post in
+                        PostView(
+                            model: post,
+                            openMaps: { postSelectedToNavigate in
+                                self.postSelectedToNavigate = postSelectedToNavigate
+                                showNavigationAlert = true
+                            },
+                            showUserOrCompanyProfile: {
+                                showUserProfilePublisher.send(post)
+                            }
+                        )
                     }
-                    .padding(.bottom, 20)
+                }
+                .padding(.bottom, 20)
+            }
+        }
+        .background(Color.blue)
+        .scrollIndicators(.hidden)
+        .padding(.horizontal, 20)
+        .onAppear {
+            viewDidLoadPublisher.send()
+        }
+        .showToast(
+            error: (
+                type: viewModel.toastError,
+                showCloseButton: false,
+                onDismiss: { }
+            ),
+            isIdle: viewModel.loading
+        )
+        .alert("Open Location", isPresented: $showNavigationAlert) {
+            Button("Apple Maps") {
+                if let postSelectedToNavigate = postSelectedToNavigate {
+                    openAppleMapsPublisher.send(postSelectedToNavigate)
+                    showNavigationAlert = false
                 }
             }
-            .background(Color.blue)
-            .scrollIndicators(.hidden)
-            .padding(.horizontal, 20)
-            .onAppear {
-                viewDidLoadPublisher.send()
+            Button("Google Maps") {
+                if let postSelectedToNavigate = postSelectedToNavigate {
+                    openMapsPublisher.send(postSelectedToNavigate)
+                    showNavigationAlert = false
+                }
             }
-            .showToast(
-                error: (
-                    type: viewModel.toastError,
-                    showCloseButton: false,
-                    onDismiss: { }
-                ),
-                isIdle: viewModel.loading
-            )
+            Button("Close", role: .cancel) {
+                showNavigationAlert = false
+            }
+        } message: {
+            Text("Choose an app to open the location.")
+        }
     }
     
     var noPostsView: some View {
@@ -75,7 +101,8 @@ private extension FeedView {
         let input = FeedPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
-            showUserProfile: showUserProfilePublisher.eraseToAnyPublisher()
+            openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher(),
+            showUserOrCompanyProfile: showUserProfilePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

@@ -5,8 +5,10 @@ import Combine
 struct LocationsMapView: View {
     @State private var showingList: Bool = false
     @State private var showingDetail: Bool = false
+    @State private var showNavigationAlert = false
     
     private let openMapsPublisher = PassthroughSubject<(Double, Double), Never>()
+    private let openAppleMapsPublisher = PassthroughSubject<(CLLocationCoordinate2D, String?), Never>()
     private let filterSelectedPublisher = PassthroughSubject<MapFilterType, Never>()
     private let locationInListSelectedPublisher = PassthroughSubject<LocationModel, Never>()
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
@@ -62,14 +64,21 @@ struct LocationsMapView: View {
             }
             showingDetail = viewModel.selectedMarkerLocation != nil
         }
+        .onChange(of: showNavigationAlert, { old, showNavigationAlert in
+            if !showNavigationAlert {
+                viewModel.selectedMarkerLocation = nil
+            }
+        })
         .sheet(isPresented: $showingDetail, onDismiss: {
-            viewModel.selectedMarkerLocation = nil
+            if !showNavigationAlert {
+                viewModel.selectedMarkerLocation = nil
+            }
         }) {
             if let location = viewModel.selectedMarkerLocation {
                 LocationDetailSheet(
                     selectedLocation: location,
                     openMaps: {
-                        openMapsPublisher.send((location.coordinate.location.latitude, location.coordinate.location.longitude))
+                        showNavigationAlert = true
                     }
                 )
             }
@@ -94,7 +103,26 @@ struct LocationsMapView: View {
                 secondaryButton: .cancel()
             )
         }
-        
+        .alert("Open Location", isPresented: $showNavigationAlert) {
+            Button("Apple Maps") {
+                if let selectedMarkerLocation = viewModel.selectedMarkerLocation {
+                    openAppleMapsPublisher.send(
+                        (selectedMarkerLocation.coordinate.location, selectedMarkerLocation.name)
+                        )
+                }
+            }
+            Button("Google Maps") {
+                if let selectedMarkerLocation = viewModel.selectedMarkerLocation {
+                    openMapsPublisher.send(
+                        (selectedMarkerLocation.coordinate.location.latitude, selectedMarkerLocation.coordinate.location.longitude)
+                    )
+                }
+               
+            }
+            Button("Close", role: .cancel) {}
+        } message: {
+            Text("Choose an app to open the location.")
+        }
         .onAppear {
             // Al aparecer la vista, centrar el mapa en la ubicación del usuario
             position = MapCameraPosition.region(viewModel.locationManager.userRegion)
@@ -121,6 +149,7 @@ private extension LocationsMapView {
     func bindViewModel() {
         let input = LocationsMapPresenterImpl.ViewInputs(
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
+            openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher(),
             onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
             locationInListSelected: locationInListSelectedPublisher.eraseToAnyPublisher(),
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
@@ -140,10 +169,8 @@ struct SheetView: View {
             onLocationSelected: selectedLocation
         )
         .padding(.top, 20)
-//        .interactiveDismissDisabled()
         .presentationDetents([.large])
         .presentationBackground(.regularMaterial)
-//        .presentationBackgroundInteraction(.enabled(upThrough: .large))
     }
 }
 

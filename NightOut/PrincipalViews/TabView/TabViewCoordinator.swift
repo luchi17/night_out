@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import CoreLocation
 
 enum TabType: Equatable {
     case home
@@ -21,6 +22,7 @@ enum TabType: Equatable {
 class TabViewCoordinator: ObservableObject, Hashable {
     
     private let openMaps: (Double, Double) -> Void
+    private let openAppleMaps: (CLLocationCoordinate2D, String?) -> Void
     private let goToLogin: VoidClosure
     private let locationManager: LocationManager
     @Published var path: NavigationPath
@@ -39,11 +41,13 @@ class TabViewCoordinator: ObservableObject, Hashable {
         path: NavigationPath,
         locationManager: LocationManager,
         openMaps: @escaping (Double, Double) -> Void,
+        openAppleMaps: @escaping (CLLocationCoordinate2D, String?) -> Void,
         goToLogin: @escaping VoidClosure
     ) {
         self.path = path
         self.locationManager = locationManager
         self.openMaps = openMaps
+        self.openAppleMaps = openAppleMaps
         self.goToLogin = goToLogin
     }
     
@@ -99,7 +103,10 @@ class TabViewCoordinator: ObservableObject, Hashable {
 
 private extension TabViewCoordinator {
     func mapActions() -> LocationsMapPresenterImpl.Actions {
-        .init(onOpenMaps: openMaps)
+        .init(
+            onOpenMaps: openMaps,
+            onOpenAppleMaps: openAppleMaps
+        )
     }
     
 #warning("TODO")
@@ -110,6 +117,7 @@ private extension TabViewCoordinator {
     func feedActions() -> FeedPresenterImpl.Actions {
         .init(
             onOpenMaps: openMaps,
+            onOpenAppleMaps: openAppleMaps,
             onShowUserProfile: { _ in },
             onShowCompanyProfile: { _ in }
         )

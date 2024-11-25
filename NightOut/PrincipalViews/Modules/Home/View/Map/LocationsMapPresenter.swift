@@ -34,10 +34,12 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     
     struct Actions {
         let onOpenMaps: InputClosure<(Double, Double)>
+        let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
     }
     
     struct ViewInputs {
         let openMaps: AnyPublisher<(Double, Double), Never>
+        let openAppleMaps: AnyPublisher<(CLLocationCoordinate2D, String?), Never>
         let onFilterSelected: AnyPublisher<MapFilterType, Never>
         let locationInListSelected: AnyPublisher<LocationModel, Never>
         let viewDidLoad: AnyPublisher<Void, Never>
@@ -94,14 +96,15 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                     let locations = companyUsers.users.values.compactMap({ $0 })
                     
                     let allClubsModel = locations.compactMap { companyModel in
-                        if let components = companyModel.location?.split(separator: ","),
-                           components.indices.contains(0), components.indices.contains(1),
-                           let latitude = Double(components[0]),
-                           let longitude = Double(components[1]) {
+                        
+                        if let location = companyModel.location,
+                           let coordinates = presenter.viewModel.locationManager.getCoordinatesFromString(location) {
+                           
+                            
                             return LocationModel(
                                 id: companyModel.uid,
                                 name: companyModel.username ?? "",
-                                coordinate: LocationCoordinate(id: companyModel.uid, location: CLLocationCoordinate2D(latitude: latitude, longitude: longitude)),
+                                coordinate: LocationCoordinate(id: companyModel.uid, location: coordinates),
                                 image: companyModel.imageUrl,
                                 startTime: companyModel.startTime,
                                 endTime: companyModel.endTime,
@@ -129,6 +132,14 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .withUnretained(self)
             .sink { presenter, data in
                 presenter.actions.onOpenMaps(data)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openAppleMaps
+            .withUnretained(self)
+            .sink { presenter, data in
+                presenter.actions.onOpenAppleMaps(data)
             }
             .store(in: &cancellables)
 

@@ -1,12 +1,12 @@
 import SwiftUI
 import Combine
+import CoreLocation
 
 #warning("Add cache of companies with UserDefaults.getCompanies() ")
 
 final class FeedViewModel: ObservableObject {
     
     @Published var posts: [PostModel] = []
-    @Published var followModel: FollowModel?
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
@@ -34,14 +34,16 @@ final class FeedPresenterImpl: FeedPresenter {
     
     struct Actions {
         let onOpenMaps: InputClosure<(Double, Double)>
+        let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
         let onShowUserProfile: InputClosure<UserModel>
         let onShowCompanyProfile: InputClosure<CompanyModel>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
-        let openMaps: AnyPublisher<String, Never>
-        let showUserProfile: AnyPublisher<String, Never>
+        let openMaps: AnyPublisher<PostModel, Never>
+        let openAppleMaps: AnyPublisher<PostModel, Never>
+        let showUserOrCompanyProfile: AnyPublisher<PostModel, Never>
     }
     
     var viewModel: FeedViewModel
@@ -49,6 +51,8 @@ final class FeedPresenterImpl: FeedPresenter {
     private let actions: Actions
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
+    
+    let defaultCoordinates = CLLocationCoordinate2D(latitude: Double(-90.0000), longitude: Double(-0.0000))
     
     init(
         useCases: UseCases,
@@ -61,6 +65,8 @@ final class FeedPresenterImpl: FeedPresenter {
     }
     
     func transform(input: FeedPresenterImpl.ViewInputs) {
+        
+        listenToInput(input: input)
         
         viewModel.loading = true
         
@@ -119,7 +125,49 @@ final class FeedPresenterImpl: FeedPresenter {
         
     }
     
-    private func getPostFromUserInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
+    func listenToInput(input: FeedPresenterImpl.ViewInputs) {
+        
+        input
+            .openMaps
+            .withUnretained(self)
+            .sink { presenter, postModel in
+                let coordinate = presenter.getLocationToOpen(postModel: postModel)
+                presenter.actions.onOpenMaps((coordinate.latitude, coordinate.longitude))
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openAppleMaps
+            .withUnretained(self)
+            .sink { presenter, postModel in
+                let coordinate = presenter.getLocationToOpen(postModel: postModel)
+                
+                if LocationManager.shared.areCoordinatesEqual(
+                    coordinate1: coordinate,
+                    coordinate2: presenter.defaultCoordinates
+                ) {
+                    presenter.actions.onOpenAppleMaps((coordinate: coordinate, placeName: "Narnia"))
+                } else {
+                    presenter.actions.onOpenAppleMaps((coordinate: coordinate, placeName: postModel.username))
+                }
+            }
+            .store(in: &cancellables)
+        
+        input
+            .showUserOrCompanyProfile
+            .withUnretained(self)
+            .sink { presenter, uid in
+                //TODO
+            }
+            .store(in: &cancellables)
+        
+    }
+    
+   
+}
+
+private extension FeedPresenterImpl {
+    func getPostFromUserInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
         return useCases.userDataUseCase.getUserInfo(uid: post.publisherId)
             .withUnretained(self)
             .map({ presenter, userInfo in
@@ -129,28 +177,41 @@ final class FeedPresenterImpl: FeedPresenter {
                     description: post.description,
                     location: presenter.getClubNameByPostLocation(postLocation: post.location),
                     username: userInfo?.username,
-                    uid: post.publisherId
+                    publisher: userInfo?.fullname,
+                    uid: post.publisherId,
+                    isFromUser: post.isFromUser ?? true
                 )
             })
             .eraseToAnyPublisher()
     }
     
-    private func getPostFromCompanyInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
+    func getPostFromCompanyInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
         useCases.companyDataUseCase.getCompanyInfo(uid: post.publisherId)
-            .map({ companyInfo in
+            .withUnretained(self)
+            .map({ presenter, companyInfo in
                 return PostModel(
                     profileImageUrl: companyInfo?.imageUrl,
                     postImage: post.postImage,
                     description: post.description,
-                    location: post.location ?? companyInfo?.location,
+                    location: presenter.getLocationFromCompanyPost(postLocation: post.location, companylocation: companyInfo?.location),
                     username: companyInfo?.username,
-                    uid: post.publisherId
+                    publisher: companyInfo?.fullname,
+                    uid: post.publisherId,
+                    isFromUser: post.isFromUser ?? false
                 )
             })
             .eraseToAnyPublisher()
     }
     
-    private func getClubNameByPostLocation(postLocation: String?) -> String {
+    func getLocationFromCompanyPost(postLocation: String?, companylocation: String?) -> String {
+        if let location = postLocation {
+            return "📍 \(location)"
+        } else {
+            return "📍 \(companylocation ?? "")"
+        }
+    }
+    
+    func getClubNameByPostLocation(postLocation: String?) -> String {
         let defaultLocation = "📍 De fiesta por Narnia"
         
         if let postLocation = postLocation, !postLocation.isEmpty {
@@ -159,9 +220,38 @@ final class FeedPresenterImpl: FeedPresenter {
                 return company.value.location == postLocation
             })?.value
             
-            return postLocationCompany?.username ?? defaultLocation
-            
+            if let username = postLocationCompany?.username {
+                return "📍 \(username)"
+            } else {
+                return defaultLocation
+            }
         }
+        
         return defaultLocation
     }
+    
+    func getLocationToOpen(postModel: PostModel) -> CLLocationCoordinate2D {
+        let cleanedPostLocation = postModel.location?.replacingOccurrences(of: "📍 ", with: "")
+        
+        if postModel.isFromUser {
+            
+            let locationFromName = UserDefaults.getCompanies()?.users.first(where: { $0.value.username == cleanedPostLocation })?.value.location
+            
+            if let locationFromName = locationFromName,
+               let coordinate = LocationManager.shared.getCoordinatesFromString(locationFromName) {
+                return coordinate
+            }
+
+        } else {
+            if let cleanedPostLocation = cleanedPostLocation,
+               let coordinate = LocationManager.shared.getCoordinatesFromString(cleanedPostLocation) {
+                return coordinate
+            }
+        }
+        
+        return defaultCoordinates
+    }
+    
+    
+    
 }
