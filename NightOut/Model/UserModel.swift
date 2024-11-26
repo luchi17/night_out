@@ -9,7 +9,7 @@ struct UserModel: Codable {
     var image: String?
     var fcm_token: String?
     var attendingClub: String?
-    var misLigas: [String: Bool] = [:]
+    var misLigas: [String: Bool]?
 }
 
 enum Gender {
