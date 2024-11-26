@@ -25,13 +25,11 @@ struct PostView: View {
             topView
             
             if let postImage = model.postImage {
-                KingFisherImage(url: URL(string: postImage))
-                    .centerCropped(width: .infinity, height: 300, placeholder: {
-                        ZStack {
-                            Color.gray
-                            ProgressView()
-                        }
-                    })
+                Image(uiImage: postImage)
+                .resizable()
+                .scaledToFill()
+                .frame(maxHeight: 300)
+                .clipped()
             } else {
                 Image("placeholder")
                     .resizable()
@@ -53,12 +51,12 @@ struct PostView: View {
                     .placeholder({
                         Image("placeholder")
                             .clipShape(Circle())
+                            .frame(width: 50, height: 50, alignment: .leading)
                             .clipped()
                     })
                     .scaledToFill()
                     .clipShape(Circle())
                     .frame(width: 50, height: 50, alignment: .leading)
-                    
                     .onTapGesture {
                         //Show user profile
                     }
