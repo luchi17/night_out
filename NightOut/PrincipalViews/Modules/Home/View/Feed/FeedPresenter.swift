@@ -187,10 +187,17 @@ private extension FeedPresenterImpl {
     func getPostFromUserInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
         return useCases.userDataUseCase.getUserInfo(uid: post.publisherId)
             .withUnretained(self)
-            .map({ presenter, userInfo in
+            .flatMap({ presenter, userInfo in
+                presenter.getPostImagePublisher(image: post.postImage)
+                    .map( { (userInfo, $0) })
+            })
+            .withUnretained(self)
+            .map({ presenter, data in
+                let userInfo = data.0
+                let postImage = data.1
                 return PostModel(
                     profileImageUrl: userInfo?.image,
-                    postImage: post.postImage,
+                    postImage: postImage,
                     description: post.description,
                     location: presenter.getClubNameByPostLocation(postLocation: post.location),
                     username: userInfo?.username,
@@ -206,10 +213,17 @@ private extension FeedPresenterImpl {
     func getPostFromCompanyInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
         useCases.companyDataUseCase.getCompanyInfo(uid: post.publisherId)
             .withUnretained(self)
-            .map({ presenter, companyInfo in
+            .flatMap({ presenter, companyInfo in
+                presenter.getPostImagePublisher(image: post.postImage)
+                    .map( { (companyInfo, $0) })
+            })
+            .withUnretained(self)
+            .map({ presenter, data in
+                let companyInfo = data.0
+                let postImage = data.1
                 return PostModel(
                     profileImageUrl: companyInfo?.imageUrl,
-                    postImage: post.postImage,
+                    postImage: postImage,
                     description: post.description,
                     location: presenter.getLocationFromCompanyPost(postLocation: post.location, companylocation: companyInfo?.location),
                     username: companyInfo?.username,
@@ -271,6 +285,12 @@ private extension FeedPresenterImpl {
         return defaultCoordinates
     }
     
+    func getPostImagePublisher(image: String?) -> AnyPublisher<UIImage?, Never> {
+        if let image = image, let url = URL(string: image) {
+            return KingFisherImage.fetchImagePublisher(url: url)
+        }
+        return Just(nil).eraseToAnyPublisher()
+    }
     
     
 }

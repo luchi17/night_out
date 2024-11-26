@@ -1,5 +1,6 @@
 import SwiftUI
 import Kingfisher
+import Combine
 
 public struct KingFisherImage: View {
     public let url: URL?
@@ -75,14 +76,8 @@ public extension KingFisherImage {
     }
 }
 
-import Combine
-
 extension KingFisherImage {
-    enum WebImageError: Error {
-        case failure
-    }
-
-    public static func fetchImage(url: URL, scaleFactor: CGFloat? = nil, completion: ((Result<UIImage?, Error>) -> Void)?) {
+    private static func fetchImage(url: URL, scaleFactor: CGFloat? = nil, completion: ((Result<UIImage?, Never>) -> Void)?) {
         KingfisherManager.shared.retrieveImage(
             with: KF.ImageResource(downloadURL: url),
             options: scaleFactor.map { [.scaleFactor($0)] },
@@ -91,9 +86,24 @@ extension KingFisherImage {
                 case .success(let image):
                     completion?(.success(image.image))
                 case .failure:
-                    completion?(.failure(WebImageError.failure))
+                    completion?(.success(nil))
                 }
             }
         )
+    }
+    
+    public static func fetchImagePublisher(url: URL, scaleFactor: CGFloat? = nil) -> AnyPublisher<UIImage?, Never> {
+        return Future<UIImage?, Never> { promise in
+            
+            KingFisherImage.fetchImage(url: url, scaleFactor: scaleFactor) { result in
+                switch result {
+                case .success(let image):
+                    promise(.success(image))
+                case .failure(_):
+                    promise(.success(nil))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
     }
 }

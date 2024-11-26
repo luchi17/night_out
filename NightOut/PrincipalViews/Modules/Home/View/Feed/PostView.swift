@@ -3,7 +3,7 @@ import Firebase
 
 struct PostModel: Hashable {
     var profileImageUrl: String?
-    var postImage: String?
+    var postImage: UIImage?
     var description: String?
     var location: String?
     var username: String?
