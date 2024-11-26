@@ -147,7 +147,7 @@ private extension CommentsPresenterImpl {
             .map { presenter, saved -> UserCommentModel? in
                 guard saved else { return nil }
                 
-                var username: String = {
+                let username: String = {
                     if FirebaseServiceImpl.shared.getImUser() {
                         return UserDefaults.getUserModel()?.username ?? "Unknown"
                     } else {
