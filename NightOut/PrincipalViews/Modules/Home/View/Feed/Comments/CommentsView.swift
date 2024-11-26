@@ -51,6 +51,13 @@ struct CommentsView: View {
         .onAppear {
             viewDidLoadPublisher.send()
         }
+        .onTapGesture {
+             hideKeyboard()
+        }
+    }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
     var topView: some View {
@@ -64,6 +71,7 @@ struct CommentsView: View {
             
             if let postImage = viewModel.postImage {
                 KFImage.url(URL(string: postImage))
+                    .placeholder { ProgressView() }
                     .resizable()
                     .scaledToFill()
                     .frame(maxWidth: .infinity, maxHeight: 300)
@@ -106,8 +114,7 @@ struct CommentsView: View {
             
             Button(action: {
                 publishCommentPublisher.send()
-                print("Comentario publicado: \(viewModel.commentText)")
-                viewModel.commentText = ""
+                hideKeyboard()
             }) {
                 Text("Publicar")
                     .font(.system(size: 18, weight: .bold))
@@ -120,7 +127,6 @@ struct CommentsView: View {
             .padding(.trailing, 10)
         }
         .padding(.vertical, 10)
-        //        .background(Color.black)
     }
 }
 

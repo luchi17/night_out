@@ -27,8 +27,10 @@ struct PostView: View {
             
             if let postImage = model.postImage {
                 KFImage.url(URL(string: postImage))
+                    .placeholder { ProgressView() }
                     .resizable()
                     .scaledToFill()
+                    .frame(maxHeight: 300)
     
             } else {
                 Image("placeholder")
