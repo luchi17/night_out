@@ -114,7 +114,7 @@ struct PostDatasourceImpl: PostDatasource {
             let commentData = structToDictionary(comment)
             let ref = FirebaseServiceImpl.shared.getComments().child(postId)
             
-            ref.setValue(commentData) { error, _ in
+            ref.childByAutoId().setValue(commentData) { error, _ in
                 if let error = error {
                     print("Error al guardar el comentario en la base de datos: \(error.localizedDescription)")
                     promise(.success(false))

@@ -55,6 +55,13 @@ final class FirebaseServiceImpl: ObservableObject {
     func getCurrentUserUid() -> String? {
         return currentUser?.uid
     }
+    
+    func getImUser() -> Bool {
+        if UserDefaults.getCompanyUserModel() != nil {
+            return false
+        }
+        return true
+    }
 }
 
 private extension FirebaseServiceImpl {

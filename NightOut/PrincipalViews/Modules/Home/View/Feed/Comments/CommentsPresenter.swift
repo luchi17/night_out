@@ -80,7 +80,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
             })
             .withUnretained(self)
             .flatMap({ presenter, commentsModel -> AnyPublisher<[UserCommentModel], Never> in
-                presenter.transformModelToUserModel(commentsModel: Array(commentsModel))
+                presenter.transformModelsToUserModels(commentsModel: Array(commentsModel))
             })
             .withUnretained(self)
             .sink(receiveCompletion: { [weak self] completion in
@@ -103,27 +103,18 @@ final class CommentsPresenterImpl: CommentsPresenter {
             .publishComment
             .withUnretained(self)
             .filter( { $0.0.publishComment() })
-            .flatMap({ presenter, _ -> AnyPublisher<Bool, Never> in
-                if let uid = FirebaseServiceImpl.shared.getCurrentUserUid() {
-                    let comment = CommentModel(
-                        comment: presenter.viewModel.commentText,
-                        publisher: uid
-                    )
-                    return presenter.useCases.postsUseCase.addComment(
-                        comment: comment,
-                        postId: presenter.info.postId
-                    )
-                } else {
-                    return Just(false)
-                        .eraseToAnyPublisher()
-                }
+            .flatMap({ presenter, _ -> AnyPublisher<UserCommentModel?, Never> in
+                presenter.getAddedCommentModel()
             })
             .withUnretained(self)
-            .sink { presenter, saved in
-                
-                //añadir comment, llamar a srvicio? o añadir directamente a viewModel
-//                self.viewModel.comments.append(<#T##newElement: UserCommentModel##UserCommentModel#>)
-//                print(saved)
+            .sink { presenter, comment in
+                if let comment = comment {
+                    presenter.viewModel.toastError = nil
+                    presenter.viewModel.commentText = ""
+                    presenter.viewModel.comments.append(comment)
+                } else {
+                    presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Could not publish comment", image: nil))
+                }
             }
             .store(in: &cancellables)
 
@@ -141,7 +132,42 @@ private extension CommentsPresenterImpl {
         }
     }
     
-    func transformModelToUserModel(commentsModel: [CommentModel]) -> AnyPublisher<[UserCommentModel], Never> {
+    func getAddedCommentModel() -> AnyPublisher<UserCommentModel?, Never> {
+        if let uid = FirebaseServiceImpl.shared.getCurrentUserUid() {
+            let comment = CommentModel(
+                comment: viewModel.commentText,
+                publisher: uid
+            )
+            //MANDAR String: String... miraar firebase, se guardan mal los coments
+            return useCases.postsUseCase.addComment(
+                comment: comment,
+                postId: info.postId
+            )
+            .withUnretained(self)
+            .map { presenter, saved -> UserCommentModel? in
+                guard saved else { return nil }
+                
+                var username: String = {
+                    if FirebaseServiceImpl.shared.getImUser() {
+                        return UserDefaults.getUserModel()?.username ?? "Unknown"
+                    } else {
+                        return UserDefaults.getCompanyUserModel()?.username ?? "Unknown"
+                    }
+                }()
+                
+                return UserCommentModel(
+                    userImageUrl: presenter.viewModel.profileImage,
+                    username: username,
+                    comment: presenter.viewModel.commentText
+                )
+            }
+            .eraseToAnyPublisher()
+        } else {
+            return Just(nil).eraseToAnyPublisher()
+        }
+    }
+    
+    func transformModelsToUserModels(commentsModel: [CommentModel]) -> AnyPublisher<[UserCommentModel], Never> {
         let publishers: [AnyPublisher<UserCommentModel, Never>] = commentsModel.map { comment in
             if UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == comment.publisher }) != nil {
                 return useCases.companyDataUseCase.getCompanyInfo(uid: comment.publisher)
@@ -171,18 +197,6 @@ private extension CommentsPresenterImpl {
             .eraseToAnyPublisher()
     }
 }
-
-//private fun addComment() {
-//      val commentsRef = FirebaseDatabase.getInstance().reference
-//          .child("Comments")
-//          .child(postId)
-//      val commentsMap = HashMap<String, Any>()
-//      commentsMap["comment"] = binding.addComment.text.toString()
-//      commentsMap["publisher"] = firebaseUser!!.uid
-//      commentsRef.push().setValue(commentsMap)
-//      addNotification()
-//      binding.addComment.text.clear()
-//  }
 
 //private fun addNotification() {
 //       val notiRef = FirebaseDatabase.getInstance()
