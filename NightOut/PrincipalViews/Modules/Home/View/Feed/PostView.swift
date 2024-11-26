@@ -7,10 +7,10 @@ struct PostModel: Hashable {
     var description: String?
     var location: String?
     var username: String?
-    var publisher: String?
+    var publisherName: String?
     var uid: String
     var isFromUser: Bool
-    var publisherId: String?
+    var publisherId: String
 }
 
 struct PostView: View {
