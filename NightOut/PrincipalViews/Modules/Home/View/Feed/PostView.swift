@@ -20,20 +20,24 @@ struct PostView: View {
     var showPostComments: VoidClosure
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             
             topView
             
             if let postImage = model.postImage {
                 KingFisherImage(url: URL(string: postImage))
                     .centerCropped(width: .infinity, height: 300, placeholder: {
-                        ProgressView()
+                        ZStack {
+                            Color.gray
+                            ProgressView()
+                        }
                     })
             } else {
                 Image("placeholder")
                     .resizable()
                     .scaledToFill()
                     .frame(maxHeight: 300)
+                    .clipped()
             }
             
             bottomView
@@ -44,13 +48,17 @@ struct PostView: View {
     
     var topView: some View {
         HStack(spacing: 10) {
-            // Imagen de perfil del usuario
             if let profileImageUrl = model.profileImageUrl {
                 KingFisherImage(url: URL(string: profileImageUrl))
-                    .placeholder(Image("placeholder"))
+                    .placeholder({
+                        Image("placeholder")
+                            .clipShape(Circle())
+                            .clipped()
+                    })
                     .scaledToFill()
                     .clipShape(Circle())
                     .frame(width: 50, height: 50, alignment: .leading)
+                    
                     .onTapGesture {
                         //Show user profile
                     }
@@ -88,7 +96,7 @@ struct PostView: View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 5) {
                 // Descripción
-                Text(model.publisher ?? "Unknown")
+                Text(model.publisherName ?? "Unknown")
                     .font(.subheadline)
                     .foregroundColor(.white)
 

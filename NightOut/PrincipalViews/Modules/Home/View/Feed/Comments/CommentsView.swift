@@ -72,7 +72,10 @@ struct CommentsView: View {
             if let postImage = viewModel.postImage {
                 KingFisherImage(url: URL(string: postImage))
                     .centerCropped(width: .infinity, height: 300, placeholder: {
-                        ProgressView()
+                        ZStack {
+                            Color.gray
+                            ProgressView()
+                        }
                     })
             } else {
                 Image("placeholder")

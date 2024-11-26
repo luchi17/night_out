@@ -87,8 +87,8 @@ final class FeedPresenterImpl: FeedPresenter {
                     .map { posts in
                         let matchingPosts = posts.filter { post in
                             followModel?.following?.keys.contains(post.value.publisherId) ?? false
-                        }
-                        return Array(matchingPosts.values)
+                        }.values
+                        return Array(matchingPosts)
                     }
                     .eraseToAnyPublisher()
             })

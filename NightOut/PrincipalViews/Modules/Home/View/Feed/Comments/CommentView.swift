@@ -16,7 +16,11 @@ struct CommentView: View  {
         HStack(spacing: 8) {
             if let userImageUrl = commentModel.userImageUrl {
                 KingFisherImage(url: URL(string: userImageUrl))
-                    .placeholder(Image("placeholder"))
+                    .placeholder({
+                        Image("placeholder")
+                            .clipShape(Circle())
+                            .clipped()
+                    })
                     .scaledToFill()
                     .frame(width: 40, height: 40)
                     .clipShape(Circle())

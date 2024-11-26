@@ -121,7 +121,8 @@ public extension View {
         VStack(spacing: 0) {
             if isIdle {
                 ZStack(alignment: .top) {
-                    self.opacity(0)
+                    self
+//                        .opacity(0)
                     DefaultIdleView()
                 }
             } else {
