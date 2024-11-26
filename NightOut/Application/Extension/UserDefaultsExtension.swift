@@ -29,7 +29,15 @@ extension UserDefaults {
     }
     
     static func clearAll() {
-        guard let appDomain = Bundle.main.bundleIdentifier else { return }
+        let defaults = UserDefaults.standard
+        let dictionary = defaults.dictionaryRepresentation()
+            dictionary.keys.forEach { key in
+                defaults.removeObject(forKey: key)
+            }
+        guard let appDomain = Bundle.main.bundleIdentifier else {
+            print("Could not clean appDomain")
+            return
+        }
         UserDefaults.standard.removePersistentDomain(forName: appDomain)
         UserDefaults.standard.synchronize()
     }
