@@ -12,11 +12,10 @@ struct LocationsListView: View {
             ForEach(locations) { location in
                 HStack(spacing: 12) {
                     if let imageUrl = location.image {
-                        KFImage.url(URL(string: imageUrl))
-                            .placeholder { ProgressView() } // Muestra un indicador mientras carga
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 60, height: 60)
+                        KingFisherImage(url: URL(string: imageUrl))
+                            .centerCropped(width: 60, height: 60) {
+                                Image("placeholder")
+                            }
                             .cornerRadius(10)
                     } else {
                         placeholderImage

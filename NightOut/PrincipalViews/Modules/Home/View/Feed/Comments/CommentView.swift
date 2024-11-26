@@ -1,7 +1,5 @@
 import Combine
 import SwiftUI
-import Kingfisher
-
 
 struct UserCommentModel {
     var userImageUrl: String?
@@ -17,9 +15,8 @@ struct CommentView: View  {
         
         HStack(spacing: 8) {
             if let userImageUrl = commentModel.userImageUrl {
-                KFImage.url(URL(string: userImageUrl))
-                    .placeholder { ProgressView() }
-                    .resizable()
+                KingFisherImage(url: URL(string: userImageUrl))
+                    .placeholder(Image("placeholder"))
                     .scaledToFill()
                     .frame(width: 40, height: 40)
                     .clipShape(Circle())

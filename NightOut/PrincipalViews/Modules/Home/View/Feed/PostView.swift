@@ -1,6 +1,5 @@
 import SwiftUI
 import Firebase
-import Kingfisher
 
 struct PostModel: Hashable {
     var profileImageUrl: String?
@@ -26,12 +25,10 @@ struct PostView: View {
             topView
             
             if let postImage = model.postImage {
-                KFImage.url(URL(string: postImage))
-                    .placeholder { ProgressView() }
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxHeight: 300)
-    
+                KingFisherImage(url: URL(string: postImage))
+                    .centerCropped(width: .infinity, height: 300, placeholder: {
+                        ProgressView()
+                    })
             } else {
                 Image("placeholder")
                     .resizable()
@@ -49,8 +46,8 @@ struct PostView: View {
         HStack(spacing: 10) {
             // Imagen de perfil del usuario
             if let profileImageUrl = model.profileImageUrl {
-                KFImage.url(URL(string: profileImageUrl))
-                    .resizable()
+                KingFisherImage(url: URL(string: profileImageUrl))
+                    .placeholder(Image("placeholder"))
                     .scaledToFill()
                     .clipShape(Circle())
                     .frame(width: 50, height: 50, alignment: .leading)

@@ -70,13 +70,10 @@ struct CommentsView: View {
                 .background(Color(.black))
             
             if let postImage = viewModel.postImage {
-                KFImage.url(URL(string: postImage))
-                    .placeholder { ProgressView() }
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: 300)
-                    .clipped()
-                
+                KingFisherImage(url: URL(string: postImage))
+                    .centerCropped(width: .infinity, height: 300, placeholder: {
+                        ProgressView()
+                    })
             } else {
                 Image("placeholder")
                     .resizable()
@@ -90,8 +87,7 @@ struct CommentsView: View {
     var bottomView: some View {
         HStack {
             if let profileImage = viewModel.profileImage {
-                KFImage.url(URL(string: profileImage))
-                    .resizable()
+                KingFisherImage(url: URL(string: profileImage))
                     .scaledToFill()
                     .frame(width: 40, height: 40)
                     .clipShape(Circle())

@@ -28,7 +28,7 @@ struct FeedView: View {
             if viewModel.posts.isEmpty && !viewModel.loading {
                 noPostsView
             } else {
-                VStack(spacing: 20) {
+                LazyVStack(spacing: 20) {
                     ForEach(viewModel.posts, id: \.self) { post in
                         PostView(
                             model: post,

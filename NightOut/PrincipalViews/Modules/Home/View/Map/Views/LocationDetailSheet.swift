@@ -1,11 +1,8 @@
 import SwiftUI
-import Kingfisher
 
 struct LocationDetailSheet: View {
     var selectedLocation: LocationModel
     var openMaps: () -> Void
-    
-    @State private var loadFailed = false
 
 #warning("PENDING: show correct placeholder image")
     
@@ -13,27 +10,15 @@ struct LocationDetailSheet: View {
         VStack {
             ScrollView {
                 VStack {
-                    if loadFailed {
-                        placeholderImage
+                    if let imageUrl = selectedLocation.image {
+                        KingFisherImage(url: URL(string: imageUrl))
+                            .centerCropped(width: 150, height: 150) {
+                                Image("placeholder")
+                            }
+                            .cornerRadius(10)
+                            .padding(.vertical, 30)
                     } else {
-                        if let imageUrl = selectedLocation.image {
-                            KFImage.url(URL(string: imageUrl))
-                                .placeholder { ProgressView() } // Muestra un indicador mientras carga
-                                .onSuccess { result in
-                                    loadFailed = false
-                                }
-                                .onFailure { error in
-                                    print(error)
-                                    loadFailed = true
-                                }
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 150, height: 150)
-                                .cornerRadius(10)
-                                .padding(.vertical, 30)
-                        } else {
-                            placeholderImage
-                        }
+                        placeholderImage
                     }
                     
                     Text(selectedLocation.name)
