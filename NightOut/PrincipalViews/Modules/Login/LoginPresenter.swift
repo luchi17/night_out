@@ -24,6 +24,7 @@ final class LoginPresenterImpl: LoginPresenter {
     struct UseCases {
         let loginUseCase: LoginUseCase
         let companyLocationsUseCase: CompanyLocationsUseCase
+        let userDataUseCase: UserDataUseCase
     }
     
     struct Actions {
@@ -93,6 +94,10 @@ final class LoginPresenterImpl: LoginPresenter {
             .flatMap({ presenter, _ in
                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
             })
+            .withUnretained(self)
+            .flatMap({ presenter, _ in
+                presenter.saveMyUserInfoInUserDefaults()
+            })
             .sink(receiveValue: { [weak self] _ in
                 self?.actions.goToTabView()
             })
@@ -141,6 +146,14 @@ final class LoginPresenterImpl: LoginPresenter {
                     self.viewModel.headerError = ErrorState(errorOptional: error)
                 }
             })
+            .withUnretained(self)
+            .flatMap({ presenter, _ in
+                presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
+            })
+            .withUnretained(self)
+            .flatMap({ presenter, _ in
+                presenter.saveMyUserInfoInUserDefaults()
+            })
             .sink(receiveValue: { [weak self] _ in
                 self?.actions.goToTabView()
             })
@@ -153,5 +166,30 @@ final class LoginPresenterImpl: LoginPresenter {
 //            .signupWithApple
 //            .withUnretained(self)
         
+    }
+}
+
+private extension LoginPresenterImpl {
+    func saveMyUserInfoInUserDefaults() -> AnyPublisher<Void, Never> {
+        guard let currentUserUid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            
+            return Just(()).eraseToAnyPublisher()
+        }
+
+        if let myUserCompany = UserDefaults.getCompanies()?.users.first(where: { $0.value.email == viewModel.email }) {
+            
+            UserDefaults.setCompanyUserModel(myUserCompany.value)
+            return Just(()).eraseToAnyPublisher()
+            
+        } else {
+            
+            return useCases.userDataUseCase.getUserInfo(uid: currentUserUid)
+                .compactMap({ $0 })
+                .handleEvents(receiveOutput: { model in
+                    UserDefaults.setUserModel(model)
+                })
+                .map({ _ in })
+                .eraseToAnyPublisher()
+        }
     }
 }

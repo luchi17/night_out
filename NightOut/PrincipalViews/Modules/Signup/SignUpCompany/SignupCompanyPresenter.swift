@@ -212,7 +212,6 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                 if data.0, let model = data.1 {
                     self?.viewModel.headerError = nil
                     self?.actions.goToTabView()
-                    UserDefaults.setCompanyUserModel(model)
                 } else {
                     self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "Could not save user"))
                 }

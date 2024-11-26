@@ -113,7 +113,6 @@ final class SignupPresenterImpl: SignupPresenter {
             .sink(receiveValue: { [weak self] data in
                 if data.0, let model = data.1 {
                     self?.viewModel.headerError = nil
-                    UserDefaults.setUserModel(model)
                     self?.actions.goToTabView()
                 } else {
                     self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "User ID not found"))
