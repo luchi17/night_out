@@ -34,6 +34,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
         let postsUseCase: PostsUseCase
         let userDataUseCase: UserDataUseCase
         let companyDataUseCase: CompanyDataUseCase
+        let notificationsUseCase: NotificationsUseCase
     }
     
     struct Actions {
@@ -102,7 +103,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
         input
             .publishComment
             .withUnretained(self)
-            .filter( { $0.0.publishComment() })
+            .filter( { $0.0.shouldPublishComment() })
             .flatMap({ presenter, _ -> AnyPublisher<UserCommentModel?, Never> in
                 presenter.getAddedCommentModel()
             })
@@ -112,6 +113,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
                     presenter.viewModel.toastError = nil
                     presenter.viewModel.commentText = ""
                     presenter.viewModel.comments.append(comment)
+                    presenter.sendNotification(comment: comment)
                 } else {
                     presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Could not publish comment", image: nil))
                 }
@@ -122,7 +124,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
 }
 
 private extension CommentsPresenterImpl {
-    func publishComment() -> Bool {
+    func shouldPublishComment() -> Bool {
         if viewModel.commentText.isEmpty {
             viewModel.toastError = .custom(.init(title: "Please write comment first", description: "", image: nil))
             return false
@@ -130,6 +132,19 @@ private extension CommentsPresenterImpl {
             viewModel.toastError = nil
             return true
         }
+    }
+    
+    func sendNotification(comment: UserCommentModel) {
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid(), let commentText = comment.comment else {
+            return
+        }
+        let model = NotificationModel(
+            ispost: true,
+            postid: info.postId,
+            text: "commented: " + commentText,
+            userid: uid
+        )
+        _ = self.useCases.notificationsUseCase.addNotification(model: model, publisherId: info.publisherId)
     }
     
     func getAddedCommentModel() -> AnyPublisher<UserCommentModel?, Never> {
@@ -197,16 +212,3 @@ private extension CommentsPresenterImpl {
             .eraseToAnyPublisher()
     }
 }
-
-//private fun addNotification() {
-//       val notiRef = FirebaseDatabase.getInstance()
-//           .reference.child("Notifications").child(publisherId)
-//       val notiMap = HashMap<String, Any>()
-//       notiMap["userid"] = firebaseUser!!.uid
-//       notiMap["text"] = "commented: " + binding.addComment.text.toString()
-//       notiMap["postid"] = postId
-//       notiMap["ispost"] = true
-//
-//       notiRef.push().setValue(notiMap)
-//   }
-#warning("ADD notification using publisherId")

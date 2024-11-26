@@ -171,7 +171,7 @@ final class FeedPresenterImpl: FeedPresenter {
                     postId: model.uid,
                     postImageUrl: model.postImage ?? "",
                     postIsFromUser: model.isFromUser,
-                    publisherId: model.publisher ?? ""
+                    publisherId: model.publisherId
                 )
             }
             .withUnretained(self)
@@ -194,7 +194,7 @@ private extension FeedPresenterImpl {
                     description: post.description,
                     location: presenter.getClubNameByPostLocation(postLocation: post.location),
                     username: userInfo?.username,
-                    publisher: userInfo?.fullname,
+                    publisherName: userInfo?.fullname,
                     uid: post.postID,
                     isFromUser: post.isFromUser ?? true,
                     publisherId: post.publisherId
@@ -213,7 +213,7 @@ private extension FeedPresenterImpl {
                     description: post.description,
                     location: presenter.getLocationFromCompanyPost(postLocation: post.location, companylocation: companyInfo?.location),
                     username: companyInfo?.username,
-                    publisher: companyInfo?.fullname,
+                    publisherName: companyInfo?.fullname,
                     uid: post.postID,
                     isFromUser: post.isFromUser ?? false,
                     publisherId: post.publisherId
@@ -275,14 +275,6 @@ private extension FeedPresenterImpl {
     
 }
 
-//private fun openCommentsActivity(postId: String, publisherID: String, postImageUrl: String) {
-//        val intent = Intent(context, CommentsActivity::class.java).apply {
-//            putExtra("postId", postId)
-//            putExtra("publisherId", publisherID)
-//            putExtra("postImageUrl", postImageUrl)
-//        }
-//        context.startActivity(intent)
-//    }
 //
 //    private fun openUserProfile(publisherID: String, username: String, ) {
 //        CoroutineScope(Dispatchers.Main).launch {

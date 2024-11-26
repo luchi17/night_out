@@ -31,7 +31,8 @@ class CommentsCoordinator: ObservableObject, Hashable {
             useCases: .init(
                 postsUseCase: PostsUseCaseImpl(repository: PostsRepositoryImpl.shared),
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
-                companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
+                companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                notificationsUseCase: NotificationsUseCaseImpl(repository: NotificationsRepositoryImpl.shared)
             ),
             actions: actions,
             info: info
