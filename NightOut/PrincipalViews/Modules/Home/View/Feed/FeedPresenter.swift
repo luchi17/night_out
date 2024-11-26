@@ -169,7 +169,7 @@ final class FeedPresenterImpl: FeedPresenter {
             .map { model in
                 PostCommentsInfo(
                     postId: model.uid,
-                    postImageUrl: model.postImage ?? "",
+                    postImage: model.postImage,
                     postIsFromUser: model.isFromUser,
                     publisherId: model.publisherId
                 )

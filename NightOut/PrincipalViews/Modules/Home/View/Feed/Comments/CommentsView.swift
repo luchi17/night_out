@@ -70,13 +70,11 @@ struct CommentsView: View {
                 .background(Color(.black))
             
             if let postImage = viewModel.postImage {
-                KingFisherImage(url: URL(string: postImage))
-                    .centerCropped(width: .infinity, height: 300, placeholder: {
-                        ZStack {
-                            Color.gray
-                            ProgressView()
-                        }
-                    })
+                Image(uiImage: postImage)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity, maxHeight: 300)
+                .clipped()
             } else {
                 Image("placeholder")
                     .resizable()

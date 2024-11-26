@@ -3,21 +3,21 @@ import Combine
 
 struct PostCommentsInfo {
     let postId: String
-    let postImageUrl: String
+    let postImage: UIImage?
     let postIsFromUser: Bool
     let publisherId: String
     
 }
 
 final class CommentsViewModel: ObservableObject {
-    @Published var postImage: String?
+    @Published var postImage: UIImage?
     @Published var profileImage: String?
     @Published var commentText: String = ""
     @Published var comments: [UserCommentModel] = []
     @Published var toastError: ToastType?
     @Published var loading: Bool = false
     
-    init(postImage: String?, profileImage: String?) {
+    init(postImage: UIImage?, profileImage: String?) {
         self.postImage = postImage
         self.profileImage = profileImage
     }
@@ -64,7 +64,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
         
         let profileImage = info.postIsFromUser ? UserDefaults.getUserModel()?.image : UserDefaults.getCompanyUserModel()?.imageUrl
         
-        viewModel = CommentsViewModel(postImage: info.postImageUrl, profileImage: profileImage)
+        viewModel = CommentsViewModel(postImage: info.postImage, profileImage: profileImage)
     }
     
     func transform(input: CommentsPresenterImpl.ViewInputs) {

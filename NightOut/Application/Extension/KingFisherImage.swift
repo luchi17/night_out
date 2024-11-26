@@ -80,7 +80,10 @@ extension KingFisherImage {
     private static func fetchImage(url: URL, scaleFactor: CGFloat? = nil, completion: ((Result<UIImage?, Never>) -> Void)?) {
         KingfisherManager.shared.retrieveImage(
             with: KF.ImageResource(downloadURL: url),
-            options: scaleFactor.map { [.scaleFactor($0)] },
+            options: [
+                .scaleFactor(scaleFactor ?? 1),
+                .fromMemoryCacheOrRefresh
+            ],
             completionHandler: { result in
                 switch result {
                 case .success(let image):
