@@ -2,7 +2,7 @@
 import SwiftUI
 import Combine
 
-class UserProfileCoordinator: ObservableObject, Hashable {
+class UserPostProfileCoordinator: ObservableObject, Hashable {
     
     let id = UUID()
     
@@ -10,16 +10,16 @@ class UserProfileCoordinator: ObservableObject, Hashable {
         hasher.combine(id)
     }
     
-    static func == (lhs: UserProfileCoordinator, rhs: UserProfileCoordinator) -> Bool {
+    static func == (lhs: UserPostProfileCoordinator, rhs: UserPostProfileCoordinator) -> Bool {
         return lhs.id == rhs.id
     }
     
-    private let actions: UserProfilePresenterImpl.Actions
-    private let info: UserProfileInfo
+    private let actions: UserPostProfilePresenterImpl.Actions
+    private let info: UserPostProfileInfo
     
     init(
-        actions: UserProfilePresenterImpl.Actions,
-        info: UserProfileInfo
+        actions: UserPostProfilePresenterImpl.Actions,
+        info: UserPostProfileInfo
     ) {
         self.actions = actions
         self.info = info
@@ -27,12 +27,12 @@ class UserProfileCoordinator: ObservableObject, Hashable {
     
     @ViewBuilder
     func build() -> some View {
-        let presenter = UserProfilePresenterImpl(
+        let presenter = UserPostProfilePresenterImpl(
             useCases: .init(followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared)),
             actions: actions,
             info: info
         )
-        UserProfileView(presenter: presenter)
+        UserPostProfileView(presenter: presenter)
     }
 }
 

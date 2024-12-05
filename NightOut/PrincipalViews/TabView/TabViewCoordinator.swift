@@ -25,7 +25,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let openAppleMaps: (CLLocationCoordinate2D, String?) -> Void
     private let onShowPostComments: InputClosure<PostCommentsInfo>
     private let goToLogin: VoidClosure
-    private let showPostUserProfileView: InputClosure<UserProfileInfo>
+    private let showPostUserProfileView: InputClosure<UserPostProfileInfo>
     private let locationManager: LocationManager
     @Published var path: NavigationPath
     
@@ -45,7 +45,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
         openMaps: @escaping (Double, Double) -> Void,
         openAppleMaps: @escaping (CLLocationCoordinate2D, String?) -> Void,
         goToLogin: @escaping VoidClosure,
-        showPostUserProfileView: @escaping InputClosure<UserProfileInfo>,
+        showPostUserProfileView: @escaping InputClosure<UserPostProfileInfo>,
         onShowPostComments:  @escaping InputClosure<PostCommentsInfo>
     ) {
         self.path = path

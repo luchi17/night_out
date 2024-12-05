@@ -38,7 +38,7 @@ final class FeedPresenterImpl: FeedPresenter {
     struct Actions {
         let onOpenMaps: InputClosure<(Double, Double)>
         let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
-        let onShowUserProfile: InputClosure<UserProfileInfo>
+        let onShowUserProfile: InputClosure<UserPostProfileInfo>
         let onShowCompanyProfile: InputClosure<CompanyModel>
         let onShowPostComments: InputClosure<PostCommentsInfo>
         
@@ -165,7 +165,7 @@ final class FeedPresenterImpl: FeedPresenter {
             .showUserOrCompanyProfile
             .withUnretained(self)
             .sink { presenter, model in
-                let profileInfo = UserProfileInfo(
+                let profileInfo = UserPostProfileInfo(
                     profileId: model.publisherId,
                     profileImageUrl: model.profileImageUrl,
                     username: model.username ?? "Unknown",

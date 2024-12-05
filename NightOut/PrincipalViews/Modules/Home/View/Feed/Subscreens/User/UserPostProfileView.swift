@@ -1,15 +1,15 @@
 import SwiftUI
 import Combine
 
-struct UserProfileView: View {
+struct UserPostProfileView: View {
 
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     
-    @ObservedObject var viewModel: UserProfileViewModel
-    let presenter: UserProfilePresenter
+    @ObservedObject var viewModel: UserPostProfileViewModel
+    let presenter: UserPostProfilePresenter
     
     init(
-        presenter: UserProfilePresenter
+        presenter: UserPostProfilePresenter
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
@@ -71,9 +71,9 @@ struct UserProfileView: View {
     }
 }
 
-private extension UserProfileView {
+private extension UserPostProfileView {
     func bindViewModel() {
-        let input = UserProfilePresenterImpl.ViewInputs(
+        let input = UserPostProfilePresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
         )
         presenter.transform(input: input)

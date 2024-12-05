@@ -1,14 +1,14 @@
 import SwiftUI
 import Combine
 
-struct UserProfileInfo {
+struct UserPostProfileInfo {
     var profileId: String
     var profileImageUrl: String?
     var username: String
     var fullName: String
 }
 
-final class UserProfileViewModel: ObservableObject {
+final class UserPostProfileViewModel: ObservableObject {
     @Published var profileImageUrl: String?
     @Published var username: String = "Nombre no disponible"
     @Published var fullname: String = "Username no disponible"
@@ -25,12 +25,12 @@ final class UserProfileViewModel: ObservableObject {
     }
 }
 
-protocol UserProfilePresenter {
-    var viewModel: UserProfileViewModel { get }
-    func transform(input: UserProfilePresenterImpl.ViewInputs)
+protocol UserPostProfilePresenter {
+    var viewModel: UserPostProfileViewModel { get }
+    func transform(input: UserPostProfilePresenterImpl.ViewInputs)
 }
 
-final class UserProfilePresenterImpl: UserProfilePresenter {
+final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     
     struct UseCases {
         let followUseCase: FollowUseCase
@@ -43,24 +43,24 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         let viewDidLoad: AnyPublisher<Void, Never>
     }
     
-    var viewModel: UserProfileViewModel
+    var viewModel: UserPostProfileViewModel
     
     private let actions: Actions
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
     
-    private let info: UserProfileInfo
+    private let info: UserPostProfileInfo
     
     init(
         useCases: UseCases,
         actions: Actions,
-        info: UserProfileInfo
+        info: UserPostProfileInfo
     ) {
         self.actions = actions
         self.useCases = useCases
         self.info = info
 
-        viewModel = UserProfileViewModel(
+        viewModel = UserPostProfileViewModel(
             profileImageUrl: info.profileImageUrl,
             username: info.username,
             fullname: info.fullName,
@@ -70,7 +70,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         )
     }
     
-    func transform(input: UserProfilePresenterImpl.ViewInputs) {
+    func transform(input: UserPostProfilePresenterImpl.ViewInputs) {
         input
             .viewDidLoad
             .withUnretained(self)
@@ -83,9 +83,4 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             }
             .store(in: &cancellables)
     }
-}
-
-private extension UserProfilePresenterImpl {
-    
-    
 }
