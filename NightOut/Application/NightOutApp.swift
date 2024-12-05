@@ -17,14 +17,19 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack(path: $appCoordinator.path) {
-            appCoordinator.build()
+            appCoordinator
+                .build()
                 .navigationDestination(for: LoginCoordinator.self, destination: { coordinator in
                     coordinator.build()
                         .navigationDestination(for: SignupCoordinator.self) { coordinator in
-                            coordinator.build()
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
                         }
                         .navigationDestination(for: SignUpCompanyCoordinator.self) { coordinator in
-                            coordinator.build()
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
                         }
                 })
                 .navigationDestination(for: TabViewCoordinator.self, destination: { coordinator in
@@ -32,10 +37,14 @@ struct ContentView: View {
                         .build()
                         .edgesIgnoringSafeArea(.top)
                         .navigationDestination(for: CommentsCoordinator.self) { coordinator in
-                            coordinator.build()
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
                         }
                         .navigationDestination(for: UserProfileCoordinator.self) { coordinator in
-                            coordinator.build()
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
                         }
                 })
         }

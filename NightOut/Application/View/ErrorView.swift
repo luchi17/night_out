@@ -1,5 +1,35 @@
 import SwiftUI
 
+struct CustomBackButton: View {
+    @Environment(\.dismiss) var dismiss // Para retroceder en la pila de navegación
+    
+    var body: some View {
+        Button(action: {
+            dismiss()
+        }) {
+            HStack {
+                Image(systemName: "arrow.backward")
+                    .foregroundStyle(.white)
+            }
+        }
+    }
+}
+
+
+public extension View {
+    @ViewBuilder
+    func showCustomBackButtonNavBar() -> some View {
+        self
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    CustomBackButton()
+                }
+            }
+    }
+}
+
+
 public extension View {
     @ViewBuilder
     func applyErrorView(_ error: ErrorState?, onReload: @escaping () -> Void, closeButton: VoidClosure?) -> some View {
