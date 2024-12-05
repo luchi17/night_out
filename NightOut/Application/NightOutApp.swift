@@ -34,6 +34,9 @@ struct ContentView: View {
                         .navigationDestination(for: CommentsCoordinator.self) { coordinator in
                             coordinator.build()
                         }
+                        .navigationDestination(for: UserProfileCoordinator.self) { coordinator in
+                            coordinator.build()
+                        }
                 })
         }
         .environmentObject(appCoordinator)

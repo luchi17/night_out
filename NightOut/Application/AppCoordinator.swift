@@ -43,9 +43,15 @@ final class AppCoordinator: ObservableObject {
             goToLogin: {
                 self.pop()
             },
+            showPostUserProfileView: showPostUserProfileView,
             onShowPostComments: showPostComments
         )
         self.push(tabBarCoordinator)
+    }
+    
+    private func showPostUserProfileView(info: UserProfileInfo) {
+        let postUserProfileView = UserProfileCoordinator(actions: .init(), info: info)
+        self.push(postUserProfileView)
     }
     
     private func showRegisterUserView() {

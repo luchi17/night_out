@@ -7,7 +7,7 @@ struct PostModel: Hashable {
     var description: String?
     var location: String?
     var username: String?
-    var publisherName: String?
+    var fullName: String?
     var uid: String
     var isFromUser: Bool
     var publisherId: String
@@ -69,13 +69,14 @@ struct PostView: View {
             }
             
             VStack(alignment: .leading, spacing: 5) {
-                Text(model.username ?? "Unknown")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .onTapGesture {
-                        showUserOrCompanyProfile()
-                    }
+                Button {
+                    showUserOrCompanyProfile()
+                } label: {
+                    Text(model.username ?? "Unknown")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
                 Button {
                     openMaps(model)
                 } label: {
@@ -94,15 +95,11 @@ struct PostView: View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 5) {
                 // Descripción
-                Text(model.publisherName ?? "Unknown")
+                Text(model.fullName ?? "Unknown")
                     .font(.subheadline)
                     .foregroundColor(.white)
 
                 Text(model.description ?? "Unknown")
-                    .font(.subheadline)
-                    .foregroundColor(.white)
-                
-                Text("View all comments: TODO")
                     .font(.subheadline)
                     .foregroundColor(.white)
             }

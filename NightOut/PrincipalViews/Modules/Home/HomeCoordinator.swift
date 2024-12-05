@@ -30,6 +30,7 @@ class HomeCoordinator {
         let feedPresenter = FeedPresenterImpl(
             useCases: .init(
                 postsUseCase: PostsUseCaseImpl(repository: PostsRepositoryImpl.shared),
+                followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared), companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: feedActions
         )

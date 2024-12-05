@@ -10,7 +10,7 @@ import FirebaseStorage
 
 protocol PostDatasource {
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never>
-    func fetchFollow() -> AnyPublisher<FollowModel?, Never>
+    func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func getComments(postId: String) -> AnyPublisher<[String: CommentModel], Never>
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
 }
@@ -46,15 +46,10 @@ struct PostDatasourceImpl: PostDatasource {
         return publisher.eraseToAnyPublisher()
     }
     
-    func fetchFollow() -> AnyPublisher<FollowModel?, Never> {
+    func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never> {
         return Future<FollowModel?, Never> { promise in
-            
-            guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-                promise(.success(nil))
-                return
-            }
-            
-            let ref = FirebaseServiceImpl.shared.getFollow()
+
+            let ref = FirebaseServiceImpl.shared.getFollow().child(id)
             
             ref.getData { error, snapshot in
                 guard error == nil else {
@@ -64,11 +59,9 @@ struct PostDatasourceImpl: PostDatasource {
                 }
                 
                 do {
-                    if let allFollowModel = try snapshot?.data(as: [String: FollowModel].self) {
-                        promise(.success(allFollowModel[uid]))
-                        if let followModel = allFollowModel[uid] {
-                            UserDefaults.setFollowModel(followModel)
-                        }
+                    if let followModel = try snapshot?.data(as: FollowModel.self) {
+                        promise(.success(followModel))
+                        UserDefaults.setFollowModel(followModel)
                     } else {
                         promise(.success(nil))
                     }

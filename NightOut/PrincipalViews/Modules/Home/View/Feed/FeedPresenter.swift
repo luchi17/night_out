@@ -11,6 +11,7 @@ final class FeedViewModel: ObservableObject {
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
     @Published var headerError: ErrorState?
+    @Published var followersCount: Int = 0
     
     private var matchingPosts: [PostsUser] = []
     
@@ -29,6 +30,7 @@ final class FeedPresenterImpl: FeedPresenter {
     
     struct UseCases {
         let postsUseCase: PostsUseCase
+        let followUseCase: FollowUseCase
         let userDataUseCase: UserDataUseCase
         let companyDataUseCase: CompanyDataUseCase
     }
@@ -36,7 +38,7 @@ final class FeedPresenterImpl: FeedPresenter {
     struct Actions {
         let onOpenMaps: InputClosure<(Double, Double)>
         let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
-        let onShowUserProfile: InputClosure<UserModel>
+        let onShowUserProfile: InputClosure<UserProfileInfo>
         let onShowCompanyProfile: InputClosure<CompanyModel>
         let onShowPostComments: InputClosure<PostCommentsInfo>
         
@@ -75,14 +77,19 @@ final class FeedPresenterImpl: FeedPresenter {
         let userPostsPublisher = input
             .viewDidLoad
             .withUnretained(self)
-            .flatMap({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
-                presenter.useCases.postsUseCase.fetchFollow()
+            .flatMapLatest({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just(nil).eraseToAnyPublisher()
+                }
+                return presenter.useCases.followUseCase.fetchFollow(id: uid)
             })
-            .handleEvents(receiveRequest: { [weak self] _ in
+            .handleEvents(receiveOutput: { [weak self] output in
+                self?.viewModel.followersCount = output?.followers?.count ?? 0
+            },receiveRequest: { [weak self] _ in
                 self?.viewModel.loading = true
             })
             .withUnretained(self)
-            .flatMap({ presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
+            .flatMapLatest({ presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
                 presenter.useCases.postsUseCase.fetchPosts()
                     .map { posts in
                         let matchingPosts = posts.filter { post in
@@ -96,7 +103,7 @@ final class FeedPresenterImpl: FeedPresenter {
             .eraseToAnyPublisher()
         
         userPostsPublisher
-            .flatMap({ presenter, userPosts ->  AnyPublisher<[PostModel], Never> in
+            .flatMapLatest({ presenter, userPosts ->  AnyPublisher<[PostModel], Never> in
                 let publishers: [AnyPublisher<PostModel, Never>] = userPosts.map { post in
                     
                     if post.isFromUser ?? true {
@@ -159,8 +166,15 @@ final class FeedPresenterImpl: FeedPresenter {
         input
             .showUserOrCompanyProfile
             .withUnretained(self)
-            .sink { presenter, uid in
-                //TODO
+            .sink { presenter, model in
+                let profileInfo = UserProfileInfo(
+                    profileId: model.publisherId,
+                    profileImageUrl: model.profileImageUrl,
+                    followersCount: String(presenter.viewModel.followersCount),
+                    username: model.username ?? "Unknown",
+                    fullName: model.fullName ?? "Unknown"
+                )
+                presenter.actions.onShowUserProfile(profileInfo)
             }
             .store(in: &cancellables)
         
@@ -187,7 +201,7 @@ private extension FeedPresenterImpl {
     func getPostFromUserInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
         return useCases.userDataUseCase.getUserInfo(uid: post.publisherId)
             .withUnretained(self)
-            .flatMap({ presenter, userInfo in
+            .flatMapLatest({ presenter, userInfo in
                 presenter.getPostImagePublisher(image: post.postImage)
                     .map( { (userInfo, $0) })
             })
@@ -201,7 +215,7 @@ private extension FeedPresenterImpl {
                     description: post.description,
                     location: presenter.getClubNameByPostLocation(postLocation: post.location),
                     username: userInfo?.username,
-                    publisherName: userInfo?.fullname,
+                    fullName: userInfo?.fullname,
                     uid: post.postID,
                     isFromUser: post.isFromUser ?? true,
                     publisherId: post.publisherId
@@ -213,7 +227,7 @@ private extension FeedPresenterImpl {
     func getPostFromCompanyInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
         useCases.companyDataUseCase.getCompanyInfo(uid: post.publisherId)
             .withUnretained(self)
-            .flatMap({ presenter, companyInfo in
+            .flatMapLatest({ presenter, companyInfo in
                 presenter.getPostImagePublisher(image: post.postImage)
                     .map( { (companyInfo, $0) })
             })
@@ -227,7 +241,7 @@ private extension FeedPresenterImpl {
                     description: post.description,
                     location: presenter.getLocationFromCompanyPost(postLocation: post.location, companylocation: companyInfo?.location),
                     username: companyInfo?.username,
-                    publisherName: companyInfo?.fullname,
+                    fullName: companyInfo?.fullname,
                     uid: post.postID,
                     isFromUser: post.isFromUser ?? false,
                     publisherId: post.publisherId
@@ -294,45 +308,3 @@ private extension FeedPresenterImpl {
     
     
 }
-
-//
-//    private fun openUserProfile(publisherID: String, username: String, ) {
-//        CoroutineScope(Dispatchers.Main).launch {
-//            // Obtener el número de seguidores de manera asíncrona
-//            val followersCount = getUserFollowersCount(publisherID)
-//
-//            // Crear el fragmento y pasarle los argumentos
-//            val fragment = ViewUserProfile().apply {
-//                arguments = Bundle().apply {
-//                    putString("publisherID", publisherID)
-//                    putInt("followersCount", followersCount)
-//                    putString("profileImageUrl", profileImageUrl)  // Usar la variable global
-//                    putString("username", username)  // Pasar el nombre de usuario
-//
-//                }
-//            }
-//
-//            // Reemplazar el fragmento actual con el nuevo
-//            (context as FragmentActivity).supportFragmentManager.beginTransaction()
-//                .replace(R.id.fragment_container, fragment)
-//                .addToBackStack(null)
-//                .commit()
-//        }
-//    }
-//
-
-//suspend fun getUserFollowersCount(publisherID: String): Int {
-//        return try {
-//            // Referencia al nodo 'Follow' donde está el nodo 'Followers' para el publisherID
-//            val followersSnapshot = FirebaseDatabase.getInstance()
-//                .getReference("Follow")
-//                .child(publisherID)
-//                .child("Followers")
-//                .get()
-//                .await()
-//            followersSnapshot.childrenCount.toInt()
-//        } catch (e: Exception) {
-//            // Manejo de excepciones, retornando 0 en caso de error
-//            0
-//        }
-//    }
