@@ -82,7 +82,8 @@ extension KingFisherImage {
             with: KF.ImageResource(downloadURL: url),
             options: [
                 .scaleFactor(scaleFactor ?? 1),
-                .fromMemoryCacheOrRefresh
+                .fromMemoryCacheOrRefresh,
+                .cacheMemoryOnly
             ],
             completionHandler: { result in
                 switch result {

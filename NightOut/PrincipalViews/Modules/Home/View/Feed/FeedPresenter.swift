@@ -83,9 +83,7 @@ final class FeedPresenterImpl: FeedPresenter {
                 }
                 return presenter.useCases.followUseCase.fetchFollow(id: uid)
             })
-            .handleEvents(receiveOutput: { [weak self] output in
-                self?.viewModel.followersCount = output?.followers?.count ?? 0
-            },receiveRequest: { [weak self] _ in
+            .handleEvents(receiveRequest: { [weak self] _ in
                 self?.viewModel.loading = true
             })
             .withUnretained(self)
@@ -170,7 +168,6 @@ final class FeedPresenterImpl: FeedPresenter {
                 let profileInfo = UserProfileInfo(
                     profileId: model.publisherId,
                     profileImageUrl: model.profileImageUrl,
-                    followersCount: String(presenter.viewModel.followersCount),
                     username: model.username ?? "Unknown",
                     fullName: model.fullName ?? "Unknown"
                 )
