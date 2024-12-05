@@ -100,3 +100,5 @@ struct CounterView: View {
         .padding(.horizontal, 8)
     }
 }
+
+
