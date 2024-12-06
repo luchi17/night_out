@@ -17,8 +17,9 @@ public struct KingFisherImage: View {
         KFImage(url)
             .placeholder({ placeholder })
             .fromMemoryCacheOrRefresh()
-            .waitForCache()
+            .cacheOriginalImage()
             .resizable()
+            .waitForCache()
             .onSuccess(onSuccessCallback)
     }
 }
@@ -78,22 +79,28 @@ public extension KingFisherImage {
 
 extension KingFisherImage {
     private static func fetchImage(url: URL, scaleFactor: CGFloat? = nil, completion: ((Result<UIImage?, Never>) -> Void)?) {
-        KingfisherManager.shared.retrieveImage(
-            with: KF.ImageResource(downloadURL: url),
-            options: [
-                .scaleFactor(scaleFactor ?? 1),
-                .fromMemoryCacheOrRefresh,
-                .cacheMemoryOnly
-            ],
-            completionHandler: { result in
-                switch result {
-                case .success(let image):
-                    completion?(.success(image.image))
-                case .failure:
-                    completion?(.success(nil))
+        DispatchQueue.main.async {
+            KingfisherManager.shared.retrieveImage(
+                with: KF.ImageResource(downloadURL: url),
+                options: [
+    //                .scaleFactor(scaleFactor ?? 1),
+                    .fromMemoryCacheOrRefresh,
+                    .cacheMemoryOnly,
+                    .scaleFactor(UIScreen.main.scale),
+                    .transition(.fade(0.2)),
+                    .backgroundDecode
+                ],
+                completionHandler: { result in
+                    switch result {
+                    case .success(let image):
+                        completion?(.success(image.image))
+                    case .failure:
+                        completion?(.success(nil))
+                    }
                 }
-            }
-        )
+            )
+        }
+       
     }
     
     public static func fetchImagePublisher(url: URL, scaleFactor: CGFloat? = nil) -> AnyPublisher<UIImage?, Never> {

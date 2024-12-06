@@ -2,15 +2,15 @@ import Foundation
 
 struct NotificationModel: Codable {
     var ispost: Bool
-    var postid: String
+    var postId: String
     var text: String
-    var userid: String
+    var userId: String
     
     init(ispost: Bool, postid: String, text: String, userid: String) {
         self.ispost = ispost
-        self.postid = postid
+        self.postId = postid
         self.text = text
-        self.userid = userid
+        self.userId = userid
     }
 }
 

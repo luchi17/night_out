@@ -46,6 +46,11 @@ struct ContentView: View {
                                 .build()
                                 .showCustomBackButtonNavBar()
                         }
+                        .navigationDestination(for: NotificationsCoordinator.self) { coordinator in
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
+                        }
                 })
         }
         .environmentObject(appCoordinator)

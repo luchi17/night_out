@@ -63,7 +63,7 @@ struct CommentsView: View {
     var topView: some View {
         VStack(spacing: 0) {
             Text("Comentarios")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.white)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)

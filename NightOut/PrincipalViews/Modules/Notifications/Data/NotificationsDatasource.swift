@@ -33,7 +33,6 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
         
     }
     
-#warning("checkNotifications")
     func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never> {
         return Future<[String: NotificationModel], Never> { promise in
             let ref = FirebaseServiceImpl.shared.getNotifications().child(publisherId)

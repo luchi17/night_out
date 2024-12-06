@@ -44,9 +44,15 @@ final class AppCoordinator: ObservableObject {
                 self.pop()
             },
             showPostUserProfileView: showPostUserProfileView,
-            onShowPostComments: showPostComments
+            onShowPostComments: showPostComments,
+            showNotificationsView: showNotificationsView
         )
         self.push(tabBarCoordinator)
+    }
+    
+    private func showNotificationsView() {
+        let notificationsView = NotificationsCoordinator(actions: .init())
+        self.push(notificationsView)
     }
     
     private func showPostUserProfileView(info: UserPostProfileInfo) {
