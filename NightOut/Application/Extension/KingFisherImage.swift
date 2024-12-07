@@ -16,11 +16,13 @@ public struct KingFisherImage: View {
     public var body: some View {
         KFImage(url)
             .placeholder({ placeholder })
-            .fromMemoryCacheOrRefresh()
-            .cacheOriginalImage()
+            .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 200, height: 200)))
             .resizable()
+            .fromMemoryCacheOrRefresh()
+            .cacheMemoryOnly() // Cache images in memory
             .waitForCache()
             .onSuccess(onSuccessCallback)
+        
     }
 }
 

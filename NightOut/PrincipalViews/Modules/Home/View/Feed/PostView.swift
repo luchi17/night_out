@@ -50,6 +50,8 @@ struct PostView: View {
                 KingFisherImage(url: URL(string: profileImageUrl))
                     .placeholder({
                         Image("placeholder")
+                            .resizable()
+                            .scaledToFill()
                             .clipShape(Circle())
                             .frame(width: 50, height: 50, alignment: .leading)
                             .clipped()
