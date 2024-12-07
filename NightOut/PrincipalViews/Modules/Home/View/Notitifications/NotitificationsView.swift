@@ -31,13 +31,14 @@ struct NotificationsView: View {
 
             Divider()
                 .background(Color.white)
-                .padding(.vertical, 8)
+                .frame(height: 2)
+                .padding(.vertical, 4)
             
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach(viewModel.notifications.reversed(), id: \.uid) { notification in
                         if notification.type == .friendRequest {
-                            FriendRequestView(
+                            FriendRequestNotificationView(
                                 notification: notification,
                                 onAccept: onAcceptPublisher.send,
                                 onReject: onRejectPublisher.send,
@@ -52,13 +53,12 @@ struct NotificationsView: View {
                         }
                     }
                 }
-//                .padding()
+                .padding(.all, 12)
             }
-            .padding(.bottom, 5)
             
             Spacer()
         }
-        .background(Color.blue)
+        .background(Color.black.opacity(0.7))
         .onAppear {
             viewDidLoadPublisher.send()
         }

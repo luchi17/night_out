@@ -1,5 +1,6 @@
 import SwiftUI
 
+#warning("CHECK POST notification when adding posts with code done")
 
 struct NotificationModelForView {
     var isPost: Bool
@@ -14,7 +15,7 @@ struct NotificationModelForView {
 }
 
 
-struct FriendRequestView: View {
+struct FriendRequestNotificationView: View {
     var notification: NotificationModelForView
     var onAccept: InputClosure<String>
     var onReject: InputClosure<String>
@@ -28,7 +29,7 @@ struct FriendRequestView: View {
                     goToProfile(notification.userId)
                 }
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(notification.userName)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
@@ -36,9 +37,10 @@ struct FriendRequestView: View {
                     .fontWeight(.medium)
                     .foregroundColor(.white)
             }
+            .padding(.vertical, 5)
            
             if notification.type == .friendRequest {
-                HStack {
+                HStack(spacing: 8) {
                     Button(action: { onReject(notification.userId) }) {
                         Text("X")
                             .font(.system(size: 18))
@@ -47,7 +49,8 @@ struct FriendRequestView: View {
                             .background(Color.red)
                             .cornerRadius(20)
                     }
-                    .padding(.leading)
+                    .padding(.trailing, 8)
+                    
                     
                     Button(action: { onAccept(notification.userId) } ) {
                         Text("✓")
@@ -57,12 +60,12 @@ struct FriendRequestView: View {
                             .background(Color.green)
                             .cornerRadius(20)
                     }
-                    .padding(.leading)
+                    
                 }
             }
         }
-        .padding()
-        .background(Color.black.opacity(0.7))
+        .padding(.all, 8)
+        .background(Color.black.opacity(0.5))
         .cornerRadius(10)
     }
 }
@@ -81,7 +84,7 @@ struct DefaultNotificationView: View {
                     goToProfile(notification.userId)
                 }
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(notification.userName)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
@@ -89,6 +92,7 @@ struct DefaultNotificationView: View {
                     .fontWeight(.medium)
                     .foregroundColor(.white)
             }
+            .padding(.vertical, 5)
             
             Spacer()
             
@@ -97,7 +101,6 @@ struct DefaultNotificationView: View {
                     .resizable()
                     .scaledToFill()
                     .frame(width: 60, height: 60)
-                    .padding(.trailing)
                     .onTapGesture {
                         goToPost(notification.postId)
                     }
@@ -107,14 +110,13 @@ struct DefaultNotificationView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 60, height: 60)
                     .clipped()
-                    .padding(.trailing)
                     .onTapGesture {
                         goToPost(notification.postId)
                     }
                     
             }
         }
-        .padding(6)
+        .padding(.all, 8)
         .background(Color.black.opacity(0.5)) // Agregar un fondo oscuro para resaltar el contenido
         .cornerRadius(10)
     }
@@ -127,14 +129,16 @@ struct CircleImage: View {
         if let imageUrl = imageUrl, let url = URL(string: imageUrl) {
             KingFisherImage(url: url)
                 .resizable()
-                .aspectRatio(contentMode: .fill)
+                .placeholder(Image("placeholder"))
+                .scaledToFill()
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
                 .frame(width: 60, height: 60)
         } else {
-            Image(systemName: "person.crop.circle") //person.circle.fill"
+            Image(systemName: "person.circle.fill") //person.circle.fill"
                 .resizable()
                 .aspectRatio(contentMode: .fill)
+                .foregroundStyle(.white)
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
                 .frame(width: 60, height: 60)
