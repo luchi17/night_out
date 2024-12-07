@@ -6,6 +6,8 @@ protocol PostsRepository {
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func getComments(postId: String) -> AnyPublisher<[String : CommentModel], Never>
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
+    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never>
+    func rejectFollowRequest(requesterUid: String)
 }
 
 struct PostsRepositoryImpl: PostsRepository {
@@ -45,5 +47,13 @@ struct PostsRepositoryImpl: PostsRepository {
             .eraseToAnyPublisher()
     }
     
+    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never> {
+        return network
+            .acceptFollowRequest(requesterUid: requesterUid)
+            .eraseToAnyPublisher()
+    }
     
+    func rejectFollowRequest(requesterUid: String) {
+        network.rejectFollowRequest(requesterUid: requesterUid)
+    }
 }

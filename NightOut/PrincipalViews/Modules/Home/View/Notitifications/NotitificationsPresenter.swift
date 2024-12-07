@@ -10,7 +10,7 @@ enum NotificationType {
 final class NotificationsViewModel: ObservableObject {
     @Published var notifications: [NotificationModelForView] = []
     @Published var loading: Bool = false
-    @Published var headerError: ErrorState?
+    @Published var toast: ToastType?
 }
 
 protocol NotificationsPresenter {
@@ -23,6 +23,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
     struct UseCases {
         let notificationsUseCase: NotificationsUseCase
         let userDataUseCase: UserDataUseCase
+        let followUseCase: FollowUseCase
     }
     
     struct Actions {
@@ -30,8 +31,8 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
-        let accept: AnyPublisher<String, Never>
-        let reject: AnyPublisher<String, Never>
+        let accept: AnyPublisher<(String, String), Never>
+        let reject: AnyPublisher<(String, String), Never>
     }
     
     var viewModel: NotificationsViewModel
@@ -68,12 +69,12 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
             .withUnretained(self)
             .flatMap({ presenter, notificationsModel ->  AnyPublisher<[NotificationModelForView], Never> in
                 
-                let publishers: [AnyPublisher<NotificationModelForView, Never>] = notificationsModel.values.map { model in
+                let publishers: [AnyPublisher<NotificationModelForView, Never>] = notificationsModel.map { data in
 
-                    if let companyFound = UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == model.userid }) {
-                        presenter.getNotificationFromCompany(model: model, companyFound: companyFound)
+                    if let companyFound = UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == data.value.userid }) {
+                        presenter.getNotificationFromCompany(notificationId: data.key, model: data.value, companyFound: companyFound)
                     } else {
-                        presenter.getNotificationFromUser(model: model)
+                        presenter.getNotificationFromUser(notificationId: data.key, model: data.value)
                     }
                 }
                 
@@ -87,155 +88,147 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 presenter.viewModel.notifications = notifications
             }
             .store(in: &cancellables)
+        
+        
+        input
+            .accept
+            .sink { values in
+                print("GGGGGG")
+            }
+            .store(in: &cancellables)
+        
+        input
+            .accept
+            .withUnretained(self)
+            .flatMap { presenter, data in
+                let notificationId = data.0
+                let requesterUid = data.1
+                
+                return presenter.useCases.followUseCase.acceptFollowRequest(requesterUid: requesterUid)
+                    .map { success in
+                        (notificationId, success)
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .withUnretained(self)
+            .sink(receiveValue: { presenter, data in
+                let notificationId = data.0
+                let success = data.1
+                
+                if success {
+                    presenter.viewModel.toast = ToastType.success(.init(title: "Solicitud aceptada", description: "", image: nil))
+                    presenter.useCases.notificationsUseCase.removeNotification(notificationId: notificationId)
+                    presenter.viewModel.notifications = presenter.viewModel.notifications
+                        .filter({ $0.notificationId != notificationId })
+                   
+                } else {
+                    presenter.viewModel.toast = ToastType.defaultError
+                }
+                
+            })
+            .store(in: &cancellables)
+        
+        
+        input
+            .reject
+            .withUnretained(self)
+            .sink { presenter, data in
+                let notificationId = data.0
+                let requesterUid = data.1
+                
+                presenter.useCases.followUseCase.rejectFollowRequest(requesterUid: requesterUid)
+                presenter.viewModel.toast = ToastType.success(.init(title: "Solicitud rechazada", description: "", image: nil))
+                presenter.useCases.notificationsUseCase.removeNotification(notificationId: notificationId)
+                presenter.viewModel.notifications = presenter.viewModel.notifications
+                    .filter({ $0.notificationId != notificationId })
+               
+
+            }
+            .store(in: &cancellables)
+        
+        
+//        holder.buttonAccept.setOnClickListener {
+//                            acceptFollowRequest(notification.getUserId()) // Aceptar solicitud
+//                            showToast("Solicitud aceptada")
+//                            removeNotificationFromFirebase(notification.getUserId()) // Eliminar notificación
+//                            removeNotification(position) // Eliminar de la lista local
+//                        }
+//
+//                        holder.buttonReject.setOnClickListener {
+//                            rejectFollowRequest(notification.getUserId()) // Rechazar solicitud
+//                            showToast("Solicitud rechazada")
+//                            removeNotificationFromFirebase(notification.getUserId()) // Eliminar notificación
+//                            removeNotification(position) // Eliminar de la lista local
+//                        }
     }
-    
-//    func acceptFollowRequest(requesterUid: String) {
-//        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-//        
-//        // El solicitante sigue al usuario actual
-//        let followRef = Database.database().reference().child("Follow").child(currentUserId).child("Followers").child(requesterUid)
-//        followRef.setValue(true) { error, _ in
-//            if error == nil {
-//                // El usuario actual sigue al solicitante
-//                let reverseFollowRef = Database.database().reference().child("Follow").child(requesterUid).child("Following").child(currentUserId)
-//                reverseFollowRef.setValue(true) { error, _ in
-//                    if error == nil {
-//                        self.removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
-//                    }
-//                }
-//            }
-//        }
-//    }
 }
 
 
 private extension NotificationsPresenterImpl {
     
-    func getNotificationFromCompany(model: NotificationModel, companyFound: CompanyModel) -> AnyPublisher<NotificationModelForView, Never> {
+    func getNotificationFromCompany(notificationId: String, model: NotificationModel, companyFound: CompanyModel) -> AnyPublisher<NotificationModelForView, Never> {
         let modelView = NotificationModelForView(
             isPost: model.ispost,
             text: model.text,
             userName: companyFound.username ?? "Unknown",
-            type: model.text == "Solicitud de seguimiento" ? .friendRequest : .typedefault,
+            type: model.text == GlobalStrings.shared.followUserText ? .friendRequest : .typedefault,
             profileImage: companyFound.imageUrl,
             postImage: nil,
             userId: model.userid,
-            postId: model.postid
+            postId: model.postid,
+            notificationId: notificationId
         )
         
         return Just(modelView)
             .eraseToAnyPublisher()
     }
     
-    func getNotificationFromUser(model: NotificationModel) -> AnyPublisher<NotificationModelForView, Never> {
+    func getNotificationFromUser(notificationId: String, model: NotificationModel) -> AnyPublisher<NotificationModelForView, Never> {
         return useCases.userDataUseCase.getUserInfo(uid: model.userid)
             .map { userModel in
                 let modelView = NotificationModelForView(
                     isPost: model.ispost,
                     text: model.text,
                     userName: userModel?.username ?? "Unknown",
-                    type: model.text == "Solicitud de seguimiento" ? .friendRequest : .typedefault,
+                    type: model.text == GlobalStrings.shared.followUserText ? .friendRequest : .typedefault,
                     profileImage: userModel?.image,
                     postImage: nil,
                     userId: model.userid,
-                    postId: model.postid
+                    postId: model.postid,
+                    notificationId: notificationId
                 )
                 
                 return modelView
             }
             .eraseToAnyPublisher()
     }
+
 }
 
-//class NotificationAdapter: ObservableObject {
-//    @Published var notifications: [NotificationModel] = []
-//    
-//    private var dbRef: DatabaseReference!
-//    
-//    init() {
-//        self.dbRef = Database.database().reference().child("Notifications")
-//        readNotifications()
-//    }
-//    
-//    // Función para aceptar solicitud de seguimiento
-//    func acceptFollowRequest(requesterUid: String) {
-//        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-//        
-//        // El solicitante sigue al usuario actual
-//        let followRef = Database.database().reference().child("Follow").child(currentUserId).child("Followers").child(requesterUid)
-//        followRef.setValue(true) { error, _ in
-//            if error == nil {
-//                // El usuario actual sigue al solicitante
-//                let reverseFollowRef = Database.database().reference().child("Follow").child(requesterUid).child("Following").child(currentUserId)
-//                reverseFollowRef.setValue(true) { error, _ in
-//                    if error == nil {
-//                        self.removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    
-//    func rejectFollowRequest(requesterUid: String) {
-//        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-//        
-//        // Eliminar solicitud pendiente
-//        removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
-//    }
-//    
-//    // Eliminar la solicitud pendiente de seguimiento
-//    private func removePendingRequest(requesterUid: String, currentUserId: String) {
-//        let pendingRef = Database.database().reference().child("Follow").child(currentUserId).child("Pending").child(requesterUid)
-//        pendingRef.removeValue()
-//    }
-//    
-//    // Función para eliminar notificación de Firebase
-//    func removeNotificationFromFirebase(requesterUid: String) {
-//        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-//        
-//        let notificationRef = Database.database().reference().child("Notifications").child(currentUserId)
-//        notificationRef.observeSingleEvent(of: .value) { snapshot in
-//            for child in snapshot.children {
-//                if let childSnapshot = child as? DataSnapshot,
-//                   let notification = childSnapshot.value as? [String: Any],
-//                   let notificationUserId = notification["userId"] as? String,
-//                   notificationUserId == requesterUid,
-//                   notification["text"] as? String == "Solicitud de seguimiento" {
-//                    childSnapshot.ref.removeValue()
-//                    break
-//                }
-//            }
-//        }
-//    }
-//    
-//}
-//
-//
-//struct PostImageView: View {
-//    var postId: String
-//    
-//    var body: some View {
-//        WebImage(url: URL(string: "https://example.com/postImage/\(postId)"))
-//            .resizable()
-//            .scaledToFit()
-//            .frame(width: 100, height: 100)
-//            .placeholder {
-//                ProgressView()
-//            }
-//    }
-//}
-//
-//struct ProfileImageView: View {
-//    var userId: String
-//    
-//    var body: some View {
-//        WebImage(url: URL(string: "https://example.com/profileImage/\(userId)"))
-//            .resizable()
-//            .scaledToFit()
-//            .frame(width: 50, height: 50)
-//            .clipShape(Circle())
-//            .placeholder {
-//                ProgressView()
-//            }
-//    }
+
+//"VHN8c6ifU9g1A3EQB2sPykGytxw1": {
+//  "-O0eztFlQHzkyp9Dt9A9": {
+//    "ispost": false,
+//    "postid": "",
+//    "text": "Solicitud de seguimiento",
+//    "userid": "2MZr2lDNdbg2419oGwHEhEtuWG53"
+//  },
+//  "-O0f-v1yW1UkQW5kEZv2": {
+//    "ispost": false,
+//    "postid": "",
+//    "text": "Solicitud de seguimiento",
+//    "userid": "1b1wOkNvb7fS2Ib9ewEeKmLCbgI2"
+//  },
+//  "-O0f-x3yvkeYCaezipNp": {
+//    "ispost": false,
+//    "postid": "",
+//    "text": "Prueba",
+//    "userid": "1b1wOkNvb7fS2Ib9ewEeKmLCbgI2"
+//  },
+//  "-O0f-zTvN2Fcc5w1XShf": {
+//    "ispost": true,
+//    "postid": "",
+//    "text": "hola soy una nueva empresa",
+//    "userid": "1b1wOkNvb7fS2Ib9ewEeKmLCbgI2"
+//  }
 //}

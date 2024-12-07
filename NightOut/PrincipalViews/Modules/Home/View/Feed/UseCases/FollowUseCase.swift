@@ -3,6 +3,8 @@ import FirebaseAuth
 
 protocol FollowUseCase {
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
+    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never>
+    func rejectFollowRequest(requesterUid: String)
 }
 
 struct FollowUseCaseImpl: FollowUseCase {
@@ -16,6 +18,16 @@ struct FollowUseCaseImpl: FollowUseCase {
         return repository
             .fetchFollow(id: id)
             .eraseToAnyPublisher()
+    }
+    
+    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never> {
+        return repository
+            .acceptFollowRequest(requesterUid: requesterUid)
+            .eraseToAnyPublisher()
+    }
+    
+    func rejectFollowRequest(requesterUid: String) {
+        repository.rejectFollowRequest(requesterUid: requesterUid)
     }
 }
 

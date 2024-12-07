@@ -11,18 +11,18 @@ struct NotificationModelForView {
     var postImage: String?
     var userId: String
     var postId: String
-    let uid = UUID()
+    let notificationId: String
 }
 
 
 struct FriendRequestNotificationView: View {
     var notification: NotificationModelForView
-    var onAccept: InputClosure<String>
-    var onReject: InputClosure<String>
+    var onAccept: InputClosure<(String, String)>
+    var onReject: InputClosure<(String, String)>
     var goToProfile: InputClosure<String>
     
     var body: some View {
-        HStack {
+        HStack(alignment: .center, spacing: 10) {
             // Imagen de perfil
             CircleImage(imageUrl: notification.profileImage)
                 .onTapGesture {
@@ -33,38 +33,42 @@ struct FriendRequestNotificationView: View {
                 Text(notification.userName)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-                Text("Solicitud de seguimiento")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(GlobalStrings.shared.followUserText)
                     .fontWeight(.medium)
                     .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 5)
            
+            Spacer()
+            
             if notification.type == .friendRequest {
                 HStack(spacing: 8) {
-                    Button(action: { onReject(notification.userId) }) {
+                    Button(action: {
+                        onReject((notification.notificationId, notification.userId))
+                    }) {
                         Text("X")
-                            .font(.system(size: 18))
-                            .frame(width: 40, height: 40)
+                            .font(.system(size: 20))
+                            .frame(width: 45, height: 45)
                             .foregroundColor(.white)
                             .background(Color.red)
-                            .cornerRadius(20)
                     }
-                    .padding(.trailing, 8)
                     
-                    
-                    Button(action: { onAccept(notification.userId) } ) {
+                    Button(action: {
+                        onAccept((notification.notificationId, notification.userId))
+                    } ) {
                         Text("✓")
-                            .font(.system(size: 18))
-                            .frame(width: 40, height: 40)
+                            .font(.system(size: 20))
+                            .frame(width: 45, height: 45)
                             .foregroundColor(.white)
                             .background(Color.green)
-                            .cornerRadius(20)
                     }
                     
                 }
             }
         }
-        .padding(.all, 8)
+        .padding(.all, 10)
         .background(Color.black.opacity(0.5))
         .cornerRadius(10)
     }
@@ -88,9 +92,11 @@ struct DefaultNotificationView: View {
                 Text(notification.userName)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Text(notification.text)
                     .fontWeight(.medium)
                     .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 5)
             
@@ -116,7 +122,7 @@ struct DefaultNotificationView: View {
                     
             }
         }
-        .padding(.all, 8)
+        .padding(.all, 10)
         .background(Color.black.opacity(0.5)) // Agregar un fondo oscuro para resaltar el contenido
         .cornerRadius(10)
     }

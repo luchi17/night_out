@@ -4,8 +4,8 @@ import Combine
 struct NotificationsView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
-    private let onAcceptPublisher = PassthroughSubject<String, Never>()
-    private let onRejectPublisher = PassthroughSubject<String, Never>()
+    private let onAcceptPublisher = PassthroughSubject<(String, String), Never>()
+    private let onRejectPublisher = PassthroughSubject<(String, String), Never>()
     private let goToPostPublisher = PassthroughSubject<String, Never>()
     private let goToProfilePublisher = PassthroughSubject<String, Never>()
     
@@ -36,7 +36,7 @@ struct NotificationsView: View {
             
             ScrollView {
                 VStack(spacing: 10) {
-                    ForEach(viewModel.notifications.reversed(), id: \.uid) { notification in
+                    ForEach(viewModel.notifications.reversed(), id: \.notificationId) { notification in
                         if notification.type == .friendRequest {
                             FriendRequestNotificationView(
                                 notification: notification,

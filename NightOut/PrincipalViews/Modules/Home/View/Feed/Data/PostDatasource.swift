@@ -13,6 +13,8 @@ protocol PostDatasource {
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func getComments(postId: String) -> AnyPublisher<[String: CommentModel], Never>
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
+    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never>
+    func rejectFollowRequest(requesterUid: String)
 }
 
 struct PostDatasourceImpl: PostDatasource {
@@ -41,14 +43,14 @@ struct PostDatasourceImpl: PostDatasource {
                 publisher.send([:])
             }
             
-           
+            
         }
         return publisher.eraseToAnyPublisher()
     }
     
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never> {
         return Future<FollowModel?, Never> { promise in
-
+            
             let ref = FirebaseServiceImpl.shared.getFollow().child(id)
             
             ref.getData { error, snapshot in
@@ -120,5 +122,60 @@ struct PostDatasourceImpl: PostDatasource {
         .eraseToAnyPublisher()
         
     }
+    
+    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never> {
+        
+        return Future<Bool, Never> { promise in
+            
+            guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                return promise(.success(false))
+            }
+            
+            let ref = FirebaseServiceImpl.shared.getFollow().child(currentUserId).child("Followers").child(requesterUid)
+            
+            ref.setValue(true) { error, _ in
+                if let error = error {
+                    print("Error al guardar el comentario en la base de datos: \(error.localizedDescription)")
+                    promise(.success(false))
+                } else {
+                    print("Comentario guardado exitosamente en la base de datos")
+                    let reverseFollowRef = FirebaseServiceImpl.shared.getFollow().child(requesterUid).child("Following").child(currentUserId)
+                    reverseFollowRef.setValue(true) { error, _ in
+                        if error == nil {
+                            self.removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
+                            promise(.success(true))
+                        } else {
+                            promise(.success(false))
+                        }
+                    }
+                }
+                
+                //                    if error == nil {
+                //                        // El usuario actual sigue al solicitante
+                //                        let reverseFollowRef = Database.database().reference().child("Follow").child(requesterUid).child("Following").child(currentUserId)
+                //                        reverseFollowRef.setValue(true) { error, _ in
+                //                            if error == nil {
+                //                                self.removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
+                //                            }
+                //                        }
+                //                    }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func rejectFollowRequest(requesterUid: String) {
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        
+        removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
+    }
+    
+    // Eliminar la solicitud pendiente de seguimiento
+    private func removePendingRequest(requesterUid: String, currentUserId: String) {
+        let pendingRef = FirebaseServiceImpl.shared.getFollow().child(currentUserId).child("Pending").child(requesterUid)
+        pendingRef.removeValue()
+    }
+    
+    
     
 }

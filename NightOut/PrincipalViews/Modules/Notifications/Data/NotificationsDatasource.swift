@@ -9,6 +9,7 @@ import FirebaseStorage
 protocol NotificationsDatasource {
     func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
+    func removeNotificationFromFirebase(notificationId: String)
 }
 
 struct NotificationsDatasourceImpl: NotificationsDatasource {
@@ -58,4 +59,28 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
         }
         .eraseToAnyPublisher()
     }
+    
+    #warning("check working")
+    func removeNotificationFromFirebase(notificationId: String) {
+        
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        
+        let ref = FirebaseServiceImpl.shared.getNotifications().child(currentUserId).child(notificationId)
+        
+        ref.removeValue()
+        
+        //        notificationRef.observeSingleEvent(of: .value) { snapshot in
+        //            for child in snapshot.children {
+        //                if let childSnapshot = child as? DataSnapshot,
+        //                   let notification = childSnapshot.value as? [String: Any],
+        //                   let notificationUserId = notification["userId"] as? String,
+        //                   notificationUserId == requesterUid,
+        //                   notification["text"] as? String == "Solicitud de seguimiento" {
+        //                    childSnapshot.ref.removeValue()
+        //                    break
+        //                }
+        //            }
+        //        }
+    }
 }
+

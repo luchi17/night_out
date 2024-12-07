@@ -27,7 +27,8 @@ class NotificationsCoordinator: ObservableObject, Hashable {
         let presenter = NotificationsPresenterImpl(
             useCases: .init(
                 notificationsUseCase: NotificationsUseCaseImpl(repository: NotificationsRepositoryImpl.shared),
-                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
+                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared)
             ),
             actions: actions
         )
