@@ -149,16 +149,6 @@ struct PostDatasourceImpl: PostDatasource {
                         }
                     }
                 }
-                
-                //                    if error == nil {
-                //                        // El usuario actual sigue al solicitante
-                //                        let reverseFollowRef = Database.database().reference().child("Follow").child(requesterUid).child("Following").child(currentUserId)
-                //                        reverseFollowRef.setValue(true) { error, _ in
-                //                            if error == nil {
-                //                                self.removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
-                //                            }
-                //                        }
-                //                    }
             }
         }
         .eraseToAnyPublisher()

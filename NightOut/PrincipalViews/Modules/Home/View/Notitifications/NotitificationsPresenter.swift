@@ -145,21 +145,6 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
 
             }
             .store(in: &cancellables)
-        
-        
-//        holder.buttonAccept.setOnClickListener {
-//                            acceptFollowRequest(notification.getUserId()) // Aceptar solicitud
-//                            showToast("Solicitud aceptada")
-//                            removeNotificationFromFirebase(notification.getUserId()) // Eliminar notificación
-//                            removeNotification(position) // Eliminar de la lista local
-//                        }
-//
-//                        holder.buttonReject.setOnClickListener {
-//                            rejectFollowRequest(notification.getUserId()) // Rechazar solicitud
-//                            showToast("Solicitud rechazada")
-//                            removeNotificationFromFirebase(notification.getUserId()) // Eliminar notificación
-//                            removeNotification(position) // Eliminar de la lista local
-//                        }
     }
 }
 
@@ -204,31 +189,3 @@ private extension NotificationsPresenterImpl {
     }
 
 }
-
-
-//"VHN8c6ifU9g1A3EQB2sPykGytxw1": {
-//  "-O0eztFlQHzkyp9Dt9A9": {
-//    "ispost": false,
-//    "postid": "",
-//    "text": "Solicitud de seguimiento",
-//    "userid": "2MZr2lDNdbg2419oGwHEhEtuWG53"
-//  },
-//  "-O0f-v1yW1UkQW5kEZv2": {
-//    "ispost": false,
-//    "postid": "",
-//    "text": "Solicitud de seguimiento",
-//    "userid": "1b1wOkNvb7fS2Ib9ewEeKmLCbgI2"
-//  },
-//  "-O0f-x3yvkeYCaezipNp": {
-//    "ispost": false,
-//    "postid": "",
-//    "text": "Prueba",
-//    "userid": "1b1wOkNvb7fS2Ib9ewEeKmLCbgI2"
-//  },
-//  "-O0f-zTvN2Fcc5w1XShf": {
-//    "ispost": true,
-//    "postid": "",
-//    "text": "hola soy una nueva empresa",
-//    "userid": "1b1wOkNvb7fS2Ib9ewEeKmLCbgI2"
-//  }
-//}
