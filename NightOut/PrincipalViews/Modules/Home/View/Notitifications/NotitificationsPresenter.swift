@@ -70,7 +70,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 
                 let publishers: [AnyPublisher<NotificationModelForView, Never>] = notificationsModel.values.map { model in
 
-                    if let companyFound = UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == model.userId }) {
+                    if let companyFound = UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == model.userid }) {
                         presenter.getNotificationFromCompany(model: model, companyFound: companyFound)
                     } else {
                         presenter.getNotificationFromUser(model: model)
@@ -119,8 +119,8 @@ private extension NotificationsPresenterImpl {
             type: model.text == "Solicitud de seguimiento" ? .friendRequest : .typedefault,
             profileImage: companyFound.imageUrl,
             postImage: nil,
-            userId: model.userId,
-            postId: model.postId
+            userId: model.userid,
+            postId: model.postid
         )
         
         return Just(modelView)
@@ -128,7 +128,7 @@ private extension NotificationsPresenterImpl {
     }
     
     func getNotificationFromUser(model: NotificationModel) -> AnyPublisher<NotificationModelForView, Never> {
-        return useCases.userDataUseCase.getUserInfo(uid: model.userId)
+        return useCases.userDataUseCase.getUserInfo(uid: model.userid)
             .map { userModel in
                 let modelView = NotificationModelForView(
                     isPost: model.ispost,
@@ -137,8 +137,8 @@ private extension NotificationsPresenterImpl {
                     type: model.text == "Solicitud de seguimiento" ? .friendRequest : .typedefault,
                     profileImage: userModel?.image,
                     postImage: nil,
-                    userId: model.userId,
-                    postId: model.postId
+                    userId: model.userid,
+                    postId: model.postid
                 )
                 
                 return modelView
