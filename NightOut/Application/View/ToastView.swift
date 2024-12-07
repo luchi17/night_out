@@ -46,7 +46,7 @@ struct ToastView: View {
                     }
                 }
                 .padding(.vertical, 10)
-                .background(Color.red.opacity(0.4), in: RoundedRectangle(cornerRadius: 10))  // Fondo azul claro
+                .background(type.backgroundColor, in: RoundedRectangle(cornerRadius: 10))  // Fondo azul claro
                 .transition(.move(edge: .top))  // Transición desde arriba
                 .zIndex(1)  // Asegura que el toast esté sobre otras vistas
             }
@@ -80,33 +80,51 @@ public class ToastDescriptor {
 }
 
 public enum ToastType {
-    case normal
+    case success(ToastDescriptor)
+    case defaultError
     case custom(ToastDescriptor)
+    
+    var backgroundColor: Color {
+        switch self {
+        case .defaultError:
+            return Color.red.opacity(0.4)
+        case .custom(let descriptor):
+            return Color.red.opacity(0.4)
+        case .success(let descriptor):
+            return Color.green.opacity(0.4)
+        }
+    }
     
     var title: String {
         switch self {
-        case .normal:
+        case .defaultError:
             return "Error"
         case .custom(let descriptor):
+            return descriptor.title
+        case .success(let descriptor):
             return descriptor.title
         }
     }
     
     var description: String {
         switch self {
-        case .normal:
+        case .defaultError:
             return "Algo salió mal."
         case .custom(let descriptor):
+            return descriptor.description
+        case .success(let descriptor):
             return descriptor.description
         }
     }
     
     var image: Image {
         switch self {
-        case .normal:
+        case .defaultError:
             return Image(systemName: "exclamationmark.triangle.fill")
         case .custom(let descriptor):
             return descriptor.image ?? Image(systemName: "exclamationmark.triangle.fill")
+        case .success(let descriptor):
+            return descriptor.image ?? Image(systemName: "checkmark")
         }
     }
 }
