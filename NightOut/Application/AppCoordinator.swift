@@ -45,7 +45,8 @@ final class AppCoordinator: ObservableObject {
             },
             showPostUserProfileView: showPostUserProfileView,
             onShowPostComments: showPostComments,
-            showNotificationsView: showNotificationsView
+            showNotificationsView: showNotificationsView,
+            showUserProfileView: showUserProfileView
         )
         self.push(tabBarCoordinator)
     }
@@ -53,6 +54,11 @@ final class AppCoordinator: ObservableObject {
     private func showNotificationsView() {
         let notificationsView = NotificationsCoordinator(actions: .init())
         self.push(notificationsView)
+    }
+    
+    private func showUserProfileView() {
+        let userprofileView = UserProfileCoordinator(actions: .init())
+        self.push(userprofileView)
     }
     
     private func showPostUserProfileView(info: UserPostProfileInfo) {

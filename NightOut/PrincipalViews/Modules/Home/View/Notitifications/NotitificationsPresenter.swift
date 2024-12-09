@@ -137,6 +137,28 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
 
             }
             .store(in: &cancellables)
+        
+        #warning("TODO")
+        
+//        holder.itemView.setOnClickListener {
+//                    // Navegación a detalles de la publicación o perfil
+//                    val editor = mContext.getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
+//                    if (notification.getIsPost()) {
+//                        editor.putString("postId", notification.getPostId())
+//                    } else {
+//                        editor.putString("profileId", notification.getUserId())
+//                    }
+//                    editor.apply()
+//
+//                    val fragment = if (notification.getIsPost()) {
+//                        PostDetailsFragment()
+//                    } else {
+//                        Profile3Fragment()
+//                    }
+//
+//                    (mContext as FragmentActivity).supportFragmentManager.beginTransaction()
+//                        .replace(R.id.fragment_container, fragment).commit()
+//                }
     }
 }
 

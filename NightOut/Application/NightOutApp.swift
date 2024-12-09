@@ -51,6 +51,11 @@ struct ContentView: View {
                                 .build()
                                 .showCustomBackButtonNavBar()
                         }
+                        .navigationDestination(for: UserProfileCoordinator.self) { coordinator in
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
+                        }
                 })
         }
         .environmentObject(appCoordinator)
