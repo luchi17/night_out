@@ -60,7 +60,7 @@ struct PostView: View {
                     .clipShape(Circle())
                     .frame(width: 50, height: 50, alignment: .leading)
                     .onTapGesture {
-                        //Show user profile
+                        showUserOrCompanyProfile()
                     }
             } else {
                 Image("placeholder")
