@@ -58,6 +58,16 @@ struct NotificationsView: View {
             
             Spacer()
         }
+        .showToast(
+            error: (
+                type: viewModel.toast,
+                showCloseButton: false,
+                onDismiss: {
+                    viewModel.toast = nil
+                }
+            ),
+            isIdle: viewModel.loading
+        )
         .background(Color.black.opacity(0.7))
         .onAppear {
             viewDidLoadPublisher.send()

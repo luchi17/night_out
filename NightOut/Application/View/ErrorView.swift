@@ -256,6 +256,7 @@ public struct DefaultIdleView: View {
     public var body: some View {
         VStack(spacing: 0) {
             ProgressView()
+                .tint(.white)
                 .padding(.top, 32)
             Spacer()
         }

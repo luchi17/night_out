@@ -89,14 +89,6 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
             }
             .store(in: &cancellables)
         
-        
-        input
-            .accept
-            .sink { values in
-                print("GGGGGG")
-            }
-            .store(in: &cancellables)
-        
         input
             .accept
             .withUnretained(self)
@@ -116,7 +108,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 let success = data.1
                 
                 if success {
-                    presenter.viewModel.toast = ToastType.success(.init(title: "Solicitud aceptada", description: "", image: nil))
+                    presenter.viewModel.toast = .success(.init(title: "Solicitud aceptada", description: nil, image: nil))
                     presenter.useCases.notificationsUseCase.removeNotification(notificationId: notificationId)
                     presenter.viewModel.notifications = presenter.viewModel.notifications
                         .filter({ $0.notificationId != notificationId })
@@ -137,7 +129,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 let requesterUid = data.1
                 
                 presenter.useCases.followUseCase.rejectFollowRequest(requesterUid: requesterUid)
-                presenter.viewModel.toast = ToastType.success(.init(title: "Solicitud rechazada", description: "", image: nil))
+                presenter.viewModel.toast = .custom(.init(title: "Solicitud rechazada", description: nil, image: (image: Image(systemName: "xmark"), color: Color.white), backgroundColor: Color.gray))
                 presenter.useCases.notificationsUseCase.removeNotification(notificationId: notificationId)
                 presenter.viewModel.notifications = presenter.viewModel.notifications
                     .filter({ $0.notificationId != notificationId })

@@ -14,19 +14,21 @@ struct ToastView: View {
                     type.image
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(.red)
+                        .foregroundColor(type.imageColor)
                         .frame(width: 24, height: 24)
                         .padding(.leading, 20)
                     
                     VStack(alignment: .leading, spacing: 10) {
                         Text(type.title)
                             .font(.headline)
-                            .foregroundColor(.red)
+                            .foregroundColor(Color.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        Text(type.description)
-                            .font(.subheadline)
-                            .foregroundColor(.red)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        if let description = type.description {
+                            Text(description)
+                                .font(.subheadline)
+                                .foregroundColor(.red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                     }
 
                     if showCloseButton, let onDismiss = onDismiss {
@@ -40,12 +42,12 @@ struct ToastView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 24, height: 24)
-                                .foregroundColor(.red)
+                                .foregroundColor(.white)
                         }
                         .padding(.trailing, 20)
                     }
                 }
-                .padding(.vertical, 10)
+                .padding(.vertical, 15)
                 .background(type.backgroundColor, in: RoundedRectangle(cornerRadius: 10))  // Fondo azul claro
                 .transition(.move(edge: .top))  // Transición desde arriba
                 .zIndex(1)  // Asegura que el toast esté sobre otras vistas
@@ -57,9 +59,10 @@ struct ToastView: View {
                 isVisible = true
             }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 withAnimation(.linear) {
                     isVisible = false
+                    onDismiss?()
                 }
             }
         }
@@ -69,13 +72,15 @@ struct ToastView: View {
 
 public class ToastDescriptor {
     public let title: String
-    public let description: String
-    public let image: Image?
+    public let description: String?
+    public let image: (image: Image, color: Color)?
+    public let backgroundColor: Color?
     
-    init(title: String, description: String, image: Image?) {
+    init(title: String, description: String?, image: (image: Image, color: Color)?, backgroundColor: Color? = nil) {
         self.title = title
         self.description = description
         self.image = image
+        self.backgroundColor = backgroundColor
     }
 }
 
@@ -87,11 +92,22 @@ public enum ToastType {
     var backgroundColor: Color {
         switch self {
         case .defaultError:
-            return Color.red.opacity(0.4)
+            return Color.red.opacity(0.9)
         case .custom(let descriptor):
-            return Color.red.opacity(0.4)
+            return descriptor.backgroundColor ?? Color.red.opacity(0.9)
+        case .success(_):
+            return Color.green 
+        }
+    }
+    
+    var imageColor: Color {
+        switch self {
+        case .defaultError:
+            return Color.red
+        case .custom(let descriptor):
+            return descriptor.image?.color ?? Color.red
         case .success(let descriptor):
-            return Color.green.opacity(0.4)
+            return descriptor.image?.color ?? Color.white
         }
     }
     
@@ -106,7 +122,7 @@ public enum ToastType {
         }
     }
     
-    var description: String {
+    var description: String? {
         switch self {
         case .defaultError:
             return "Algo salió mal."
@@ -122,9 +138,9 @@ public enum ToastType {
         case .defaultError:
             return Image(systemName: "exclamationmark.triangle.fill")
         case .custom(let descriptor):
-            return descriptor.image ?? Image(systemName: "exclamationmark.triangle.fill")
+            return descriptor.image?.image ?? Image(systemName: "exclamationmark.triangle.fill")
         case .success(let descriptor):
-            return descriptor.image ?? Image(systemName: "checkmark")
+            return descriptor.image?.image ?? Image(systemName: "checkmark")
         }
     }
 }
@@ -140,7 +156,7 @@ public extension View {
             if isIdle {
                 ZStack(alignment: .top) {
                     self
-//                        .opacity(0)
+                        .opacity(0)
                     DefaultIdleView()
                 }
             } else {

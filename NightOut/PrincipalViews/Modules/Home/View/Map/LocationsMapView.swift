@@ -132,7 +132,9 @@ struct LocationsMapView: View {
             error: (
                 type: viewModel.toastError,
                 showCloseButton: false,
-                onDismiss: { }
+                onDismiss: {
+                    viewModel.toastError = nil
+                }
             ),
             isIdle: viewModel.loading
         )

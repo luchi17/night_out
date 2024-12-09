@@ -126,7 +126,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
 private extension CommentsPresenterImpl {
     func shouldPublishComment() -> Bool {
         if viewModel.commentText.isEmpty {
-            viewModel.toastError = .custom(.init(title: "Please write comment first", description: "", image: nil))
+            viewModel.toastError = .custom(.init(title: "Please write comment first", description: nil, image: nil))
             return false
         } else {
             viewModel.toastError = nil
