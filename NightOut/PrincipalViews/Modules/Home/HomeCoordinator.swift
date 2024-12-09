@@ -34,7 +34,20 @@ class HomeCoordinator {
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared), companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: feedActions
         )
-        HomeView(presenter: presenter, mapPresenter: mapPresenter, feedPresenter: feedPresenter)
+        let userPresenter = UserProfilePresenterImpl(
+            useCases: .init(
+                followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
+                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
+            ),
+            actions: .init()
+        )
+        
+        HomeView(
+            presenter: presenter,
+            mapPresenter: mapPresenter,
+            feedPresenter: feedPresenter,
+            userPresenter: userPresenter
+        )
     }
 }
 

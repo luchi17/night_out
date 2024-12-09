@@ -5,20 +5,25 @@ struct HomeView: View {
     
     @ObservedObject var viewModel: HomeViewModel
     
+    @State private var showMyProfile = false
+    
     let presenter: HomePresenter
     let mapPresenter: LocationsMapPresenter
     let feedPresenter: FeedPresenter
+    let userPresenter: UserProfilePresenter
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
-    private let openProfilePublisher = PassthroughSubject<Void, Never>()
+
     init(
         presenter: HomePresenter,
         mapPresenter: LocationsMapPresenter,
-        feedPresenter: FeedPresenter
+        feedPresenter: FeedPresenter,
+        userPresenter: UserProfilePresenter
     ) {
         self.presenter = presenter
         self.mapPresenter = mapPresenter
         self.feedPresenter = feedPresenter
+        self.userPresenter = userPresenter
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -35,6 +40,13 @@ struct HomeView: View {
                 FeedView(presenter: feedPresenter)
             }
         }
+        .sheet(isPresented: $showMyProfile) {
+            UserProfileView(presenter: userPresenter)
+                .presentationDetents([.large])
+                .presentationBackground(.regularMaterial)
+                .presentationBackgroundInteraction(.enabled(upThrough: .large))
+                .presentationDragIndicator(.visible)
+        }
         .padding(.top, 20)
         .background(.blue)
         .navigationBarHidden(true)
@@ -46,7 +58,7 @@ struct HomeView: View {
         HStack(spacing: 0) {
             // Botón de perfil
             Button(action: {
-                openProfilePublisher.send()
+                showMyProfile.toggle()
             }) {
                 Image(systemName: "person.circle.fill")
                     .foregroundStyle(.gray)
@@ -80,7 +92,6 @@ private extension HomeView {
     
     func bindViewModel() {
         let input = HomePresenterImpl.ViewInputs(
-            openProfile: openProfilePublisher.eraseToAnyPublisher(),
             openNotifications: openNotificationsPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)

@@ -32,12 +32,10 @@ final class HomePresenterImpl: HomePresenter {
     }
     
     struct Actions {
-        let onOpenProfile: VoidClosure
         let onOpenNotifications: VoidClosure
     }
     
     struct ViewInputs {
-        let openProfile: AnyPublisher<Void, Never>
         let openNotifications: AnyPublisher<Void, Never>
     }
     
@@ -58,14 +56,6 @@ final class HomePresenterImpl: HomePresenter {
     }
     
     func transform(input: HomePresenterImpl.ViewInputs){
-        input
-            .openProfile
-            .withUnretained(self)
-            .sink { presenter in
-                self.actions.onOpenProfile()
-            }
-            .store(in: &cancellables)
-        
         input
             .openNotifications
             .withUnretained(self)
