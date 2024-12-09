@@ -22,6 +22,9 @@ public struct KingFisherImage: View {
             .cacheMemoryOnly() // Cache images in memory
             .waitForCache()
             .onSuccess(onSuccessCallback)
+            .onFailure { error in
+                print("Kingfisher error fetching image: \(error.localizedDescription)")
+            }
         
     }
 }
@@ -112,7 +115,8 @@ extension KingFisherImage {
                 switch result {
                 case .success(let image):
                     promise(.success(image))
-                case .failure(_):
+                case .failure(let error):
+                    print("Error fetching image: \(error)")
                     promise(.success(nil))
                 }
             }
