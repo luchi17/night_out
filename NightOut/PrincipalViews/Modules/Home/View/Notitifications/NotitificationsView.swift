@@ -80,7 +80,9 @@ private extension NotificationsView {
         let input = NotificationsPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             accept: onAcceptPublisher.eraseToAnyPublisher(),
-            reject: onRejectPublisher.eraseToAnyPublisher()
+            reject: onRejectPublisher.eraseToAnyPublisher(),
+            goToPost: goToPostPublisher.eraseToAnyPublisher(),
+            goToProfile: goToProfilePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

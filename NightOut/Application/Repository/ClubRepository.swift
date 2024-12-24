@@ -20,7 +20,7 @@ struct ClubRepositoryImpl: ClubRepository {
     
     func observeAssistance(profileId: String) -> AnyPublisher<[String : ClubAssistance], Never> {
         network
-            .getAssistance(profileId: profileId)
+            .observeAssistance(profileId: profileId)
             .eraseToAnyPublisher()
     }
     
