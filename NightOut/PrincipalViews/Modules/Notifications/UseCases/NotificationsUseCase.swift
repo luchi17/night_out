@@ -5,6 +5,7 @@ protocol NotificationsUseCase {
     func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
     func removeNotification(notificationId: String)
+    func sendNotificationToFollowers(clubName: String)
 }
 
 struct NotificationsUseCaseImpl: NotificationsUseCase {
@@ -30,6 +31,12 @@ struct NotificationsUseCaseImpl: NotificationsUseCase {
        repository
             .removeNotificationFromFirebase(notificationId: notificationId)
     }
+    
+    func sendNotificationToFollowers(clubName: String) {
+        repository
+            .sendNotificationToFollowers(clubName: clubName)
+    }
+
 }
 
 

@@ -15,6 +15,8 @@ protocol PostDatasource {
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
     func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never>
     func rejectFollowRequest(requesterUid: String)
+    func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
+   
 }
 
 struct PostDatasourceImpl: PostDatasource {
@@ -74,6 +76,26 @@ struct PostDatasourceImpl: PostDatasource {
             }
         }
         .eraseToAnyPublisher()
+    }
+    
+    // Observando cambios en firebase
+    func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never> {
+        let subject = CurrentValueSubject<FollowModel?, Never>(nil)
+        
+        let ref = FirebaseServiceImpl.shared.getFollow().child(id)
+        
+        ref.observe(.value) { snapshot in
+            do {
+                let followModel = try snapshot.data(as: FollowModel.self)
+                subject.send(followModel)
+                UserDefaults.setFollowModel(followModel)
+            } catch {
+                print("Error decoding data: \(error.localizedDescription)")
+                subject.send(nil)
+            }
+        }
+        
+        return subject.eraseToAnyPublisher()
     }
     
     

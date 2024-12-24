@@ -33,6 +33,8 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
         let viewDidLoad: AnyPublisher<Void, Never>
         let accept: AnyPublisher<(String, String), Never>
         let reject: AnyPublisher<(String, String), Never>
+        let goToPost: AnyPublisher<String, Never>
+        let goToProfile: AnyPublisher<String, Never>
     }
     
     var viewModel: NotificationsViewModel
@@ -138,27 +140,25 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
             }
             .store(in: &cancellables)
         
-        #warning("TODO")
         
-//        holder.itemView.setOnClickListener {
-//                    // Navegación a detalles de la publicación o perfil
-//                    val editor = mContext.getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
-//                    if (notification.getIsPost()) {
-//                        editor.putString("postId", notification.getPostId())
-//                    } else {
-//                        editor.putString("profileId", notification.getUserId())
-//                    }
-//                    editor.apply()
-//
-//                    val fragment = if (notification.getIsPost()) {
-//                        PostDetailsFragment()
-//                    } else {
-//                        Profile3Fragment()
-//                    }
-//
-//                    (mContext as FragmentActivity).supportFragmentManager.beginTransaction()
-//                        .replace(R.id.fragment_container, fragment).commit()
-//                }
+        input
+            .goToPost
+            .withUnretained(self)
+            .sink { presenter, postId in
+                //TODO
+                // PostDetailsFragment()
+            }
+            .store(in: &cancellables)
+        
+        
+        input
+            .goToProfile
+            .withUnretained(self)
+            .sink { presenter, profileId in
+                //TODO
+                //  Profile3Fragment()
+            }
+            .store(in: &cancellables)
     }
 }
 

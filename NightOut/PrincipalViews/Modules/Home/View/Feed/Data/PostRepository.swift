@@ -8,6 +8,7 @@ protocol PostsRepository {
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
     func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never>
     func rejectFollowRequest(requesterUid: String)
+    func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
 }
 
 struct PostsRepositoryImpl: PostsRepository {
@@ -34,6 +35,11 @@ struct PostsRepositoryImpl: PostsRepository {
             .eraseToAnyPublisher()
     }
     
+    func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never> {
+        network
+            .observeFollow(id: id)
+            .eraseToAnyPublisher()
+    }
     
     func getComments(postId: String) -> AnyPublisher<[String : CommentModel], Never> {
         return network

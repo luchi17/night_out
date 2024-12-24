@@ -10,6 +10,7 @@ protocol NotificationsDatasource {
     func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
     func removeNotificationFromFirebase(notificationId: String)
+    func sendNotificationToFollowers(clubName: String)
 }
 
 struct NotificationsDatasourceImpl: NotificationsDatasource {
@@ -67,6 +68,56 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
         let ref = FirebaseServiceImpl.shared.getNotifications().child(currentUserId).child(notificationId)
         
         ref.removeValue()
+    }
+    
+    func sendNotificationToFollowers(clubName: String) {
+        
+        print("sendNotificationToFollowers: Sending notification to followers for club: \(clubName)")
+        
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        
+        let myFollowersRef = FirebaseServiceImpl.shared.getFollow()
+            .child(currentUserId)
+            .child("Followers")
+        
+        myFollowersRef.observeSingleEvent(of: .value) { snapshot in
+            for child in snapshot.children {
+                if let followerSnapshot = child as? DataSnapshot {
+                    let followerId = followerSnapshot.key
+                    
+                    self.addNotificationClub(followerId: followerId, clubName: clubName)
+                }
+            }
+        } withCancel: { error in
+            print("Error fetching followers: \(error.localizedDescription)")
+        }
+    }
+    
+    // Enviar notificación a cada seguidor mio con el nombre del club
+    private func addNotificationClub(followerId: String, clubName: String) {
+
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        
+        let notificationRef = FirebaseServiceImpl.shared
+            .getNotifications()
+            .child(followerId)
+            .childByAutoId()
+        
+        let notificationModel = NotificationModel(
+            ispost: false,
+            postid: "",
+            text: "is attending \(clubName)",
+            userid: currentUserId
+        )
+        let notificationData = structToDictionary(notificationModel)
+        
+        notificationRef.setValue(notificationData) { error, _ in
+            if let error = error {
+                print("Error adding notification for \(followerId): \(error.localizedDescription)")
+            } else {
+                print("Notification sent to \(followerId) for club \(clubName)")
+            }
+        }
     }
 }
 

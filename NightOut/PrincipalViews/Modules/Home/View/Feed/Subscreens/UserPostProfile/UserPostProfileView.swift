@@ -102,5 +102,3 @@ struct CounterView: View {
 }
 
 
-//viewuserprofile
-//profile3 al buscar amigos

@@ -84,9 +84,6 @@ struct DefaultNotificationView: View {
         HStack(alignment: .center, spacing: 10) {
 
             CircleImage(imageUrl: notification.profileImage)
-                .onTapGesture {
-                    goToProfile(notification.userId)
-                }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(notification.userName)
@@ -102,24 +99,26 @@ struct DefaultNotificationView: View {
             
             Spacer()
             
-            if notification.isPost, let postImage = notification.postImage {
-                KingFisherImage(url: URL(string: postImage))
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .onTapGesture {
-                        goToPost(notification.postId)
-                    }
+            if notification.isPost {
+                if let postImage = notification.postImage {
+                    KingFisherImage(url: URL(string: postImage))
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                } else {
+                    Image(systemName: "photo.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 60, height: 60)
+                        .clipped()
+                }
+            }
+        }
+        .onTapGesture {
+            if notification.isPost {
+                goToPost(notification.postId)
             } else {
-                Image(systemName: "photo.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 60, height: 60)
-                    .clipped()
-                    .onTapGesture {
-                        goToPost(notification.postId)
-                    }
-                    
+                goToProfile(notification.userId)
             }
         }
         .padding(.all, 10)
