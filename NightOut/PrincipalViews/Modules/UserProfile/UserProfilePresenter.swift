@@ -29,6 +29,15 @@ enum ImGoingToClub {
     }
 }
 
+//From notifications when
+//val fragment = if (notification.getIsPost()) {
+//                PostDetailsFragment(notification.postId)
+//            } else {
+//                Profile3Fragment(notification.userId)
+//            }
+
+//From Maps when tapping on marker
+
 final class UserProfileViewModel: ObservableObject {
     @Published var profileImageUrl: String?
     @Published var username: String = ""
@@ -113,7 +122,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         
         
         let assistanceObserver =
-        self.useCases.clubUseCase.observeAssistance(clubProfileId: self.model.uid)
+        self.useCases.clubUseCase.observeAssistance(profileId: self.model.uid)
             .withUnretained(self)
             .flatMap { presenter, userIds -> AnyPublisher<[UserModel?], Never> in
                 presenter.handleUsersGoingToClub(
@@ -124,7 +133,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .withUnretained(self)
             .flatMap { presenter, _ -> AnyPublisher<String?, Never> in
                 // Obtener el nombre del club al que el usuario está asistiendo_ #warning("TODO: Check Javi")
-                presenter.useCases.clubUseCase.getClubName(clubProfileId: presenter.model.uid)
+                presenter.useCases.clubUseCase.getClubName(profileId: presenter.model.uid)
                     .handleEvents(receiveOutput: { clubName in
                         if presenter.viewModel.imGoingToClub == .going, let clubName = clubName {
                             presenter.sendNotificationToFollowersIfNeeded(clubName: clubName)
