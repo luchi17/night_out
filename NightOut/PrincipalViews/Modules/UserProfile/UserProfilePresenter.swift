@@ -58,14 +58,17 @@ final class UserProfileViewModel: ObservableObject {
     @Published var followingPeopleGoingToClub: [UserModel] = []
     
     @Published var myCurrentClubModel: CompanyModel?
+    @Published var isCompanyProfile: Bool
     
     @Published var loading: Bool = false
+    @Published var toast: ToastType?
     
     
-    init(profileImageUrl: String?, username: String?, fullname: String?) {
+    init(profileImageUrl: String?, username: String?, fullname: String?, isCompanyProfile: Bool) {
         self.profileImageUrl = profileImageUrl
         self.username = username ?? "Nombre no disponible"
         self.fullname = fullname ?? "Username no disponible"
+        self.isCompanyProfile = isCompanyProfile
     }
     
 }
@@ -106,7 +109,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     private var model: ProfileModel
     
     let myUid = FirebaseServiceImpl.shared.getCurrentUserUid() ?? ""
-    
+
     init(
         useCases: UseCases,
         actions: Actions,
@@ -120,7 +123,8 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         viewModel = UserProfileViewModel(
             profileImageUrl: model.profileImageUrl,
             username: model.username,
-            fullname: model.fullname
+            fullname: model.fullname,
+            isCompanyProfile: model.isCompanyProfile
         )
     }
     
@@ -130,17 +134,15 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         
         let followObserver =
             useCases.followUseCase.observeFollow(id: myUid)
-                .withUnretained(self)
-                .map({ $0.1 })
                 .eraseToAnyPublisher()
         
+        //Just for companies
         let assistanceObserver =
             useCases.clubUseCase.observeAssistance(profileId: self.model.profileId)
                     .withUnretained(self)
                     .flatMap { presenter, userIds -> AnyPublisher<[UserModel?], Never> in
                         presenter.getUsersGoingToClub(usersGoingIds: Array(userIds.keys))
                     }
-                    .withUnretained(self)
                     .eraseToAnyPublisher()
         
         let myCurrentClubModelPublisher =
@@ -162,12 +164,23 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .handleEvents(receiveRequest: { [weak self] _ in
                 self?.viewModel.loading = true
             })
-            .combineLatest(assistanceObserver, followObserver, myCurrentClubModelPublisher)
             .withUnretained(self)
-            .sink { presenter, data in
-                let usersGoingToClub = data.1.1
-                let followingPeople = data.2?.following ?? [:]
-                let myCurrentClubModel = data.3
+            .flatMap({ presenter, _ in
+                Publishers.CombineLatest3(
+                    assistanceObserver,
+                    followObserver,
+                    myCurrentClubModelPublisher
+                )
+            })
+            .withUnretained(self)
+            .sink { data in
+                
+                let presenter = data.0
+                let usersGoingToClub = data.1.0
+                let followingPeople = data.1.1?.following ?? [:]
+                let myCurrentClubModel = data.1.2
+                
+                presenter.viewModel.loading = false
                 
                 let myUserFollowsThisProfile = followingPeople.first(where: { $0.key == presenter.model.profileId }) != nil
                 presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
