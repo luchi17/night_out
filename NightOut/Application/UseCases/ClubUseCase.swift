@@ -2,7 +2,6 @@ import Combine
 
 protocol ClubUseCase {
     func observeAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never>
-    func getClubName(profileId: String) -> AnyPublisher<String?, Never>
 }
 
 struct ClubUseCaseImpl: ClubUseCase {
@@ -15,12 +14,6 @@ struct ClubUseCaseImpl: ClubUseCase {
     func observeAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never> {
         return repository
             .observeAssistance(profileId: profileId)
-            .eraseToAnyPublisher()
-    }
-    
-    func getClubName(profileId: String) -> AnyPublisher<String?, Never> {
-        return repository
-            .getClubName(profileId: profileId)
             .eraseToAnyPublisher()
     }
 }

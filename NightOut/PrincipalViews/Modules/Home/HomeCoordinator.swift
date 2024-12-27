@@ -34,7 +34,7 @@ class HomeCoordinator {
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared), companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: feedActions
         )
-        let userPresenter = UserProfilePresenterImpl(
+        let userPresenter = MyUserProfilePresenterImpl(
             useCases: .init(
                 followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared)

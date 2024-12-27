@@ -51,7 +51,7 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func showNotificationsView() {
-        let notificationsView = NotificationsCoordinator(actions: .init())
+        let notificationsView = NotificationsCoordinator(actions: makeNotificationsActions())
         self.push(notificationsView)
     }
     
@@ -79,6 +79,17 @@ final class AppCoordinator: ObservableObject {
         let loginCoordinator = LoginCoordinator(actions: makeLoginActions())
         self.push(loginCoordinator)
     }
+    
+    private func showProfile(model: ProfileModel) {
+        let profileView = UserProfileCoordinator(
+            actions: .init(goBack: {
+                self.pop()
+            }),
+            model: model
+        )
+        self.push(profileView)
+    }
+    
     
 }
 
@@ -115,6 +126,12 @@ private extension AppCoordinator {
                 self.showTabView()
             },
             backToLogin: self.pop
+        )
+    }
+    
+    func makeNotificationsActions() -> NotificationsPresenterImpl.Actions {
+        return .init(
+            goToProfile: showProfile(model:)
         )
     }
 }

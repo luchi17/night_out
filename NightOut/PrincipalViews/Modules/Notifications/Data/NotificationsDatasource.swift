@@ -11,6 +11,7 @@ protocol NotificationsDatasource {
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
     func removeNotificationFromFirebase(notificationId: String)
     func sendNotificationToFollowers(clubName: String)
+    func addNotificationClub(followerId: String, clubName: String)
 }
 
 struct NotificationsDatasourceImpl: NotificationsDatasource {
@@ -94,7 +95,7 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
     }
     
     // Enviar notificación a cada seguidor mio con el nombre del club
-    private func addNotificationClub(followerId: String, clubName: String) {
+    func addNotificationClub(followerId: String, clubName: String) {
 
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         

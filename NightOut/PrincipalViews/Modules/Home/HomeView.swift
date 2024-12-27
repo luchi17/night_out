@@ -10,7 +10,7 @@ struct HomeView: View {
     let presenter: HomePresenter
     let mapPresenter: LocationsMapPresenter
     let feedPresenter: FeedPresenter
-    let userPresenter: UserProfilePresenter
+    let userPresenter: MyUserProfilePresenter
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
 
@@ -18,7 +18,7 @@ struct HomeView: View {
         presenter: HomePresenter,
         mapPresenter: LocationsMapPresenter,
         feedPresenter: FeedPresenter,
-        userPresenter: UserProfilePresenter
+        userPresenter: MyUserProfilePresenter
     ) {
         self.presenter = presenter
         self.mapPresenter = mapPresenter
@@ -41,7 +41,7 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $showMyProfile) {
-            UserProfileView(presenter: userPresenter)
+            MyUserProfileView(presenter: userPresenter)
                 .presentationDetents([.large])
                 .presentationBackground(.regularMaterial)
                 .presentationBackgroundInteraction(.enabled(upThrough: .large))

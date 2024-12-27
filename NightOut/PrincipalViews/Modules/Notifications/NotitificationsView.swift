@@ -6,8 +6,8 @@ struct NotificationsView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let onAcceptPublisher = PassthroughSubject<(String, String), Never>()
     private let onRejectPublisher = PassthroughSubject<(String, String), Never>()
-    private let goToPostPublisher = PassthroughSubject<String, Never>()
-    private let goToProfilePublisher = PassthroughSubject<String, Never>()
+    private let goToPostPublisher = PassthroughSubject<NotificationModelForView, Never>()
+    private let goToProfilePublisher = PassthroughSubject<NotificationModelForView, Never>()
     
     @ObservedObject var viewModel: NotificationsViewModel
     let presenter: NotificationsPresenter

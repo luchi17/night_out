@@ -6,27 +6,28 @@ struct NotificationModelForView {
     var isPost: Bool
     var text: String
     var userName: String
+    var fullName: String
     var type: NotificationType
     var profileImage: String?
     var postImage: String?
     var userId: String
     var postId: String
     let notificationId: String
+    let isFromCompany: Bool
 }
-
 
 struct FriendRequestNotificationView: View {
     var notification: NotificationModelForView
     var onAccept: InputClosure<(String, String)>
     var onReject: InputClosure<(String, String)>
-    var goToProfile: InputClosure<String>
+    var goToProfile: InputClosure<NotificationModelForView>
     
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             // Imagen de perfil
             CircleImage(imageUrl: notification.profileImage)
                 .onTapGesture {
-                    goToProfile(notification.userId)
+                    goToProfile(notification)
                 }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -77,8 +78,8 @@ struct FriendRequestNotificationView: View {
 struct DefaultNotificationView: View {
     
     var notification: NotificationModelForView
-    var goToPost: InputClosure<String>
-    var goToProfile: InputClosure<String>
+    var goToPost: InputClosure<NotificationModelForView>
+    var goToProfile: InputClosure<NotificationModelForView>
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
@@ -116,9 +117,9 @@ struct DefaultNotificationView: View {
         }
         .onTapGesture {
             if notification.isPost {
-                goToPost(notification.postId)
+                goToPost(notification)
             } else {
-                goToProfile(notification.userId)
+                goToProfile(notification)
             }
         }
         .padding(.all, 10)

@@ -1,6 +1,15 @@
 import SwiftUI
 import Combine
 
+
+struct ProfileModel {
+    var profileImageUrl: String?
+    var username: String?
+    var fullname: String?
+    var profileId: String
+    var isCompanyProfile: Bool
+}
+
 enum FollowButtonType {
     case following
     case follow
@@ -43,12 +52,14 @@ final class UserProfileViewModel: ObservableObject {
     @Published var username: String = ""
     @Published var fullname: String = ""
     @Published var followButtonType: FollowButtonType?
+
     @Published var imGoingToClub: ImGoingToClub = .notGoing
     @Published var usersGoingToClub: [UserModel] = []
-    @Published var whiskyButtonImage: [UserModel] = []
+    @Published var followingPeopleGoingToClub: [UserModel] = []
+    
+    @Published var myCurrentClubModel: CompanyModel?
     
     @Published var loading: Bool = false
-    
     
     
     init(profileImageUrl: String?, username: String?, fullname: String?) {
@@ -71,14 +82,19 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         let userDataUseCase: UserDataUseCase
         let clubUseCase: ClubUseCase
         let noficationsUsecase: NotificationsUseCase
+        let companyDataUseCase: CompanyDataUseCase
     }
     
     struct Actions {
+        let goBack: VoidClosure
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let followProfile: AnyPublisher<Void, Never>
+        let goToClub: AnyPublisher<Void, Never>
+        let goBack: AnyPublisher<Void, Never>
+        let onUserSelected: AnyPublisher<UserGoingCellModel, Never>
     }
     
     var viewModel: UserProfileViewModel
@@ -87,12 +103,14 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
     
-    private var model: UserModel
+    private var model: ProfileModel
+    
+    let myUid = FirebaseServiceImpl.shared.getCurrentUserUid() ?? ""
     
     init(
         useCases: UseCases,
         actions: Actions,
-        model: UserModel
+        model: ProfileModel
     ) {
         self.actions = actions
         self.useCases = useCases
@@ -100,7 +118,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         
         
         viewModel = UserProfileViewModel(
-            profileImageUrl: model.image,
+            profileImageUrl: model.profileImageUrl,
             username: model.username,
             fullname: model.fullname
         )
@@ -108,68 +126,111 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     
     func transform(input: UserProfilePresenterImpl.ViewInputs) {
         
-        let myUid = FirebaseServiceImpl.shared.getCurrentUserUid() ?? ""
+        listenToInputs(input: input)
         
         let followObserver =
-        self.useCases.followUseCase.observeFollow(id: myUid)
-            .withUnretained(self)
-            .handleEvents(receiveOutput: { presenter, followModel in
-                let myUserFollowsThisProfile = followModel?.following?.first(where: { $0.key == presenter.model.uid }) != nil
-                presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
-            })
-            .map({ $0.1 })
-            .eraseToAnyPublisher()
-        
+            useCases.followUseCase.observeFollow(id: myUid)
+                .withUnretained(self)
+                .map({ $0.1 })
+                .eraseToAnyPublisher()
         
         let assistanceObserver =
-        self.useCases.clubUseCase.observeAssistance(profileId: self.model.uid)
-            .withUnretained(self)
-            .flatMap { presenter, userIds -> AnyPublisher<[UserModel?], Never> in
-                presenter.handleUsersGoingToClub(
-                    usersGoingIds: Array(userIds.keys),
-                    myUid: myUid
-                )
-            }
-            .withUnretained(self)
-            .flatMap { presenter, _ -> AnyPublisher<String?, Never> in
-                // Obtener el nombre del club al que el usuario está asistiendo_ #warning("TODO: Check Javi")
-                presenter.useCases.clubUseCase.getClubName(profileId: presenter.model.uid)
-                    .handleEvents(receiveOutput: { clubName in
-                        if presenter.viewModel.imGoingToClub == .going, let clubName = clubName {
-                            presenter.sendNotificationToFollowersIfNeeded(clubName: clubName)
-                        }
-                    })
+            useCases.clubUseCase.observeAssistance(profileId: self.model.profileId)
+                    .withUnretained(self)
+                    .flatMap { presenter, userIds -> AnyPublisher<[UserModel?], Never> in
+                        presenter.getUsersGoingToClub(usersGoingIds: Array(userIds.keys))
+                    }
+                    .withUnretained(self)
                     .eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
         
-        
+        let myCurrentClubModelPublisher =
+            useCases.userDataUseCase.getUserInfo(uid: myUid)
+                .map({ $0?.attendingClub })
+                .withUnretained(self)
+                .flatMap { presenter, attendingClubId -> AnyPublisher<CompanyModel?, Never> in
+                    if let attendingClubId = attendingClubId {
+                        return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: attendingClubId)
+                    } else {
+                        return Just(nil)
+                            .eraseToAnyPublisher()
+                    }
+                }
+                .eraseToAnyPublisher()
         
         input
             .viewDidLoad
             .handleEvents(receiveRequest: { [weak self] _ in
                 self?.viewModel.loading = true
             })
-            .combineLatest(assistanceObserver, followObserver)
+            .combineLatest(assistanceObserver, followObserver, myCurrentClubModelPublisher)
             .withUnretained(self)
             .sink { presenter, data in
-                let assistance = data.1
-                let follow = data.2
+                let usersGoingToClub = data.1.1
+                let followingPeople = data.2?.following ?? [:]
+                let myCurrentClubModel = data.3
                 
-                //// Actualizar la lista de seguidores y asistencia cuando cambie la asistencia
-                // setupFollowingUsersRecyclerView
+                let myUserFollowsThisProfile = followingPeople.first(where: { $0.key == presenter.model.profileId }) != nil
+                presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
+                
+                presenter.viewModel.followingPeopleGoingToClub = usersGoingToClub.compactMap({ $0 }).filter({ userGoing in
+                    followingPeople.contains(where: {  $0.key == userGoing.uid })
+                })
+                
+                presenter.viewModel.usersGoingToClub = usersGoingToClub.compactMap({ $0 })
+                presenter.viewModel.imGoingToClub = usersGoingToClub.contains(where: { $0?.uid == presenter.myUid }) ? .going : .notGoing
+                
+                if presenter.viewModel.imGoingToClub == .going, let clubName = myCurrentClubModel?.username {
+                    presenter.sendNotificationToFollowersIfNeeded(clubName: clubName)
+                }
+                
+                presenter.viewModel.myCurrentClubModel = myCurrentClubModel
+               
             }
             .store(in: &cancellables)
+    }
+    
+    private func getUsersGoingToClub(usersGoingIds: [String]) -> AnyPublisher<[UserModel?], Never> {
         
-       
+        let publishers: [AnyPublisher<UserModel?, Never>] = usersGoingIds.map { id in
+            useCases.userDataUseCase.getUserInfo(uid: id)
+        }
         
-        
-        
+        return Publishers.MergeMany(publishers)
+            .collect()
+            .eraseToAnyPublisher()
+    }
+    
+    func listenToInputs(input: UserProfilePresenterImpl.ViewInputs) {
+
         input
             .followProfile
             .withUnretained(self)
             .sink { presenter, _ in
-                    
+                
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goToClub
+            .withUnretained(self)
+            .sink { presenter, _ in
+                
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goBack
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.goBack()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .onUserSelected
+            .withUnretained(self)
+            .sink { presenter, _ in
+                
             }
             .store(in: &cancellables)
     }
@@ -178,23 +239,6 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
 }
 
 private extension UserProfilePresenterImpl {
-    private func handleUsersGoingToClub(usersGoingIds: [String], myUid: String) -> AnyPublisher<[UserModel?], Never> {
-        
-        let publishers: [AnyPublisher<UserModel?, Never>] = usersGoingIds.map { id in
-            useCases.userDataUseCase.getUserInfo(uid: id)
-        }
-        
-        return Publishers.MergeMany(publishers)
-            .collect()
-            .withUnretained(self)
-            .handleEvents(receiveOutput: { presenter, usersGoingToClub in
-                presenter.viewModel.usersGoingToClub = usersGoingToClub.compactMap({ $0 })
-                presenter.viewModel.imGoingToClub = usersGoingToClub.contains(where: { $0?.uid == myUid }) ? .going : .notGoing
-                
-            })
-            .map({ $0.1 })
-            .eraseToAnyPublisher()
-    }
     
     private func sendNotificationToFollowersIfNeeded(clubName: String) {
         print("sendNotificationToFollowersIfNeeded: Checking if user is attending club...")
@@ -203,24 +247,43 @@ private extension UserProfilePresenterImpl {
             useCases.noficationsUsecase.sendNotificationToFollowers(clubName: clubName)
         }
     }
+    
+    private func addUserNotification() {
+        let model = NotificationModel(
+            ispost: false,
+            postid: "",
+            text: GlobalStrings.shared.startFollowUserText,
+            userid: myUid
+        )
+        
+        useCases.noficationsUsecase.addNotification(
+            model: model,
+            publisherId: self.model.profileId
+        )
+        .sink { sent in
+            if sent {
+                print("notification user with uid \(self.model.profileId) started following you")
+            } else {
+                print("notification user not sent")
+            }
+        }
+        .store(in: &cancellables)
+    }
+
+    
+    // NEEDED??
+//    private func getCompanyInfo() -> CompanyModel? {
+        //        if model.isCompanyProfile {
+        //            viewModel.currentClubModel = UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == model.profileId })
+        //        }
+//    }
+    
+    
 }
 
-//        input
-//            .viewDidLoad
-//            .withUnretained(self)
-//            .handleEvents(receiveRequest: { [weak self] _ in
-//                self?.viewModel.loading = true
-//            })
-//            .flatMap({ presenter, _ -> AnyPublisher<[String], Never> in
-//                return presenter.useCases.clubUseCase.getAssistance(clubProfileId: presenter.model.uid)
-//                    .map({ Array($0.keys) }) //Returning ids of Assistance
-//                    .eraseToAnyPublisher()
-//            })
-//            .withUnretained(self)
-//            .flatMap { presenter, userIds -> AnyPublisher<[model?], Never> in
-//                presenter.getInfoOfUsersGoingToClub(usersGoingIds: Array(userIds))
-//            }
-//            .withUnretained(self)
-//            .flatMap { presenter, userIds -> AnyPublisher<[model?], Never> in
-//                presenter.useCases.clubUseCase.getClubName(clubProfileId: presenter.)
-//            }
+//si das al vaso --> confirmas que vas al club, else --> no attending
+//lista de usuarios que van a la discoteca
+// lista de usuarios que van a la discoteca que son tus amigos
+
+//No empresa
+// foto, nombre de perfil, following

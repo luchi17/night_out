@@ -7,6 +7,9 @@ struct UserProfileView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let followPublisher = PassthroughSubject<Void, Never>()
+    private let whiskyTappedPublisher = PassthroughSubject<Void, Never>()
+    private let goBackPublisher = PassthroughSubject<Void, Never>()
+    private let userSelectedPublisher = PassthroughSubject<UserGoingCellModel, Never>()
     
     @ObservedObject var viewModel: UserProfileViewModel
     let presenter: UserProfilePresenter
@@ -35,18 +38,9 @@ struct UserProfileView: View {
             
             clubContent
             
-            // RecyclerView para las fotos
-            ScrollView {
-                VStack {
-                    // Aquí agregarías imágenes o contenido tipo carousel
-                }
-            }
-            .padding(.top, 50)
-            
-            
         }
         .navigationBarHidden(true)
-        .background(Color.blue) // Fondo azul
+        .background(Color.black.opacity(0.8))
         .edgesIgnoringSafeArea(.top)
         .onAppear {
             viewDidLoadPublisher.send()
@@ -56,7 +50,7 @@ struct UserProfileView: View {
     var navigationBar: some View {
         HStack {
             Button(action: {
-                // Acción de retroceso
+                goBackPublisher.send()
             }) {
                 Image(systemName: "chevron.left")
                     .resizable()
@@ -76,7 +70,7 @@ struct UserProfileView: View {
         }
         .padding(.top, 4)
         .frame(height: 50)
-        .background(Color.clear)
+        .background(Color.blue)
     }
     
     var profileInfo: some View {
@@ -108,9 +102,9 @@ struct UserProfileView: View {
                 HStack {
                     Spacer()
                     Button(action: {
-                        // Acción para navegar al club
+                        whiskyTappedPublisher.send()
                     }) {
-                        Image(systemName: "whisky")
+                        viewModel.imGoingToClub.whiskyImage
                             .resizable()
                             .scaledToFit()
                             .frame(width: 60, height: 60)
@@ -122,7 +116,7 @@ struct UserProfileView: View {
         }
     }
     
-    
+    //In case showing a club profile
     var clubContent: some View {
         VStack {
             Text("Usuarios que asisten al club")
@@ -130,22 +124,32 @@ struct UserProfileView: View {
                 .padding(.top, 10)
                 .foregroundColor(.white)
                 .padding(.horizontal, 10)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    // Aquí puedes agregar un List o HStack con usuarios que van al club
-                }
-            }
+            UsersGoingClubSubview(
+                users: viewModel.usersGoingToClub.map({
+                    UserGoingCellModel(
+                        id: $0.uid,
+                        username: $0.username,
+                        profileImageUrl: $0.image
+                    )
+                }),
+                onUserSelected: userSelectedPublisher.send
+            )
 
             Text("Amigos que asisten al club")
                 .font(.system(size: 18, weight: .bold))
                 .padding(.top, 10)
                 .foregroundColor(.white)
                 .padding(.horizontal, 10)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    // Aquí puedes agregar otro List o HStack con amigos que van al club
-                }
-            }
+            UsersGoingClubSubview(
+                users: viewModel.usersGoingToClub.map({
+                    UserGoingCellModel(
+                        id: $0.uid,
+                        username: $0.username,
+                        profileImageUrl: $0.image
+                    )
+                }),
+                onUserSelected: userSelectedPublisher.send
+            )
         }
     }
         
@@ -153,7 +157,7 @@ struct UserProfileView: View {
         Button(action: {
             followPublisher.send()
         }) {
-            Text("Follow")
+            Text(viewModel.followButtonType == .follow ? "Follow" : "Following")
                 .font(.system(size: 18))
                 .padding()
                 .frame(maxWidth: .infinity)
@@ -170,7 +174,10 @@ private extension UserProfileView {
     func bindViewModel() {
         let input = UserProfilePresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            followProfile: followPublisher.eraseToAnyPublisher()
+            followProfile: followPublisher.eraseToAnyPublisher(),
+            goToClub: whiskyTappedPublisher.eraseToAnyPublisher(),
+            goBack: goBackPublisher.eraseToAnyPublisher(),
+            onUserSelected: userSelectedPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

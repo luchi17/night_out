@@ -27,14 +27,15 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
     }
     
     struct Actions {
+        let goToProfile: InputClosure<ProfileModel>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let accept: AnyPublisher<(String, String), Never>
         let reject: AnyPublisher<(String, String), Never>
-        let goToPost: AnyPublisher<String, Never>
-        let goToProfile: AnyPublisher<String, Never>
+        let goToPost: AnyPublisher<NotificationModelForView, Never>
+        let goToProfile: AnyPublisher<NotificationModelForView, Never>
     }
     
     var viewModel: NotificationsViewModel
@@ -154,9 +155,15 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
         input
             .goToProfile
             .withUnretained(self)
-            .sink { presenter, profileId in
-                //TODO
-                //  Profile3Fragment()
+            .sink { presenter, notificationModel in
+                let profileModel = ProfileModel(
+                    profileImageUrl: notificationModel.profileImage,
+                    username: notificationModel.userName,
+                    fullname: notificationModel.fullName,
+                    profileId: notificationModel.userId,
+                    isCompanyProfile: notificationModel.isFromCompany
+                )
+                presenter.actions.goToProfile(profileModel)
             }
             .store(in: &cancellables)
     }
@@ -170,12 +177,14 @@ private extension NotificationsPresenterImpl {
             isPost: model.ispost,
             text: model.text,
             userName: companyFound.username ?? "Unknown",
+            fullName: companyFound.fullname ?? "Unknown",
             type: model.text == GlobalStrings.shared.followUserText ? .friendRequest : .typedefault,
             profileImage: companyFound.imageUrl,
             postImage: nil,
             userId: model.userid,
             postId: model.postid,
-            notificationId: notificationId
+            notificationId: notificationId,
+            isFromCompany: true
         )
         
         return Just(modelView)
@@ -189,12 +198,14 @@ private extension NotificationsPresenterImpl {
                     isPost: model.ispost,
                     text: model.text,
                     userName: userModel?.username ?? "Unknown",
+                    fullName: userModel?.fullname ?? "Unknown",
                     type: model.text == GlobalStrings.shared.followUserText ? .friendRequest : .typedefault,
                     profileImage: userModel?.image,
                     postImage: nil,
                     userId: model.userid,
                     postId: model.postid,
-                    notificationId: notificationId
+                    notificationId: notificationId,
+                    isFromCompany: false
                 )
                 
                 return modelView
