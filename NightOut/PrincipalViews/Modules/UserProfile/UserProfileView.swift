@@ -21,98 +21,75 @@ struct UserProfileView: View {
         viewModel = presenter.viewModel
         bindViewModel()
     }
-
+    
     
     var body: some View {
-        VStack(spacing: 0) {
-            navigationBar
-            
-            Text(viewModel.username)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .padding(.trailing, 10)
-            
-            profileInfo
-            
-            followButton
-            
-            clubContent
-            
-        }
-        .navigationBarHidden(true)
-        .background(Color.black.opacity(0.8))
-        .edgesIgnoringSafeArea(.top)
-        .onAppear {
-            viewDidLoadPublisher.send()
-        }
-    }
-    
-    var navigationBar: some View {
-        HStack {
-            Button(action: {
-                goBackPublisher.send()
-            }) {
-                Image(systemName: "chevron.left")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 30, height: 30)
-                    .foregroundStyle(.white)
-                    .padding(.leading, 5)
+        Color.black
+            .overlay(
+                VStack(spacing: 0) {
+
+                    profileInfo
+                    
+                    followButton
+                    
+                    if viewModel.isCompanyProfile {
+                        clubContent
+                    }
+                    
+                    Spacer()
+                }
+            )
+            .showCustomNavBar(
+                title: viewModel.username,
+                goBack: goBackPublisher.send
+            )
+            .showToast(
+                error: (
+                    type: viewModel.toast,
+                    showCloseButton: false,
+                    onDismiss: {
+                        viewModel.toast = nil
+                    }
+                ),
+                isIdle: viewModel.loading
+            )
+            .edgesIgnoringSafeArea(.bottom)
+            .onAppear {
+                viewDidLoadPublisher.send()
             }
-            
-            Spacer()
-            
-            Text(viewModel.username)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-            
-            Spacer()
-        }
-        .padding(.top, 4)
-        .frame(height: 50)
-        .background(Color.blue)
     }
     
     var profileInfo: some View {
-        ZStack {
+        ZStack(alignment: .bottomLeading) {
             if let profileImage = viewModel.profileImageUrl {
                 KingFisherImage(url: URL(string: profileImage))
-                    .centerCropped(width: 300, height: 300, placeholder: {
+                    .centerCropped(width: .infinity, height: 300, placeholder: {
                         ProgressView()
                     })
-                    .scaledToFill()
-                    .clipped()
             } else {
                 Image("placeholder")
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 300, height: 300)
             }
-           
-            VStack {
-                HStack {
-                    Text(viewModel.fullname)
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.bottom, 16)
-                        .padding(.leading, 16)
-                    Spacer()
-                }
+            HStack {
+                Text(viewModel.fullname)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white)
+                
                 Spacer()
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        whiskyTappedPublisher.send()
-                    }) {
-                        viewModel.imGoingToClub.whiskyImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 60, height: 60)
-                            .foregroundColor(.white)
-                            .padding(.bottom, 20)
-                    }
+                
+                Button(action: {
+                    whiskyTappedPublisher.send()
+                }) {
+                    viewModel.imGoingToClub.whiskyImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60)
+                        .foregroundColor(.white)
                 }
             }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 20)
         }
     }
     
@@ -134,7 +111,7 @@ struct UserProfileView: View {
                 }),
                 onUserSelected: userSelectedPublisher.send
             )
-
+            
             Text("Amigos que asisten al club")
                 .font(.system(size: 18, weight: .bold))
                 .padding(.top, 10)
@@ -151,8 +128,9 @@ struct UserProfileView: View {
                 onUserSelected: userSelectedPublisher.send
             )
         }
+        .padding(.top, 20)
     }
-        
+    
     var followButton: some View {
         Button(action: {
             followPublisher.send()

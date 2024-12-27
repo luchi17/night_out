@@ -27,6 +27,30 @@ public extension View {
                 }
             }
     }
+    
+    func showCustomNavBar(title: String, goBack: @escaping VoidClosure) -> some View {
+        self
+            .navigationBarBackButtonHidden(true)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.blue, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        goBack()
+                    }) {
+                        Image(systemName: "arrow.backward")
+                            .foregroundStyle(.white)
+                    }
+                }
+                
+                ToolbarItem(placement: .principal) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                }
+            }
+    }
 }
 
 

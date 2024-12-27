@@ -7,9 +7,6 @@ import FirebaseFirestore
 import FirebaseStorage
 
 
-// UserGoingToClubAdapter add
-
-
 protocol ClubDataSource {
     func observeAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never>
 }
@@ -25,8 +22,8 @@ struct ClubDataSourceImpl: ClubDataSource {
         
         ref.observe(.value) { snapshot in
             do {
-                let users = try snapshot.data(as: [String: ClubAssistance].self)
-                subject.send(users)
+                let assistance = try snapshot.data(as: [String: ClubAssistance].self)
+                subject.send(assistance)
             } catch {
                 print("Error decoding data: \(error.localizedDescription)")
                 subject.send([:])
