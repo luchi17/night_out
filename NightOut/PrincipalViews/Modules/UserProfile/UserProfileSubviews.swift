@@ -19,6 +19,7 @@ struct UsersGoingClubSubview: View {
             .padding(.horizontal, 10)
         }
         .background(Color.black)
+        .frame(height: 120)
     }
 }
 

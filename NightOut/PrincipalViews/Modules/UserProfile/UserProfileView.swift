@@ -22,41 +22,39 @@ struct UserProfileView: View {
         bindViewModel()
     }
     
-    
     var body: some View {
-        Color.black
-            .overlay(
-                VStack(spacing: 0) {
-
-                    profileInfo
-                    
-                    followButton
-                    
-                    if viewModel.isCompanyProfile {
-                        clubContent
-                    }
-                    
-                    Spacer()
+        ScrollView(.vertical, showsIndicators: false) {
+            
+            VStack(spacing: 0) {
+                
+                profileInfo
+                
+                followButton
+                
+                if viewModel.isCompanyProfile {
+                    clubContent
                 }
-            )
-            .showCustomNavBar(
-                title: viewModel.username,
-                goBack: goBackPublisher.send
-            )
-            .showToast(
-                error: (
-                    type: viewModel.toast,
-                    showCloseButton: false,
-                    onDismiss: {
-                        viewModel.toast = nil
-                    }
-                ),
-                isIdle: viewModel.loading
-            )
-            .edgesIgnoringSafeArea(.bottom)
-            .onAppear {
-                viewDidLoadPublisher.send()
             }
+        }
+        .background(Color.black)
+        .showCustomNavBar(
+            title: viewModel.username,
+            goBack: goBackPublisher.send
+        )
+        .showToast(
+            error: (
+                type: viewModel.toast,
+                showCloseButton: false,
+                onDismiss: {
+                    viewModel.toast = nil
+                }
+            ),
+            isIdle: viewModel.loading
+        )
+        .edgesIgnoringSafeArea(.bottom)
+        .onAppear {
+            viewDidLoadPublisher.send()
+        }
     }
     
     var profileInfo: some View {
@@ -94,37 +92,55 @@ struct UserProfileView: View {
     //In case showing a club profile
     var clubContent: some View {
         VStack {
-            Text("Usuarios que asisten al club")
-                .font(.system(size: 18, weight: .bold))
-                .padding(.top, 10)
-                .foregroundColor(.white)
-                .padding(.horizontal, 10)
-            UsersGoingClubSubview(
-                users: viewModel.usersGoingToClub.map({
-                    UserGoingCellModel(
-                        id: $0.uid,
-                        username: $0.username,
-                        profileImageUrl: $0.image
-                    )
-                }),
-                onUserSelected: userSelectedPublisher.send
-            )
+            if viewModel.followingPeopleGoingToClub.isEmpty {
+                Text("Todavía no tienes amigos que vayan al club")
+                    .font(.system(size: 16, weight: .medium))
+                    .padding(.top, 10)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .frame(alignment: .leading)
+            } else {
+                Text("Amigos que asisten al club")
+                    .font(.system(size: 18, weight: .bold))
+                    .padding(.top, 10)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                UsersGoingClubSubview(
+                    users: viewModel.followingPeopleGoingToClub.map({
+                        UserGoingCellModel(
+                            id: $0.uid,
+                            username: $0.username,
+                            profileImageUrl: $0.image
+                        )
+                    }),
+                    onUserSelected: userSelectedPublisher.send
+                )
+            }
             
-            Text("Amigos que asisten al club")
-                .font(.system(size: 18, weight: .bold))
-                .padding(.top, 10)
-                .foregroundColor(.white)
-                .padding(.horizontal, 10)
-            UsersGoingClubSubview(
-                users: viewModel.usersGoingToClub.map({
-                    UserGoingCellModel(
-                        id: $0.uid,
-                        username: $0.username,
-                        profileImageUrl: $0.image
-                    )
-                }),
-                onUserSelected: userSelectedPublisher.send
-            )
+            if viewModel.usersGoingToClub.isEmpty {
+                Text("Todavía no hay usuarios que asistan al club")
+                    .font(.system(size: 16, weight: .medium))
+                    .padding(.top, 10)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+            } else {
+                Text("Usuarios que asisten al club")
+                    .font(.system(size: 18, weight: .bold))
+                    .padding(.top, 10)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                UsersGoingClubSubview(
+                    users: viewModel.usersGoingToClub.map({
+                        UserGoingCellModel(
+                            id: $0.uid,
+                            username: $0.username,
+                            profileImageUrl: $0.image
+                        )
+                    }),
+                    onUserSelected: userSelectedPublisher.send
+                )
+                
+            }
         }
         .padding(.top, 20)
     }
