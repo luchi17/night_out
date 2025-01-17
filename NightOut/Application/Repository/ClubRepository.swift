@@ -3,6 +3,8 @@ import Foundation
 
 protocol ClubRepository {
     func observeAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never>
+    func removeAssistingToClub(clubId: String) -> AnyPublisher<Bool, Never>
+    func addAssistingToClub(clubId: String, clubAssistance: ClubAssistance) -> AnyPublisher<Bool, Never>
 }
 
 struct ClubRepositoryImpl: ClubRepository {
@@ -23,4 +25,15 @@ struct ClubRepositoryImpl: ClubRepository {
             .eraseToAnyPublisher()
     }
     
+    func removeAssistingToClub(clubId: String) -> AnyPublisher<Bool, Never> {
+        network
+            .removeAssistingToClub(clubId: clubId)
+            .eraseToAnyPublisher()
+    }
+    
+    func addAssistingToClub(clubId: String, clubAssistance: ClubAssistance) -> AnyPublisher<Bool, Never> {
+        network
+            .addAssistingToClub(clubId: clubId, clubAssistance: clubAssistance)
+            .eraseToAnyPublisher()
+    }
 }

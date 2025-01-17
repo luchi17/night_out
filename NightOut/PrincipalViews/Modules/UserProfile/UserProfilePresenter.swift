@@ -212,7 +212,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .store(in: &cancellables)
     }
     
-    private func getUsersGoingToClub(usersGoingIds: [String]) -> AnyPublisher<[UserModel?], Never> {
+    private func getInfoOfUsersGoingToClub(usersGoingIds: [String]) -> AnyPublisher<[UserModel?], Never> {
         
         let publishers: [AnyPublisher<UserModel?, Never>] = usersGoingIds.map { id in
             useCases.userDataUseCase.getUserInfo(uid: id)
@@ -237,7 +237,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .goToClub
             .withUnretained(self)
             .sink { presenter, _ in
-                
+                presenter.whiskyButtonTapped()
             }
             .store(in: &cancellables)
         
@@ -263,19 +263,12 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
 
 private extension UserProfilePresenterImpl {
     
-    private func sendNotificationToFollowersIfNeeded(clubName: String) {
-        print("sendNotificationToFollowersIfNeeded: Checking if user is attending club...")
-        
-        if self.viewModel.imGoingToClub == .going {
-            useCases.noficationsUsecase.sendNotificationToFollowers(clubName: clubName)
-        }
-    }
-    
-    private func addUserNotification() {
+    //addNotification()
+    private func addUserFollowNotification() {
         let model = NotificationModel(
             ispost: false,
             postid: "",
-            text: GlobalStrings.shared.startFollowUserText,
+            text: "\(model.username ?? "Unknown user") \(GlobalStrings.shared.startFollowUserText)",
             userid: myUid
         )
         
@@ -292,21 +285,111 @@ private extension UserProfilePresenterImpl {
         }
         .store(in: &cancellables)
     }
+    
+    #warning("CHECK")
+    private func followButtonTapped() {
+        switch viewModel.followButtonType {
+        case .follow:
+            // Añadir al seguimiento en "Follow"
+            useCases.followUseCase.addFollow(
+                requesterProfileUid: myUid,
+                profileUid: model.profileId,
+                needRemoveFromPending: false
+            )
+            .withUnretained(self)
+            .sink { presenter, followOk in
+                    #warning("DO notificationManager")
+                // Enviar notificación
+                // notificationManager.getUsernamesAndSendNotification(it1.toString(), profileId)
+                
+                if followOk {
+                    presenter.addUserFollowNotification()
+                    print("started following \(presenter.model.profileId)")
+                } else {
+                    print("Error: started following \(presenter.model.profileId)")
+                }
+            }
+            .store(in: &cancellables)
+           
+        case .following:
+            // Eliminar del seguimiento en "Follow"
+            useCases.followUseCase.removeFollow(
+                requesterProfileUid: myUid,
+                profileUid: model.profileId
+            )
+            .withUnretained(self)
+            .sink { presenter, removeOk in
+                if removeOk {
+                    print("not following \(presenter.model.profileId) anymore")
+                } else {
+                    print("Error: not following \(presenter.model.profileId) anymore")
+                }
+            }
+            .store(in: &cancellables)
+            
+        default:
+            break
+        }
+    }
 
-    
-    // NEEDED??
-//    private func getCompanyInfo() -> CompanyModel? {
-        //        if model.isCompanyProfile {
-        //            viewModel.currentClubModel = UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == model.profileId })
-        //        }
-//    }
-    
-    
+#warning("CHECK if tapping button calls again comhinelatest and updates image automatically ")
+    private func whiskyButtonTapped() {
+        switch viewModel.imGoingToClub {
+        case .going:
+            //Ya no quiero seguir asistiendo
+            useCases.clubUseCase.removeAssistingToClub(clubId: model.profileId)
+                .withUnretained(self)
+                .sink { presenter, ok in
+                    if ok {
+                        presenter.viewModel.toast = .custom(
+                            .init(
+                                title: "Has dejado de asistir a este club",
+                                description: nil,
+                                image: nil,
+                                backgroundColor: .green
+                            ))
+                    } else {
+                        presenter.viewModel.toast = .custom(.init(
+                            title: "Error",
+                            description: "Error al procesar la solicitud.",
+                            image: nil
+                        ))
+                    }
+                }
+                .store(in: &cancellables)
+            
+        case .notGoing:
+            //Quiero asistir al club
+            if let myCurrentClub = viewModel.myCurrentClubModel, myCurrentClub.uid != model.profileId {  //Pero ya estoy asistiendo a otro
+                viewModel.toast = .custom(.init(
+                    title: "Asistencia Actual",
+                    description: "Ya estás asistiendo a \(myCurrentClub.username ?? "otro club"). Cancela la asistencia antes de asistir a otro evento.",
+                    image: nil
+                ))
+            } else {
+                let clubAssistance = ClubAssistance(
+                    uid: myUid,
+                    gender: viewModel.myUserModel?.gender,
+                    tinderPhoto: nil
+                )
+                useCases.clubUseCase.addAssistingToClub(
+                    clubId: model.profileId,
+                    clubAssistance: clubAssistance
+                )
+                .withUnretained(self)
+                .sink { presenter, ok in
+                    if ok {
+                        presenter.useCases.noficationsUsecase.sendNotificationToFollowers(clubName: presenter.model.profileId)
+                    } else {
+                        presenter.viewModel.toast = .custom(.init(
+                            title: "Error",
+                            description: "Error al procesar la solicitud.",
+                            image: nil
+                        ))
+                    }
+                }
+                .store(in: &cancellables)
+            }
+        }
+    }
 }
-
-//si das al vaso --> confirmas que vas al club, else --> no attending
-//lista de usuarios que van a la discoteca
-// lista de usuarios que van a la discoteca que son tus amigos
-
-//No empresa
-// foto, nombre de perfil, following
