@@ -73,8 +73,6 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
     
     func sendNotificationToFollowers(clubName: String) {
         
-        print("sendNotificationToFollowers: Sending notification to followers for club: \(clubName)")
-        
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         
         let myFollowersRef = FirebaseServiceImpl.shared.getFollow()

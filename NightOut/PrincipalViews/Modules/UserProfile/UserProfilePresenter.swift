@@ -73,6 +73,8 @@ final class UserProfileViewModel: ObservableObject {
     @Published var loading: Bool = false
     @Published var toast: ToastType?
     
+    @Published var myUserModel: UserModel?
+    
     
     init(profileImageUrl: String?, username: String?, fullname: String?, isCompanyProfile: Bool) {
         self.profileImageUrl = profileImageUrl
@@ -151,7 +153,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             useCases.clubUseCase.observeAssistance(profileId: self.model.profileId)
                     .withUnretained(self)
                     .flatMap { presenter, userIds -> AnyPublisher<[UserModel?], Never> in
-                        presenter.getUsersGoingToClub(usersGoingIds: Array(userIds.keys))
+                        presenter.getInfoOfUsersGoingToClub(usersGoingIds: Array(userIds.keys))
                     }
                     .eraseToAnyPublisher()
         
@@ -196,15 +198,15 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
                 
                 presenter.viewModel.followingPeopleGoingToClub = usersGoingToClub.compactMap({ $0 }).filter({ userGoing in
-                    followingPeople.contains(where: {  $0.key == userGoing.uid })
+                    followingPeople.contains(where: { $0.key == userGoing.uid })
                 })
                 
                 presenter.viewModel.usersGoingToClub = usersGoingToClub.compactMap({ $0 })
-                presenter.viewModel.imGoingToClub = usersGoingToClub.contains(where: { $0?.uid == presenter.myUid }) ? .going : .notGoing
+                print("--------")
+                print(presenter.viewModel.usersGoingToClub.count)
                 
-                if presenter.viewModel.imGoingToClub == .going, let clubName = myCurrentClubModel?.username {
-                    presenter.sendNotificationToFollowersIfNeeded(clubName: clubName)
-                }
+                presenter.viewModel.imGoingToClub = usersGoingToClub.contains(where: { $0?.uid == presenter.myUid }) ? .going : .notGoing
+                presenter.viewModel.myUserModel = usersGoingToClub.compactMap({ $0 }).first(where: { $0.uid == presenter.myUid })
                 
                 presenter.viewModel.myCurrentClubModel = myCurrentClubModel
                
@@ -229,7 +231,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .followProfile
             .withUnretained(self)
             .sink { presenter, _ in
-                
+                presenter.followButtonTapped()
             }
             .store(in: &cancellables)
         
