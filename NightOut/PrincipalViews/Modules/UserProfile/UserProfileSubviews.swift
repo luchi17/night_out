@@ -1,6 +1,3 @@
-// UserGoingToClubAdapter - all
-// UserGoingToClubAdapter2 - following
-
 import SwiftUI
 
 struct UsersGoingClubSubview: View {
@@ -10,15 +7,16 @@ struct UsersGoingClubSubview: View {
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 20) {
+            HStack {
                 ForEach(users) { user in
                     UserGoingCell(
                         model: user,
                         onTap: onUserSelected
                     )
+                    Spacer()
                 }
             }
-            .padding()
+            .padding(.horizontal, 10)
         }
         .background(Color.black)
     }
@@ -40,8 +38,6 @@ struct UserGoingCell: View {
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.white)
         }
-        .frame(minWidth: 100)
-        .padding(.leading, 30)
         .contentShape(Rectangle())
         .onTapGesture {
             onTap(model)
