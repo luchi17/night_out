@@ -28,12 +28,22 @@ enum ImGoingToClub {
     case going
     case notGoing
     
-    var whiskyImage: Image {
-        switch self {
-        case .going:
-            return Image("whisky_full")
-        case .notGoing:
-            return Image("whisky_empty")
+    var whiskyImage: some View {
+        Group {
+            switch self {
+            case .going:
+                Image("whisky_full")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 60, height: 60)
+            case .notGoing:
+                Image("whisky_empty")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 60, height: 60)
+                    .foregroundColor(.white)
+            }
         }
     }
 }

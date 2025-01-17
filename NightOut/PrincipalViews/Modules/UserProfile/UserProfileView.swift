@@ -78,14 +78,12 @@ struct UserProfileView: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    whiskyTappedPublisher.send()
-                }) {
-                    viewModel.imGoingToClub.whiskyImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 60, height: 60)
-                        .foregroundColor(.white)
+                if viewModel.isCompanyProfile {
+                    Button(action: {
+                        whiskyTappedPublisher.send()
+                    }) {
+                        viewModel.imGoingToClub.whiskyImage
+                    }
                 }
             }
             .padding(.horizontal, 12)
