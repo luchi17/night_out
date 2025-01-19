@@ -106,13 +106,7 @@ struct UserProfileView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 10)
                 UsersGoingClubSubview(
-                    users: viewModel.followingPeopleGoingToClub.map({
-                        UserGoingCellModel(
-                            id: $0.uid,
-                            username: $0.username,
-                            profileImageUrl: $0.image
-                        )
-                    }),
+                    users: $viewModel.followingPeopleGoingToClub,
                     onUserSelected: userSelectedPublisher.send
                 )
             }
@@ -130,13 +124,7 @@ struct UserProfileView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 10)
                 UsersGoingClubSubview(
-                    users: viewModel.usersGoingToClub.map({
-                        UserGoingCellModel(
-                            id: $0.uid,
-                            username: $0.username,
-                            profileImageUrl: $0.image
-                        )
-                    }),
+                    users: $viewModel.usersGoingToClub,
                     onUserSelected: userSelectedPublisher.send
                 )
                 

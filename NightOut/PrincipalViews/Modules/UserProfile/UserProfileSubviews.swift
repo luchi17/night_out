@@ -2,7 +2,7 @@ import SwiftUI
 
 struct UsersGoingClubSubview: View {
     
-    @State var users: [UserGoingCellModel] = []
+    @Binding var users: [UserGoingCellModel]
     let onUserSelected: InputClosure<UserGoingCellModel>
     
     var body: some View {

@@ -62,10 +62,10 @@ final class UserProfileViewModel: ObservableObject {
     @Published var username: String = ""
     @Published var fullname: String = ""
     @Published var followButtonType: FollowButtonType?
-
+    
     @Published var imGoingToClub: ImGoingToClub = .notGoing
-    @Published var usersGoingToClub: [UserModel] = []
-    @Published var followingPeopleGoingToClub: [UserModel] = []
+    @Published var usersGoingToClub: [UserGoingCellModel] = []
+    @Published var followingPeopleGoingToClub: [UserGoingCellModel] = []
     
     @Published var myCurrentClubModel: CompanyModel?
     @Published var isCompanyProfile: Bool
@@ -121,7 +121,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     private var model: ProfileModel
     
     let myUid = FirebaseServiceImpl.shared.getCurrentUserUid() ?? ""
-
+    
     init(
         useCases: UseCases,
         actions: Actions,
@@ -145,31 +145,31 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         listenToInputs(input: input)
         
         let followObserver =
-            useCases.followUseCase.observeFollow(id: myUid)
-                .eraseToAnyPublisher()
+        useCases.followUseCase.observeFollow(id: myUid)
+            .eraseToAnyPublisher()
         
         //Just for companies
         let assistanceObserver =
-            useCases.clubUseCase.observeAssistance(profileId: self.model.profileId)
-                    .withUnretained(self)
-                    .flatMap { presenter, userIds -> AnyPublisher<[UserModel?], Never> in
-                        presenter.getInfoOfUsersGoingToClub(usersGoingIds: Array(userIds.keys))
-                    }
-                    .eraseToAnyPublisher()
+        useCases.clubUseCase.observeAssistance(profileId: self.model.profileId)
+            .withUnretained(self)
+            .flatMap { presenter, userIds -> AnyPublisher<[UserModel?], Never> in
+                presenter.getInfoOfUsersGoingToClub(usersGoingIds: Array(userIds.keys))
+            }
+            .eraseToAnyPublisher()
         
         let myCurrentClubModelPublisher =
-            useCases.userDataUseCase.getUserInfo(uid: myUid)
-                .map({ $0?.attendingClub })
-                .withUnretained(self)
-                .flatMap { presenter, attendingClubId -> AnyPublisher<CompanyModel?, Never> in
-                    if let attendingClubId = attendingClubId {
-                        return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: attendingClubId)
-                    } else {
-                        return Just(nil)
-                            .eraseToAnyPublisher()
-                    }
+        useCases.userDataUseCase.getUserInfo(uid: myUid)
+            .map({ $0?.attendingClub })
+            .withUnretained(self)
+            .flatMap { presenter, attendingClubId -> AnyPublisher<CompanyModel?, Never> in
+                if let attendingClubId = attendingClubId {
+                    return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: attendingClubId)
+                } else {
+                    return Just(nil)
+                        .eraseToAnyPublisher()
                 }
-                .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
         
         input
             .viewDidLoad
@@ -197,19 +197,19 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 let myUserFollowsThisProfile = followingPeople.first(where: { $0.key == presenter.model.profileId }) != nil
                 presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
                 
-                presenter.viewModel.followingPeopleGoingToClub = usersGoingToClub.compactMap({ $0 }).filter({ userGoing in
-                    followingPeople.contains(where: { $0.key == userGoing.uid })
-                })
+                presenter.viewModel.followingPeopleGoingToClub = usersGoingToClub.compactMap({ $0 })
+                    .filter({ userGoing in
+                        followingPeople.contains(where: { $0.key == userGoing.uid })
+                    })
+                    .map({ $0.toUserGoingCellModel() })
                 
-                presenter.viewModel.usersGoingToClub = usersGoingToClub.compactMap({ $0 })
-                print("--------")
-                print(presenter.viewModel.usersGoingToClub.count)
+                presenter.viewModel.usersGoingToClub = usersGoingToClub.compactMap({ $0 }).map({ $0.toUserGoingCellModel() })
                 
                 presenter.viewModel.imGoingToClub = usersGoingToClub.contains(where: { $0?.uid == presenter.myUid }) ? .going : .notGoing
                 presenter.viewModel.myUserModel = usersGoingToClub.compactMap({ $0 }).first(where: { $0.uid == presenter.myUid })
                 
                 presenter.viewModel.myCurrentClubModel = myCurrentClubModel
-               
+                
             }
             .store(in: &cancellables)
     }
@@ -226,7 +226,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     }
     
     func listenToInputs(input: UserProfilePresenterImpl.ViewInputs) {
-
+        
         input
             .followProfile
             .withUnretained(self)
@@ -288,7 +288,7 @@ private extension UserProfilePresenterImpl {
         .store(in: &cancellables)
     }
     
-    #warning("CHECK")
+#warning("CHECK")
     private func followButtonTapped() {
         switch viewModel.followButtonType {
         case .follow:
@@ -300,7 +300,7 @@ private extension UserProfilePresenterImpl {
             )
             .withUnretained(self)
             .sink { presenter, followOk in
-                    #warning("DO notificationManager")
+#warning("DO notificationManager")
                 // Enviar notificación
                 // notificationManager.getUsernamesAndSendNotification(it1.toString(), profileId)
                 
@@ -312,7 +312,7 @@ private extension UserProfilePresenterImpl {
                 }
             }
             .store(in: &cancellables)
-           
+            
         case .following:
             // Eliminar del seguimiento en "Follow"
             useCases.followUseCase.removeFollow(
@@ -333,7 +333,7 @@ private extension UserProfilePresenterImpl {
             break
         }
     }
-
+    
 #warning("CHECK if tapping button calls again comhinelatest and updates image automatically ")
     private func whiskyButtonTapped() {
         switch viewModel.imGoingToClub {
@@ -393,5 +393,15 @@ private extension UserProfilePresenterImpl {
                 .store(in: &cancellables)
             }
         }
+    }
+}
+
+private extension UserModel {
+    func toUserGoingCellModel() -> UserGoingCellModel {
+        UserGoingCellModel(
+            id: self.uid,
+            username: self.username,
+            profileImageUrl: self.image
+        )
     }
 }
