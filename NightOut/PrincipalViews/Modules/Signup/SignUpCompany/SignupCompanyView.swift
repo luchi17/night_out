@@ -26,73 +26,78 @@ struct SignupCompanyView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Background Image
-            //            Image("imagen_inicio")
-            //                .resizable()
-            //                .edgesIgnoringSafeArea(.all)
-            //                .aspectRatio(contentMode: .fill)
+        //        ZStack {
+        // Background Image
+        //            Image("imagen_inicio")
+        //                .resizable()
+        //                .edgesIgnoringSafeArea(.all)
+        //                .aspectRatio(contentMode: .fill)
+        
+        VStack(spacing: 10) {
+            // Logo
             
-            VStack(spacing: 10) {
-                // Logo
-                
-                Spacer()
-
-                ImagePickerView(imageData: $viewModel.imageData)
-                
-                TextField("Full Name...", text: $viewModel.fullName)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                // Password Input
-                TextField("User Name...", text: $viewModel.userName)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                // Email Input
-                TextField("Email...", text: $viewModel.email)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                // Password Input
-                SecureField("Password...", text: $viewModel.password)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                locationButton
-                TimeButtonView(
-                    title: "START TIME",
-                    selectedTimeString: $viewModel.startTime
-                )
-                TimeButtonView(
-                    title: "END TIME",
-                    selectedTimeString: $viewModel.endTime
-                )
-                selectTagButton
-                
-                Spacer()
-                
-                HStack(spacing: 20) {
-                    registerButton
-                    signInButton
-                }
-                .padding(.bottom, 20)
+            Spacer()
+            
+            ImagePickerView(imageData: $viewModel.imageData)
+            
+            TextField("Full Name...", text: $viewModel.fullName)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            // Password Input
+            TextField("User Name...", text: $viewModel.userName)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            // Email Input
+            TextField("Email...", text: $viewModel.email)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            // Password Input
+            SecureField("Password...", text: $viewModel.password)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            locationButton
+            TimeButtonView(
+                title: "START TIME",
+                selectedTimeString: $viewModel.startTime
+            )
+            TimeButtonView(
+                title: "END TIME",
+                selectedTimeString: $viewModel.endTime
+            )
+            selectTagButton
+            
+            Spacer()
+            
+            HStack(spacing: 20) {
+                registerButton
+                signInButton
             }
-            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
         }
-        .background(Color.gray)
+        .padding(.horizontal, 20)
+        //        }
+        .background(
+            Image("imagen_inicio")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .aspectRatio(contentMode: .fill)
+        )
         .sheet(
             isPresented: $showLocation,
             onDismiss: {

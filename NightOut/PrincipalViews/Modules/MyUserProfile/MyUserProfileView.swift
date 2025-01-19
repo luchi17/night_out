@@ -20,12 +20,6 @@ struct MyUserProfileView: View {
     }
     
     var body: some View {
-        ZStack {
-//             Imagen de fondo
-            #warning("IMAGE")
-            Color.blue
-                .edgesIgnoringSafeArea(.all)
-
             VStack {
                 
                 editProfileButton
@@ -38,7 +32,7 @@ struct MyUserProfileView: View {
                         .clipShape(Circle())
                         .padding(.top, 40)
                 } else {
-                    Image("placeholder")
+                    Image("profile")
                         .resizable()
                         .scaledToFill()
                         .frame(width: 100, height: 100)
@@ -67,7 +61,12 @@ struct MyUserProfileView: View {
                 Spacer()
                 
             }
-        }
+            .background(
+                Image("fondo_azul")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
+            )
         .sheet(isPresented: $showShareSheet) {
             if let currentId = FirebaseServiceImpl.shared.getCurrentUserUid() {
                 // Presentar el ActivityViewController para compartir

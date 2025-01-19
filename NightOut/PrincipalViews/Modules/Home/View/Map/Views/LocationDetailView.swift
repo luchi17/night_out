@@ -33,8 +33,8 @@ struct LocationDetailView: View {
     private var content: some View {
         VStack {
             if let selectedLocation = selectedLocation {
-                // Imagen de la discoteca con un placeholder
-                Image("placeholder")
+#warning("TODO: placeholder disco image")
+                Image("profile")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 150)

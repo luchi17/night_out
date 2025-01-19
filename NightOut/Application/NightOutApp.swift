@@ -20,7 +20,8 @@ struct ContentView: View {
             appCoordinator
                 .build()
                 .navigationDestination(for: LoginCoordinator.self, destination: { coordinator in
-                    coordinator.build()
+                    coordinator
+                        .build()
                         .navigationDestination(for: SignupCoordinator.self) { coordinator in
                             coordinator
                                 .build()

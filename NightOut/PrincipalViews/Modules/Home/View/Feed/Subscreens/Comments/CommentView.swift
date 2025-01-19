@@ -17,15 +17,14 @@ struct CommentView: View  {
             if let userImageUrl = commentModel.userImageUrl {
                 KingFisherImage(url: URL(string: userImageUrl))
                     .placeholder({
-                        Image("placeholder")
+                        Image("profile")
                             .clipShape(Circle())
-                            .clipped()
                     })
                     .scaledToFill()
                     .frame(width: 40, height: 40)
                     .clipShape(Circle())
             } else {
-                Image("placeholder")
+                Image("profile")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 40, height: 40)

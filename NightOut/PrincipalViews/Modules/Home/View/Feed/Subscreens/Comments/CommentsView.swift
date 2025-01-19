@@ -78,7 +78,7 @@ struct CommentsView: View {
                 .frame(maxWidth: .infinity, maxHeight: 300)
                 .clipped()
             } else {
-                Image("placeholder")
+                Image("profile")
                     .resizable()
                     .scaledToFill()
                     .frame(maxWidth: .infinity, maxHeight: 300)
@@ -97,7 +97,7 @@ struct CommentsView: View {
                     .padding(.leading, 5)
                 
             } else {
-                Image("placeholder")
+                Image("profile")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 40, height: 40)

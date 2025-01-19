@@ -1,7 +1,5 @@
 import SwiftUI
 
-#warning("CHECK POST notification when adding posts with code done")
-
 struct NotificationModelForView {
     var isPost: Bool
     var text: String
@@ -141,13 +139,13 @@ struct CircleImage: View {
         if let imageUrl = imageUrl, let url = URL(string: imageUrl) {
             KingFisherImage(url: url)
                 .resizable()
-                .placeholder(Image("placeholder"))
+                .placeholder(Image("profile"))
                 .scaledToFill()
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
                 .frame(width: 60, height: 60)
         } else {
-            Image(systemName: "person.circle.fill") //person.circle.fill"
+            Image(systemName: "profile")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .foregroundStyle(.white)

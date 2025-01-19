@@ -209,7 +209,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] data in
-                if data.0, let model = data.1 {
+                if data.0, let _ = data.1 {
                     self?.viewModel.headerError = nil
                     self?.actions.goToTabView()
                 } else {

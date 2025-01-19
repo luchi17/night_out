@@ -20,66 +20,69 @@ struct SignupView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Background Image
-            //            Image("imagen_inicio")
-            //                .resizable()
-            //                .edgesIgnoringSafeArea(.all)
-            //                .aspectRatio(contentMode: .fill)
+        //        ZStack {
+        //            Image("imagen_inicio")
+        //                .resizable()
+        //                .edgesIgnoringSafeArea(.all)
+        //                .aspectRatio(contentMode: .fill)
+        
+        VStack(spacing: 20) {
+            // Logo
+            Image("logo_amarillo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 162, height: 157)
+                .padding(.top, 90)
             
-            VStack(spacing: 20) {
-                // Logo
-                Image("logo_amarillo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 162, height: 157)
-                    .padding(.top, 90)
-                
-                TextField("Full Name...", text: $viewModel.fullName)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                // Password Input
-                TextField("User Name...", text: $viewModel.userName)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                // Email Input
-                TextField("Email...", text: $viewModel.email)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                // Password Input
-                SecureField("Password...", text: $viewModel.password)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                TermsAndConditionsView(isAccepted: $termsAccepted)
-                
-                Spacer()
-                
-                registerButton
-                
-                Spacer()
-                
-                alreadyHaveAnAccountButton
-                
-            }
-            .padding(.horizontal, 20)
+            TextField("Full Name...", text: $viewModel.fullName)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            // Password Input
+            TextField("User Name...", text: $viewModel.userName)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            // Email Input
+            TextField("Email...", text: $viewModel.email)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            // Password Input
+            SecureField("Password...", text: $viewModel.password)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            TermsAndConditionsView(isAccepted: $termsAccepted)
+            
+            Spacer()
+            
+            registerButton
+            
+            Spacer()
+            
+            alreadyHaveAnAccountButton
+            
         }
-        .background(Color.green)
+        .padding(.horizontal, 20)
+        .background(
+            Image("imagen_inicio")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .aspectRatio(contentMode: .fill)
+        )
         .applyStates(
             error: (state: viewModel.headerError, onReload: { }),
             isIdle: viewModel.loading,

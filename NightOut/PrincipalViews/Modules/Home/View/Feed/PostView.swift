@@ -31,7 +31,8 @@ struct PostView: View {
                 .frame(maxHeight: 300)
                 .clipped()
             } else {
-                Image("placeholder")
+                #warning("TODO: image post empty")
+                Image("profile")
                     .resizable()
                     .scaledToFill()
                     .frame(maxHeight: 300)
@@ -49,7 +50,7 @@ struct PostView: View {
             if let profileImageUrl = model.profileImageUrl {
                 KingFisherImage(url: URL(string: profileImageUrl))
                     .placeholder({
-                        Image("placeholder")
+                        Image("profile")
                             .resizable()
                             .scaledToFill()
                             .clipShape(Circle())
@@ -63,7 +64,7 @@ struct PostView: View {
                         showUserOrCompanyProfile()
                     }
             } else {
-                Image("placeholder")
+                Image("profile")
                     .resizable()
                     .scaledToFill()
                     .clipShape(Circle())
@@ -110,7 +111,8 @@ struct PostView: View {
             Button {
                 showPostComments()
             } label: {
-                Image(systemName: "text.bubble")
+                Image("comment")
+                    .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
                     .foregroundStyle(.white)

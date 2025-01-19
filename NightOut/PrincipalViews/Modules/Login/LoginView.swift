@@ -33,81 +33,77 @@ struct LoginView: View, Hashable {
     }
     
     var body: some View {
-        ZStack {
-            // Background Image
-            //            Image("imagen_inicio")
-            //                .resizable()
-            //                .edgesIgnoringSafeArea(.all)
-            //                .aspectRatio(contentMode: .fill)
+        VStack(spacing: 20) {
+            Image("logo_amarillo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 162, height: 157)
+                .padding(.top, 90)
             
-            VStack(spacing: 20) {
-                // Logo
-                Image("logo_amarillo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 162, height: 157)
-                    .padding(.top, 90)
-                
-                // Email Input
-                TextField("Email...", text: $viewModel.email)
-                    .textFieldStyle(PlainTextFieldStyle())
+            // Email Input
+            TextField("Email...", text: $viewModel.email)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            // Password Input
+            SecureField("Password...", text: $viewModel.password)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color.white.opacity(0.2)) // Custom input background color
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            
+            // Login Button
+            Button(action: {
+                loginPublisher.send()
+            }) {
+                Text("Log in")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                // Password Input
-                SecureField("Password...", text: $viewModel.password)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                // Login Button
-                Button(action: {
-                    loginPublisher.send()
-                }) {
-                    Text("Log in")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.yellow) // Adjust as needed for your button style
-                        .cornerRadius(25)
-                        .shadow(radius: 4)
-                }
-                .padding(.top, 20)
-                
-                Spacer()
-                
-                // Apple Sign In Button
-                appleLoginButton
-
-                googleLoginButton
-                
-                Spacer()
-                
-                signupButton
-                
+                    .background(Color.yellow) // Adjust as needed for your button style
+                    .cornerRadius(25)
+                    .shadow(radius: 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            
+            Spacer()
+            
+            // Apple Sign In Button
+            appleLoginButton
+            
+            googleLoginButton
+            
+            Spacer()
+            
+            signupButton
+            
         }
+        .padding(.horizontal, 20)
+        .background(
+            Image("imagen_inicio")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .aspectRatio(contentMode: .fill)
+        )
         .alert(isPresented: $showRegisterAlert) {
-                        Alert(
-                            title: Text("Selecciona una opción"),
-                            message: Text("¿Cómo quieres registrarte?"),
-                            primaryButton: .default(Text("Registrar Empresa"), action: {
-                                showRegisterAlert.toggle()
-                                signupCompanyPublisher.send()
-                            }),
-                            secondaryButton: .default(Text("Registrar Persona"), action: {
-                                showRegisterAlert.toggle()
-                                signupUserPublisher.send()
-                            })
-                        )
-                    }
-        .background(Color.green)
+            Alert(
+                title: Text("Selecciona una opción"),
+                message: Text("¿Cómo quieres registrarte?"),
+                primaryButton: .default(Text("Registrar Empresa"), action: {
+                    showRegisterAlert.toggle()
+                    signupCompanyPublisher.send()
+                }),
+                secondaryButton: .default(Text("Registrar Persona"), action: {
+                    showRegisterAlert.toggle()
+                    signupUserPublisher.send()
+                })
+            )
+        }
         .applyStates(
             error: (state: viewModel.headerError, onReload: { }),
             isIdle: viewModel.loading,

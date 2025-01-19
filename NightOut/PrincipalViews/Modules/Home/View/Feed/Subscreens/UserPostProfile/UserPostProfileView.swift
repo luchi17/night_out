@@ -18,13 +18,11 @@ struct UserPostProfileView: View {
     
     var body: some View {
         ZStack {
-//             Imagen de fondo
-            #warning("IMAGE")
             Image("fondo_azul")
                 .resizable()
                 .scaledToFill()
                 .edgesIgnoringSafeArea(.all)
-                .background(Color.blue)
+//                .background(Color.blue)
 
             VStack {
                 // Imagen de perfil
@@ -36,7 +34,7 @@ struct UserPostProfileView: View {
                         .clipShape(Circle())
                         .padding(.top, 40)
                 } else {
-                    Image("placeholder")
+                    Image("profile")
                         .resizable()
                         .scaledToFill()
                         .frame(width: 100, height: 100)

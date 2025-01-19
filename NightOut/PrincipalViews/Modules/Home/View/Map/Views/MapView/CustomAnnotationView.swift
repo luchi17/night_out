@@ -2,7 +2,6 @@ import SwiftUI
 import UIKit
 import MapKit
 
-#warning("Is this an asset?")
 struct CustomAnnotationView: View {
     
     @State private var isSelected = false
@@ -11,17 +10,21 @@ struct CustomAnnotationView: View {
     @Binding var selection: LocationModel?
     
     var body: some View {
-        ZStack(alignment: .center) {
-            Circle()
-                .fill(.gray)
-                .stroke(Color.pink, lineWidth: 3)
-                .frame(width: isSelected ? 40 : 28, height: isSelected ? 40 : 28)
-            Image(systemName: "wineglass.fill")
-                .resizable()
-                .scaledToFit()
-                .foregroundStyle(.blue)
-                .frame(width: isSelected ? 18 : 10)
-        }
+//        ZStack(alignment: .center) {
+//            Circle()
+//                .fill(.gray)
+//                .stroke(Color.pink, lineWidth: 3)
+//                .frame(width: isSelected ? 40 : 28, height: isSelected ? 40 : 28)
+//            Image(systemName: "wineglass.fill")
+//                .resizable()
+//                .scaledToFit()
+//                .foregroundStyle(.blue)
+//                .frame(width: isSelected ? 18 : 10)
+//        }
+        Image("map_marker")
+            .resizable()
+            .scaledToFit()
+        .frame(width: isSelected ? 40 : 28, height: isSelected ? 40 : 28)
         .onTapGesture {
           selection = club
             withAnimation(.bouncy) {

@@ -65,7 +65,7 @@ struct UserProfileView: View {
                         ProgressView()
                     })
             } else {
-                Image("placeholder")
+                Image("profile")
                     .resizable()
                     .scaledToFill()
             }

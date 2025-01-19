@@ -13,7 +13,7 @@ struct LocationDetailSheet: View {
                     if let imageUrl = selectedLocation.image {
                         KingFisherImage(url: URL(string: imageUrl))
                             .centerCropped(width: 150, height: 150) {
-                                Image("placeholder")
+                                Image("profile")
                             }
                             .cornerRadius(10)
                             .padding(.vertical, 30)
@@ -65,7 +65,7 @@ struct LocationDetailSheet: View {
     }
     
     var placeholderImage: some View {
-        Image("placeholder")
+        Image("profile")
             .resizable()
             .scaledToFit()
             .frame(width: 150, height: 150)
