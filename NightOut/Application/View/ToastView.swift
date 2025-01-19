@@ -26,7 +26,7 @@ struct ToastView: View {
                         if let description = type.description {
                             Text(description)
                                 .font(.subheadline)
-                                .foregroundColor(.red)
+                                .foregroundColor(Color.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
@@ -48,7 +48,7 @@ struct ToastView: View {
                     }
                 }
                 .padding(.vertical, 15)
-                .background(type.backgroundColor, in: RoundedRectangle(cornerRadius: 10))  // Fondo azul claro
+                .background(type.backgroundColor) // Fondo azul claro, corner radius: , in: RoundedRectangle(cornerRadius: 10)
                 .transition(.move(edge: .top))  // Transición desde arriba
                 .zIndex(1)  // Asegura que el toast esté sobre otras vistas
             }
@@ -60,10 +60,8 @@ struct ToastView: View {
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                withAnimation(.linear) {
-                    isVisible = false
-                    onDismiss?()
-                }
+                isVisible = false
+                onDismiss?()
             }
         }
     }
@@ -94,7 +92,7 @@ public enum ToastType {
         case .defaultError:
             return Color.red.opacity(0.9)
         case .custom(let descriptor):
-            return descriptor.backgroundColor ?? Color.red.opacity(0.9)
+            return descriptor.backgroundColor ?? Color.red
         case .success(_):
             return Color.green 
         }
@@ -105,7 +103,7 @@ public enum ToastType {
         case .defaultError:
             return Color.red
         case .custom(let descriptor):
-            return descriptor.image?.color ?? Color.red
+            return descriptor.image?.color ?? Color.white
         case .success(let descriptor):
             return descriptor.image?.color ?? Color.white
         }
