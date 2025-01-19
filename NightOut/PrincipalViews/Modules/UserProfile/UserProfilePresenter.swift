@@ -288,7 +288,6 @@ private extension UserProfilePresenterImpl {
         .store(in: &cancellables)
     }
     
-#warning("CHECK")
     private func followButtonTapped() {
         switch viewModel.followButtonType {
         case .follow:
@@ -334,7 +333,6 @@ private extension UserProfilePresenterImpl {
         }
     }
     
-#warning("CHECK if tapping button calls again comhinelatest and updates image automatically ")
     private func whiskyButtonTapped() {
         switch viewModel.imGoingToClub {
         case .going:
