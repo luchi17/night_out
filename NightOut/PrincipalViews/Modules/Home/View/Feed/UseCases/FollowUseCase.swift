@@ -3,9 +3,10 @@ import FirebaseAuth
 
 protocol FollowUseCase {
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
-    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never>
     func rejectFollowRequest(requesterUid: String)
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
+    func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never>
+    func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never>
 }
 
 struct FollowUseCaseImpl: FollowUseCase {
@@ -19,16 +20,20 @@ struct FollowUseCaseImpl: FollowUseCase {
         return repository.fetchFollow(id: id)
     }
     
-    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never> {
-        return repository.acceptFollowRequest(requesterUid: requesterUid)
-    }
-    
     func rejectFollowRequest(requesterUid: String) {
         repository.rejectFollowRequest(requesterUid: requesterUid)
     }
     
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never> {
         repository.observeFollow(id: id)
+    }
+    
+    func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never> {
+        return repository.addFollow(requesterProfileUid: requesterProfileUid, profileUid: profileUid, needRemoveFromPending: needRemoveFromPending)
+    }
+    
+    func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never> {
+        return repository.removeFollow(requesterProfileUid: requesterProfileUid, profileUid: profileUid)
     }
 }
 

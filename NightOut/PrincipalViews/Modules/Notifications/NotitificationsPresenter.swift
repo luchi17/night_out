@@ -99,7 +99,11 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 let notificationId = data.0
                 let requesterUid = data.1
                 
-                return presenter.useCases.followUseCase.acceptFollowRequest(requesterUid: requesterUid)
+                return presenter.useCases.followUseCase.addFollow(
+                    requesterProfileUid: requesterUid,
+                    profileUid: FirebaseServiceImpl.shared.getCurrentUserUid() ?? "",
+                    needRemoveFromPending: true
+                )
                     .map { success in
                         (notificationId, success)
                     }

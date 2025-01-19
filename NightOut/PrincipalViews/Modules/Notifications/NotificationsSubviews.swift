@@ -41,6 +41,9 @@ struct FriendRequestNotificationView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 5)
+            .onTapGesture {
+                goToProfile(notification)
+            }
            
             Spacer()
             
@@ -97,6 +100,9 @@ struct DefaultNotificationView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 5)
+            .onTapGesture {
+                goToProfile(notification)
+            }
             
             Spacer()
             
@@ -106,20 +112,20 @@ struct DefaultNotificationView: View {
                         .resizable()
                         .scaledToFill()
                         .frame(width: 60, height: 60)
+                        .onTapGesture {
+                            goToPost(notification)
+                        }
+                    
                 } else {
                     Image(systemName: "photo.fill")
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 60, height: 60)
                         .clipped()
+                        .onTapGesture {
+                            goToPost(notification)
+                        }
                 }
-            }
-        }
-        .onTapGesture {
-            if notification.isPost {
-                goToPost(notification)
-            } else {
-                goToProfile(notification)
             }
         }
         .padding(.all, 10)

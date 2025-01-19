@@ -6,9 +6,10 @@ protocol PostsRepository {
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func getComments(postId: String) -> AnyPublisher<[String : CommentModel], Never>
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
-    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never>
     func rejectFollowRequest(requesterUid: String)
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
+    func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never>
+    func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never>
 }
 
 struct PostsRepositoryImpl: PostsRepository {
@@ -53,9 +54,15 @@ struct PostsRepositoryImpl: PostsRepository {
             .eraseToAnyPublisher()
     }
     
-    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never> {
+    func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never> {
         return network
-            .acceptFollowRequest(requesterUid: requesterUid)
+            .removeFollow(requesterProfileUid: requesterProfileUid, profileUid: profileUid)
+            .eraseToAnyPublisher()
+    }
+    
+    func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never> {
+        return network
+            .addFollow(requesterProfileUid: requesterProfileUid, profileUid: profileUid, needRemoveFromPending: needRemoveFromPending)
             .eraseToAnyPublisher()
     }
     

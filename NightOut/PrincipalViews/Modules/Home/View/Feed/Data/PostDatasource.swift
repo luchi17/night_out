@@ -13,10 +13,10 @@ protocol PostDatasource {
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func getComments(postId: String) -> AnyPublisher<[String: CommentModel], Never>
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
-    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never>
     func rejectFollowRequest(requesterUid: String)
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
-   
+    func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never>
+    func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never>
 }
 
 struct PostDatasourceImpl: PostDatasource {
@@ -144,16 +144,12 @@ struct PostDatasourceImpl: PostDatasource {
         .eraseToAnyPublisher()
         
     }
-    
-    func acceptFollowRequest(requesterUid: String) -> AnyPublisher<Bool, Never> {
+
+    func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never> {
         
         return Future<Bool, Never> { promise in
             
-            guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-                return promise(.success(false))
-            }
-            
-            let ref = FirebaseServiceImpl.shared.getFollow().child(currentUserId).child("Followers").child(requesterUid)
+            let ref = FirebaseServiceImpl.shared.getFollow().child(profileUid).child("Followers").child(requesterProfileUid)
             
             ref.setValue(true) { error, _ in
                 if let error = error {
@@ -161,10 +157,37 @@ struct PostDatasourceImpl: PostDatasource {
                     promise(.success(false))
                 } else {
                     print("Comentario guardado exitosamente en la base de datos")
-                    let reverseFollowRef = FirebaseServiceImpl.shared.getFollow().child(requesterUid).child("Following").child(currentUserId)
+                    let reverseFollowRef = FirebaseServiceImpl.shared.getFollow().child(requesterProfileUid).child("Following").child(profileUid)
                     reverseFollowRef.setValue(true) { error, _ in
                         if error == nil {
-                            self.removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
+                            if needRemoveFromPending {
+                                self.removePendingRequest(requesterUid: requesterProfileUid, currentUserId: profileUid)
+                            }
+                            promise(.success(true))
+                        } else {
+                            promise(.success(false))
+                        }
+                    }
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never> {
+        return Future<Bool, Never> { promise in
+            
+            let ref = FirebaseServiceImpl.shared.getFollow().child(profileUid).child("Followers").child(requesterProfileUid)
+            
+            ref.removeValue() { error, _ in
+                if let error = error {
+                    print("Error al guardar el comentario en la base de datos: \(error.localizedDescription)")
+                    promise(.success(false))
+                } else {
+                    print("Comentario guardado exitosamente en la base de datos")
+                    let reverseFollowRef = FirebaseServiceImpl.shared.getFollow().child(requesterProfileUid).child("Following").child(profileUid)
+                    reverseFollowRef.removeValue() { error, _ in
+                        if error == nil {
                             promise(.success(true))
                         } else {
                             promise(.success(false))
@@ -177,7 +200,7 @@ struct PostDatasourceImpl: PostDatasource {
     }
     
     func rejectFollowRequest(requesterUid: String) {
-        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        guard let currentUserId = FirebaseServiceImpl.shared.currentUser?.uid else { return }
         
         removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
     }
