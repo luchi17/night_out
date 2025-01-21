@@ -271,7 +271,8 @@ private extension UserProfilePresenterImpl {
             ispost: false,
             postid: "",
             text: "\(model.username ?? "Unknown user") \(GlobalStrings.shared.startFollowUserText)",
-            userid: myUid
+            userid: myUid,
+            date: Date().toIsoString()
         )
         
         useCases.noficationsUsecase.addNotification(

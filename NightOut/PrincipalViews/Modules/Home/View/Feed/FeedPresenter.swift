@@ -128,7 +128,7 @@ final class FeedPresenterImpl: FeedPresenter {
                 }
             }, receiveValue: { presenter, data in
                 presenter.viewModel.loading = false
-                presenter.viewModel.posts = data
+                presenter.viewModel.posts = Utils.sortByDate(objects: data, dateExtractor: { $0.date }, ascending: false)
             })
             .store(in: &cancellables)
         
@@ -215,7 +215,8 @@ private extension FeedPresenterImpl {
                     fullName: userInfo?.fullname,
                     uid: post.postID,
                     isFromUser: post.isFromUser ?? true,
-                    publisherId: post.publisherId
+                    publisherId: post.publisherId,
+                    date: post.date ?? Date().toIsoString()
                 )
             })
             .eraseToAnyPublisher()
@@ -241,7 +242,8 @@ private extension FeedPresenterImpl {
                     fullName: companyInfo?.fullname,
                     uid: post.postID,
                     isFromUser: post.isFromUser ?? false,
-                    publisherId: post.publisherId
+                    publisherId: post.publisherId,
+                    date: post.date ?? Date().toIsoString()
                 )
             })
             .eraseToAnyPublisher()

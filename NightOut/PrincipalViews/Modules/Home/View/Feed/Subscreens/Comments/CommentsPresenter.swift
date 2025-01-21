@@ -95,7 +95,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
                     self.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load comments", image: nil))
                 }
             }, receiveValue: { presenter, comments in
-                presenter.viewModel.comments = comments
+                presenter.viewModel.comments = Utils.sortByDate(objects: comments, dateExtractor: { $0.date }, ascending: true)
             })
             .store(in: &cancellables)
             
@@ -142,7 +142,8 @@ private extension CommentsPresenterImpl {
             ispost: true,
             postid: info.postId,
             text: "commented: " + commentText,
-            userid: uid
+            userid: uid,
+            date: Date().toIsoString()
         )
         _ = self.useCases.notificationsUseCase.addNotification(model: model, publisherId: info.publisherId)
     }
@@ -151,9 +152,10 @@ private extension CommentsPresenterImpl {
         if let uid = FirebaseServiceImpl.shared.getCurrentUserUid() {
             let comment = CommentModel(
                 comment: viewModel.commentText,
-                publisher: uid
+                publisher: uid,
+                date: Date().toIsoString()
             )
-            //MANDAR String: String... miraar firebase, se guardan mal los coments
+            
             return useCases.postsUseCase.addComment(
                 comment: comment,
                 postId: info.postId
@@ -173,7 +175,8 @@ private extension CommentsPresenterImpl {
                 return UserCommentModel(
                     userImageUrl: presenter.viewModel.profileImage,
                     username: username,
-                    comment: presenter.viewModel.commentText
+                    comment: presenter.viewModel.commentText,
+                    date: comment.date
                 )
             }
             .eraseToAnyPublisher()
@@ -190,7 +193,8 @@ private extension CommentsPresenterImpl {
                         UserCommentModel(
                             userImageUrl: companyModel?.imageUrl,
                             username: companyModel?.username,
-                            comment: comment.comment
+                            comment: comment.comment,
+                            date: comment.date
                         )
                     }
                     .eraseToAnyPublisher()
@@ -200,7 +204,8 @@ private extension CommentsPresenterImpl {
                         UserCommentModel(
                             userImageUrl: userModel?.image,
                             username: userModel?.username,
-                            comment: comment.comment
+                            comment: comment.comment,
+                            date: comment.date
                         )
                     }
                     .eraseToAnyPublisher()

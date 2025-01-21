@@ -8,6 +8,7 @@ struct PostCompanyModel: Codable {
     var name: String?
     var price: String?
     var uid: String?
+    var date: String?
     
     // Mapear clave JSON a propiedad de Swift
     enum CodingKeys: String, CodingKey {
@@ -18,6 +19,7 @@ struct PostCompanyModel: Codable {
         case name
         case price
         case uid
+        case date
     }
 }
 

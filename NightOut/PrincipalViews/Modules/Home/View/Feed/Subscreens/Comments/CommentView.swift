@@ -6,6 +6,7 @@ struct UserCommentModel {
     var username: String?
     var comment: String?
     let uid = UUID()
+    let date: String
 }
 
 struct CommentView: View  {

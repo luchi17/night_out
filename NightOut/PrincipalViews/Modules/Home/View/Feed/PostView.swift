@@ -11,6 +11,20 @@ struct PostModel: Hashable {
     var uid: String
     var isFromUser: Bool
     var publisherId: String
+    var date: String
+    
+    init(profileImageUrl: String?, postImage: UIImage?, description: String?, location: String? , username: String?, fullName: String?, uid: String, isFromUser: Bool, publisherId: String, date: String?) {
+        self.profileImageUrl = profileImageUrl
+        self.postImage = postImage
+        self.description = description
+        self.location = location
+        self.username = username
+        self.fullName = fullName
+        self.uid = uid
+        self.isFromUser = isFromUser
+        self.publisherId = publisherId
+        self.date = date ?? Date().ISO8601Format()
+    }
 }
 
 struct PostView: View {
@@ -31,7 +45,7 @@ struct PostView: View {
                 .frame(maxHeight: 300)
                 .clipped()
             } else {
-                #warning("TODO: image post empty")
+                #warning("TODO: image post placeholder empty")
                 Image("profile")
                     .resizable()
                     .scaledToFill()
