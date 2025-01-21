@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct MyUserProfileView: View {
-
+    
     @State private var showShareSheet = false
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
@@ -20,53 +20,53 @@ struct MyUserProfileView: View {
     }
     
     var body: some View {
-            VStack {
-                
-                editProfileButton
-
-                if let profileImageUrl = viewModel.profileImageUrl {
-                    KingFisherImage(url: URL(string: profileImageUrl))
-                        .centerCropped(width: 100, height: 100, placeholder: {
-                            ProgressView()
-                        })
-                        .clipShape(Circle())
-                        .padding(.top, 40)
-                } else {
-                    Image("profile")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 100, height: 100)
-                        .clipShape(Circle())
-                        .padding(.top, 40)
-                }
-
-                Text(viewModel.fullname)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.top, 8)
-
-                Text(viewModel.username)
-                    .font(.system(size: 14))
-                    .foregroundColor(.white)
-                
-                shareProfileButton
-                
-                HStack(spacing: 8) {
-                    CounterView(count: viewModel.followersCount, label: "Seguidores")
-                    CounterView(count: viewModel.discosCount, label: "Discotecas")
-                    CounterView(count: viewModel.copasCount, label: "Copas")
-                }
-                .padding(.top, 16)
-                
-                Spacer()
-                
-            }
-            .background(
-                Image("fondo_azul")
+        VStack {
+            
+            editProfileButton
+            
+            if let profileImageUrl = viewModel.profileImageUrl {
+                KingFisherImage(url: URL(string: profileImageUrl))
+                    .centerCropped(width: 100, height: 100, placeholder: {
+                        ProgressView()
+                    })
+                    .clipShape(Circle())
+                    .padding(.top, 40)
+            } else {
+                Image("profile")
                     .resizable()
-                    .edgesIgnoringSafeArea(.all)
-                    .aspectRatio(contentMode: .fill)
-            )
+                    .scaledToFill()
+                    .frame(width: 100, height: 100)
+                    .clipShape(Circle())
+                    .padding(.top, 40)
+            }
+            
+            Text(viewModel.fullname)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.top, 8)
+            
+            Text(viewModel.username)
+                .font(.system(size: 14))
+                .foregroundColor(.white)
+            
+            shareProfileButton
+            
+            HStack(spacing: 8) {
+                CounterView(count: viewModel.followersCount, label: "Seguidores")
+                CounterView(count: viewModel.discosCount, label: "Discotecas")
+                CounterView(count: viewModel.copasCount, label: "Copas")
+            }
+            .padding(.top, 16)
+            
+            Spacer()
+            
+        }
+        .background(
+            Image("fondo_azul")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .aspectRatio(contentMode: .fill)
+        )
         .sheet(isPresented: $showShareSheet) {
             if let currentId = FirebaseServiceImpl.shared.getCurrentUserUid() {
                 // Presentar el ActivityViewController para compartir
