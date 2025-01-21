@@ -22,8 +22,6 @@ struct UserPostProfileView: View {
                 .resizable()
                 .scaledToFill()
                 .edgesIgnoringSafeArea(.all)
-//                .background(Color.blue)
-
             VStack {
                 // Imagen de perfil
                 if let profileImageUrl = viewModel.profileImageUrl {

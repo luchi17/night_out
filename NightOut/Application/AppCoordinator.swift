@@ -165,4 +165,12 @@ extension AppCoordinator {
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
         ])
     }
+    
+    static func getAppVersion() -> String {
+        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+           let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+            return "Version \(version) (Build \(build))"
+        }
+        return "Version not found"
+    }
 }

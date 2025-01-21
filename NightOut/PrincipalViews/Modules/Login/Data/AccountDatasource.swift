@@ -17,6 +17,7 @@ protocol AccountDatasource {
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
     func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>
     func signOut() -> AnyPublisher<Void, Error>
+    func deleteAccount() -> AnyPublisher<String?, Never>
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
     func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
 }
@@ -75,7 +76,7 @@ struct AccountDatasourceImpl: AccountDatasource {
             
             guard let user = signInResult?.user,
                   let idToken = user.idToken?.tokenString else {
-               
+                
                 publisher.send(completion: .failure(NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to obtain authentication tokens"])))
                 return
             }
@@ -162,7 +163,7 @@ struct AccountDatasourceImpl: AccountDatasource {
         
         return publisher.eraseToAnyPublisher()
     }
-
+    
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never> {
         
         return Future<UserModel?, Never> { promise in
@@ -206,7 +207,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                 do {
                     if let companyModel = try snapshot?.data(as: CompanyModel.self) {
                         // Asumiendo que deseas crear un PostModel a partir de CompanyModel
-                       
+                        
                         promise(.success(companyModel))
                     } else {
                         promise(.success(nil))  // Envía `nil` si no se encuentra el modelo
@@ -221,7 +222,7 @@ struct AccountDatasourceImpl: AccountDatasource {
     }
     
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never> {
-
+        
         let publisher = PassthroughSubject<Bool, Never>()
         
         guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
@@ -263,7 +264,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                 print("Error al subir imagen: \(error.localizedDescription)")
                 publisher.send(nil)
             }
-
+            
             // Obtener la URL de la imagen
             imageRef.downloadURL { url, error in
                 publisher.send(url?.absoluteString)
@@ -274,7 +275,7 @@ struct AccountDatasourceImpl: AccountDatasource {
     }
     
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never> {
-
+        
         let publisher = PassthroughSubject<Bool, Never>()
         
         guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
@@ -308,6 +309,25 @@ struct AccountDatasourceImpl: AccountDatasource {
             } catch let signOutError as NSError {
                 print("logout failure")
                 promise(.failure(signOutError))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func deleteAccount() -> AnyPublisher<String?, Never> {
+        return Future<String?, Never> { promise in
+            guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                promise(.success("Error finding user uid"))
+                return
+            }
+            let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: uid)
+            ref.removeValue { error, _ in
+                if let error = error {
+                    promise(.success(error.localizedDescription))
+                    
+                } else {
+                    promise(.success(nil))
+                }
             }
         }
         .eraseToAnyPublisher()

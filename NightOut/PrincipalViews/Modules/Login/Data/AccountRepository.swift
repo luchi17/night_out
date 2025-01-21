@@ -11,6 +11,7 @@ protocol AccountRepository {
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
     func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>
     func signOut() -> AnyPublisher<Void, Error>
+    func deleteAccount() -> AnyPublisher<String?, Never>
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
     func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
 }
@@ -89,6 +90,12 @@ struct AccountRepositoryImpl: AccountRepository {
     func signOut() -> AnyPublisher<Void, Error> {
         return network
             .signOut()
+            .eraseToAnyPublisher()
+    }
+    
+    func deleteAccount() -> AnyPublisher<String?, Never> {
+        return network
+            .deleteAccount()
             .eraseToAnyPublisher()
     }
 }
