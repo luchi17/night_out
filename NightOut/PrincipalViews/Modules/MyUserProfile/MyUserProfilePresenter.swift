@@ -37,7 +37,6 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
-        let editProfile: AnyPublisher<Void, Never>
     }
     
     var viewModel: MyUserProfileViewModel
@@ -83,14 +82,6 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
             .sink { presenter, followModel in
                 presenter.viewModel.loading = false
                 presenter.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
-            }
-            .store(in: &cancellables)
-        
-        input
-            .editProfile
-            .withUnretained(self)
-            .sink { presenter, _ in
-                #warning("TODO: Open app settings")
             }
             .store(in: &cancellables)
     }

@@ -48,7 +48,6 @@ struct FeedView: View {
                 .padding(.bottom, 20)
             }
         }
-        .background(Color.blue)
         .scrollIndicators(.hidden)
         .padding(.horizontal, 20)
         .onAppear {
