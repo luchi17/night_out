@@ -4,17 +4,21 @@ import Combine
 struct MyUserProfileView: View {
     
     @State private var showShareSheet = false
+    @State private var showEditSheet = false
+    @Environment(\.dismiss) private var dismiss
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
-    private let editProfilePublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: MyUserProfileViewModel
     let presenter: MyUserProfilePresenter
+    let settingsPresenter: MyUserSettingsPresenter
     
     init(
-        presenter: MyUserProfilePresenter
+        presenter: MyUserProfilePresenter,
+        settingsPresenter: MyUserSettingsPresenter
     ) {
         self.presenter = presenter
+        self.settingsPresenter = settingsPresenter
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -73,6 +77,11 @@ struct MyUserProfileView: View {
                 ShareSheet(activityItems: ["¡Echa un vistazo a este perfil en NightOut! nightout://profile/\(currentId)"])
             }
         }
+        .sheet(isPresented: $showEditSheet) {
+            MyUserSettingsView(presenter: settingsPresenter)
+             .presentationDetents([.large])
+             .presentationDragIndicator(.visible)
+        }
         .applyStates(error: nil, isIdle: viewModel.loading)
         .onAppear {
             viewDidLoadPublisher.send()
@@ -83,7 +92,7 @@ struct MyUserProfileView: View {
         HStack {
             Spacer()
             Button(action: {
-                editProfilePublisher.send()
+                showEditSheet.toggle()
             }) {
                 Text("Editar")
                     .font(.system(size: 16))
@@ -119,8 +128,7 @@ struct MyUserProfileView: View {
 private extension MyUserProfileView {
     func bindViewModel() {
         let input = MyUserProfilePresenterImpl.ViewInputs(
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            editProfile: editProfilePublisher.eraseToAnyPublisher()
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

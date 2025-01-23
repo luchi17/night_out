@@ -7,13 +7,15 @@ class HomeCoordinator {
     private let actions: HomePresenterImpl.Actions
     private let mapActions: LocationsMapPresenterImpl.Actions
     private let feedActions: FeedPresenterImpl.Actions
+    private let settingsActions: MyUserSettingsPresenterImpl.Actions
     private let locationManager: LocationManager
     
-    init(actions: HomePresenterImpl.Actions, mapActions: LocationsMapPresenterImpl.Actions, feedActions : FeedPresenterImpl.Actions, locationManager: LocationManager) {
+    init(actions: HomePresenterImpl.Actions, mapActions: LocationsMapPresenterImpl.Actions, feedActions : FeedPresenterImpl.Actions, settingsActions: MyUserSettingsPresenterImpl.Actions, locationManager: LocationManager) {
         self.actions = actions
         self.mapActions = mapActions
         self.locationManager = locationManager
         self.feedActions = feedActions
+        self.settingsActions = settingsActions
     }
     
     @ViewBuilder
@@ -42,11 +44,21 @@ class HomeCoordinator {
             actions: .init()
         )
         
+        let settingsPresenter = MyUserSettingsPresenterImpl(
+            useCases: .init(
+                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                signOutUseCase: SignOutUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                deleteAccountUseCase: DeleteAccountUseCaseImpl(repository: AccountRepositoryImpl.shared)
+            ),
+            actions: settingsActions
+        )
+        
         HomeView(
             presenter: presenter,
             mapPresenter: mapPresenter,
             feedPresenter: feedPresenter,
-            userPresenter: userPresenter
+            userPresenter: userPresenter,
+            settingsPresenter: settingsPresenter
         )
     }
 }

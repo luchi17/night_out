@@ -11,6 +11,7 @@ struct HomeView: View {
     let mapPresenter: LocationsMapPresenter
     let feedPresenter: FeedPresenter
     let userPresenter: MyUserProfilePresenter
+    let settingsPresenter: MyUserSettingsPresenter
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
 
@@ -18,12 +19,14 @@ struct HomeView: View {
         presenter: HomePresenter,
         mapPresenter: LocationsMapPresenter,
         feedPresenter: FeedPresenter,
-        userPresenter: MyUserProfilePresenter
+        userPresenter: MyUserProfilePresenter,
+        settingsPresenter: MyUserSettingsPresenter
     ) {
         self.presenter = presenter
         self.mapPresenter = mapPresenter
         self.feedPresenter = feedPresenter
         self.userPresenter = userPresenter
+        self.settingsPresenter = settingsPresenter
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -41,20 +44,27 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $showMyProfile) {
-            MyUserProfileView(presenter: userPresenter)
+            MyUserProfileView(
+                presenter: userPresenter,
+                settingsPresenter: settingsPresenter
+            )
                 .presentationDetents([.large])
                 .presentationBackground(.regularMaterial)
-                .presentationBackgroundInteraction(.enabled(upThrough: .large))
+//                .presentationBackgroundInteraction(.enabled(upThrough: .large))
                 .presentationDragIndicator(.visible)
         }
         .padding(.top, 20)
-        .background(.blue)
+        .background(
+            Image("fondo_azul")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .aspectRatio(contentMode: .fill)
+        )
         .navigationBarHidden(true)
     }
     
     
     var topButtonView: some View {
-        // Parte superior de la pantalla
         HStack(spacing: 0) {
             // Botón de perfil
             Button(action: {

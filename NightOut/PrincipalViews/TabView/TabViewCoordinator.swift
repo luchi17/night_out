@@ -82,7 +82,13 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makeHomeFlow() -> AnyView {
-        let coordinator = HomeCoordinator(actions: homeActions(), mapActions: mapActions(), feedActions: feedActions(), locationManager: locationManager)
+        let coordinator = HomeCoordinator(
+            actions: homeActions(),
+            mapActions: mapActions(),
+            feedActions: feedActions(),
+            settingsActions: settingsActions(),
+            locationManager: locationManager
+        )
         return AnyView(coordinator.build())
     }
     
@@ -133,5 +139,9 @@ private extension TabViewCoordinator {
             onShowCompanyProfile: { _ in },
             onShowPostComments: onShowPostComments
         )
+    }
+    
+    func settingsActions() -> MyUserSettingsPresenterImpl.Actions {
+        .init(backToLogin: goToLogin)
     }
 }

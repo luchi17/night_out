@@ -22,13 +22,8 @@ final class MyUserSettingsPresenterImpl: MyUserSettingsPresenter {
         let signOutUseCase: SignOutUseCase
         let deleteAccountUseCase: DeleteAccountUseCase
     }
-    
-#warning("TODO: hacerlo como sheet?")
+
     struct Actions {
-//        startActivity(Intent(this@ActivityAccountSettingUser, ActivityPolicy::class.java))
-//        let openPrivacyPolicy: VoidClosure
-////        startActivity(Intent(this@ActivityAccountSettingUser, ActivityTermsAndConditions::class.java))
-//        let openTermsConditions: VoidClosure
         let backToLogin: VoidClosure
     }
     
@@ -63,9 +58,10 @@ final class MyUserSettingsPresenterImpl: MyUserSettingsPresenter {
             .viewDidLoad
             .withUnretained(self)
             .sink { presenter, _ in
-                presenter.viewModel.appVersion = "App Version \(AppCoordinator.getAppVersion())"
+                presenter.viewModel.appVersion = "App \(AppCoordinator.getAppVersion())"
             }
             .store(in: &cancellables)
+        
         input
             .logout
             .withUnretained(self)
@@ -101,12 +97,10 @@ final class MyUserSettingsPresenterImpl: MyUserSettingsPresenter {
                 presenter.useCases.deleteAccountUseCase.execute()
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }
-                viewModel.showProgress = loading
-                self.viewModel.loading = loading
+                self.viewModel.showProgress = loading
             }, onError: { _ in })
             .withUnretained(self)
             .sink(receiveValue: { presenter, errorMessage in
-                presenter.viewModel.showProgress = false
                 presenter.viewModel.showAlertMessage = true
                 if let errorMessage = errorMessage {
                     presenter.viewModel.alertMessage = "Error deleting account: \(errorMessage)"
