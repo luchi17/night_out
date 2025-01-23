@@ -4,11 +4,14 @@ import Combine
 struct MyUserSettingsView: View {
     
     @State private var showAlertDeleteUser = false
+    @State private var showPrivacyPolicy = false
+    @State private var showTermsAndConditions = false
+    
+    @Environment(\.dismiss) private var dismiss
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let logoutPublisher = PassthroughSubject<Void, Never>()
     private let confirmDeleteAccountPublisher = PassthroughSubject<Void, Never>()
-    //    private let termsConditionsPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: MyUserSettingsViewModel
     let presenter: MyUserSettingsPresenter
@@ -24,31 +27,27 @@ struct MyUserSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Título
-                Text("Configuraciones")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding(.bottom, 20)
+                
+                topView
                 
                 // Sección Legal
-                SectionView(iconName: "gavel", title: "Legal") {
+                SectionView(iconName: "flag", title: "Legal") {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Privacy Policy")
+                            .font(.system(size: 16))
                             .foregroundColor(.gray)
                             .onTapGesture {
-                                // Acción para Privacy Policy
+                                showPrivacyPolicy.toggle()
                             }
                         Text("Terms and Conditions")
+                            .font(.system(size: 16))
                             .foregroundColor(.gray)
                             .onTapGesture {
-                                // Acción para Terms and Conditions
+                                showTermsAndConditions.toggle()
                             }
                     }
                 }
                 
-                
-                // Sección Contact Us
                 SectionView(iconName: "envelope", title: "Contact Us") {
                     
                     Button(action: {
@@ -60,28 +59,26 @@ struct MyUserSettingsView: View {
                     }
                 }
                 
-                // Sección Log Out
                 SectionView(iconName: "arrow.right.square", title: "Log Out") {
                     Button(action: {
                         logoutPublisher.send()
                     }) {
                         Text("Log Out")
                             .font(.system(size: 16))
-                            .foregroundColor(.white)
+                            .foregroundColor(.gray)
                     }
                 }
                 
-                // Sección Delete Account
                 SectionView(iconName: "trash", title: "Delete Account") {
                     Button(action: {
                         showAlertDeleteUser.toggle()
                     }) {
                         Text("Delete Account")
-                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                            .foregroundColor(.gray)
                     }
                 }
                 
-                // Versión de la aplicación
                 Text(viewModel.appVersion)
                     .font(.system(size: 14))
                     .foregroundColor(.gray)
@@ -90,8 +87,12 @@ struct MyUserSettingsView: View {
             }
             .padding(20)
         }
-        .background(Color.blue) // Cambiar a un color específico si tienes un color personalizado
-        .ignoresSafeArea()
+        .background(
+            Image("fondo_azul")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .aspectRatio(contentMode: .fill)
+        )
         .alert(isPresented: $viewModel.showAlertMessage) {
             Alert(
                 title: Text("Message"),
@@ -108,6 +109,16 @@ struct MyUserSettingsView: View {
                 },
                 secondaryButton: .cancel()
             )
+        }
+        .sheet(isPresented: $showPrivacyPolicy) {
+            PrivacyPolicyView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showTermsAndConditions) {
+            SettingsTermsAndConditionsView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
         .overlay(
             Group {
@@ -126,6 +137,46 @@ struct MyUserSettingsView: View {
             viewDidLoadPublisher.send()
         }
     }
+    
+//    var topView: some View {
+//        VStack(spacing: 12) {
+//            HStack {
+//                Spacer()
+//                
+//                Button(action: {
+//                    dismiss()
+//                }) {
+//                    Image(systemName: "xmark")
+//                        .foregroundStyle(.white)
+//                        .font(.system(size: 20, weight: .bold))
+//                }
+//            }
+//            HStack {
+//                
+//                Spacer()
+//            }
+//        }
+//        .padding(.top, 16)
+//        .padding(.horizontal, 16)
+//    }
+    
+    var topView: some View {
+        HStack {
+            Text("Configuraciones")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.top, 40)
+                .padding(.bottom, 15)
+            
+            Spacer()
+        
+        }
+        .padding(.top, 16)
+        .padding(.horizontal, 16)
+        
+    }
+    
+    
 }
 
 private extension MyUserSettingsView {
@@ -157,14 +208,14 @@ struct SectionView<Content: View>: View {
             HStack {
                 Image(systemName: iconName)
                     .resizable()
+                    .scaledToFit()
                     .frame(width: 24, height: 24)
                     .foregroundColor(.white)
                 Text(title)
-                    .font(.headline)
+                    .font(.system(size: 18))
                     .foregroundColor(.white)
             }
             content()
         }
     }
 }
-
