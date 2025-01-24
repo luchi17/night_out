@@ -59,6 +59,7 @@ final class LoginPresenterImpl: LoginPresenter {
     }
     
     func transform(input: LoginPresenterImpl.ViewInputs) {
+        
         loginListener(input: input)
         signupListener(input: input)
         signupCompanyListener(input: input)
@@ -96,16 +97,8 @@ final class LoginPresenterImpl: LoginPresenter {
                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
             })
             .withUnretained(self)
-            .flatMap({ presenter, companyLocations in
-                presenter.saveMyUserInfoInUserDefaults(companyLocations: companyLocations)
-            })
-            .sink(receiveValue: { [weak self] savedOk in
-                if savedOk {
-                    self?.actions.goToTabView()
-                } else {
-                    self?.viewModel.toast = .custom(.init(title: "Error", description: "No se pudo iniciar sesión.", image: nil))
-                    
-                }
+            .sink(receiveValue: { [weak self] _ in
+                self?.actions.goToTabView()
             })
             .store(in: &cancellables)
     }
@@ -150,16 +143,8 @@ final class LoginPresenterImpl: LoginPresenter {
                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
             })
             .withUnretained(self)
-            .flatMap({ presenter, companyLocations in
-                presenter.saveMyUserInfoInUserDefaults(companyLocations: companyLocations)
-            })
-            .sink(receiveValue: { [weak self] savedOk in
-                if savedOk {
-                    self?.actions.goToTabView()
-                } else {
-                    self?.viewModel.toast = .custom(.init(title: "Error", description: "No se pudo iniciar sesión.", image: nil))
-                }
-                
+            .sink(receiveValue: { [weak self] _ in
+                self?.actions.goToTabView()
             })
             .store(in: &cancellables)
         
@@ -170,30 +155,5 @@ final class LoginPresenterImpl: LoginPresenter {
 //            .signupWithApple
 //            .withUnretained(self)
         
-    }
-}
-
-private extension LoginPresenterImpl {
-    func saveMyUserInfoInUserDefaults() -> AnyPublisher<Void, Never> {
-        guard let currentUserUid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-            
-            return Just(()).eraseToAnyPublisher()
-        }
-
-        if let myUserCompany = UserDefaults.getCompanies()?.users.first(where: { $0.value.email == viewModel.email }) {
-            
-            UserDefaults.setCompanyUserModel(myUserCompany.value)
-            return Just(()).eraseToAnyPublisher()
-            
-        } else {
-            
-            return useCases.userDataUseCase.getUserInfo(uid: currentUserUid)
-                .compactMap({ $0 })
-                .handleEvents(receiveOutput: { model in
-                    UserDefaults.setUserModel(model)
-                })
-                .map({ _ in })
-                .eraseToAnyPublisher()
-        }
     }
 }
