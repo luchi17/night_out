@@ -26,13 +26,6 @@ struct SignupCompanyView: View {
     }
     
     var body: some View {
-        //        ZStack {
-        // Background Image
-        //            Image("imagen_inicio")
-        //                .resizable()
-        //                .edgesIgnoringSafeArea(.all)
-        //                .aspectRatio(contentMode: .fill)
-        
         VStack(spacing: 10) {
             // Logo
             
@@ -110,15 +103,17 @@ struct SignupCompanyView: View {
                     .presentationDragIndicator(.visible)
             }
         )
-        .applyStates(
-            error: (state: viewModel.headerError, onReload: { }),
+        .showToast(
+            error: (
+                type: viewModel.toast,
+                showCloseButton: false,
+                onDismiss: {
+                    viewModel.toast = nil
+                }
+            ),
             isIdle: viewModel.loading,
-            showCloseButton: {
-                //Resetting headerError
-                self.viewModel.headerError = nil
-            }
+            toastExtraPadding: true
         )
-        .navigationBarBackButtonHidden()
     }
     
     private var registerButton: some View {

@@ -20,12 +20,6 @@ struct SignupView: View {
     }
     
     var body: some View {
-        //        ZStack {
-        //            Image("imagen_inicio")
-        //                .resizable()
-        //                .edgesIgnoringSafeArea(.all)
-        //                .aspectRatio(contentMode: .fill)
-        
         VStack(spacing: 20) {
             // Logo
             Image("logo_amarillo")
@@ -83,15 +77,17 @@ struct SignupView: View {
                 .edgesIgnoringSafeArea(.all)
                 .aspectRatio(contentMode: .fill)
         )
-        .applyStates(
-            error: (state: viewModel.headerError, onReload: { }),
+        .showToast(
+            error: (
+                type: viewModel.toast,
+                showCloseButton: false,
+                onDismiss: {
+                    viewModel.toast = nil
+                }
+            ),
             isIdle: viewModel.loading,
-            showCloseButton: {
-                //Resetting headerError
-                self.viewModel.headerError = nil
-            }
+            toastExtraPadding: true
         )
-        .navigationBarBackButtonHidden()
     }
     
     private var registerButton: some View {

@@ -4,6 +4,9 @@ struct ToastView: View {
     var type: ToastType
     var onDismiss: VoidClosure?
     var showCloseButton: Bool = false
+    var showExtraPadding: Bool = false
+    
+    var extraPadding: CGFloat = 42
     
     @State private var isVisible = false
     
@@ -30,7 +33,7 @@ struct ToastView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-
+                    
                     if showCloseButton, let onDismiss = onDismiss {
                         Button(action: {
                             withAnimation {
@@ -47,7 +50,8 @@ struct ToastView: View {
                         .padding(.trailing, 20)
                     }
                 }
-                .padding(.vertical, 15)
+                .padding(.top, showExtraPadding ? (15 + extraPadding) : 15) //extraPadding
+                .padding(.bottom, 15)
                 .background(type.backgroundColor) // Fondo azul claro, corner radius: , in: RoundedRectangle(cornerRadius: 10)
                 .transition(.move(edge: .top))  // Transición desde arriba
                 .zIndex(1)  // Asegura que el toast esté sobre otras vistas
@@ -58,7 +62,7 @@ struct ToastView: View {
             withAnimation {
                 isVisible = true
             }
-
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 isVisible = false
                 onDismiss?()
@@ -94,7 +98,7 @@ public enum ToastType {
         case .custom(let descriptor):
             return descriptor.backgroundColor ?? Color.red
         case .success(_):
-            return Color.green 
+            return Color.green
         }
     }
     
@@ -148,7 +152,8 @@ public extension View {
     @ViewBuilder
     func showToast(
         error: (type: ToastType?, showCloseButton: Bool, onDismiss: VoidClosure)?,
-        isIdle: Bool
+        isIdle: Bool,
+        toastExtraPadding: Bool = false
     ) -> some View {
         VStack(spacing: 0) {
             if isIdle {
@@ -164,13 +169,12 @@ public extension View {
                 if let error = error, let type = error.type {
                     self
                         .overlay(
-                            Group {
-                                ToastView(
-                                    type: type,
-                                    onDismiss: error.onDismiss,
-                                    showCloseButton: error.showCloseButton
-                                )
-                            }
+                            ToastView(
+                                type: type,
+                                onDismiss: error.onDismiss,
+                                showCloseButton: error.showCloseButton,
+                                showExtraPadding: toastExtraPadding
+                            )
                         )
                 } else {
                     self
