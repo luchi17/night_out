@@ -153,10 +153,13 @@ public extension View {
         VStack(spacing: 0) {
             if isIdle {
                 ZStack(alignment: .top) {
-                    self
-                        .opacity(0)
+                    Image("fondo_azul")
+                        .resizable()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .opacity(0.9)
                     DefaultIdleView()
                 }
+                .ignoresSafeArea()
             } else {
                 if let error = error, let type = error.type {
                     self
