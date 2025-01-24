@@ -11,13 +11,6 @@ final class MyUserProfileViewModel: ObservableObject {
     @Published var discosCount: String = "0"
     
     @Published var loading: Bool = false
-    
-    init(profileImageUrl: String?, username: String?, fullname: String?) {
-        self.profileImageUrl = profileImageUrl
-        self.username = username ?? "Nombre no disponible"
-        self.fullname = fullname ?? "MyUsername no disponible"
-    }
-    
 }
 
 protocol MyUserProfilePresenter {
@@ -33,10 +26,12 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
     }
     
     struct Actions {
+        let backToLogin: VoidClosure
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
+        let goToLogin: AnyPublisher<Void, Never>
     }
     
     var viewModel: MyUserProfileViewModel
@@ -52,22 +47,26 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
     ) {
         self.actions = actions
         self.useCases = useCases
-
-        let userModel = UserDefaults.getUserModel()
-        let profileImage = userModel?.image
-        let username = userModel?.username
-        let fullname = userModel?.fullname
         
-        viewModel = MyUserProfileViewModel(
-            profileImageUrl: profileImage,
-            username: username,
-            fullname: fullname
-        )
+        viewModel = MyUserProfileViewModel()
     }
     
     func transform(input: MyUserProfilePresenterImpl.ViewInputs) {
         input
             .viewDidLoad
+            .withUnretained(self)
+            .flatMap({ presenter, _ -> AnyPublisher<UserModel?, Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just(nil).eraseToAnyPublisher()
+                }
+                return presenter.useCases.userDataUseCase.getUserInfo(uid: uid)
+                    .handleEvents(receiveOutput: { [weak self] userModel in
+                        self?.viewModel.profileImageUrl = userModel?.image
+                        self?.viewModel.username = userModel?.username ?? "Username no disponible"
+                        self?.viewModel.fullname = userModel?.fullname ??  "Fullname no disponible"
+                    })
+                    .eraseToAnyPublisher()
+            })
             .withUnretained(self)
             .flatMap({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
@@ -84,6 +83,16 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
                 presenter.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
             }
             .store(in: &cancellables)
+        
+        input
+            .goToLogin
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.backToLogin()
+            }
+            .store(in: &cancellables)
+        
+        
     }
 }
 

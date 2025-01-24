@@ -8,6 +8,7 @@ final class MyUserSettingsViewModel: ObservableObject {
     @Published var progressMessage: String = ""
     @Published var showProgress: Bool = false
     @Published var appVersion: String = ""
+    @Published var shouldCloseSheet: Bool = false
 }
 
 protocol MyUserSettingsPresenter {
@@ -23,9 +24,8 @@ final class MyUserSettingsPresenterImpl: MyUserSettingsPresenter {
         let deleteAccountUseCase: DeleteAccountUseCase
     }
 
-    struct Actions {
-        let backToLogin: VoidClosure
-    }
+   
+    struct Actions { }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
@@ -86,10 +86,10 @@ final class MyUserSettingsPresenterImpl: MyUserSettingsPresenter {
             .sink(receiveValue: { [weak self] _ in
                 AppState.shared.logOut()
                 UserDefaults.clearAll()
-                self?.actions.backToLogin()
+                self?.viewModel.shouldCloseSheet = true
             })
             .store(in: &cancellables)
-        
+
         input
             .confirmDeleteAccount
             .withUnretained(self)

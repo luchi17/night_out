@@ -5,9 +5,13 @@ struct MyUserProfileView: View {
     
     @State private var showShareSheet = false
     @State private var showEditSheet = false
+    
+    @State private var closeAllSheets = false
+    
     @Environment(\.dismiss) private var dismiss
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
+    private let goToLoginPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: MyUserProfileViewModel
     let presenter: MyUserProfilePresenter
@@ -78,10 +82,19 @@ struct MyUserProfileView: View {
             }
         }
         .sheet(isPresented: $showEditSheet) {
-            MyUserSettingsView(presenter: settingsPresenter)
+            MyUserSettingsView(
+                presenter: settingsPresenter,
+                closeAllSheets: $closeAllSheets
+            )
              .presentationDetents([.large])
              .presentationDragIndicator(.visible)
         }
+        .onChange(of: closeAllSheets, { oldValue, newValue in
+            if newValue {
+                goToLoginPublisher.send()
+                dismiss()
+            }
+        })
         .applyStates(error: nil, isIdle: viewModel.loading)
         .onAppear {
             viewDidLoadPublisher.send()
@@ -128,7 +141,8 @@ struct MyUserProfileView: View {
 private extension MyUserProfileView {
     func bindViewModel() {
         let input = MyUserProfilePresenterImpl.ViewInputs(
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            goToLogin: goToLoginPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

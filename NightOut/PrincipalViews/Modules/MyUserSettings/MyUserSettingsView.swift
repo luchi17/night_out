@@ -7,6 +7,8 @@ struct MyUserSettingsView: View {
     @State private var showPrivacyPolicy = false
     @State private var showTermsAndConditions = false
     
+    @Binding private var closeAllSheets: Bool
+    
     @Environment(\.dismiss) private var dismiss
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
@@ -17,9 +19,11 @@ struct MyUserSettingsView: View {
     let presenter: MyUserSettingsPresenter
     
     init(
-        presenter: MyUserSettingsPresenter
+        presenter: MyUserSettingsPresenter,
+        closeAllSheets: Binding<Bool>
     ) {
         self.presenter = presenter
+        self._closeAllSheets = closeAllSheets
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -132,33 +136,17 @@ struct MyUserSettingsView: View {
                 
             }
         )
+        .onChange(of: viewModel.shouldCloseSheet, { olv, new in
+            if new {
+                closeAllSheets.toggle()
+                dismiss()
+            }
+        })
         .applyStates(error: nil, isIdle: viewModel.loading)
         .onAppear {
             viewDidLoadPublisher.send()
         }
     }
-    
-//    var topView: some View {
-//        VStack(spacing: 12) {
-//            HStack {
-//                Spacer()
-//                
-//                Button(action: {
-//                    dismiss()
-//                }) {
-//                    Image(systemName: "xmark")
-//                        .foregroundStyle(.white)
-//                        .font(.system(size: 20, weight: .bold))
-//                }
-//            }
-//            HStack {
-//                
-//                Spacer()
-//            }
-//        }
-//        .padding(.top, 16)
-//        .padding(.horizontal, 16)
-//    }
     
     var topView: some View {
         HStack {
