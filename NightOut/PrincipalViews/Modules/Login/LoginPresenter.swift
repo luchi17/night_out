@@ -2,6 +2,7 @@
 import SwiftUI
 import Combine
 import FirebaseAuth
+import GoogleSignIn
 
 final class LoginViewModel: ObservableObject {
     
@@ -25,6 +26,7 @@ final class LoginPresenterImpl: LoginPresenter {
         let loginUseCase: LoginUseCase
         let companyLocationsUseCase: CompanyLocationsUseCase
         let userDataUseCase: UserDataUseCase
+        let saveUserUseCase: SaveUserUseCase
     }
     
     struct Actions {
@@ -146,6 +148,14 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .withUnretained(self)
+            .flatMap({ presenter, googleUser in
+                return presenter.useCases.saveUserUseCase.execute(model: presenter.getGoogleUserInfo(googleUser: googleUser))
+            })
+            .withUnretained(self)
+            .flatMap({ presenter, _ in
+                return presenter.useCases.saveUserUseCase.executeTerms()
+            })
+            .withUnretained(self)
             .flatMap({ presenter, _ in
                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
             })
@@ -162,5 +172,26 @@ final class LoginPresenterImpl: LoginPresenter {
 //            .signupWithApple
 //            .withUnretained(self)
         
+    }
+}
+
+private extension LoginPresenterImpl {
+    
+    func getGoogleUserInfo(googleUser: GIDGoogleUser) -> UserModel {
+        // Extraer información del usuario de Google
+        let fullName = googleUser.profile?.name ?? "Sin Nombre"
+        let userName = googleUser.profile?.email.components(separatedBy: "@").first ?? "Sin Usuario"
+        let photoURL = googleUser.profile?.imageURL(withDimension: 200)?.absoluteString ?? ""
+        
+        let userModel = UserModel(
+            uid: FirebaseServiceImpl.shared.getCurrentUserUid()!,
+            fullname: fullName,
+            username: userName,
+            email: googleUser.profile?.email ?? "",
+            image: photoURL,
+            fcm_token: "Sin Token"
+        )
+        
+        return userModel
     }
 }

@@ -1,10 +1,11 @@
 import Combine
 import FirebaseAuth
+import GoogleSignIn
 
 protocol LoginUseCase {
     func execute(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
     func executeApple() -> AnyPublisher<Void, Error>
-    func executeGoogle() -> AnyPublisher<Void, Error>
+    func executeGoogle() -> AnyPublisher<GIDGoogleUser, Error>
 }
 
 struct LoginUseCaseImpl: LoginUseCase {
@@ -24,7 +25,7 @@ struct LoginUseCaseImpl: LoginUseCase {
         return .empty()
     }
     
-    func executeGoogle() -> AnyPublisher<Void, Error> {
+    func executeGoogle() -> AnyPublisher<GIDGoogleUser, Error> {
         return repository
             .loginGoogle()
             .eraseToAnyPublisher()

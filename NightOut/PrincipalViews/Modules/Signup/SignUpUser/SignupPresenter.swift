@@ -104,6 +104,12 @@ final class SignupPresenterImpl: SignupPresenter {
                     .map({ ($0, model)})
                     .eraseToAnyPublisher()
             })
+            .withUnretained(self)
+            .flatMap({ presenter, data in
+                presenter.useCases.saveUserUseCase.executeTerms()
+                    .map({ _ in data })
+                    .eraseToAnyPublisher()
+            })
             .sink(receiveValue: { [weak self] data in
                 if data.0, let _ = data.1 {
                     UserDefaults.setImUser(true)

@@ -1,9 +1,10 @@
 import Combine
 import Foundation
+import GoogleSignIn
 
 protocol AccountRepository {
     func login(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
-    func loginGoogle() -> AnyPublisher<Void, Error>
+    func loginGoogle() -> AnyPublisher<GIDGoogleUser, Error>
     func loginApple() -> AnyPublisher<Void, Error>
     func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
     func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
@@ -14,6 +15,7 @@ protocol AccountRepository {
     func deleteAccount() -> AnyPublisher<String?, Never>
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
     func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
+    func executeTerms() -> AnyPublisher<Bool, Never>
 }
 
 struct AccountRepositoryImpl: AccountRepository {
@@ -42,6 +44,12 @@ struct AccountRepositoryImpl: AccountRepository {
     func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError> {
         return network
             .signupCompany(email: email, password: password)
+            .eraseToAnyPublisher()
+    }
+    
+    func executeTerms() -> AnyPublisher<Bool, Never> {
+        return network
+            .setTerms()
             .eraseToAnyPublisher()
     }
     
@@ -75,7 +83,7 @@ struct AccountRepositoryImpl: AccountRepository {
             .eraseToAnyPublisher()
     }
     
-    func loginGoogle() -> AnyPublisher<Void, Error> {
+    func loginGoogle() -> AnyPublisher<GIDGoogleUser, Error> {
         return network
             .loginGoogle()
             .eraseToAnyPublisher()

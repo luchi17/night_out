@@ -9,7 +9,7 @@ import FirebaseStorage
 
 protocol AccountDatasource {
     func login(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
-    func loginGoogle() -> AnyPublisher<Void, Error>
+    func loginGoogle() -> AnyPublisher<GIDGoogleUser, Error>
     func loginApple() -> AnyPublisher<Void, Error>
     func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
     func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
@@ -20,6 +20,7 @@ protocol AccountDatasource {
     func deleteAccount() -> AnyPublisher<String?, Never>
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
     func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
+    func setTerms() -> AnyPublisher<Bool, Never>
 }
 
 struct AccountDatasourceImpl: AccountDatasource {
@@ -64,9 +65,9 @@ struct AccountDatasourceImpl: AccountDatasource {
         return .empty()
     }
     
-    func loginGoogle() -> AnyPublisher<Void, Error> {
+    func loginGoogle() -> AnyPublisher<GIDGoogleUser, Error> {
         
-        let publisher = PassthroughSubject<Void, Error>()
+        let publisher = PassthroughSubject<GIDGoogleUser, Error>()
         
         GIDSignIn.sharedInstance.signIn(withPresenting: AppCoordinator.getRootViewController()) { signInResult, error in
             if let error = error {
@@ -92,8 +93,13 @@ struct AccountDatasourceImpl: AccountDatasource {
                     return
                 }
                 
+                guard let firebaseUser = authResult?.user else {
+                    publisher.send(completion: .failure(NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve Firebase user"])))
+                    return
+                }
+               
                 // El inicio de sesión fue exitoso
-                publisher.send(())
+                publisher.send(user)
                 // Finaliza el publisher
                 publisher.send(completion: .finished)
             }
@@ -329,6 +335,27 @@ struct AccountDatasourceImpl: AccountDatasource {
                     
                 } else {
                     promise(.success(nil))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func setTerms() -> AnyPublisher<Bool, Never> {
+        return Future<Bool, Never> { promise in
+            guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                promise(.success(false))
+                return
+            }
+            let ref = FirebaseServiceImpl.shared.getTerms()
+            
+            ref.child(uid).setValue("signed") { termError, _ in
+                if let termError = termError {
+                    print("Error al guardar aceptación de términos: \(termError.localizedDescription)")
+                    promise(.success(false))
+                } else {
+                    print("Información del usuario y términos guardados correctamente")
+                    promise(.success(true))
                 }
             }
         }

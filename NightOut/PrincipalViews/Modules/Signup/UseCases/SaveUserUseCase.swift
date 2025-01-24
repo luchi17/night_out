@@ -3,6 +3,7 @@ import FirebaseAuth
 
 protocol SaveUserUseCase {
     func execute(model: UserModel) -> AnyPublisher<Bool, Never>
+    func executeTerms() -> AnyPublisher<Bool, Never>
 }
 
 struct SaveUserUseCaseImpl: SaveUserUseCase {
@@ -15,6 +16,12 @@ struct SaveUserUseCaseImpl: SaveUserUseCase {
     func execute(model: UserModel) -> AnyPublisher<Bool, Never> {
         return repository
             .saveUser(model: model)
+            .eraseToAnyPublisher()
+    }
+    
+    func executeTerms() -> AnyPublisher<Bool, Never> {
+        return repository
+            .executeTerms()
             .eraseToAnyPublisher()
     }
 }

@@ -165,7 +165,7 @@ struct LoginView: View, Hashable {
                 .foregroundColor(Color.black)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.2)) 
+                .background(Color.gray.opacity(0.2))
                 .cornerRadius(25)
         }
         .padding(.top, 16)

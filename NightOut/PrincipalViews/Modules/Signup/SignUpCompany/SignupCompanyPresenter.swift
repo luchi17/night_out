@@ -199,6 +199,12 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
                 }
             })
+            .withUnretained(self)
+            .flatMap({ presenter, data in
+                presenter.useCases.saveCompanyUseCase.executeTerms()
+                    .map({ _ in data })
+                    .eraseToAnyPublisher()
+            })
             .sink(receiveValue: { [weak self] data in
                 if data.0, let _ = data.1 {
                     UserDefaults.setImUser(false)
