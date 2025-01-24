@@ -73,7 +73,6 @@ struct LoginView: View, Hashable {
             
             Spacer()
             
-            // Apple Sign In Button
             appleLoginButton
             
             googleLoginButton
@@ -104,13 +103,19 @@ struct LoginView: View, Hashable {
                 })
             )
         }
-        .applyStates(
-            error: (state: viewModel.headerError, onReload: { }),
-            isIdle: viewModel.loading,
-            showCloseButton: {
-                //Resetting headerError
-                self.viewModel.headerError = nil
-            }
+//        .onAppear {
+//            viewModel.email = ""
+//            viewModel.password = ""
+//        }
+        .showToast(
+            error: (
+                type: viewModel.toast,
+                showCloseButton: false,
+                onDismiss: {
+                    viewModel.toast = nil
+                }
+            ),
+            isIdle: viewModel.loading
         )
         .navigationBarBackButtonHidden()
     }

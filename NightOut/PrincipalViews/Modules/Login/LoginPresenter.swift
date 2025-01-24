@@ -9,6 +9,7 @@ final class LoginViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var loading: Bool = false
     @Published var headerError: ErrorState?
+    @Published var toast: ToastType?
     
     init() { }
     
@@ -68,38 +69,43 @@ final class LoginPresenterImpl: LoginPresenter {
     func loginListener(input: LoginPresenterImpl.ViewInputs) {
         input
             .login
+            .handleEvents(receiveOutput: { [weak self] _ in
+                if (self?.viewModel.password.isEmpty ?? true) || (self?.viewModel.email.isEmpty ?? true) {
+                    self?.viewModel.toast = .custom(.init(title: "Error", description: "Por favor, ingresa tu email y contraseña.", image: nil))
+                }
+            })
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
                 presenter.useCases.loginUseCase.execute(
-                    email: self.viewModel.email,
-                    password: self.viewModel.password
+                    email: presenter.viewModel.email,
+                    password: presenter.viewModel.password
                 )
-                .mapError { error -> ErrorPresentationType in
-                    return .makeCustom(title: "Error", description: error.localizedDescription)
-                }
                 .eraseToAnyPublisher()
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }
                 self.viewModel.loading = loading
             }, onError: { [weak self] error in
                 guard let self = self else { return }
-                if error == nil {
-                    self.viewModel.headerError = nil
-                } else {
-                    guard self.viewModel.loading else { return }
-                    self.viewModel.headerError = ErrorState(errorOptional: error)
+                if error != nil {
+                    self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
                 }
+                
             })
             .withUnretained(self)
             .flatMap({ presenter, _ in
                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
             })
             .withUnretained(self)
-            .flatMap({ presenter, _ in
-                presenter.saveMyUserInfoInUserDefaults()
+            .flatMap({ presenter, companyLocations in
+                presenter.saveMyUserInfoInUserDefaults(companyLocations: companyLocations)
             })
-            .sink(receiveValue: { [weak self] _ in
-                self?.actions.goToTabView()
+            .sink(receiveValue: { [weak self] savedOk in
+                if savedOk {
+                    self?.actions.goToTabView()
+                } else {
+                    self?.viewModel.toast = .custom(.init(title: "Error", description: "No se pudo iniciar sesión.", image: nil))
+                    
+                }
             })
             .store(in: &cancellables)
     }
@@ -130,20 +136,13 @@ final class LoginPresenterImpl: LoginPresenter {
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
                 presenter.useCases.loginUseCase.executeGoogle()
-                    .mapError { error -> ErrorPresentationType in
-                        return .makeCustom(title: "Unable to login with Google", description: error.localizedDescription)
-                    }
-                    .eraseToAnyPublisher()
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }
                 self.viewModel.loading = loading
             }, onError: { [weak self] error in
                 guard let self = self else { return }
-                if error == nil {
-                    self.viewModel.headerError = nil
-                } else {
-                    guard self.viewModel.loading else { return }
-                    self.viewModel.headerError = ErrorState(errorOptional: error)
+                if error != nil {
+                    self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
                 }
             })
             .withUnretained(self)
@@ -151,11 +150,16 @@ final class LoginPresenterImpl: LoginPresenter {
                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
             })
             .withUnretained(self)
-            .flatMap({ presenter, _ in
-                presenter.saveMyUserInfoInUserDefaults()
+            .flatMap({ presenter, companyLocations in
+                presenter.saveMyUserInfoInUserDefaults(companyLocations: companyLocations)
             })
-            .sink(receiveValue: { [weak self] _ in
-                self?.actions.goToTabView()
+            .sink(receiveValue: { [weak self] savedOk in
+                if savedOk {
+                    self?.actions.goToTabView()
+                } else {
+                    self?.viewModel.toast = .custom(.init(title: "Error", description: "No se pudo iniciar sesión.", image: nil))
+                }
+                
             })
             .store(in: &cancellables)
         
