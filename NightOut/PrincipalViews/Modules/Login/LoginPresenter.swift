@@ -77,6 +77,9 @@ final class LoginPresenterImpl: LoginPresenter {
                 
                 return true
             })
+            .filter({ _ in
+                FirebaseServiceImpl.shared.getIsLoggedin()
+            })
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
                 presenter.useCases.loginUseCase.execute(
