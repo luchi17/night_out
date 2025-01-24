@@ -77,8 +77,12 @@ final class LoginPresenterImpl: LoginPresenter {
                 
                 return true
             })
-            .filter({ _ in
-                FirebaseServiceImpl.shared.getIsLoggedin()
+            .filter({ [weak self] _ in
+                if !FirebaseServiceImpl.shared.getIsLoggedin() {
+                    self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))
+                    return false
+                }
+                return true
             })
             .withUnretained(self)
             .performRequest(request: { presenter, _ in

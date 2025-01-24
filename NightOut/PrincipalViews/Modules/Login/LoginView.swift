@@ -149,7 +149,7 @@ struct LoginView: View, Hashable {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.purple) // Adjust as needed for your button style
+                .background(Color.purple)
                 .cornerRadius(25)
                 .shadow(radius: 4)
         }
@@ -165,7 +165,7 @@ struct LoginView: View, Hashable {
                 .foregroundColor(Color.black)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.2)) // Adjust as needed
+                .background(Color.gray.opacity(0.2)) 
                 .cornerRadius(25)
         }
         .padding(.top, 16)
