@@ -8,7 +8,6 @@ final class LoginViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var loading: Bool = false
-    @Published var headerError: ErrorState?
     @Published var toast: ToastType?
     
     init() { }
@@ -70,10 +69,13 @@ final class LoginPresenterImpl: LoginPresenter {
     func loginListener(input: LoginPresenterImpl.ViewInputs) {
         input
             .login
-            .handleEvents(receiveOutput: { [weak self] _ in
+            .filter({ [weak self] _ in
                 if (self?.viewModel.password.isEmpty ?? true) || (self?.viewModel.email.isEmpty ?? true) {
                     self?.viewModel.toast = .custom(.init(title: "Error", description: "Por favor, ingresa tu email y contraseña.", image: nil))
+                    return false
                 }
+                
+                return true
             })
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
@@ -129,9 +131,7 @@ final class LoginPresenterImpl: LoginPresenter {
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
                 presenter.useCases.loginUseCase.executeGoogle()
-            }, loadingClosure: { [weak self] loading in
-                guard let self = self else { return }
-                self.viewModel.loading = loading
+            }, loadingClosure: { _ in
             }, onError: { [weak self] error in
                 guard let self = self else { return }
                 if error != nil {
