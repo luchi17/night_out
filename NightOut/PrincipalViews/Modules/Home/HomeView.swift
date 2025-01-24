@@ -50,7 +50,6 @@ struct HomeView: View {
             )
                 .presentationDetents([.large])
                 .presentationBackground(.regularMaterial)
-//                .presentationBackgroundInteraction(.enabled(upThrough: .large))
                 .presentationDragIndicator(.visible)
         }
         .padding(.top, 20)

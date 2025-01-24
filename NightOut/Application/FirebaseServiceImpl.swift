@@ -65,7 +65,7 @@ final class FirebaseServiceImpl: ObservableObject {
         return currentUser?.uid
     }
     
-    func getIsLoggedIn() -> Bool {
+    func getIsLoggedin() -> Bool {
         guard currentUser != nil else {
             return false
         }

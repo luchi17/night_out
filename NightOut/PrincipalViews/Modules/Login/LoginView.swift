@@ -10,7 +10,7 @@ struct LoginView: View, Hashable {
     }
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id) // Combina el id para el hash
+        hasher.combine(id)
     }
     
     @ObservedObject var viewModel: LoginViewModel
@@ -22,7 +22,7 @@ struct LoginView: View, Hashable {
     private let signupGooglePublisher = PassthroughSubject<Void, Never>()
     private let signupApplePublisher = PassthroughSubject<Void, Never>()
     
-    @State private var showRegisterAlert = false  // Estado para mostrar la alerta
+    @State private var showRegisterAlert = false
     
     init(
         presenter: LoginPresenter

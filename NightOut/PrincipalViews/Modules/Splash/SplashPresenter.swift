@@ -72,7 +72,7 @@ final class SplashPresenterImpl: SplashPresenter {
             .map { _ in }
             .combineLatest(input.viewIsLoaded)
             .sink { [weak self] _ in
-                if FirebaseServiceImpl.shared.getIsLoggedIn() {
+                if FirebaseServiceImpl.shared.getIsLoggedin() {
                     self?.actions.onMainFlow()
                 } else {
                     self?.actions.onLogin()
