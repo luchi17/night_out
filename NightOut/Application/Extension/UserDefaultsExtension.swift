@@ -4,6 +4,7 @@ private let companies: String = "locationModels"
 private let followModel: String = "followModel"
 private let userModel: String = "userModel"
 private let companyModel: String = "companyModel"
+private let imUser: String = "imUser"
 
 extension UserDefaults {
     
@@ -76,5 +77,13 @@ extension UserDefaults {
     
     static func getCompanyUserModel() -> CompanyModel? {
         self.objectForKey(forKey: companyModel, as: CompanyModel.self)
+    }
+    
+    static func setImUser(_ value: Bool) {
+        self.setObject(value, forKey: imUser)
+    }
+    
+    static func getImUser() -> Bool? {
+        self.objectForKey(forKey: imUser, as: Bool.self)
     }
 }

@@ -8,10 +8,6 @@ import SwiftUI
 final class FirebaseServiceImpl: ObservableObject {
     static let shared = FirebaseServiceImpl()
     
-    var isLoggedIn: Bool {
-        return currentUser != nil
-    }
-    
     var currentUser: User? {
         return Auth.auth().currentUser
     }
@@ -69,11 +65,21 @@ final class FirebaseServiceImpl: ObservableObject {
         return currentUser?.uid
     }
     
-    func getImUser() -> Bool {
-        if UserDefaults.getCompanyUserModel() != nil {
+    func getIsLoggedIn() -> Bool {
+        guard currentUser != nil else {
             return false
         }
-        return true
+        let imUser = UserDefaults.getUserModel() != nil
+        let imCompany = UserDefaults.getCompanyUserModel() != nil
+        if imUser || imCompany {
+            return true
+        } else {
+          return false
+        }
+    }
+    
+    func getImUser() -> Bool {
+        return UserDefaults.getImUser() ?? false
     }
 }
 

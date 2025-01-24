@@ -211,6 +211,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
             .sink(receiveValue: { [weak self] data in
                 if data.0, let _ = data.1 {
                     self?.viewModel.headerError = nil
+                    UserDefaults.setImUser(false)
                     self?.actions.goToTabView()
                 } else {
                     self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "Could not save user"))
