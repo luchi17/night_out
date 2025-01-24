@@ -240,6 +240,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                 publisher.send(false)
             } else {
                 print("Usuario guardado exitosamente en la base de datos")
+                UserDefaults.setUserModel(model)
                 publisher.send(true)
             }
         }
@@ -293,6 +294,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                 publisher.send(false)
             } else {
                 print("Empresa guardada exitosamente en la base de datos")
+                UserDefaults.setCompanyUserModel(model)
                 publisher.send(true)
             }
         }
