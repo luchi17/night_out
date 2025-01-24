@@ -55,7 +55,7 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var imageData: Data? = nil
     @Published var locationString = ""
     @Published var loading: Bool = false
-    @Published var headerError: ErrorState?
+    @Published var toast: ToastType?
     
     var imageUrl: String?
     
@@ -134,20 +134,14 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     email: self.viewModel.email,
                     password: self.viewModel.password
                 )
-                .mapError { error -> ErrorPresentationType in
-                    return .makeCustom(title: "Unable to register", description: error.localizedDescription)
-                }
                 .eraseToAnyPublisher()
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }
                 self.viewModel.loading = loading
             }, onError: { [weak self] error in
                 guard let self = self else { return }
-                if error == nil {
-                    self.viewModel.headerError = nil
-                } else {
-                    guard self.viewModel.loading else { return }
-                    self.viewModel.headerError = ErrorState(errorOptional: error)
+                if error != nil {
+                    self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
                 }
             })
            
@@ -201,20 +195,16 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                 self.viewModel.loading = loading
             }, onError: { [weak self] error in
                 guard let self = self else { return }
-                if error == nil {
-                    self.viewModel.headerError = nil
-                } else {
-                    guard self.viewModel.loading else { return }
-                    self.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "Could not save company"))
+                if error != nil {
+                    self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
                 }
             })
             .sink(receiveValue: { [weak self] data in
                 if data.0, let _ = data.1 {
-                    self?.viewModel.headerError = nil
                     UserDefaults.setImUser(false)
                     self?.actions.goToTabView()
                 } else {
-                    self?.viewModel.headerError = ErrorState(error: .makeCustom(title: "Error", description: "Could not save user"))
+                    self?.viewModel.toast = .custom(.init(title: "Error", description: "Could not save company", image: nil))
                 }
                
             })
