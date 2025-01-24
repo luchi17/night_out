@@ -251,8 +251,8 @@ struct AccountDatasourceImpl: AccountDatasource {
         let publisher = PassthroughSubject<String?, Never>()
         
         guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-                publisher.send(nil)
-                return publisher.eraseToAnyPublisher()
+            publisher.send(nil)
+            return publisher.eraseToAnyPublisher()
         }
         // Referencia a Firebase Storage
         let storageRef = Storage.storage().reference()
@@ -299,7 +299,7 @@ struct AccountDatasourceImpl: AccountDatasource {
         return publisher.eraseToAnyPublisher()
     }
     
-
+    
     func signOut() -> AnyPublisher<Void, Error> {
         return Future<Void, Error> { promise in
             do {

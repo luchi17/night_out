@@ -86,7 +86,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
             actions: homeActions(),
             mapActions: mapActions(),
             feedActions: feedActions(),
-            settingsActions: settingsActions(),
+            profileActions: profileActions(),
             locationManager: locationManager
         )
         return AnyView(coordinator.build())
@@ -141,7 +141,7 @@ private extension TabViewCoordinator {
         )
     }
     
-    func settingsActions() -> MyUserSettingsPresenterImpl.Actions {
+    func profileActions() -> MyUserProfilePresenterImpl.Actions {
         .init(backToLogin: goToLogin)
     }
 }

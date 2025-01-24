@@ -7,15 +7,15 @@ class HomeCoordinator {
     private let actions: HomePresenterImpl.Actions
     private let mapActions: LocationsMapPresenterImpl.Actions
     private let feedActions: FeedPresenterImpl.Actions
-    private let settingsActions: MyUserSettingsPresenterImpl.Actions
+    private let profileActions: MyUserProfilePresenterImpl.Actions
     private let locationManager: LocationManager
     
-    init(actions: HomePresenterImpl.Actions, mapActions: LocationsMapPresenterImpl.Actions, feedActions : FeedPresenterImpl.Actions, settingsActions: MyUserSettingsPresenterImpl.Actions, locationManager: LocationManager) {
+    init(actions: HomePresenterImpl.Actions, mapActions: LocationsMapPresenterImpl.Actions, feedActions : FeedPresenterImpl.Actions, profileActions: MyUserProfilePresenterImpl.Actions, locationManager: LocationManager) {
         self.actions = actions
         self.mapActions = mapActions
         self.locationManager = locationManager
         self.feedActions = feedActions
-        self.settingsActions = settingsActions
+        self.profileActions = profileActions
     }
     
     @ViewBuilder
@@ -41,7 +41,7 @@ class HomeCoordinator {
                 followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
             ),
-            actions: .init()
+            actions: profileActions
         )
         
         let settingsPresenter = MyUserSettingsPresenterImpl(
@@ -50,7 +50,7 @@ class HomeCoordinator {
                 signOutUseCase: SignOutUseCaseImpl(repository: AccountRepositoryImpl.shared),
                 deleteAccountUseCase: DeleteAccountUseCaseImpl(repository: AccountRepositoryImpl.shared)
             ),
-            actions: settingsActions
+            actions: .init()
         )
         
         HomeView(

@@ -116,19 +116,10 @@ final class FeedPresenterImpl: FeedPresenter {
                     .eraseToAnyPublisher()
             })
             .withUnretained(self)
-            .sink(receiveCompletion: { [weak self] completion in
-                guard let self = self else { return }
-                switch completion {
-                case .finished :
-                    self.viewModel.loading = false
-                case .failure(let error):
-                    print("Error: \(error)")
-                    self.viewModel.loading = false
-                    self.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load posts", image: nil))
-                }
-            }, receiveValue: { presenter, data in
+            .sink(receiveValue: { presenter, data in
                 presenter.viewModel.loading = false
                 presenter.viewModel.posts = Utils.sortByDate(objects: data, dateExtractor: { $0.date }, ascending: false)
+               
             })
             .store(in: &cancellables)
         
