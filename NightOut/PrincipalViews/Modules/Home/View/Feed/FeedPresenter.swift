@@ -103,7 +103,7 @@ final class FeedPresenterImpl: FeedPresenter {
             .eraseToAnyPublisher()
         
         userPostsPublisher
-            .flatMapLatest({ presenter, userPosts ->  AnyPublisher<[PostModel], Never> in
+            .performRequest(request: { presenter, userPosts -> AnyPublisher<[PostModel], Never> in
                 let publishers: [AnyPublisher<PostModel, Never>] = userPosts.map { post in
                     
                     if post.isFromUser ?? true {
@@ -116,10 +116,14 @@ final class FeedPresenterImpl: FeedPresenter {
                 return Publishers.MergeMany(publishers)
                     .collect()
                     .eraseToAnyPublisher()
-            })
+                
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in }
+            )
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
-                presenter.viewModel.loading = false
                 presenter.viewModel.posts = Utils.sortByDate(objects: data, dateExtractor: { $0.date }, ascending: false)
             })
             .store(in: &cancellables)
