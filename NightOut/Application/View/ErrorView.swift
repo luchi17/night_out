@@ -256,9 +256,7 @@ public extension View {
         VStack(spacing: 0) {
             if error?.state == nil, isIdle {
                 ZStack(alignment: .top) {
-                    Image("fondo_azul")
-                        .resizable()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    self
                     DefaultIdleView()
                 }
             } else {
@@ -282,7 +280,7 @@ public struct DefaultIdleView: View {
     public var body: some View {
         VStack(spacing: 0) {
             ProgressView()
-                .tint(.white)
+                .tint(Color.white)
                 .padding(.top, 70)
             Spacer()
         }
