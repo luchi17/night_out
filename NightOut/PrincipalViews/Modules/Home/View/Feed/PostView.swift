@@ -37,6 +37,7 @@ struct PostView: View {
         VStack(spacing: 0) {
             
             topView
+                .zIndex(1)
             
             if let postImage = model.postImage {
                 Image(uiImage: postImage)
