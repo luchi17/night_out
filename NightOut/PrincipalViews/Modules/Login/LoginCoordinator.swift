@@ -26,7 +26,8 @@ class LoginCoordinator: Hashable {
                 loginUseCase: LoginUseCaseImpl(repository: AccountRepositoryImpl.shared),
                 companyLocationsUseCase: CompanyLocationsUseCaseImpl(repository: LocationRepositoryImpl.shared),
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
-                saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared)
+                saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
             ),
             actions: actions
         ))

@@ -94,11 +94,11 @@ struct LoginView: View, Hashable {
                 title: Text("Selecciona una opción"),
                 message: Text("¿Cómo quieres registrarte?"),
                 primaryButton: .default(Text("Registrar Empresa"), action: {
-                    showRegisterAlert.toggle()
+                    showRegisterAlert = false
                     signupCompanyPublisher.send()
                 }),
                 secondaryButton: .default(Text("Registrar Persona"), action: {
-                    showRegisterAlert.toggle()
+                    showRegisterAlert = false
                     signupUserPublisher.send()
                 })
             )
@@ -142,7 +142,7 @@ struct LoginView: View, Hashable {
     
     private var signupButton: some View {
         Button(action: {
-            showRegisterAlert.toggle()
+            showRegisterAlert = true
         }) {
             Text("Need new account? Sign up")
                 .font(.system(size: 17, weight: .bold))

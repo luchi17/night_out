@@ -27,6 +27,7 @@ final class LoginPresenterImpl: LoginPresenter {
         let companyLocationsUseCase: CompanyLocationsUseCase
         let userDataUseCase: UserDataUseCase
         let saveUserUseCase: SaveUserUseCase
+        let companyDataUseCase: CompanyDataUseCase
     }
     
     struct Actions {
@@ -79,13 +80,6 @@ final class LoginPresenterImpl: LoginPresenter {
                 
                 return true
             })
-            .filter({ [weak self] _ in
-                if !FirebaseServiceImpl.shared.getIsLoggedin() {
-                    self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))
-                    return false
-                }
-                return true
-            })
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
                 presenter.useCases.loginUseCase.execute(
@@ -101,11 +95,19 @@ final class LoginPresenterImpl: LoginPresenter {
                 if error != nil {
                     self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
                 }
-                
             })
             .withUnretained(self)
-            .flatMap({ presenter, _ in
-                presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
+            .flatMap({ presenter, _ -> AnyPublisher<Bool, Never> in
+                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
+                    .map({ companies in
+                        let imCompany = companies?.users.map({ $0.value.email }).contains(presenter.viewModel.email) ?? false
+                        return imCompany
+                    })
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .flatMap({ presenter, imCompany -> AnyPublisher<Void, Never> in
+                presenter.saveInfo(imCompany: imCompany)
             })
             .withUnretained(self)
             .sink(receiveValue: { [weak self] _ in
@@ -193,5 +195,55 @@ private extension LoginPresenterImpl {
         )
         
         return userModel
+    }
+    
+    func getUserInfo() -> AnyPublisher<UserModel?, Never> {
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            return Just(nil).eraseToAnyPublisher()
+        }
+        return self.useCases.userDataUseCase.getUserInfo(uid: uid)
+            .eraseToAnyPublisher()
+    }
+    
+    func getCompanyInfo() -> AnyPublisher<CompanyModel?, Never> {
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            return Just(nil).eraseToAnyPublisher()
+        }
+        return self.useCases.companyDataUseCase.getCompanyInfo(uid: uid)
+            .eraseToAnyPublisher()
+    }
+    
+    func saveInfo(imCompany: Bool) -> AnyPublisher<Void, Never> {
+        if imCompany {
+            self
+                .getCompanyInfo()
+                .filter { [weak self] companyModel in
+                    if companyModel == nil {
+                        self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))
+                        return false
+                    }
+                    return true
+                }
+                .handleEvents(receiveOutput: { model in
+                    UserDefaults.setCompanyUserModel(model!)
+                })
+                .map({ _ in })
+                .eraseToAnyPublisher()
+        } else {
+            self
+                .getUserInfo()
+                .filter { [weak self] userModel in
+                    if userModel == nil {
+                        self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))
+                        return false
+                    }
+                    return true
+                }
+                .handleEvents(receiveOutput: { model in
+                    UserDefaults.setUserModel(model!)
+                })
+                .map({ _ in })
+                .eraseToAnyPublisher()
+        }
     }
 }
