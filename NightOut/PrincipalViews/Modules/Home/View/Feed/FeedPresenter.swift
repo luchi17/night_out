@@ -77,17 +77,19 @@ final class FeedPresenterImpl: FeedPresenter {
         let userPostsPublisher = input
             .viewDidLoad
             .withUnretained(self)
-            .flatMapLatest({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
+            .performRequest(request: { presenter, _ -> AnyPublisher<FollowModel?, Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(nil).eraseToAnyPublisher()
                 }
                 return presenter.useCases.followUseCase.fetchFollow(id: uid)
-            })
-            .handleEvents(receiveRequest: { [weak self] _ in
-                self?.viewModel.loading = true
-            })
+                
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in }
+            )
             .withUnretained(self)
-            .flatMapLatest({ presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
+            .performRequest(request: { presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
                 presenter.useCases.postsUseCase.fetchPosts()
                     .map { posts in
                         let matchingPosts = posts.filter { post in
@@ -119,7 +121,6 @@ final class FeedPresenterImpl: FeedPresenter {
             .sink(receiveValue: { presenter, data in
                 presenter.viewModel.loading = false
                 presenter.viewModel.posts = Utils.sortByDate(objects: data, dateExtractor: { $0.date }, ascending: false)
-               
             })
             .store(in: &cancellables)
         
