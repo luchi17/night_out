@@ -48,13 +48,6 @@ enum ImGoingToClub {
     }
 }
 
-//From notifications when
-//val fragment = if (notification.getIsPost()) {
-//                PostDetailsFragment(notification.postId)
-//            } else {
-//                Profile3Fragment(notification.userId)
-//            }
-
 //From Maps when tapping on marker
 
 final class UserProfileViewModel: ObservableObject {

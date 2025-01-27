@@ -28,6 +28,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
     
     struct Actions {
         let goToProfile: InputClosure<ProfileModel>
+        let goToPost: InputClosure<NotificationModelForView>
     }
     
     struct ViewInputs {
@@ -149,9 +150,8 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
         input
             .goToPost
             .withUnretained(self)
-            .sink { presenter, postId in
-                //TODO
-                // PostDetailsFragment()
+            .sink { presenter, post in
+                presenter.actions.goToPost(post)
             }
             .store(in: &cancellables)
         

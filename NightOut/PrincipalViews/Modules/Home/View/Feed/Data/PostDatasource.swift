@@ -101,6 +101,12 @@ struct PostDatasourceImpl: PostDatasource {
     
     func getComments(postId: String) -> AnyPublisher<[String: CommentModel], Never> {
         return Future<[String: CommentModel], Never> { promise in
+            
+            guard !postId.isEmpty else {
+                promise(.success([:]))
+                return
+            }
+            
             let ref = FirebaseServiceImpl.shared.getComments().child(postId)
             
             ref.getData { error, snapshot in

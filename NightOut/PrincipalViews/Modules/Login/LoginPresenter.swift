@@ -215,8 +215,7 @@ private extension LoginPresenterImpl {
     
     func saveInfo(imCompany: Bool) -> AnyPublisher<Void, Never> {
         if imCompany {
-            self
-                .getCompanyInfo()
+            getCompanyInfo()
                 .filter { [weak self] companyModel in
                     if companyModel == nil {
                         self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))
@@ -230,8 +229,7 @@ private extension LoginPresenterImpl {
                 .map({ _ in })
                 .eraseToAnyPublisher()
         } else {
-            self
-                .getUserInfo()
+           getUserInfo()
                 .filter { [weak self] userModel in
                     if userModel == nil {
                         self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))

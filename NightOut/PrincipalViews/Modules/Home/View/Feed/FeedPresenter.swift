@@ -2,8 +2,6 @@ import SwiftUI
 import Combine
 import CoreLocation
 
-#warning("Add cache of companies with UserDefaults.getCompanies() ")
-
 final class FeedViewModel: ObservableObject {
     
     @Published var posts: [PostModel] = []

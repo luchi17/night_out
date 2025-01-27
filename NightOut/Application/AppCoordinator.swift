@@ -81,13 +81,21 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func showProfile(model: ProfileModel) {
-        let profileView = UserProfileCoordinator(
+        let userProfileCoordinator = UserProfileCoordinator(
             actions: .init(goBack: {
                 self.pop()
             }),
             model: model
         )
-        self.push(profileView)
+        self.push(userProfileCoordinator)
+    }
+    
+    private func showPostDetail(post: NotificationModelForView) {
+        let postDetailCoordinator = PostDetailCoordinator(
+            actions: .init(openComments: showPostComments),
+            post: post
+        )
+        self.push(postDetailCoordinator)
     }
     
     
@@ -131,7 +139,8 @@ private extension AppCoordinator {
     
     func makeNotificationsActions() -> NotificationsPresenterImpl.Actions {
         return .init(
-            goToProfile: showProfile(model:)
+            goToProfile: showProfile(model:),
+            goToPost: showPostDetail
         )
     }
 }
