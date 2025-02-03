@@ -31,7 +31,27 @@ struct SignupCompanyView: View {
             
             Spacer()
             
-            ImagePickerView(imageData: $viewModel.imageData)
+            ImagePickerView(
+                imageData: $viewModel.imageData,
+                selectedImage: $viewModel.selectedImage
+            ) {
+                VStack {
+                    if let selectedImage = viewModel.selectedImage {
+                        Image(uiImage: selectedImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200, height: 200)
+                        
+                    } else {
+                        Image(systemName: "photo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200, height: 200)
+                            .foregroundColor(.blue) // Color del ícono
+                            .padding()
+                    }
+                }
+            }
             
             TextField("Full Name...", text: $viewModel.fullName)
                 .textFieldStyle(PlainTextFieldStyle())

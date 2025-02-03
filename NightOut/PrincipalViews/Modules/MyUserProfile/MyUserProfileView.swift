@@ -16,13 +16,16 @@ struct MyUserProfileView: View {
     @ObservedObject var viewModel: MyUserProfileViewModel
     let presenter: MyUserProfilePresenter
     let settingsPresenter: MyUserSettingsPresenter
+    let editProfilePresenter: MyUserEditProfilePresenter
     
     init(
         presenter: MyUserProfilePresenter,
-        settingsPresenter: MyUserSettingsPresenter
+        settingsPresenter: MyUserSettingsPresenter,
+        editProfilePresenter: MyUserEditProfilePresenter
     ) {
         self.presenter = presenter
         self.settingsPresenter = settingsPresenter
+        self.editProfilePresenter = editProfilePresenter
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -81,9 +84,12 @@ struct MyUserProfileView: View {
                 ShareSheet(activityItems: ["¡Echa un vistazo a este perfil en NightOut! nightout://profile/\(currentId)"])
             }
         }
-        .sheet(isPresented: $showEditSheet) {
-            MyUserSettingsView(
-                presenter: settingsPresenter,
+        .sheet(isPresented: $showEditSheet, onDismiss: {
+            viewDidLoadPublisher.send()
+        }) {
+            MyUserEditProfileView(
+                presenter: editProfilePresenter,
+                settingsPresenter: settingsPresenter,
                 closeAllSheets: $closeAllSheets
             )
              .presentationDetents([.large])
@@ -95,7 +101,6 @@ struct MyUserProfileView: View {
                 dismiss()
             }
         })
-        .applyStates(error: nil, isIdle: viewModel.loading)
         .onAppear {
             viewDidLoadPublisher.send()
         }
@@ -141,7 +146,7 @@ struct MyUserProfileView: View {
 private extension MyUserProfileView {
     func bindViewModel() {
         let input = MyUserProfilePresenterImpl.ViewInputs(
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
             goToLogin: goToLoginPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)

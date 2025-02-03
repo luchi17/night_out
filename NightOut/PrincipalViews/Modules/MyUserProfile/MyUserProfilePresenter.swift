@@ -6,17 +6,10 @@ final class MyUserProfileViewModel: ObservableObject {
     @Published var profileImageUrl: String?
     @Published var username: String = ""
     @Published var fullname: String = ""
+    @Published var woman: Bool = false
     @Published var followersCount: String = "0"
     @Published var copasCount: String = "0"
     @Published var discosCount: String = "0"
-    
-    @Published var loading: Bool = false
-    
-    init(profileImageUrl: String?, username: String?, fullname: String?) {
-        self.profileImageUrl = profileImageUrl
-        self.username = username ?? "Username no disponible"
-        self.fullname = fullname ?? "Fullname no disponible"
-    }
 }
 
 protocol MyUserProfilePresenter {
@@ -53,17 +46,8 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
     ) {
         self.actions = actions
         self.useCases = useCases
-        
-        let userModel = UserDefaults.getUserModel()
-        let profileImage = userModel?.image
-        let username = userModel?.username
-        let fullname = userModel?.fullname
-        
-        viewModel = MyUserProfileViewModel(
-            profileImageUrl: profileImage,
-            username: username,
-            fullname: fullname
-        )
+
+        viewModel = MyUserProfileViewModel()
     }
     
     func transform(input: MyUserProfilePresenterImpl.ViewInputs) {
@@ -76,12 +60,16 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
                 }
                 return presenter.useCases.followUseCase.fetchFollow(id: uid)
             })
-            .handleEvents(receiveRequest: { [weak self] _ in
-                self?.viewModel.loading = true
-            })
             .withUnretained(self)
             .sink { presenter, followModel in
-                presenter.viewModel.loading = false
+                let userModel = UserDefaults.getUserModel()
+                let profileImage = userModel?.image
+                let username = userModel?.username
+                let fullname = userModel?.fullname
+                
+                presenter.viewModel.profileImageUrl = profileImage
+                presenter.viewModel.username = username ?? "Username no disponible"
+                presenter.viewModel.fullname = fullname ?? "Fullname no disponible"
                 presenter.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
             }
             .store(in: &cancellables)

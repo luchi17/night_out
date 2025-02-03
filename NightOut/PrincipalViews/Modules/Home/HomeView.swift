@@ -12,6 +12,7 @@ struct HomeView: View {
     let feedPresenter: FeedPresenter
     let userPresenter: MyUserProfilePresenter
     let settingsPresenter: MyUserSettingsPresenter
+    let editProfilePresenter: MyUserEditProfilePresenter
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
 
@@ -20,13 +21,15 @@ struct HomeView: View {
         mapPresenter: LocationsMapPresenter,
         feedPresenter: FeedPresenter,
         userPresenter: MyUserProfilePresenter,
-        settingsPresenter: MyUserSettingsPresenter
+        settingsPresenter: MyUserSettingsPresenter,
+        editProfilePresenter: MyUserEditProfilePresenter
     ) {
         self.presenter = presenter
         self.mapPresenter = mapPresenter
         self.feedPresenter = feedPresenter
         self.userPresenter = userPresenter
         self.settingsPresenter = settingsPresenter
+        self.editProfilePresenter = editProfilePresenter
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -46,7 +49,8 @@ struct HomeView: View {
         .sheet(isPresented: $showMyProfile) {
             MyUserProfileView(
                 presenter: userPresenter,
-                settingsPresenter: settingsPresenter
+                settingsPresenter: settingsPresenter,
+                editProfilePresenter: editProfilePresenter
             )
                 .presentationDetents([.large])
                 .presentationBackground(.regularMaterial)

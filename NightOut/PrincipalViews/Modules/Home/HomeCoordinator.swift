@@ -44,6 +44,13 @@ class HomeCoordinator {
             actions: profileActions
         )
         
+        let editProfilePresenter = MyUserEditProfilePresenterImpl(
+            useCases: .init(
+                saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                saveCompanyUseCase: SaveCompanyUseCaseImpl(repository: AccountRepositoryImpl.shared)),
+            actions: .init(backToLogin: profileActions.backToLogin)
+        )
+        
         let settingsPresenter = MyUserSettingsPresenterImpl(
             useCases: .init(
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
@@ -53,12 +60,15 @@ class HomeCoordinator {
             actions: .init()
         )
         
+        
+        
         HomeView(
             presenter: presenter,
             mapPresenter: mapPresenter,
             feedPresenter: feedPresenter,
             userPresenter: userPresenter,
-            settingsPresenter: settingsPresenter
+            settingsPresenter: settingsPresenter,
+            editProfilePresenter: editProfilePresenter
         )
     }
 }

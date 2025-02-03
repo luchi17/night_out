@@ -56,6 +56,7 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var locationString = ""
     @Published var loading: Bool = false
     @Published var toast: ToastType?
+    @Published var selectedImage: UIImage?
     
     var imageUrl: String?
     

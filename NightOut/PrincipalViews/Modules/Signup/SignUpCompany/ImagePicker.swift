@@ -1,10 +1,13 @@
 import SwiftUI
 import PhotosUI
 
-struct ImagePickerView: View {
-    @State private var selectedImage: UIImage?
+struct ImagePickerView<Content: View>: View {
     @State private var selectedItem: PhotosPickerItem?
+    
     @Binding var imageData: Data?
+    @Binding var selectedImage: UIImage?
+    
+    let content: () -> Content
     
     var body: some View {
         VStack {
@@ -12,20 +15,21 @@ struct ImagePickerView: View {
                 selection: $selectedItem,
                 matching: .images,
                 photoLibrary: .shared()) {
-                    if let selectedImage = selectedImage {
-                        Image(uiImage: selectedImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 200, height: 200)
-                        
-                    } else {
-                        Image(systemName: "photo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 200, height: 200)
-                            .foregroundColor(.blue) // Color del ícono
-                            .padding()
-                    }
+//                    if let selectedImage = selectedImage {
+//                        Image(uiImage: selectedImage)
+//                            .resizable()
+//                            .scaledToFit()
+//                            .frame(width: 200, height: 200)
+//                        
+//                    } else {
+//                        Image(systemName: "photo")
+//                            .resizable()
+//                            .scaledToFit()
+//                            .frame(width: 200, height: 200)
+//                            .foregroundColor(.blue) // Color del ícono
+//                            .padding()
+//                    }
+                    content()
                    
                 }
                 .onChange(of: selectedItem) { _, newItem in
