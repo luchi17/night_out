@@ -37,13 +37,13 @@ struct MyUserSettingsView: View {
                 // Sección Legal
                 SectionView(iconName: "flag", title: "Legal") {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Privacy Policy")
+                        Text("Política de Privacidad")
                             .font(.system(size: 16))
                             .foregroundColor(.gray)
                             .onTapGesture {
                                 showPrivacyPolicy.toggle()
                             }
-                        Text("Terms and Conditions")
+                        Text("Términos y Condiciones")
                             .font(.system(size: 16))
                             .foregroundColor(.gray)
                             .onTapGesture {
@@ -52,35 +52,48 @@ struct MyUserSettingsView: View {
                     }
                 }
                 
-                SectionView(iconName: "envelope", title: "Contact Us") {
-                    
-                    Button(action: {
-#warning("TODO: done in android?")
-                    }) {
-                        Text("For feedback, suggestions, and collaborations")
-                            .font(.system(size: 16))
-                            .foregroundColor(.gray)
-                    }
+                SectionView(iconName: "envelope", title: "Contáctanos") {
+                    Text(AttributedString("corporativo@formatink.com"))
+                        .foregroundColor(.gray)
+                        .font(.system(size: 16))
+                        .onTapGesture {
+                            if let url = URL(string: "mailto:corporativo@formatink.com") {
+                                UIApplication.shared.open(url)
+                            }
+                        }
                 }
                 
-                SectionView(iconName: "arrow.right.square", title: "Log Out") {
-                    Button(action: {
-                        logoutPublisher.send()
-                    }) {
-                        Text("Log Out")
-                            .font(.system(size: 16))
-                            .foregroundColor(.gray)
-                    }
+                Text("Tutorial")
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .padding(.top, 30)
+                
+                HStack {
+                    Image(systemName: "arrow.right.square")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(.white)
+                    Text("Cerrar Sesión")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white)
+                }
+                .onTapGesture {
+                    logoutPublisher.send()
                 }
                 
-                SectionView(iconName: "trash", title: "Delete Account") {
-                    Button(action: {
-                        showAlertDeleteUser.toggle()
-                    }) {
-                        Text("Delete Account")
-                            .font(.system(size: 16))
-                            .foregroundColor(.gray)
-                    }
+                HStack {
+                    Image(systemName: "trash")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(.white)
+                    Text("Borrar Cuenta")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white)
+                }
+                .onTapGesture {
+                    showAlertDeleteUser.toggle()
                 }
                 
                 Text(viewModel.appVersion)

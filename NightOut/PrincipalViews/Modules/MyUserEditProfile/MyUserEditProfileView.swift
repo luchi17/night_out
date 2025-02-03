@@ -142,13 +142,14 @@ struct MyUserEditProfileView: View {
     }
     
     var privateView: some View {
-        Toggle(isOn: $viewModel.isPrivate) {
+        HStack {
             Text("Perfil Privado")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.white)
+            Spacer()
+            Toggle(isOn: $viewModel.isPrivate) { }
+                .toggleStyle(SwitchToggleStyle(tint: viewModel.isPrivate ? .pink : .gray))
         }
-        .toggleStyle(SwitchToggleStyle(tint: viewModel.isPrivate ? .pink : .gray))
-        
     }
     
     var genderView: some View {
@@ -184,12 +185,14 @@ struct MyUserEditProfileView: View {
     }
     
     var participateView: some View {
-        Toggle(isOn: $viewModel.participate) {
-            Text("Participar en Social NightOut")
+        HStack {
+            Text("Perfil Privado")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.white)
+            Spacer()
+            Toggle(isOn: $viewModel.participate) { }
+                .toggleStyle(SwitchToggleStyle(tint: viewModel.participate ? .pink : .gray))
         }
-        .toggleStyle(SwitchToggleStyle(tint: viewModel.participate ? .pink : .gray))
     }
     
     var saveInfoButton: some View {
