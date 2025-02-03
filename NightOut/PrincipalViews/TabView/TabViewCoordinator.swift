@@ -111,7 +111,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makeSearchFlow() -> AnyView {
-        let coordinator = SearchCoordinator()
+        let coordinator = SearchCoordinator(actions: searchActions())
         return AnyView(coordinator.build())
     }
     
@@ -143,5 +143,9 @@ private extension TabViewCoordinator {
     
     func profileActions() -> MyUserProfilePresenterImpl.Actions {
         .init(backToLogin: goToLogin)
+    }
+    
+    func searchActions() -> SearchPresenterImpl.Actions {
+        .init()
     }
 }

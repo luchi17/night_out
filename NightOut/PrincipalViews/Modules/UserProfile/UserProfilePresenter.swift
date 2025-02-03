@@ -2,12 +2,21 @@ import SwiftUI
 import Combine
 
 
-struct ProfileModel {
+struct ProfileModel: Hashable {
     var profileImageUrl: String?
     var username: String?
     var fullname: String?
     var profileId: String
     var isCompanyProfile: Bool
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(profileId)
+    }
+    
+    static func == (lhs: ProfileModel, rhs: ProfileModel) -> Bool {
+        return lhs.profileId == rhs.profileId
+    }
+    
 }
 
 enum FollowButtonType {
