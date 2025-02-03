@@ -108,7 +108,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makePublishFlow() -> AnyView {
-        let coordinator = PublishCoordinator()
+        let coordinator = PublishCoordinator(actions: .init())
         return AnyView(coordinator.build())
         
     }

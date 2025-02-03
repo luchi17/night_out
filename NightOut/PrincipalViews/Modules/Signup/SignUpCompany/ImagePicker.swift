@@ -5,6 +5,7 @@ struct ImagePickerView: View {
     @State private var selectedImage: UIImage?
     @State private var selectedItem: PhotosPickerItem?
     @Binding var imageData: Data?
+//    @Binding var selectedImage: UIImage?
     
     var body: some View {
         VStack {
@@ -17,6 +18,7 @@ struct ImagePickerView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 200, height: 200)
+                            .clipped()
                         
                     } else {
                         Image(systemName: "photo")
@@ -26,7 +28,7 @@ struct ImagePickerView: View {
                             .foregroundColor(.blue) // Color del ícono
                             .padding()
                     }
-                   
+                    
                 }
                 .onChange(of: selectedItem) { _, newItem in
                     Task {
@@ -39,6 +41,7 @@ struct ImagePickerView: View {
                         }
                     }
                 }
+                .padding()
         }
     }
 }
