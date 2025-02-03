@@ -7,6 +7,7 @@ struct SearchView: View {
     @State private var isCancelVisible: Bool = false
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let searchPublisher = PassthroughSubject<Void, Never>()
+    private let goToProfilePublisher = PassthroughSubject<ProfileModel, Never>()
     
     @ObservedObject var viewModel: SearchViewModel
     let presenter: SearchPresenter
@@ -61,9 +62,16 @@ struct SearchView: View {
                     VStack(spacing: 10) {
                         ForEach(viewModel.searchResults, id: \.self) { user in
                             SearchUserSubView(user: user)
+                                .onTapGesture {
+                                    hideKeyboard()
+                                    goToProfilePublisher.send(user)
+                                }
                         }
                     }
                 }
+                .simultaneousGesture(DragGesture().onChanged { _ in
+                    hideKeyboard() // Esconde el teclado cuando el usuario hace scroll
+                })
                 
             } else {
                 Spacer() // Espaciador para centrar el contenido si no hay resultados
@@ -111,13 +119,18 @@ struct SearchView: View {
             }
         }
     }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
 }
 
 private extension SearchView {
     func bindViewModel() {
         let input = SearchPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            search: searchPublisher.eraseToAnyPublisher()
+            search: searchPublisher.eraseToAnyPublisher(),
+            goToProfile: goToProfilePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

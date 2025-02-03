@@ -176,11 +176,11 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                 }
        
                 let model = CompanyModel(
-                    email: self.viewModel.email,
+                    email: self.viewModel.email.lowercased(),
                     endTime: self.viewModel.endTime,
                     selectedTag: self.viewModel.selectedTag == .none ? "Etiqueta" : self.viewModel.selectedTag.title,
                     fullname: self.viewModel.fullName,
-                    username: self.viewModel.userName,
+                    username: self.viewModel.userName.lowercased(),
                     imageUrl: self.viewModel.imageUrl,
                     location: self.viewModel.locationString,
                     startTime: self.viewModel.startTime,

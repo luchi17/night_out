@@ -27,6 +27,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let goToLogin: VoidClosure
     private let showPostUserProfileView: InputClosure<UserPostProfileInfo>
     private let showNotificationsView: VoidClosure
+    private let showProfile: InputClosure<ProfileModel>
     private let locationManager: LocationManager
     
     @Published var path: NavigationPath
@@ -49,7 +50,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
         goToLogin: @escaping VoidClosure,
         showPostUserProfileView: @escaping InputClosure<UserPostProfileInfo>,
         onShowPostComments:  @escaping InputClosure<PostCommentsInfo>,
-        showNotificationsView: @escaping VoidClosure
+        showNotificationsView: @escaping VoidClosure,
+        showProfile: @escaping InputClosure<ProfileModel>
     ) {
         self.path = path
         self.locationManager = locationManager
@@ -59,6 +61,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
         self.showPostUserProfileView = showPostUserProfileView
         self.onShowPostComments = onShowPostComments
         self.showNotificationsView = showNotificationsView
+        self.showProfile = showProfile
     }
     
     @ViewBuilder
@@ -146,6 +149,6 @@ private extension TabViewCoordinator {
     }
     
     func searchActions() -> SearchPresenterImpl.Actions {
-        .init()
+        .init(goToProfile: showProfile)
     }
 }

@@ -23,16 +23,6 @@ struct UserModel: Codable {
         self.attendingClub = attendingClub
         self.misLigas = misLigas
     }
-    
-//    init?(snapshot: DataSnapshot) {
-//        guard let value = snapshot.value as? [String: Any],
-//              let uid = value["uid"] as? String,
-//              let username = value["username"] as? String else {
-//            return nil
-//        }
-//        self._id = id
-//        self.username = username
-//    }
 }
 
 enum Gender {

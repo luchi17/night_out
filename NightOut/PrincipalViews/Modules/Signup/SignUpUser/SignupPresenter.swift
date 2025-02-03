@@ -97,8 +97,8 @@ final class SignupPresenterImpl: SignupPresenter {
                 let model = UserModel(
                     uid: uid,
                     fullname: self.viewModel.fullName,
-                    username: self.viewModel.userName,
-                    email: self.viewModel.email
+                    username: self.viewModel.userName.lowercased(),
+                    email: self.viewModel.email.lowercased()
                 )
                 return presenter.useCases.saveUserUseCase.execute(model: model)
                     .map({ ($0, model)})

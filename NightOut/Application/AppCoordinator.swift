@@ -45,7 +45,8 @@ final class AppCoordinator: ObservableObject {
             },
             showPostUserProfileView: showPostUserProfileView,
             onShowPostComments: showPostComments,
-            showNotificationsView: showNotificationsView
+            showNotificationsView: showNotificationsView,
+            showProfile: showProfile(model:)
         )
         self.push(tabBarCoordinator)
     }

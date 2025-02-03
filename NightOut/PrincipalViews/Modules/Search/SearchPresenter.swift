@@ -19,19 +19,16 @@ protocol SearchPresenter {
 final class SearchPresenterImpl: SearchPresenter {
     
     struct UseCases {
-//        let notificationsUseCase: NotificationsUseCase
-//        let userDataUseCase: UserDataUseCase
-//        let followUseCase: FollowUseCase
     }
     
     struct Actions {
-//        let goToProfile: InputClosure<ProfileModel>
-//        let goToPost: InputClosure<NotificationModelForView>
+        let goToProfile: InputClosure<ProfileModel>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let search: AnyPublisher<Void, Never>
+        let goToProfile: AnyPublisher<ProfileModel, Never>
     }
     
     var viewModel: SearchViewModel
@@ -55,13 +52,21 @@ final class SearchPresenterImpl: SearchPresenter {
     
     func transform(input: SearchPresenterImpl.ViewInputs) {
         viewModel.$searchText
-                    .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+                    .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
                     .removeDuplicates()
                     .withUnretained(self)
                     .sink { presenter, query in
-                        presenter.searchUsers(query: query)
+                        presenter.searchUsers(query: query.lowercased())
                     }
                     .store(in: &cancellables)
+        
+        input
+            .goToProfile
+            .withUnretained(self)
+            .sink { presenter, model in
+                presenter.actions.goToProfile(model)
+            }
+            .store(in: &cancellables)
         
     }
     
@@ -78,7 +83,9 @@ final class SearchPresenterImpl: SearchPresenter {
         usersQuery?.removeAllObservers()
         companyUsersQuery?.removeAllObservers()
         
+        let group = DispatchGroup()
         // Búsqueda en la referencia "Users"
+        group.enter()
         usersQuery = FirebaseServiceImpl.shared.getUsers()
                     .queryOrdered(byChild: "username")
                     .queryStarting(atValue: query)
@@ -99,6 +106,7 @@ final class SearchPresenterImpl: SearchPresenter {
                             profileId: userModel.uid,
                             isCompanyProfile: false
                         )
+                        print(profile.username)
                         users.append(profile)
                         
                     } else {
@@ -107,9 +115,11 @@ final class SearchPresenterImpl: SearchPresenter {
                 }
             }
             self?.viewModel._results = users
+            group.leave()
         })
         
-        // Buscar en la referencia "Company_Users"
+//         Buscar en la referencia "Company_Users"
+        group.enter()
         let companyUsersQuery = FirebaseServiceImpl.shared.getCompanies()
             .queryOrdered(byChild: "username")
             .queryStarting(atValue: query)
@@ -120,7 +130,7 @@ final class SearchPresenterImpl: SearchPresenter {
             
             for child in snapshot.children {
                 if let childSnapshot = child as? DataSnapshot {
-                    print(childSnapshot)
+                   
                     if let companyModel = try? childSnapshot.data(as: CompanyModel.self) {
                         let profile = ProfileModel(
                             profileImageUrl: companyModel.imageUrl,
@@ -129,6 +139,7 @@ final class SearchPresenterImpl: SearchPresenter {
                             profileId: companyModel.uid,
                             isCompanyProfile: true
                         )
+                        print(profile.username)
                         companyUsers.append(profile)
                     } else {
                         print("error")
@@ -136,13 +147,18 @@ final class SearchPresenterImpl: SearchPresenter {
                 }
             }
             self?.viewModel._results.append(contentsOf: companyUsers)
+            group.leave()
         })
         
-        if self.viewModel._results != self.viewModel.searchResults { // Evitar actualizar vista
-            self.viewModel.searchResults = self.viewModel._results
-            self.viewModel._results = self.viewModel.searchResults // Actualizar variable auxiliar
-            
+        group.notify(queue: .main) {
+            if self.viewModel._results != self.viewModel.searchResults { // Evitar actualizar vista
+                self.viewModel.searchResults = self.viewModel._results
+                self.viewModel._results = self.viewModel.searchResults // Actualizar variable auxiliar
+                
+            }
         }
+        
+     
          
     }
 }
