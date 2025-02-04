@@ -20,34 +20,29 @@ struct MessagesView: View {
     
     var body: some View {
         VStack {
-            if viewModel.loading {
-                ProgressView("Cargando chats...")
-            } else if viewModel.chatList.isEmpty {
+           if viewModel.chatList.isEmpty && !viewModel.loading {
                 Spacer()
                 Text("No has dado match con ningún usuario")
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Spacer()
             } else {
-                List(viewModel.chatList) { chat in
-                    ChatRow(chat: chat)
-                        .onTapGesture {
-                            goToChatPublisher.send(chat)
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach(viewModel.chatList, id: \.id) { chat in
+                            ChatRow(chat: chat)
+                                .onTapGesture {
+                                    goToChatPublisher.send(chat)
+                                }
                         }
+                    }
+                    .background(Color.black)
                 }
-                .listStyle(PlainListStyle())
-                .background(Color.black)
             }
         }
         .listStyle(PlainListStyle())
         .padding(.all, 12)
-        .background(
-            //            Image("fondo_select_chat") // Fondo de la pantalla
-            //                .resizable()
-            //                .scaledToFill()
-            //                .ignoresSafeArea()
-            Color.black
-        )
+        .background(Color.black)
         .showCustomNavBar(
             title: "NIGHOUT MENSAJES",
             goBack: goBackPublisher.send
@@ -60,7 +55,7 @@ struct MessagesView: View {
                     viewModel.toast = nil
                 }
             ),
-            isIdle: false
+            isIdle: viewModel.loading
         )
         .background(Color.black.opacity(0.7))
         .onAppear {
@@ -98,7 +93,6 @@ class Chat: Identifiable {
     }
 }
 
-// Vista de cada fila en la lista
 struct ChatRow: View {
     let chat: Chat
     
@@ -108,6 +102,9 @@ struct ChatRow: View {
                 KingFisherImage(url: URL(string: userImageUrl))
                     .placeholder({
                         Image("profile")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 40, height: 40)
                             .clipShape(Circle())
                     })
                     .scaledToFill()
@@ -136,5 +133,6 @@ struct ChatRow: View {
             
             Spacer()
         }
+        .background(Color.black)
     }
 }

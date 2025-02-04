@@ -153,7 +153,10 @@ private extension AppCoordinator {
     
     #warning("TODO: go to chat")
     func makeMessagesActions() -> MessagesPresenterImpl.Actions {
-        return .init(goToChat: { _ in })
+        return .init(
+            goToChat: { _ in },
+            goBack: self.pop
+        )
     }
 }
 

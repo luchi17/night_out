@@ -16,12 +16,11 @@ protocol MessagesPresenter {
 final class MessagesPresenterImpl: MessagesPresenter {
     
     struct UseCases {
-//        let userDataUseCase: UserDataUseCase
-//        let messagesUseCase: NotificationsUseCase
     }
     
     struct Actions {
         let goToChat: InputClosure<Chat>
+        let goBack: VoidClosure
     }
     
     struct ViewInputs {
@@ -61,6 +60,14 @@ final class MessagesPresenterImpl: MessagesPresenter {
             .withUnretained(self)
             .sink { presenter, chat in
                 presenter.actions.goToChat(chat)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goBack
+            .withUnretained(self)
+            .sink { presenter, chat in
+                presenter.actions.goBack()
             }
             .store(in: &cancellables)
     }
@@ -158,8 +165,6 @@ final class MessagesPresenterImpl: MessagesPresenter {
                 }  withCancel: {  [weak self] error in
                     self?.viewModel.toast = .custom(.init(title: "Error", description: "Error al Error al verificar likes.", image: nil))
                 }
-                
-              
             }
             
             group.notify(queue: .main) {
@@ -168,11 +173,6 @@ final class MessagesPresenterImpl: MessagesPresenter {
             }
 
         }
-    }
-    
-    func checkUsersMatching(child: Any, group: DispatchGroup, currentUserUid: String, likedUserUid: String, fetchedChats: inout [Chat]) {
-
-        
     }
 }
 

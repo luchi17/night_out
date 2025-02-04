@@ -153,7 +153,8 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                         fcm_token: presenter.userModel?.fcm_token,
                         attendingClub: presenter.userModel?.attendingClub,
                         misLigas: presenter.userModel?.misLigas,
-                        profile: presenter.viewModel.isPrivate ? "private" : "public"
+                        profile: presenter.viewModel.isPrivate ? "private" : "public",
+                        Liked: presenter.userModel?.Liked
                     )
                     return presenter.useCases.saveUserUseCase.execute(model: model)
                         .map({ _ in imageUrl })
