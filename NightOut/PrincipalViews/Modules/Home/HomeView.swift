@@ -12,6 +12,7 @@ struct HomeView: View {
     let feedPresenter: FeedPresenter
     let userPresenter: MyUserProfilePresenter
     let settingsPresenter: MyUserSettingsPresenter
+    let companySettingsPresenter: MyUserCompanySettingsPresenter
     let editProfilePresenter: MyUserEditProfilePresenter
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
@@ -22,6 +23,7 @@ struct HomeView: View {
         feedPresenter: FeedPresenter,
         userPresenter: MyUserProfilePresenter,
         settingsPresenter: MyUserSettingsPresenter,
+        companySettingsPresenter: MyUserCompanySettingsPresenter,
         editProfilePresenter: MyUserEditProfilePresenter
     ) {
         self.presenter = presenter
@@ -29,6 +31,7 @@ struct HomeView: View {
         self.feedPresenter = feedPresenter
         self.userPresenter = userPresenter
         self.settingsPresenter = settingsPresenter
+        self.companySettingsPresenter = companySettingsPresenter
         self.editProfilePresenter = editProfilePresenter
         viewModel = presenter.viewModel
         bindViewModel()
@@ -50,6 +53,7 @@ struct HomeView: View {
             MyUserProfileView(
                 presenter: userPresenter,
                 settingsPresenter: settingsPresenter,
+                companySettingsPresenter: companySettingsPresenter,
                 editProfilePresenter: editProfilePresenter
             )
                 .presentationDetents([.large])
@@ -70,34 +74,89 @@ struct HomeView: View {
     var topButtonView: some View {
         HStack(spacing: 0) {
             // Botón de perfil
+            HStack(spacing: 12) {
+                Button(action: {
+                    showMyProfile.toggle()
+                }) {
+                    profileImage
+                }
+                
+                Button(action: {
+                        #warning("TODO: open hub")
+                }) {
+                    Text("HUB")
+                        .foregroundStyle(.white)
+                        .font(.system(size: 14))
+                        .bold()
+                }
+            }
+            .frame(width: 90)
+            
+            Spacer()
+            
             Button(action: {
-                showMyProfile.toggle()
+                #warning("TODO: open tinder")
             }) {
-                Image(systemName: "person.circle.fill")
-                    .foregroundStyle(.gray)
-                    .font(.title)
+                Image("nightout")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 150, height: 60)
+                    .foregroundStyle(.white)
             }
             
             Spacer()
             
-            Image("appLogo") // Reemplaza con el nombre de tu imagen de logo
-                .resizable()
-                .scaledToFit()
-                .frame(width: 200, height: 70)
-            
-            Spacer()
-            
-            // Botón de notificaciones
-            Button(action: {
-                openNotificationsPublisher.send()
-            }) {
-                Image(systemName: "bell.fill")
-                    .foregroundStyle(.gray)
-                    .font(.title)
+            HStack(spacing: 12) {
+                
+                Spacer()
+                // Botón de mensajes
+                Button(action: {
+    #warning("TODO: open messages")
+                }) {
+                    Image("message_icon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(.white)
+                }
+                
+                // Botón de notificaciones
+                Button(action: {
+                    openNotificationsPublisher.send()
+                }) {
+                    Image("notificaciones")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(.white)
+                }
+            }
+            .frame(width: 90)
+           
+        }
+        .padding(.top, 30)
+        .padding(.horizontal, 16)
+    }
+    
+    var profileImage: some View {
+        VStack {
+            if let userImageUrl = viewModel.profileImageUrl {
+                KingFisherImage(url: URL(string: userImageUrl))
+                    .placeholder({
+                        Image("profile")
+                            .clipShape(Circle())
+                    })
+                    .scaledToFill()
+                    .frame(width: 40, height: 40)
+                    .clipShape(Circle())
+            } else {
+                Image("profile")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 40, height: 40)
+                    .clipShape(Circle())
             }
         }
-        .padding(.top, 5)
-        .padding(.horizontal, 20)
     }
 }
 
