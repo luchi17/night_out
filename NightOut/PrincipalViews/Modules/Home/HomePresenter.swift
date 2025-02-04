@@ -18,6 +18,7 @@ enum HomeSelectedTab {
 
 final class HomeViewModel: ObservableObject {
     @Published var selectedTab: HomeSelectedTab = .feed
+    @Published var profileImageUrl: String?
 }
 
 protocol HomePresenter {
@@ -53,6 +54,13 @@ final class HomePresenterImpl: HomePresenter {
         self.useCases = useCases
         
         viewModel = HomeViewModel()
+        
+        let imUser = FirebaseServiceImpl.shared.getImUser()
+        if imUser {
+            viewModel.profileImageUrl =  UserDefaults.getUserModel()?.image
+        } else {
+            viewModel.profileImageUrl =  UserDefaults.getCompanyUserModel()?.imageUrl
+        }
     }
     
     func transform(input: HomePresenterImpl.ViewInputs){
