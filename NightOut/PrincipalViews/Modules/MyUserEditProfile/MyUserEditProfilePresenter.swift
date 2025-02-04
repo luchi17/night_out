@@ -78,6 +78,8 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
         self.useCases = useCases
 
         viewModel = MyUserEditProfileViewModel()
+        
+        viewModel.progressMessage = "Please wait, we are deleting your account..."
     }
     
     func transform(input: MyUserEditProfilePresenterImpl.ViewInputs) {
