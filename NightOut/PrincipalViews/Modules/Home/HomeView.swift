@@ -16,6 +16,7 @@ struct HomeView: View {
     let editProfilePresenter: MyUserEditProfilePresenter
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
+    private let openMessagesPublisher = PassthroughSubject<Void, Never>()
 
     init(
         presenter: HomePresenter,
@@ -111,7 +112,7 @@ struct HomeView: View {
                 Spacer()
                 // Botón de mensajes
                 Button(action: {
-    #warning("TODO: open messages")
+                    openMessagesPublisher.send()
                 }) {
                     Image("message_icon")
                         .resizable()
@@ -164,7 +165,8 @@ private extension HomeView {
     
     func bindViewModel() {
         let input = HomePresenterImpl.ViewInputs(
-            openNotifications: openNotificationsPublisher.eraseToAnyPublisher()
+            openNotifications: openNotificationsPublisher.eraseToAnyPublisher(),
+            openMessages: openMessagesPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
