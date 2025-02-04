@@ -40,7 +40,16 @@ struct CompanyModel: Codable {
     var entradas: [String: EntradaModel]?
     var payment: PaymentMethodModel?
     var ticketsSold:  [String: TicketVendido]? = [:]
+    var profile: String?
    
+    var profileType: ProfileType {
+        if profile == "private" {
+            return .privateProfile
+        } else {
+            return .publicProfile
+        }
+    }
+    
     enum CodingKeys: String, CodingKey {
             case entradas = "Entradas"
             case email
@@ -54,6 +63,7 @@ struct CompanyModel: Codable {
             case payment = "Metodos_De_Pago"
             case imageUrl = "image"
             case ticketsSold = "TicketsVendidos"
+            case profile = "profile"
         }
 }
 

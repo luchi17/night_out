@@ -10,6 +10,8 @@ final class MyUserProfileViewModel: ObservableObject {
     @Published var followersCount: String = "0"
     @Published var copasCount: String = "0"
     @Published var discosCount: String = "0"
+    
+    @Published var companyMenuSelection: CompanyMenuSelection?
 }
 
 protocol MyUserProfilePresenter {
@@ -54,6 +56,9 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
         input
             .viewDidLoad
             .withUnretained(self)
+            .filter { presenter, _ in
+                return FirebaseServiceImpl.shared.getImUser()
+            }
             .flatMap({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(nil).eraseToAnyPublisher()
@@ -75,10 +80,58 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
             .store(in: &cancellables)
         
         input
+            .viewDidLoad
+            .withUnretained(self)
+            .filter { presenter, _ in
+                return !FirebaseServiceImpl.shared.getImUser()
+            }
+            .flatMap({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just(nil).eraseToAnyPublisher()
+                }
+                return presenter.useCases.followUseCase.fetchFollow(id: uid)
+            })
+            .withUnretained(self)
+            .sink { presenter, followModel in
+                let model = UserDefaults.getCompanyUserModel()
+                let profileImage = model?.imageUrl
+                let username = model?.username
+                let fullname = model?.fullname
+                
+                presenter.viewModel.profileImageUrl = profileImage
+                presenter.viewModel.username = username ?? "Username no disponible"
+                presenter.viewModel.fullname = fullname ?? "Fullname no disponible"
+                presenter.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
+            }
+            .store(in: &cancellables)
+        
+        input
             .goToLogin
             .withUnretained(self)
             .sink { presenter, _ in
                 presenter.actions.backToLogin()
+            }
+            .store(in: &cancellables)
+        
+        viewModel
+            .$companyMenuSelection
+            .withUnretained(self)
+            .sink { presenter, value in
+                #warning("TODO: actions")
+                switch value {
+                case .lectorEntradas:
+                    print("lectorEntradas")
+                case .gestorEventos:
+                    print("gestorEventos")
+                case .publicidad:
+                    print("publicidad")
+                case .metodosDePago:
+                    print("metodosDePago")
+                case .ventas:
+                    print("ventas")
+                default:
+                    break
+                }
             }
             .store(in: &cancellables)
         

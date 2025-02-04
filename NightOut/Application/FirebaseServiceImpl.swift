@@ -82,7 +82,7 @@ final class FirebaseServiceImpl: ObservableObject {
     }
     
     func getImUser() -> Bool {
-        return UserDefaults.getImUser() ?? false
+        return UserDefaults.getUserModel() != nil
     }
 }
 

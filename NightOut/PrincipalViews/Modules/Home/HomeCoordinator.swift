@@ -47,7 +47,10 @@ class HomeCoordinator {
         let editProfilePresenter = MyUserEditProfilePresenterImpl(
             useCases: .init(
                 saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared),
-                saveCompanyUseCase: SaveCompanyUseCaseImpl(repository: AccountRepositoryImpl.shared)),
+                saveCompanyUseCase: SaveCompanyUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                signOutUseCase: SignOutUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                deleteAccountUseCase: DeleteAccountUseCaseImpl(repository: AccountRepositoryImpl.shared)
+            ),
             actions: .init(backToLogin: profileActions.backToLogin)
         )
         

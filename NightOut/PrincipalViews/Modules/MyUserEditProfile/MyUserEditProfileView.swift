@@ -3,17 +3,19 @@ import Combine
 
 struct MyUserEditProfileView: View {
     
+    @State private var showAlertDeleteUser = false
     @State private var showGenderSheet = false
     @State private var openSettings = false
+    @State private var openCompanySettings = false
     
     @Binding private var closeAllSheets: Bool
     
     @Environment(\.dismiss) private var dismiss
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
-    private let goToLoginPublisher = PassthroughSubject<Void, Never>()
     private let saveInfoPublisher = PassthroughSubject<Void, Never>()
-    private let settingsPublisher = PassthroughSubject<Void, Never>()
+    private let logoutPublisher = PassthroughSubject<Void, Never>()
+    private let confirmDeleteAccountPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: MyUserEditProfileViewModel
     let presenter: MyUserEditProfilePresenter
@@ -37,7 +39,10 @@ struct MyUserEditProfileView: View {
             HStack(spacing: 8) {
                 Spacer()
                 saveInfoButton
-                settingsButtonView
+                
+                if FirebaseServiceImpl.shared.getImUser() {
+                    settingsButtonView
+                }
             }
 
             topImageView
@@ -46,29 +51,54 @@ struct MyUserEditProfileView: View {
                 TextField(viewModel.username, text: $viewModel.username)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
+                    .background(Color.clear) // Custom input background color
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .overlay(
+                            Rectangle()
+                                .frame(height: 1) // Línea fina
+                                .foregroundColor(.white), // Color de la línea
+                            alignment: .bottom
+                        )
                 
                 TextField(viewModel.fullname, text: $viewModel.fullname)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding()
-                    .background(Color.white.opacity(0.2)) // Custom input background color
+                    .background(Color.clear) // Custom input background color
                     .foregroundColor(.white)
-                    .cornerRadius(10)
-                
-                privateView
-                
-                genderView
-                
-                paymentsView
-                
-                participateView
-                
+                    .overlay(
+                            Rectangle()
+                                .frame(height: 1) // Línea fina
+                                .foregroundColor(.white), // Color de la línea
+                            alignment: .bottom
+                        )
+
+                if FirebaseServiceImpl.shared.getImUser() {
+                    privateView
+                    
+                    genderView
+                    
+                    paymentsView
+                    
+                    participateView
+                    
+                } else {
+                    
+                    privateView
+                        .padding(.top, 20)
+                    
+                    editCompanyInfoView
+                        .padding(.top, 10)
+                    
+                    logoutView
+                    
+                    deleteAccountView
+                    
+                }
+               
                 Spacer()
             }
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 20)
         .padding(.top, 16)
         .background(
             Image("fondo_azul")
@@ -87,9 +117,50 @@ struct MyUserEditProfileView: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $openCompanySettings) {
+//            MyUserSettingsView(
+//                presenter: settingsPresenter,
+//                closeAllSheets: $closeAllSheets
+//            )
+//            .presentationDetents([.large])
+//            .presentationDragIndicator(.visible)
+        }
+        .alert(isPresented: $viewModel.showAlertMessage) {
+            Alert(
+                title: Text("Message"),
+                message: Text(viewModel.alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+        .alert(isPresented: $showAlertDeleteUser) {
+            Alert(
+                title: Text("Confirm Deletion"),
+                message: Text("Are you sure you want to delete your account? This action is irreversible."),
+                primaryButton: .destructive(Text("Delete")) {
+                    confirmDeleteAccountPublisher.send()
+                },
+                secondaryButton: .cancel()
+            )
+        }
+        .overlay(
+            Group {
+                if viewModel.showProgress {
+                    ProgressView(viewModel.progressMessage)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                }
+                
+            }
+        )
+        .onChange(of: viewModel.shouldCloseSheet, { olv, new in
+            if new {
+                closeAllSheets.toggle()
+            }
+        })
         .onChange(of: closeAllSheets, { oldValue, newValue in
             if newValue {
-                goToLoginPublisher.send()
                 dismiss()
             }
         })
@@ -101,7 +172,7 @@ struct MyUserEditProfileView: View {
                     viewModel.toast = nil
                 }
             ),
-            isIdle: false
+            isIdle: viewModel.loading
         )
         .onAppear {
             viewDidLoadPublisher.send()
@@ -214,14 +285,57 @@ struct MyUserEditProfileView: View {
                 .font(.system(size: 24))
         }
     }
+    
+    var editCompanyInfoView: some View {
+        Button(action: {
+            openCompanySettings.toggle()
+        }) {
+            Text("Editar información de la empresa")
+                .font(.system(size: 18))
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+        }
+    }
+    
+    var logoutView: some View {
+        Button(action: {
+            logoutPublisher.send()
+        }) {
+            Text("Cerrar sesión")
+                .font(.system(size: 18))
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+        }
+    }
+    
+    var deleteAccountView: some View {
+        Button(action: {
+            showAlertDeleteUser.toggle()
+        }) {
+            Text("Borrar cuenta")
+                .font(.system(size: 18))
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+        }
+    }
 }
 
 private extension MyUserEditProfileView {
     func bindViewModel() {
         let input = MyUserEditProfilePresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
-            goToLogin: goToLoginPublisher.eraseToAnyPublisher(),
-            saveInfo: saveInfoPublisher.eraseToAnyPublisher()
+            saveInfo: saveInfoPublisher.eraseToAnyPublisher(),
+            logout: logoutPublisher.eraseToAnyPublisher(),
+            confirmDeleteAccount: confirmDeleteAccountPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

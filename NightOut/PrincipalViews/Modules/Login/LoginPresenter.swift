@@ -100,7 +100,7 @@ final class LoginPresenterImpl: LoginPresenter {
             .flatMap({ presenter, _ -> AnyPublisher<Bool, Never> in
                  presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
                     .map({ companies in
-                        let imCompany = companies?.users.map({ $0.value.email }).contains(presenter.viewModel.email) ?? false
+                        let imCompany = companies?.users.map({ $0.value.email }).contains(presenter.viewModel.email.lowercased()) ?? false
                         return imCompany
                     })
                     .eraseToAnyPublisher()
