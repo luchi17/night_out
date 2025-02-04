@@ -20,14 +20,17 @@ struct MyUserEditProfileView: View {
     @ObservedObject var viewModel: MyUserEditProfileViewModel
     let presenter: MyUserEditProfilePresenter
     let settingsPresenter: MyUserSettingsPresenter
+    let companySettingsPresenter: MyUserCompanySettingsPresenter
     
     init(
         presenter: MyUserEditProfilePresenter,
         settingsPresenter: MyUserSettingsPresenter,
+        companySettingsPresenter: MyUserCompanySettingsPresenter,
         closeAllSheets: Binding<Bool>
     ) {
         self.presenter = presenter
         self.settingsPresenter = settingsPresenter
+        self.companySettingsPresenter = companySettingsPresenter
         self._closeAllSheets = closeAllSheets
         viewModel = presenter.viewModel
         bindViewModel()
@@ -44,7 +47,7 @@ struct MyUserEditProfileView: View {
                     settingsButtonView
                 }
             }
-
+            
             topImageView
             
             VStack(alignment: .leading, spacing: 14) {
@@ -54,11 +57,11 @@ struct MyUserEditProfileView: View {
                     .background(Color.clear) // Custom input background color
                     .foregroundColor(.white)
                     .overlay(
-                            Rectangle()
-                                .frame(height: 1) // Línea fina
-                                .foregroundColor(.white), // Color de la línea
-                            alignment: .bottom
-                        )
+                        Rectangle()
+                            .frame(height: 1) // Línea fina
+                            .foregroundColor(.white), // Color de la línea
+                        alignment: .bottom
+                    )
                 
                 TextField(viewModel.fullname, text: $viewModel.fullname)
                     .textFieldStyle(PlainTextFieldStyle())
@@ -66,12 +69,12 @@ struct MyUserEditProfileView: View {
                     .background(Color.clear) // Custom input background color
                     .foregroundColor(.white)
                     .overlay(
-                            Rectangle()
-                                .frame(height: 1) // Línea fina
-                                .foregroundColor(.white), // Color de la línea
-                            alignment: .bottom
-                        )
-
+                        Rectangle()
+                            .frame(height: 1) // Línea fina
+                            .foregroundColor(.white), // Color de la línea
+                        alignment: .bottom
+                    )
+                
                 if FirebaseServiceImpl.shared.getImUser() {
                     privateView
                     
@@ -94,7 +97,7 @@ struct MyUserEditProfileView: View {
                     deleteAccountView
                     
                 }
-               
+                
                 Spacer()
             }
         }
@@ -118,12 +121,9 @@ struct MyUserEditProfileView: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $openCompanySettings) {
-//            MyUserSettingsView(
-//                presenter: settingsPresenter,
-//                closeAllSheets: $closeAllSheets
-//            )
-//            .presentationDetents([.large])
-//            .presentationDragIndicator(.visible)
+            MyUserCompanySettingsView(presenter: companySettingsPresenter)
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
         .alert(isPresented: $viewModel.showAlertMessage) {
             Alert(

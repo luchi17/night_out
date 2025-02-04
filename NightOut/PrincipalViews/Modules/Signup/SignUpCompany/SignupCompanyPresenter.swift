@@ -38,7 +38,7 @@ enum LocationSelectedTag {
         case .semiInformal:
             return "Semi-informal"
         case .none:
-            return "SELECT TAG"
+            return "Secciona Vestimenta"
         }
     }
 }

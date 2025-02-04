@@ -18,14 +18,17 @@ struct MyUserProfileView: View {
     let presenter: MyUserProfilePresenter
     let settingsPresenter: MyUserSettingsPresenter
     let editProfilePresenter: MyUserEditProfilePresenter
+    let companySettingsPresenter: MyUserCompanySettingsPresenter
     
     init(
         presenter: MyUserProfilePresenter,
         settingsPresenter: MyUserSettingsPresenter,
+        companySettingsPresenter: MyUserCompanySettingsPresenter,
         editProfilePresenter: MyUserEditProfilePresenter
     ) {
         self.presenter = presenter
         self.settingsPresenter = settingsPresenter
+        self.companySettingsPresenter = companySettingsPresenter
         self.editProfilePresenter = editProfilePresenter
         viewModel = presenter.viewModel
         bindViewModel()
@@ -107,6 +110,7 @@ struct MyUserProfileView: View {
             MyUserEditProfileView(
                 presenter: editProfilePresenter,
                 settingsPresenter: settingsPresenter,
+                companySettingsPresenter: companySettingsPresenter,
                 closeAllSheets: $closeAllSheets
             )
              .presentationDetents([.large])
