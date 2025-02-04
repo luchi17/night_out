@@ -115,6 +115,7 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
         
         viewModel
             .$companyMenuSelection
+            .removeDuplicates()
             .withUnretained(self)
             .sink { presenter, value in
                 #warning("TODO: actions")
