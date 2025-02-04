@@ -23,9 +23,11 @@ struct MessagesView: View {
             if viewModel.loading {
                 ProgressView("Cargando chats...")
             } else if viewModel.chatList.isEmpty {
+                Spacer()
                 Text("No has dado match con ningún usuario")
                     .foregroundColor(.gray)
-                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Spacer()
             } else {
                 List(viewModel.chatList) { chat in
                     ChatRow(chat: chat)
@@ -34,6 +36,7 @@ struct MessagesView: View {
                         }
                 }
                 .listStyle(PlainListStyle())
+                .background(Color.black)
             }
         }
         .listStyle(PlainListStyle())
