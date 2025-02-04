@@ -20,13 +20,13 @@ struct MessagesView: View {
     
     var body: some View {
         VStack {
-           if viewModel.chatList.isEmpty && !viewModel.loading {
+            if viewModel.chatList.isEmpty && !viewModel.loading {
                 Spacer()
                 Text("No has dado match con ningún usuario")
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Spacer()
-            } else {
+            } else if !viewModel.chatList.isEmpty && !viewModel.loading {
                 ScrollView {
                     VStack(spacing: 10) {
                         ForEach(viewModel.chatList, id: \.id) { chat in
@@ -36,12 +36,14 @@ struct MessagesView: View {
                                 }
                         }
                     }
-                    .background(Color.black)
                 }
+                .padding(.all, 12)
+                .background(Color.black)
+            } else {
+                Color.black
+                    .ignoresSafeArea()
             }
         }
-        .listStyle(PlainListStyle())
-        .padding(.all, 12)
         .background(Color.black)
         .showCustomNavBar(
             title: "NIGHOUT MENSAJES",
@@ -57,7 +59,6 @@ struct MessagesView: View {
             ),
             isIdle: viewModel.loading
         )
-        .background(Color.black.opacity(0.7))
         .onAppear {
             viewDidLoadPublisher.send()
         }
