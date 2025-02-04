@@ -19,6 +19,9 @@ struct CommentView: View  {
                 KingFisherImage(url: URL(string: userImageUrl))
                     .placeholder({
                         Image("profile")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 40, height: 40)
                             .clipShape(Circle())
                     })
                     .scaledToFill()
