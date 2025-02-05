@@ -62,6 +62,11 @@ final class AppCoordinator: ObservableObject {
         self.push(messagesView)
     }
     
+    private func openChat(chat: Chat) {
+        let messagesView = ChatCoordinator(actions: .init(goBack: self.pop), chat: chat)
+        self.push(messagesView)
+    }
+    
     private func showPostUserProfileView(info: UserPostProfileInfo) {
         let postUserProfileView = UserPostProfileCoordinator(actions: .init(), info: info)
         self.push(postUserProfileView)
@@ -151,10 +156,9 @@ private extension AppCoordinator {
         )
     }
     
-    #warning("TODO: go to chat")
     func makeMessagesActions() -> MessagesPresenterImpl.Actions {
         return .init(
-            goToChat: { _ in },
+            goToChat: openChat,
             goBack: self.pop
         )
     }

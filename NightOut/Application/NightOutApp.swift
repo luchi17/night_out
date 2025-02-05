@@ -69,6 +69,10 @@ struct ContentView: View {
                         .navigationDestination(for: MessagesCoordinator.self) { coordinator in
                             coordinator
                                 .build()
+                                .navigationDestination(for: ChatCoordinator.self) { coordinator in
+                                    coordinator
+                                        .build()
+                                }
                         }
                 })
         }
