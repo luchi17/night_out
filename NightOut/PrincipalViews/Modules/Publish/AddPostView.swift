@@ -11,8 +11,8 @@ struct AddPostView: View {
     
     @State private var showingIconsView = false
     @State private var showingLocationPicker = false
-    @State private var isCameraActive = true
-    @State private var hideButtons = true
+    
+    @ObservedObject private var keyboardObserver = KeyboardObserver()
     
     @ObservedObject var viewModel: PublishViewModel
     
@@ -52,6 +52,10 @@ struct AddPostView: View {
         }
         .onDisappear {
             cameraModel.stopSession()
+        }
+        .onTapGesture {
+            // Cerrar el teclado cuando tocas fuera de él
+            hideKeyboard()
         }
     }
     
@@ -200,11 +204,12 @@ struct AddPostView: View {
     }
     
     var descriptionTextField: some View {
-        TextField("Añadir descripción...", text: $viewModel.description)
+        TextField("", text: $viewModel.description, prompt: Text("Añadir descripción...").foregroundColor(.white))
             .padding(10)
             .foregroundColor(.white) // Color del texto
             .accentColor(.white)
-            .disableAutocorrection(true) // Deshabilitar autocorrección si es necesario
+            .offset(y: -keyboardObserver.keyboardHeight)
+            .animation(.easeOut(duration: 0.3))
     }
 }
 
@@ -215,6 +220,10 @@ private extension AddPostView {
             uploadPost: uploadPostPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
+    }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
