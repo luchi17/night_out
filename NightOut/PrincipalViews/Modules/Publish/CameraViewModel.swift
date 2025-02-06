@@ -15,12 +15,17 @@ class CameraViewModel: NSObject, ObservableObject {
     }
     
     private func configureCamera() {
-        session.beginConfiguration()
         
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
             print("No back camera available")
             session.commitConfiguration()
             return
+        }
+        
+        session.beginConfiguration()
+        
+        defer {
+            self.session.commitConfiguration()
         }
         
         do {
@@ -46,7 +51,7 @@ class CameraViewModel: NSObject, ObservableObject {
             print("Camera not available in simulator")
             return
         }
-
+        
         DispatchQueue.global(qos: .background).async {
             self.session.startRunning()
         }
