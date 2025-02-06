@@ -480,6 +480,7 @@
 				INFOPLIST_FILE = NightOut/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = NightOut;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Se necesita acceso a la cámara para capturar fotos";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show nearby discotecas";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -519,6 +520,7 @@
 				INFOPLIST_FILE = NightOut/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = NightOut;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Se necesita acceso a la cámara para capturar fotos";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show nearby discotecas";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
