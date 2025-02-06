@@ -30,21 +30,23 @@ struct AddPostView: View {
     
     var body: some View {
         ZStack {
-            if viewModel.capturedImage == nil {
-                CameraPreview(session: cameraModel.session)
-                    .ignoresSafeArea()
-                
-                notCapturedImageButtonsView
-                
-            } else if let image = viewModel.capturedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-                
-                capturedImageButtonsView
+            GeometryReader { geometry in
+                if viewModel.capturedImage == nil {
+                    CameraPreview(session: cameraModel.session)
+                    
+                    notCapturedImageButtonsView
+                    
+                } else if let image = viewModel.capturedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                    
+                    capturedImageButtonsView
+                }
             }
         }
+        .ignoresSafeArea()
         .onAppear {
             cameraModel.startSession()
         }
