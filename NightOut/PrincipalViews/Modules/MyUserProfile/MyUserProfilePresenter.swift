@@ -6,17 +6,12 @@ final class MyUserProfileViewModel: ObservableObject {
     @Published var profileImageUrl: String?
     @Published var username: String = ""
     @Published var fullname: String = ""
+    @Published var woman: Bool = false
     @Published var followersCount: String = "0"
     @Published var copasCount: String = "0"
     @Published var discosCount: String = "0"
     
-    @Published var loading: Bool = false
-    
-    init(profileImageUrl: String?, username: String?, fullname: String?) {
-        self.profileImageUrl = profileImageUrl
-        self.username = username ?? "Username no disponible"
-        self.fullname = fullname ?? "Fullname no disponible"
-    }
+    @Published var companyMenuSelection: CompanyMenuSelection?
 }
 
 protocol MyUserProfilePresenter {
@@ -53,35 +48,59 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
     ) {
         self.actions = actions
         self.useCases = useCases
-        
-        let userModel = UserDefaults.getUserModel()
-        let profileImage = userModel?.image
-        let username = userModel?.username
-        let fullname = userModel?.fullname
-        
-        viewModel = MyUserProfileViewModel(
-            profileImageUrl: profileImage,
-            username: username,
-            fullname: fullname
-        )
+
+        viewModel = MyUserProfileViewModel()
     }
     
     func transform(input: MyUserProfilePresenterImpl.ViewInputs) {
         input
             .viewDidLoad
             .withUnretained(self)
+            .filter { presenter, _ in
+                return FirebaseServiceImpl.shared.getImUser()
+            }
             .flatMap({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(nil).eraseToAnyPublisher()
                 }
                 return presenter.useCases.followUseCase.fetchFollow(id: uid)
             })
-            .handleEvents(receiveRequest: { [weak self] _ in
-                self?.viewModel.loading = true
+            .withUnretained(self)
+            .sink { presenter, followModel in
+                let userModel = UserDefaults.getUserModel()
+                let profileImage = userModel?.image
+                let username = userModel?.username
+                let fullname = userModel?.fullname
+                
+                presenter.viewModel.profileImageUrl = profileImage
+                presenter.viewModel.username = username ?? "Username no disponible"
+                presenter.viewModel.fullname = fullname ?? "Fullname no disponible"
+                presenter.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .viewDidLoad
+            .withUnretained(self)
+            .filter { presenter, _ in
+                return !FirebaseServiceImpl.shared.getImUser()
+            }
+            .flatMap({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just(nil).eraseToAnyPublisher()
+                }
+                return presenter.useCases.followUseCase.fetchFollow(id: uid)
             })
             .withUnretained(self)
             .sink { presenter, followModel in
-                presenter.viewModel.loading = false
+                let model = UserDefaults.getCompanyUserModel()
+                let profileImage = model?.imageUrl
+                let username = model?.username
+                let fullname = model?.fullname
+                
+                presenter.viewModel.profileImageUrl = profileImage
+                presenter.viewModel.username = username ?? "Username no disponible"
+                presenter.viewModel.fullname = fullname ?? "Fullname no disponible"
                 presenter.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
             }
             .store(in: &cancellables)
@@ -91,6 +110,29 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 presenter.actions.backToLogin()
+            }
+            .store(in: &cancellables)
+        
+        viewModel
+            .$companyMenuSelection
+            .removeDuplicates()
+            .withUnretained(self)
+            .sink { presenter, value in
+                #warning("TODO: actions")
+                switch value {
+                case .lectorEntradas:
+                    print("lectorEntradas")
+                case .gestorEventos:
+                    print("gestorEventos")
+                case .publicidad:
+                    print("publicidad")
+                case .metodosDePago:
+                    print("metodosDePago")
+                case .ventas:
+                    print("ventas")
+                default:
+                    break
+                }
             }
             .store(in: &cancellables)
         

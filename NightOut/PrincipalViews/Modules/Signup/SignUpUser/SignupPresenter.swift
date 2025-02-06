@@ -96,9 +96,9 @@ final class SignupPresenterImpl: SignupPresenter {
                 }
                 let model = UserModel(
                     uid: uid,
-                    fullname: self.viewModel.fullName,
-                    username: self.viewModel.userName.lowercased(),
-                    email: self.viewModel.email.lowercased()
+                    fullname: presenter.viewModel.fullName,
+                    username: presenter.viewModel.userName.lowercased(),
+                    email: presenter.viewModel.email.lowercased()
                 )
                 return presenter.useCases.saveUserUseCase.execute(model: model)
                     .map({ ($0, model)})
@@ -111,8 +111,8 @@ final class SignupPresenterImpl: SignupPresenter {
                     .eraseToAnyPublisher()
             })
             .sink(receiveValue: { [weak self] data in
-                if data.0, let _ = data.1 {
-                    UserDefaults.setImUser(true)
+                if data.0, let model = data.1 {
+                    UserDefaults.setUserModel(model)
                     self?.actions.goToTabView()
                 } else {
                     self?.viewModel.toast = .custom(.init(title: "Error", description: "User ID not found", image: nil))

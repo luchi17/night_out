@@ -328,15 +328,31 @@ struct AccountDatasourceImpl: AccountDatasource {
                 promise(.success("Error finding user uid"))
                 return
             }
-            let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: uid)
-            ref.removeValue { error, _ in
-                if let error = error {
-                    promise(.success(error.localizedDescription))
-                    
-                } else {
-                    promise(.success(nil))
+            if FirebaseServiceImpl.shared.getImUser() {
+                let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: uid)
+                
+                ref.removeValue { error, _ in
+                    if let error = error {
+                        promise(.success(error.localizedDescription))
+                        
+                    } else {
+                        promise(.success(nil))
+                    }
+                }
+            } else {
+                let ref = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: uid)
+                
+                ref.removeValue { error, _ in
+                    if let error = error {
+                        promise(.success(error.localizedDescription))
+                        
+                    } else {
+                        promise(.success(nil))
+                    }
                 }
             }
+           
+           
         }
         .eraseToAnyPublisher()
     }

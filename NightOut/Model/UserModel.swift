@@ -11,8 +11,28 @@ struct UserModel: Codable {
     var fcm_token: String?
     var attendingClub: String?
     var misLigas: [String: Bool]?
+    var profile: String?
+    var Liked: [String: String]?
     
-    init(uid: String, fullname: String, username: String, email: String, gender: String? = nil, image: String? = nil, fcm_token: String? = nil, attendingClub: String? = nil, misLigas: [String : Bool]? = nil) {
+    var genderType: Gender? {
+        if gender == "Male" {
+            return .male
+        } else if gender == "Female" {
+            return .female
+        } else {
+            return nil
+        }
+    }
+    
+    var profileType: ProfileType {
+        if profile == "private" {
+            return .privateProfile
+        } else {
+            return .publicProfile
+        }
+    }
+    
+    init(uid: String, fullname: String, username: String, email: String, gender: String? = nil, image: String? = nil, fcm_token: String? = nil, attendingClub: String? = nil, misLigas: [String : Bool]? = nil, profile: String? = nil, Liked: [String: String]? = nil) {
         self.uid = uid
         self.fullname = fullname
         self.username = username
@@ -22,6 +42,8 @@ struct UserModel: Codable {
         self.fcm_token = fcm_token
         self.attendingClub = attendingClub
         self.misLigas = misLigas
+        self.profile = profile
+        self.Liked = Liked
     }
 }
 
@@ -32,9 +54,23 @@ enum Gender {
     var title: String {
         switch self {
         case .male:
+            return "Mujer"
+        case .female:
+            return "Hombre"
+        }
+    }
+    
+    var firebaseTitle: String {
+        switch self {
+        case .male:
             return "Male"
         case .female:
             return "Female"
         }
     }
+}
+
+enum ProfileType {
+    case privateProfile
+    case publicProfile
 }

@@ -55,6 +55,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func searchLocation(searchQuery: String) {
+        self.locations = []
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchQuery
 

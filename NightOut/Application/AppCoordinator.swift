@@ -46,7 +46,8 @@ final class AppCoordinator: ObservableObject {
             showPostUserProfileView: showPostUserProfileView,
             onShowPostComments: showPostComments,
             showNotificationsView: showNotificationsView,
-            showProfile: showProfile(model:)
+            showProfile: showProfile(model:),
+            openMessages: openMessages
         )
         self.push(tabBarCoordinator)
     }
@@ -54,6 +55,16 @@ final class AppCoordinator: ObservableObject {
     private func showNotificationsView() {
         let notificationsView = NotificationsCoordinator(actions: makeNotificationsActions())
         self.push(notificationsView)
+    }
+    
+    private func openMessages() {
+        let messagesView = MessagesCoordinator(actions: makeMessagesActions())
+        self.push(messagesView)
+    }
+    
+    private func openChat(chat: Chat) {
+        let messagesView = ChatCoordinator(actions: .init(goBack: self.pop), chat: chat)
+        self.push(messagesView)
     }
     
     private func showPostUserProfileView(info: UserPostProfileInfo) {
@@ -142,6 +153,13 @@ private extension AppCoordinator {
         return .init(
             goToProfile: showProfile(model:),
             goToPost: showPostDetail
+        )
+    }
+    
+    func makeMessagesActions() -> MessagesPresenterImpl.Actions {
+        return .init(
+            goToChat: openChat,
+            goBack: self.pop
         )
     }
 }

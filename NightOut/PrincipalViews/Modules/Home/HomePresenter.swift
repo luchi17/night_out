@@ -18,6 +18,7 @@ enum HomeSelectedTab {
 
 final class HomeViewModel: ObservableObject {
     @Published var selectedTab: HomeSelectedTab = .feed
+    @Published var profileImageUrl: String?
 }
 
 protocol HomePresenter {
@@ -33,10 +34,12 @@ final class HomePresenterImpl: HomePresenter {
     
     struct Actions {
         let onOpenNotifications: VoidClosure
+        let openMessages: VoidClosure
     }
     
     struct ViewInputs {
         let openNotifications: AnyPublisher<Void, Never>
+        let openMessages: AnyPublisher<Void, Never>
     }
     
     var viewModel: HomeViewModel
@@ -53,6 +56,13 @@ final class HomePresenterImpl: HomePresenter {
         self.useCases = useCases
         
         viewModel = HomeViewModel()
+        
+        let imUser = FirebaseServiceImpl.shared.getImUser()
+        if imUser {
+            viewModel.profileImageUrl =  UserDefaults.getUserModel()?.image
+        } else {
+            viewModel.profileImageUrl =  UserDefaults.getCompanyUserModel()?.imageUrl
+        }
     }
     
     func transform(input: HomePresenterImpl.ViewInputs){
@@ -61,6 +71,14 @@ final class HomePresenterImpl: HomePresenter {
             .withUnretained(self)
             .sink { presenter in
                 self.actions.onOpenNotifications()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openMessages
+            .withUnretained(self)
+            .sink { presenter in
+                self.actions.openMessages()
             }
             .store(in: &cancellables)
             

@@ -63,6 +63,14 @@ final class FirebaseServiceImpl: ObservableObject {
     func getTerms() -> DatabaseReference {
         return Database.database().reference().child("Terms_Conditions")
     }
+    
+    func getLikedUsers(fromUid: String, toUid: String) -> DatabaseReference {
+        return Database.database().reference().child("Users/\(fromUid)/Liked/\(toUid)")
+    }
+    
+    func getChats(userUid: String, likedUserUid: String) -> DatabaseReference {
+        return Database.database().reference().child("chats/\(userUid)/\(likedUserUid)")
+    }
    
     func getCompanyInDatabaseFrom(uid: String) -> DatabaseReference {
         return getCompanies().child(uid)
@@ -86,7 +94,7 @@ final class FirebaseServiceImpl: ObservableObject {
     }
     
     func getImUser() -> Bool {
-        return UserDefaults.getImUser() ?? false
+        return UserDefaults.getUserModel() != nil
     }
 }
 

@@ -38,7 +38,7 @@ enum LocationSelectedTag {
         case .semiInformal:
             return "Semi-informal"
         case .none:
-            return "SELECT TAG"
+            return "Secciona Vestimenta"
         }
     }
 }
@@ -56,6 +56,7 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var locationString = ""
     @Published var loading: Bool = false
     @Published var toast: ToastType?
+    @Published var selectedImage: UIImage?
     
     var imageUrl: String?
     
@@ -176,14 +177,14 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                 }
        
                 let model = CompanyModel(
-                    email: self.viewModel.email.lowercased(),
-                    endTime: self.viewModel.endTime,
-                    selectedTag: self.viewModel.selectedTag == .none ? "Etiqueta" : self.viewModel.selectedTag.title,
-                    fullname: self.viewModel.fullName,
-                    username: self.viewModel.userName.lowercased(),
-                    imageUrl: self.viewModel.imageUrl,
-                    location: self.viewModel.locationString,
-                    startTime: self.viewModel.startTime,
+                    email: presenter.viewModel.email.lowercased(),
+                    endTime: presenter.viewModel.endTime,
+                    selectedTag: presenter.viewModel.selectedTag == .none ? "Etiqueta" : presenter.viewModel.selectedTag.title,
+                    fullname: presenter.viewModel.fullName,
+                    username: presenter.viewModel.userName.lowercased(),
+                    imageUrl: presenter.viewModel.imageUrl,
+                    location: presenter.viewModel.locationString,
+                    startTime: presenter.viewModel.startTime,
                     uid: uid
                 )
                 return presenter.useCases.saveCompanyUseCase.execute(model: model)
@@ -206,8 +207,8 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     .eraseToAnyPublisher()
             })
             .sink(receiveValue: { [weak self] data in
-                if data.0, let _ = data.1 {
-                    UserDefaults.setImUser(false)
+                if data.0, let model = data.1 {
+                    UserDefaults.setCompanyUserModel(model)
                     self?.actions.goToTabView()
                 } else {
                     self?.viewModel.toast = .custom(.init(title: "Error", description: "Could not save company", image: nil))
