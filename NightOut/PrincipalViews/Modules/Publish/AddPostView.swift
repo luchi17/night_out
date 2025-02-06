@@ -9,7 +9,7 @@ struct AddPostView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let uploadPostPublisher = PassthroughSubject<Void, Never>()
     
-    @State private var showingImagePicker = false
+    @State private var showingIconsView = false
     @State private var showingLocationPicker = false
     @State private var isCameraActive = true
     @State private var hideButtons = true
@@ -57,7 +57,23 @@ struct AddPostView: View {
     
     var capturedImageButtonsView: some View {
         VStack {
+            HStack {
+                Spacer()
+                
+                locationView
+                
+                Spacer()
+                
+                iconsView
+                
+                Spacer()
+            }
+            .safeAreaPadding(.top)
+            .padding(.top, 50)
+            
             Spacer()
+            
+            descriptionTextField
             
             ZStack(alignment: .bottomLeading) {
                 HStack {
@@ -67,12 +83,13 @@ struct AddPostView: View {
                     
                     Spacer()
                 }
+                .padding(.bottom, 20)
                 
                 cancelPhotoView
                     .padding(.leading, 20)
+                    .padding(.bottom, 30)
             }
         }
-        .padding(.bottom, 30)
     }
     
     var notCapturedImageButtonsView: some View {
@@ -127,26 +144,67 @@ struct AddPostView: View {
         Button(action: {
             viewModel.capturedImage = nil
         }) {
-            Image(systemName: "xmark.circle.fill")
+            Image(systemName: "xmark")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 50, height: 50)
+                .frame(width: 20, height: 20)
+                .foregroundColor(.white)
+                .padding(.all, 10)
+        }
+        .background(Color.black.opacity(0.5))
+        .cornerRadius(10)
+        .padding(.leading, 20)
+    }
+    
+    var sendPhotoView: some View {
+        Button(action: {
+            uploadPostPublisher.send()
+        }) {
+            Image(systemName: "paperplane.fill")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 40, height: 40)
                 .foregroundColor(.white)
                 .padding()
         }
     }
     
-    var sendPhotoView: some View {
+    var locationView: some View {
         Button(action: {
-           // uploadPostPublisher.send()
+            showingLocationPicker.toggle()
         }) {
-            Image(systemName: "paperplane.fill")
+            Text("📍")
+                .font(.subheadline) // Tamaño del emoji
+                .padding()
+                .background(Color.black.opacity(0.5))
+                .frame(width: 40, height: 40)
+                .clipShape(Rectangle())
+                .cornerRadius(10)
+        }
+    }
+    
+    var iconsView: some View {
+        Button(action: {
+            showingIconsView.toggle()
+        }) {
+            Image("trofeo")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.white)
+                .frame(width: 30, height: 30)
                 .padding()
+                .foregroundColor(.white)
+                .background(Color.black.opacity(0.5))
+                .frame(width: 40, height: 40)
+                .cornerRadius(10)
         }
+    }
+    
+    var descriptionTextField: some View {
+        TextField("Añadir descripción...", text: $viewModel.description)
+            .padding(10)
+            .foregroundColor(.white) // Color del texto
+            .accentColor(.white)
+            .disableAutocorrection(true) // Deshabilitar autocorrección si es necesario
     }
 }
 
@@ -161,26 +219,6 @@ private extension AddPostView {
 }
 
 
-//VStack {
-//
-//    if viewModel.image == nil {
-//        Button("Capture Photo") {
-//            showingImagePicker.toggle()
-//        }
-//    }
-//    
-//    TextField("Description", text: $viewModel.description)
-//        .padding()
-//        .textFieldStyle(RoundedBorderTextFieldStyle())
-//    
-//    Button("Choose Location") {
-//        showingLocationPicker.toggle()
-//    }
-//    
-//    Button("Post") {
-//        uploadPostPublisher.send()
-//    }
-//}
 //.sheet(isPresented: $showingLocationPicker) {
 ////            LocationPicker(selectedLocation: $viewModel.location)
 //}
@@ -194,7 +232,7 @@ private extension AddPostView {
 //    private var currentDevice: AVCaptureDevice?
 //    private var isUsingFrontCamera = false
 //    private var captureCompletion: ((UIImage?) -> Void)?
-//    
+//
 //    @Published var isFlashOn = false // 🔦 Estado del flash
 //
 //    override init() {

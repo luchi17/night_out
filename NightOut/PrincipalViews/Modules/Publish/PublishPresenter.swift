@@ -57,7 +57,7 @@ final class PublishPresenterImpl: PublishPresenter {
             .uploadPost
             .withUnretained(self)
             .sink { presenter, _ in
-
+//                presenter.uploadImage()
             }
             .store(in: &cancellables)
     }
