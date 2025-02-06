@@ -7,7 +7,7 @@ import FirebaseFirestore
 
 
 final class PublishViewModel: ObservableObject {
-    @Published var image: UIImage?
+    @Published var capturedImage: UIImage?
     @Published var imageData: Data?
     @Published var description: String = ""
     @Published var location: String?
@@ -57,13 +57,13 @@ final class PublishPresenterImpl: PublishPresenter {
             .uploadPost
             .withUnretained(self)
             .sink { presenter, _ in
-//                presenter.uploadPost()
+
             }
             .store(in: &cancellables)
     }
     
     func uploadImage() async {
-        guard let image = viewModel.image else {
+        guard let image = viewModel.capturedImage else {
             print("Please select an image first.")
             return
         }
@@ -99,15 +99,19 @@ final class PublishPresenterImpl: PublishPresenter {
             guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
             let postId = postsRef.document().documentID
             
-            var postData: [String: Any] = [
-                "postid": postId,
-                "description": viewModel.description.lowercased(),
-                "publisher": userId,
-                "postimage": imageUrl
-            ]
+            let postModel = PostUserModel(
+                description: viewModel.description.lowercased(),
+                postID: postId,
+                postImage: imageUrl,
+                publisherId: userId,
+                location: viewModel.location ?? "",
+                isFromUser: FirebaseServiceImpl.shared.getImUser(),
+                date: Date().toIsoString()
+            )
             
-            if let location = viewModel.location {
-                postData["location"] = location
+            guard let postData = structToDictionary(postModel) else {
+                print("Error transforming data to json")
+                return
             }
             
             try await postsRef.document(postId).setData(postData)

@@ -95,6 +95,17 @@ class TabViewCoordinator: ObservableObject, Hashable {
         return AnyView(coordinator.build())
     }
     
+    func makeSearchFlow() -> AnyView {
+        let coordinator = SearchCoordinator(actions: searchActions())
+        return AnyView(coordinator.build())
+    }
+    
+    func makePublishFlow() -> AnyView {
+        let coordinator = PublishCoordinator(actions: .init())
+        return AnyView(coordinator.build())
+        
+    }
+    
     #warning("REDO")
     func makeMapsFlow() -> AnyView {
         return AnyView(EmptyView())
@@ -106,18 +117,6 @@ class TabViewCoordinator: ObservableObject, Hashable {
         }))
         return AnyView(coordinator.build())
     }
-    
-    func makePublishFlow() -> AnyView {
-        let coordinator = PublishCoordinator(actions: .init())
-        return AnyView(coordinator.build())
-        
-    }
-    
-    func makeSearchFlow() -> AnyView {
-        let coordinator = SearchCoordinator(actions: searchActions())
-        return AnyView(coordinator.build())
-    }
-    
 }
 
 private extension TabViewCoordinator {

@@ -15,6 +15,9 @@ struct AddPostView: View {
     @State private var hideButtons = true
     
     @ObservedObject var viewModel: PublishViewModel
+    
+    @StateObject var cameraModel = CameraViewModel()
+    
     let presenter: PublishPresenter
     
     init(
@@ -26,48 +29,69 @@ struct AddPostView: View {
     }
     
     var body: some View {
-        VStack {
-//            if let image = viewModel.image {
-//                Image(uiImage: image)
-//                    .resizable()
-//                    .scaledToFit()
-//                    .frame(width: 250, height: 250)
-//            } else {
-//                Button("Capture Photo") {
-//                    showingImagePicker.toggle()
-//                }
-//            }
+        ZStack {
+            CameraPreview(session: cameraModel.session)
+                .ignoresSafeArea()
+                .opacity(viewModel.capturedImage == nil ? 1 : 0)
             
-            if viewModel.image == nil {
-                Button("Capture Photo") {
-                    showingImagePicker.toggle()
+            if let image = viewModel.capturedImage {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .ignoresSafeArea()
+                
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            viewModel.capturedImage = nil
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.largeTitle)
+                                .foregroundColor(.white)
+                                .padding()
+                        }
+                    }
+                    Spacer()
                 }
             }
             
-            TextField("Description", text: $viewModel.description)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            Button("Choose Location") {
-                showingLocationPicker.toggle()
+            VStack {
+                Spacer()
+                HStack {
+                    Button(action: {
+                        cameraModel.switchCamera()
+                    }) {
+                        Image(systemName: "arrow.triangle.2.circlepath.camera")
+                            .font(.largeTitle)
+                            .foregroundColor(.white)
+                            .padding()
+                    }
+                    .background(Color.black.opacity(0.5))
+                    .clipShape(Circle())
+                    .padding(.leading, 20)
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        cameraModel.capturePhoto { image in
+                            viewModel.capturedImage = image
+                        }
+                    }) {
+                        Circle()
+                            .stroke(Color.white, lineWidth: 4)
+                            .frame(width: 70, height: 70)
+                    }
+                    .padding(.bottom, 20)
+                }
             }
-            
-            Button("Post") {
-                uploadPostPublisher.send()
-            }
         }
-        
-        .sheet(isPresented: $showingImagePicker) {
-//            ImagePickerView(
-//                imageData: $viewModel.imageData,
-//                selectedImage: $viewModel.image
-//            )
+        .onAppear {
+            cameraModel.startSession()
         }
-        .sheet(isPresented: $showingLocationPicker) {
-//            LocationPicker(selectedLocation: $viewModel.location)
+        .onDisappear {
+            cameraModel.stopSession()
         }
-        
-        
     }
 }
 
@@ -81,64 +105,27 @@ private extension AddPostView {
     }
 }
 
-//import SwiftUI
-//import UIKit
+
+//VStack {
 //
-//// ImagePicker como un UIViewControllerRepresentable
-//struct ImagePicker: UIViewControllerRepresentable {
-//    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-//        var parent: ImagePicker
-//
-//        init(parent: ImagePicker) {
-//            self.parent = parent
-//        }
-//
-//        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-//            if let selectedImage = info[.originalImage] as? UIImage {
-//                parent.selectedImage = selectedImage
-//            }
-//            parent.isImagePickerPresented = false
-//        }
-//
-//        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-//            parent.isImagePickerPresented = false
+//    if viewModel.image == nil {
+//        Button("Capture Photo") {
+//            showingImagePicker.toggle()
 //        }
 //    }
-//
-//    @Binding var selectedImage: UIImage?
-//    @Binding var isImagePickerPresented: Bool
-//
-//    func makeCoordinator() -> Coordinator {
-//        return Coordinator(parent: self)
+//    
+//    TextField("Description", text: $viewModel.description)
+//        .padding()
+//        .textFieldStyle(RoundedBorderTextFieldStyle())
+//    
+//    Button("Choose Location") {
+//        showingLocationPicker.toggle()
 //    }
-//
-//    func makeUIViewController(context: Context) -> UIImagePickerController {
-//        let picker = UIImagePickerController()
-//        picker.delegate = context.coordinator
-//        picker.sourceType = .photoLibrary
-//        return picker
+//    
+//    Button("Post") {
+//        uploadPostPublisher.send()
 //    }
-//
-//    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 //}
-//
-//struct ContentView: View {
-//    @State private var selectedImage: UIImage?
-//    @State private var isImagePickerPresented = false
-//
-//    var body: some View {
-//        VStack {
-//            if let selectedImage = selectedImage {
-//                Image(uiImage: selectedImage)
-//                    .resizable()
-//                    .scaledToFit()
-//                    .frame(width: 200, height: 200)
-//            }
-//
-//            Button("Seleccionar Imagen") {
-//                isImagePickerPresented.toggle()
-//            }
-//            .imagePicker(isPresented: $isImagePickerPresented, selectedImage: $selectedImage)
-//        }
-//    }
+//.sheet(isPresented: $showingLocationPicker) {
+////            LocationPicker(selectedLocation: $viewModel.location)
 //}
