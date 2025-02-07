@@ -11,6 +11,9 @@ final class PublishViewModel: ObservableObject {
     @Published var imageData: Data?
     @Published var description: String = ""
     @Published var location: String?
+    @Published var locations: [AddPostLocationModel] = []
+    
+    @Published var locationManager: LocationManager = LocationManager.shared
 }
 
 protocol PublishPresenter {
@@ -30,6 +33,8 @@ final class PublishPresenterImpl: PublishPresenter {
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let uploadPost: AnyPublisher<Void, Never>
+        let getClubs: AnyPublisher<Void, Never>
+        let getMyLocation: AnyPublisher<Void, Never>
     }
     
     var viewModel: PublishViewModel
@@ -50,6 +55,7 @@ final class PublishPresenterImpl: PublishPresenter {
         self.useCases = useCases
         
         viewModel = PublishViewModel()
+        
     }
     
     func transform(input: PublishPresenterImpl.ViewInputs) {
@@ -57,7 +63,31 @@ final class PublishPresenterImpl: PublishPresenter {
             .uploadPost
             .withUnretained(self)
             .sink { presenter, _ in
+                
 //                presenter.uploadImage()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .getClubs
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.viewModel.locations = UserDefaults.getCompanies()?.users.map({ data in
+                    AddPostLocationModel(
+                        name: data.value.username ?? "Desconocido",
+                        uid: data.value.uid,
+                        location: data.value.location ?? ""
+                    )
+                }) ?? []
+            }
+            .store(in: &cancellables)
+        
+        input
+            .getMyLocation
+            .withUnretained(self)
+            .sink { presenter, _ in
+                let userLocation = presenter.viewModel.locationManager.userLocation
+                presenter.viewModel.location = userLocation.location.latitude.description + "," + userLocation.location.longitude.description
             }
             .store(in: &cancellables)
     }

@@ -8,9 +8,14 @@ struct AddPostView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let uploadPostPublisher = PassthroughSubject<Void, Never>()
+    private let getClubsPublisher = PassthroughSubject<Void, Never>()
+    private let getMyLocationPublisher = PassthroughSubject<Void, Never>()
     
     @State private var showingIconsView = false
-    @State private var showingLocationPicker = false
+    @State private var showingLocationAlert = false
+    
+    @State private var showingClubsPicker = false
+    @State private var showingMyLocation = false
     
     @ObservedObject private var keyboardObserver = KeyboardObserver()
     
@@ -47,6 +52,33 @@ struct AddPostView: View {
             }
         }
         .ignoresSafeArea()
+        .sheet(isPresented: $showingClubsPicker) {
+            AddPostClubsList(
+                locations: $viewModel.locations) { companyModel in
+                    viewModel.location = companyModel.location
+                    showingClubsPicker.toggle()
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showingLocationAlert) {
+            ClubSelectionAlert(onTypeSelected: { type in
+                switch type {
+                case .clubs:
+                    getClubsPublisher.send()
+                    showingClubsPicker.toggle()
+                    showingLocationAlert.toggle()
+                case .myLocation:
+                    getMyLocationPublisher.send()
+                    showingLocationAlert.toggle()
+                }
+            })
+            .presentationDetents([.fraction(0.2)])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showingIconsView) {
+            //
+        }
         .onAppear {
             cameraModel.startSession()
         }
@@ -147,6 +179,8 @@ struct AddPostView: View {
     var cancelPhotoView: some View {
         Button(action: {
             viewModel.capturedImage = nil
+            viewModel.description = ""
+            viewModel.location = ""
         }) {
             Image(systemName: "xmark")
                 .resizable()
@@ -175,7 +209,7 @@ struct AddPostView: View {
     
     var locationView: some View {
         Button(action: {
-            showingLocationPicker.toggle()
+            showingLocationAlert.toggle()
         }) {
             Text("📍")
                 .font(.subheadline) // Tamaño del emoji
@@ -217,7 +251,9 @@ private extension AddPostView {
     func bindViewModel() {
         let input = PublishPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            uploadPost: uploadPostPublisher.eraseToAnyPublisher()
+            uploadPost: uploadPostPublisher.eraseToAnyPublisher(),
+            getClubs: getClubsPublisher.eraseToAnyPublisher(),
+            getMyLocation: getMyLocationPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
