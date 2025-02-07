@@ -86,7 +86,7 @@ struct LocationsMapView: View {
         .sheet(isPresented: $showingList, onDismiss: {
             showingList = false
         }) {
-            SheetView(
+            LocationClubsSheetView(
                 locations: $viewModel.currentShowingLocationList,
                 selectedLocation: locationInListSelectedPublisher.send
             )
@@ -161,7 +161,7 @@ private extension LocationsMapView {
 }
 
 
-struct SheetView: View {
+struct LocationClubsSheetView: View {
     @Binding var locations: [LocationModel]
     var selectedLocation: InputClosure<LocationModel>
     

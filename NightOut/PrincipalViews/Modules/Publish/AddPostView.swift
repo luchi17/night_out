@@ -264,10 +264,6 @@ private extension AddPostView {
 }
 
 
-//.sheet(isPresented: $showingLocationPicker) {
-////            LocationPicker(selectedLocation: $viewModel.location)
-//}
-
 
 //flash:
 //
