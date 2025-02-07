@@ -79,6 +79,18 @@ struct AddPostView: View {
         .sheet(isPresented: $showingIconsView) {
             //
         }
+        .alert(isPresented: $viewModel.locationManager.locationPermissionDenied) {
+            Alert(
+                title: Text("Permisos de Localización Denegados"),
+                message: Text("Por favor, habilita los permisos de localización en los ajustes para poder usar tu ubicación."),
+                primaryButton: .default(Text("Abrir Ajustes"), action: {
+                    if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(appSettings)
+                    }
+                }),
+                secondaryButton: .cancel()
+            )
+        }
         .onAppear {
             cameraModel.startSession()
         }
