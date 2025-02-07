@@ -110,6 +110,8 @@ struct AddPostView: View {
             Spacer()
             
             descriptionTextField
+                .padding(.bottom, keyboardObserver.keyboardHeight == 0 ? 35 : keyboardObserver.keyboardHeight)
+                .animation(.easeOut(duration: 0.2), value: keyboardObserver.keyboardHeight)
             
             ZStack(alignment: .bottomLeading) {
                 HStack {
@@ -242,8 +244,6 @@ struct AddPostView: View {
             .padding(10)
             .foregroundColor(.white) // Color del texto
             .accentColor(.white)
-            .offset(y: -keyboardObserver.keyboardHeight)
-            .animation(.easeOut(duration: 0.3))
     }
 }
 
