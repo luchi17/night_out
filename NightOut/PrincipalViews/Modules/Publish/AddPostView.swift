@@ -12,6 +12,9 @@ struct AddPostView: View {
     private let getMyLocationPublisher = PassthroughSubject<Void, Never>()
     
     @State private var showingIconsView = false
+    @State private var emojiPosition: CGSize = .zero
+    @State private var initialPosition: CGSize = .zero
+    
     @State private var showingLocationAlert = false
     
     @State private var showingClubsPicker = false
@@ -48,6 +51,26 @@ struct AddPostView: View {
                         .frame(width: geometry.size.width, height: geometry.size.height)
                     
                     capturedImageButtonsView
+                    
+                    if let emoji = viewModel.emojiSelected {
+                        Image(emoji)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 120, height: 120)
+                            .position(x: initialPosition.width + emojiPosition.width + 100,
+                                      y: initialPosition.height + emojiPosition.height + 200)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { gesture in
+                                        emojiPosition = gesture.translation
+                                    }
+                                    .onEnded { _ in
+                                        initialPosition.width += emojiPosition.width
+                                        initialPosition.height += emojiPosition.height
+                                        emojiPosition = .zero
+                                    }
+                            )
+                    }
                 }
             }
         }
@@ -77,7 +100,14 @@ struct AddPostView: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingIconsView) {
-            //
+            IconsView { emoji in
+                viewModel.emojiSelected = emoji
+                initialPosition = .zero // Resetea la posición
+                emojiPosition = .zero // Resetea la posición
+                showingIconsView.toggle()
+            }
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.visible)
         }
         .alert(isPresented: $viewModel.locationManager.locationPermissionDenied) {
             Alert(
@@ -195,6 +225,7 @@ struct AddPostView: View {
             viewModel.capturedImage = nil
             viewModel.description = ""
             viewModel.location = ""
+            viewModel.emojiSelected = nil
         }) {
             Image(systemName: "xmark")
                 .resizable()

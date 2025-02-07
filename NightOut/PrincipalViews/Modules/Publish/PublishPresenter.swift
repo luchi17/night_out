@@ -13,6 +13,8 @@ final class PublishViewModel: ObservableObject {
     @Published var location: String?
     @Published var locations: [AddPostLocationModel] = []
     
+    @Published var emojiSelected: String?
+    
     @Published var locationManager: LocationManager = LocationManager.shared
 }
 
