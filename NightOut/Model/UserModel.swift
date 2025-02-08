@@ -12,7 +12,7 @@ struct UserModel: Codable {
     var attendingClub: String?
     var misLigas: [String: Bool]?
     var profile: String?
-    var Liked: [String: String]?
+    var Liked: [String: Bool]?
     var social: String?
     
     var genderType: Gender? {
@@ -33,7 +33,7 @@ struct UserModel: Codable {
         }
     }
     
-    init(uid: String, fullname: String, username: String, email: String, gender: String? = nil, image: String? = nil, fcm_token: String? = nil, attendingClub: String? = nil, misLigas: [String : Bool]? = nil, profile: String? = nil, Liked: [String: String]? = nil, social: String? = nil) {
+    init(uid: String, fullname: String, username: String, email: String, gender: String? = nil, image: String? = nil, fcm_token: String? = nil, attendingClub: String? = nil, misLigas: [String : Bool]? = nil, profile: String? = nil, Liked: [String: Bool]? = nil, social: String? = nil) {
         self.uid = uid
         self.fullname = fullname
         self.username = username
