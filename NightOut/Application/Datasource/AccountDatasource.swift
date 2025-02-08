@@ -252,8 +252,7 @@ struct AccountDatasourceImpl: AccountDatasource {
         }
         return publisher.eraseToAnyPublisher()
     }
-    
-#warning("TODO: firebase storage Object profile_pictures/PgUHF5pTC0SytVrqlwOfdhS91Di1.jpg does not exist.")
+
     func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>  {
         let publisher = PassthroughSubject<String?, Never>()
         

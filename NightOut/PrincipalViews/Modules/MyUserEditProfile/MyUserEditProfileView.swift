@@ -257,7 +257,7 @@ struct MyUserEditProfileView: View {
     
     var participateView: some View {
         HStack {
-            Text("Perfil Privado")
+            Text("Participar en Social NightOut")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.white)
             Spacer()
