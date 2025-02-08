@@ -107,7 +107,7 @@ struct PostDatasourceImpl: PostDatasource {
                 return
             }
             
-            let ref = FirebaseServiceImpl.shared.getComments().child(postId)
+            let ref = FirebaseServiceImpl.shared.getComments().child(postId).queryOrdered(byChild: "timestamp")
             
             ref.getData { error, snapshot in
                 guard error == nil else {
