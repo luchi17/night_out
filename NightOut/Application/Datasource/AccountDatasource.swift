@@ -185,6 +185,10 @@ struct AccountDatasourceImpl: AccountDatasource {
                 
                 do {
                     if let userModel = try snapshot?.data(as: UserModel.self) {
+                        
+                        if uid == FirebaseServiceImpl.shared.getCurrentUserUid() {
+                            _ = self.saveUser(model: userModel)
+                        }
                         promise(.success(userModel))
                     } else {
                         promise(.success(nil))
@@ -213,7 +217,9 @@ struct AccountDatasourceImpl: AccountDatasource {
                 do {
                     if let companyModel = try snapshot?.data(as: CompanyModel.self) {
                         // Asumiendo que deseas crear un PostModel a partir de CompanyModel
-                        
+                        if uid == FirebaseServiceImpl.shared.getCurrentUserUid() {
+                            _ = self.saveCompany(model: companyModel)
+                        }
                         promise(.success(companyModel))
                     } else {
                         promise(.success(nil))  // Envía `nil` si no se encuentra el modelo
