@@ -21,12 +21,13 @@ final class MyUserEditProfileViewModel: ObservableObject {
     @Published var showProgress: Bool = false
     
     
-    init(profileImageUrl: String?, username: String?, fullname: String?, gender: Gender?, profile: ProfileType?) {
+    init(profileImageUrl: String?, username: String?, fullname: String?, gender: Gender?, profile: ProfileType?, participate: String? = nil) {
         self.profileImageUrl = profileImageUrl
         self.username = username ?? "Username no disponible"
         self.fullname = fullname ?? "Fullname no disponible"
         self.genderType = gender
         self.isPrivate = profile == .privateProfile
+        self.participate = participate == "participando"
     }
     
     init() {
@@ -95,7 +96,8 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                         username: presenter.userModel?.username,
                         fullname: presenter.userModel?.fullname,
                         gender: presenter.userModel?.genderType,
-                        profile: presenter.userModel?.profileType ?? .publicProfile
+                        profile: presenter.userModel?.profileType ?? .publicProfile,
+                        participate: presenter.userModel?.social
                     )
                 } else {
                     presenter.companyModel = UserDefaults.getCompanyUserModel()
@@ -115,7 +117,7 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
             .withUnretained(self)
             .flatMap { presenter, _ -> AnyPublisher<String?, Never> in
                 guard let imageData = presenter.viewModel.imageData else {
-                    return Just(nil)
+                    return Just("")
                         .eraseToAnyPublisher()
                 }
                 return presenter.useCases.saveCompanyUseCase.executeGetImageUrl(imageData: imageData)
