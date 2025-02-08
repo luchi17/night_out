@@ -8,7 +8,7 @@ final class MyUserEditProfileViewModel: ObservableObject {
     @Published var fullname: String = ""
     @Published var genderType: Gender?
     @Published var isPrivate: Bool = false
-    @Published var participate: Bool = false // TODO
+    @Published var participate: Bool = false
     @Published var imageData: Data? = nil
     @Published var selectedImage: UIImage?
     
@@ -154,7 +154,8 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                         attendingClub: presenter.userModel?.attendingClub,
                         misLigas: presenter.userModel?.misLigas,
                         profile: presenter.viewModel.isPrivate ? "private" : "public",
-                        Liked: presenter.userModel?.Liked
+                        Liked: presenter.userModel?.Liked,
+                        social: presenter.viewModel.participate ? "participando" : ""
                     )
                     return presenter.useCases.saveUserUseCase.execute(model: model)
                         .map({ _ in imageUrl })
