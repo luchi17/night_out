@@ -96,7 +96,6 @@ final class SearchPresenterImpl: SearchPresenter {
             
             for child in snapshot.children {
                 if let childSnapshot = child as? DataSnapshot {
-                    print(childSnapshot)
                     if let userModel = try? childSnapshot.data(as: UserModel.self) {
                         
                         let profile = ProfileModel(
