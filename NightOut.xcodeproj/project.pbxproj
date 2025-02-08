@@ -13,7 +13,7 @@
 		1839A6562CEBAE330062ED82 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 1839A6552CEBAE330062ED82 /* Kingfisher */; };
 		187F203E2CD939F7005469B5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 187F203D2CD939F7005469B5 /* FirebaseFirestore */; };
 		187F20402CD93A04005469B5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 187F203F2CD93A04005469B5 /* FirebaseStorage */; };
-		18E1755E2CB6772800E3CA07 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 18E1755D2CB6772700E3CA07 /* GoogleService-Info.plist */; };
+		188167DA2D57808F005E7785 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 188167D92D57808F005E7785 /* GoogleService-Info.plist */; };
 		18E175F22CB6893E00E3CA07 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F12CB6893E00E3CA07 /* FirebaseDatabase */; };
 		18E175F72CB6991A00E3CA07 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F62CB6991A00E3CA07 /* GoogleSignIn */; };
 		18E175F92CB6991A00E3CA07 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F82CB6991A00E3CA07 /* GoogleSignInSwift */; };
@@ -37,10 +37,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		188167D92D57808F005E7785 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		18AE85FA2CA6A900007448F3 /* NightOut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NightOut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AE860A2CA6A903007448F3 /* NightOutTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AE86142CA6A903007448F3 /* NightOutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		18E1755D2CB6772700E3CA07 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -142,7 +142,7 @@
 		18AE85F12CA6A900007448F3 = {
 			isa = PBXGroup;
 			children = (
-				18E1755D2CB6772700E3CA07 /* GoogleService-Info.plist */,
+				188167D92D57808F005E7785 /* GoogleService-Info.plist */,
 				18AE85FC2CA6A900007448F3 /* NightOut */,
 				18AE86272CA6AC23007448F3 /* Tests */,
 				181656E32CB57BC1005063A9 /* Frameworks */,
@@ -289,7 +289,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				18E1755E2CB6772800E3CA07 /* GoogleService-Info.plist in Resources */,
+				188167DA2D57808F005E7785 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -3,21 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf.apps.googleusercontent.com</string>
+	<string>16597384086-uf4a5k28qlrdp53n2st8uv8rciqgaog0.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf</string>
+	<string>com.googleusercontent.apps.16597384086-uf4a5k28qlrdp53n2st8uv8rciqgaog0</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>16597384086-o1o5e4u9a6usmo8f10vplqernd4gjsdd.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCBik0-vmm-pZvAG-fwClLClbZVHVfLpXg</string>
+	<string>AIzaSyANkCxAWJFYaNbPmgzH3B9KHCySfaQ1sls</string>
 	<key>GCM_SENDER_ID</key>
-	<string>714999336065</string>
+	<string>16597384086</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.night-out.NightOut</string>
+	<string>com.nightOut.NightOut</string>
 	<key>PROJECT_ID</key>
-	<string>nighoutios-6f453</string>
+	<string>nightout-bf14a</string>
 	<key>STORAGE_BUCKET</key>
-	<string>nighoutios-6f453.appspot.com</string>
+	<string>nightout-bf14a.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +31,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:714999336065:ios:3943757b254ab33ec0d180</string>
+	<string>1:16597384086:ios:7a4fdbc6aecf71f441bbb7</string>
 	<key>DATABASE_URL</key>
-	<string>https://nighoutios-6f453-default-rtdb.europe-west1.firebasedatabase.app</string>
+	<string>https://nightout-bf14a-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>
