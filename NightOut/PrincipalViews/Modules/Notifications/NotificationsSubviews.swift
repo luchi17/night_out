@@ -12,7 +12,6 @@ struct NotificationModelForView {
     var postId: String
     let notificationId: String
     let isFromCompany: Bool
-    let date: String
 }
 
 struct FriendRequestNotificationView: View {

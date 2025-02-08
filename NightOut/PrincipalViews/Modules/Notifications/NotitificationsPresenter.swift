@@ -89,7 +89,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
             })
             .withUnretained(self)
             .sink { presenter, notifications in
-                presenter.viewModel.notifications = Utils.sortByDate(objects: notifications, dateExtractor: { $0.date }, ascending: false)
+                presenter.viewModel.notifications = notifications
             }
             .store(in: &cancellables)
         
@@ -188,8 +188,7 @@ private extension NotificationsPresenterImpl {
             userId: model.userid,
             postId: model.postid,
             notificationId: notificationId,
-            isFromCompany: true,
-            date: model.date
+            isFromCompany: true
         )
         
         return Just(modelView)
@@ -210,8 +209,7 @@ private extension NotificationsPresenterImpl {
                     userId: model.userid,
                     postId: model.postid,
                     notificationId: notificationId,
-                    isFromCompany: false,
-                    date: model.date
+                    isFromCompany: false
                 )
                 
                 return modelView
