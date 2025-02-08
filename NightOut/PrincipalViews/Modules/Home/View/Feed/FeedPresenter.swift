@@ -75,6 +75,21 @@ final class FeedPresenterImpl: FeedPresenter {
         let userPostsPublisher = input
             .viewDidLoad
             .withUnretained(self)
+            .flatMap { presenter, _ in //Get user info and save it when feed appears
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just(()).eraseToAnyPublisher()
+                }
+                if FirebaseServiceImpl.shared.getImUser() {
+                    return presenter.useCases.userDataUseCase.getUserInfo(uid: uid)
+                        .map({ _ in })
+                        .eraseToAnyPublisher()
+                } else {
+                    return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: uid)
+                        .map({ _ in })
+                        .eraseToAnyPublisher()
+                }
+            }
+            .withUnretained(self)
             .performRequest(request: { presenter, _ -> AnyPublisher<FollowModel?, Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(nil).eraseToAnyPublisher()
