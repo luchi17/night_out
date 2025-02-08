@@ -106,8 +106,10 @@ final class SearchPresenterImpl: SearchPresenter {
                             profileId: userModel.uid,
                             isCompanyProfile: false
                         )
-                        print(profile.username)
-                        users.append(profile)
+                        
+                        if profile.profileId != FirebaseServiceImpl.shared.getCurrentUserUid() {
+                            users.append(profile)
+                        }
                         
                     } else {
                         print("error")
@@ -139,8 +141,11 @@ final class SearchPresenterImpl: SearchPresenter {
                             profileId: companyModel.uid,
                             isCompanyProfile: true
                         )
-                        print(profile.username)
-                        companyUsers.append(profile)
+                        
+                        if profile.profileId != FirebaseServiceImpl.shared.getCurrentUserUid() {
+                            companyUsers.append(profile)
+                        }
+                        
                     } else {
                         print("error")
                     }
@@ -157,8 +162,5 @@ final class SearchPresenterImpl: SearchPresenter {
                 
             }
         }
-        
-     
-         
     }
 }
