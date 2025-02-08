@@ -146,7 +146,7 @@ struct CircleImage: View {
                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
                 .frame(width: 60, height: 60)
         } else {
-            Image(systemName: "profile")
+            Image("profile")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .foregroundStyle(.white)
