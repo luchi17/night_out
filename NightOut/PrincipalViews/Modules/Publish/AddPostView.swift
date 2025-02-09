@@ -10,6 +10,7 @@ struct AddPostView: View {
     private let uploadPostPublisher = PassthroughSubject<Void, Never>()
     private let getClubsPublisher = PassthroughSubject<Void, Never>()
     private let getMyLocationPublisher = PassthroughSubject<Void, Never>()
+    private let clubTappedPublisher = PassthroughSubject<AddPostLocationModel, Never>()
     
     @State private var showingIconsView = false
     @State private var emojiPosition: CGSize = .zero
@@ -77,12 +78,14 @@ struct AddPostView: View {
         .ignoresSafeArea()
         .sheet(isPresented: $showingClubsPicker) {
             AddPostClubsList(
-                locations: $viewModel.locations) { companyModel in
-                    viewModel.location = companyModel.location
+                locations: $viewModel.locations,
+                onLocationSelected: { club in
+                    clubTappedPublisher.send(club)
                     showingClubsPicker.toggle()
                 }
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
+            )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingLocationAlert) {
             ClubSelectionAlert(onTypeSelected: { type in
@@ -296,7 +299,8 @@ private extension AddPostView {
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             uploadPost: uploadPostPublisher.eraseToAnyPublisher(),
             getClubs: getClubsPublisher.eraseToAnyPublisher(),
-            getMyLocation: getMyLocationPublisher.eraseToAnyPublisher()
+            myLocationTapped: getMyLocationPublisher.eraseToAnyPublisher(),
+            clubTapped: clubTappedPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

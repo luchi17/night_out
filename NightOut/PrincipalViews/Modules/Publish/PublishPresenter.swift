@@ -29,14 +29,15 @@ final class PublishPresenterImpl: PublishPresenter {
     }
     
     struct Actions {
-        //        let goToProfile: InputClosure<ProfileModel>
+        let goToFeed: VoidClosure
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let uploadPost: AnyPublisher<Void, Never>
         let getClubs: AnyPublisher<Void, Never>
-        let getMyLocation: AnyPublisher<Void, Never>
+        let myLocationTapped: AnyPublisher<Void, Never>
+        let clubTapped: AnyPublisher<AddPostLocationModel, Never>
     }
     
     var viewModel: PublishViewModel
@@ -85,33 +86,53 @@ final class PublishPresenterImpl: PublishPresenter {
             .store(in: &cancellables)
         
         input
-            .getMyLocation
+            .myLocationTapped
             .withUnretained(self)
             .sink { presenter, _ in
                 let userLocation = presenter.viewModel.locationManager.userLocation
                 presenter.viewModel.location = userLocation.location.latitude.description + "," + userLocation.location.longitude.description
             }
             .store(in: &cancellables)
+        
+        input
+            .clubTapped
+            .withUnretained(self)
+            .sink { presenter, club in
+                presenter.viewModel.location = club.location
+                presenter.viewModel.toast = .success(.init(
+                    title: "",
+                    description: "El club seleccionado ha sido \(club.name)",
+                    image: nil
+                )
+                )
+            }
+            .store(in: &cancellables)
+        
     }
     
     func uploadImage() async {
         guard let image = viewModel.capturedImage else {
-            print("Please select an image first.")
+            viewModel.toast = .custom(.init(
+                title: "",
+                description: "Por favor, captura una imagen primero.",
+                image: nil
+            ))
             return
         }
         
         guard !viewModel.description.isEmpty else {
-            print("Please write a description")
+            viewModel.toast = .custom(.init(
+                title: "",
+                description: "Por favor, escribe una descripción",
+                image: nil
+            ))
             return
         }
         
+        
+        
         // Redirigir a la pantalla principal antes de subir la imagen
-        DispatchQueue.main.async {
-            if let window = UIApplication.shared.windows.first {
-                //                window.rootViewController = UIHostingController(rootView: MainView())
-                window.makeKeyAndVisible()
-            }
-        }
+        actions.goToFeed()
         
         do {
             // Convertir la imagen en Data
