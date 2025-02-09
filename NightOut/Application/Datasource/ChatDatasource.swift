@@ -44,7 +44,7 @@ struct ChatDataSourceImpl: ChatDataSource {
                 id: messageId,
                 message: text,
                 sender: currentUserUid,
-                timestamp: Date().timeIntervalSince1970
+                timestamp: Int64(Date().timeIntervalSince1970 * 1000)
             )
             
             let data = structToDictionary(message)
