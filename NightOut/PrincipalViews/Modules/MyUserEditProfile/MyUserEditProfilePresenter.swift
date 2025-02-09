@@ -121,6 +121,9 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                         .eraseToAnyPublisher()
                 }
                 return presenter.useCases.saveCompanyUseCase.executeGetImageUrl(imageData: imageData)
+                    .handleEvents(receiveRequest: { [weak self] _ in
+                        self?.viewModel.loading = true
+                    })
                     .eraseToAnyPublisher()
             }
             .withUnretained(self)
@@ -166,9 +169,12 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
             }
             .withUnretained(self)
             .sink { presenter, imageUrl in
+                presenter.viewModel.loading = false
                 if imageUrl == nil {
                     presenter.viewModel.selectedImage = nil
                     presenter.viewModel.toast = .custom(.init(title: "Error", description: "La imagen no se pudo actualizar", image: nil))
+                } else {
+                    presenter.viewModel.toast = .success(.init(title: "", description: "Información actualizada.", image: nil))
                 }
             }
             .store(in: &cancellables)

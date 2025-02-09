@@ -177,6 +177,13 @@ struct MyUserEditProfileView: View {
         .onAppear {
             viewDidLoadPublisher.send()
         }
+        .onTapGesture {
+             hideKeyboard()
+        }
+    }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
     var topImageView: some View {
