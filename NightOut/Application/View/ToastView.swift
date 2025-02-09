@@ -22,10 +22,13 @@ struct ToastView: View {
                         .padding(.leading, 20)
                     
                     VStack(alignment: .leading, spacing: 10) {
-                        Text(type.title)
-                            .font(.headline)
-                            .foregroundColor(Color.white)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        if !type.title.isEmpty {
+                            Text(type.title)
+                                .font(.headline)
+                                .foregroundColor(Color.white)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                       
                         if let description = type.description {
                             Text(description)
                                 .font(.subheadline)
