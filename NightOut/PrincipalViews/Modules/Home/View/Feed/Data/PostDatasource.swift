@@ -23,31 +23,20 @@ struct PostDatasourceImpl: PostDatasource {
     
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never> {
         
-        let publisher = PassthroughSubject<[String: PostUserModel], Never>()
+        let subject = CurrentValueSubject<[String: PostUserModel], Never>([:])
         
-        let ref = FirebaseServiceImpl.shared.getPosts()
+        let ref = FirebaseServiceImpl.shared.getPosts().queryOrdered(byChild: "timestamp")
         
-        ref.getData { error, snapshot in
-            guard error == nil else {
-                print("Error fetching data: \(error!.localizedDescription)")
-                publisher.send([:])
-                return
-            }
-            
+        ref.observe(.value) { snapshot in
             do {
-                if let allFollowModel = try snapshot?.data(as: [String: PostUserModel].self) {
-                    publisher.send(allFollowModel)
-                } else {
-                    publisher.send([:])
-                }
+                let posts = try snapshot.data(as: [String: PostUserModel].self)
+                subject.send(posts)
             } catch {
                 print("Error decoding data: \(error.localizedDescription)")
-                publisher.send([:])
+                subject.send([:])
             }
-            
-            
         }
-        return publisher.eraseToAnyPublisher()
+        return subject.eraseToAnyPublisher()
     }
     
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never> {
