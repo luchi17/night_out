@@ -8,6 +8,7 @@ struct MyUserProfileView: View {
     @State private var showCompanyMenu = false
     
     @State private var closeAllSheets = false
+    @Binding private var updateProfileImage: Bool
     
     @Environment(\.dismiss) private var dismiss
     
@@ -24,12 +25,14 @@ struct MyUserProfileView: View {
         presenter: MyUserProfilePresenter,
         settingsPresenter: MyUserSettingsPresenter,
         companySettingsPresenter: MyUserCompanySettingsPresenter,
-        editProfilePresenter: MyUserEditProfilePresenter
+        editProfilePresenter: MyUserEditProfilePresenter,
+        updateProfileImage: Binding<Bool>
     ) {
         self.presenter = presenter
         self.settingsPresenter = settingsPresenter
         self.companySettingsPresenter = companySettingsPresenter
         self.editProfilePresenter = editProfilePresenter
+        self._updateProfileImage = updateProfileImage
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -106,6 +109,7 @@ struct MyUserProfileView: View {
         }
         .sheet(isPresented: $showEditSheet, onDismiss: {
             viewDidLoadPublisher.send()
+            updateProfileImage.toggle()
         }) {
             MyUserEditProfileView(
                 presenter: editProfilePresenter,

@@ -17,7 +17,10 @@ struct HomeView: View {
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
     private let openMessagesPublisher = PassthroughSubject<Void, Never>()
-
+    private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
+    
+    @State private var updateProfileImage: Bool = false
+    
     init(
         presenter: HomePresenter,
         mapPresenter: LocationsMapPresenter,
@@ -55,7 +58,8 @@ struct HomeView: View {
                 presenter: userPresenter,
                 settingsPresenter: settingsPresenter,
                 companySettingsPresenter: companySettingsPresenter,
-                editProfilePresenter: editProfilePresenter
+                editProfilePresenter: editProfilePresenter,
+                updateProfileImage: $updateProfileImage
             )
                 .presentationDetents([.large])
                 .presentationBackground(.regularMaterial)
@@ -69,6 +73,12 @@ struct HomeView: View {
                 .aspectRatio(contentMode: .fill)
         )
         .navigationBarHidden(true)
+        .onChange(of: updateProfileImage, { oldValue, newValue in
+            viewDidLoadPublisher.send()
+        })
+        .onAppear {
+            viewDidLoadPublisher.send()
+        }
     }
     
     
@@ -166,7 +176,8 @@ private extension HomeView {
     func bindViewModel() {
         let input = HomePresenterImpl.ViewInputs(
             openNotifications: openNotificationsPublisher.eraseToAnyPublisher(),
-            openMessages: openMessagesPublisher.eraseToAnyPublisher()
+            openMessages: openMessagesPublisher.eraseToAnyPublisher(),
+            viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

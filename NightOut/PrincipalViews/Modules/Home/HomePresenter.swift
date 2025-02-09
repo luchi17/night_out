@@ -40,6 +40,7 @@ final class HomePresenterImpl: HomePresenter {
     struct ViewInputs {
         let openNotifications: AnyPublisher<Void, Never>
         let openMessages: AnyPublisher<Void, Never>
+        let viewDidLoad: AnyPublisher<Void, Never>
     }
     
     var viewModel: HomeViewModel
@@ -56,13 +57,6 @@ final class HomePresenterImpl: HomePresenter {
         self.useCases = useCases
         
         viewModel = HomeViewModel()
-        
-        let imUser = FirebaseServiceImpl.shared.getImUser()
-        if imUser {
-            viewModel.profileImageUrl =  UserDefaults.getUserModel()?.image
-        } else {
-            viewModel.profileImageUrl =  UserDefaults.getCompanyUserModel()?.imageUrl
-        }
     }
     
     func transform(input: HomePresenterImpl.ViewInputs){
@@ -81,6 +75,18 @@ final class HomePresenterImpl: HomePresenter {
                 self.actions.openMessages()
             }
             .store(in: &cancellables)
-            
+
+        input
+            .viewDidLoad
+            .withUnretained(self)
+            .sink { presenter, _ in
+                let imUser = FirebaseServiceImpl.shared.getImUser()
+                if imUser {
+                    presenter.viewModel.profileImageUrl =  UserDefaults.getUserModel()?.image
+                } else {
+                    presenter.viewModel.profileImageUrl =  UserDefaults.getCompanyUserModel()?.imageUrl
+                }
+            }
+            .store(in: &cancellables)
     }
 }
