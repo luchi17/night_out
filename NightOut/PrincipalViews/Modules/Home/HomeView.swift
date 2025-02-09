@@ -18,6 +18,7 @@ struct HomeView: View {
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
     private let openMessagesPublisher = PassthroughSubject<Void, Never>()
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
+    private let updateProfileImagePublisher = PassthroughSubject<Void, Never>()
     
     @State private var updateProfileImage: Bool = false
     
@@ -74,7 +75,7 @@ struct HomeView: View {
         )
         .navigationBarHidden(true)
         .onChange(of: updateProfileImage, { oldValue, newValue in
-            viewDidLoadPublisher.send()
+            updateProfileImagePublisher.send()
         })
         .onAppear {
             viewDidLoadPublisher.send()
@@ -177,7 +178,8 @@ private extension HomeView {
         let input = HomePresenterImpl.ViewInputs(
             openNotifications: openNotificationsPublisher.eraseToAnyPublisher(),
             openMessages: openMessagesPublisher.eraseToAnyPublisher(),
-            viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher()
+            viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
+            updateProfileImage: updateProfileImagePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

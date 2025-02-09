@@ -41,20 +41,25 @@ final class HomePresenterImpl: HomePresenter {
         let openNotifications: AnyPublisher<Void, Never>
         let openMessages: AnyPublisher<Void, Never>
         let viewDidLoad: AnyPublisher<Void, Never>
+        let updateProfileImage: AnyPublisher<Void, Never>
     }
     
     var viewModel: HomeViewModel
     
     private let actions: Actions
     private let useCases: UseCases
+    private let reloadSubject: PassthroughSubject<Void, Never>
+    
     private var cancellables = Set<AnyCancellable>()
     
     init(
         useCases: UseCases,
-        actions: Actions
+        actions: Actions,
+        reloadSubject: PassthroughSubject<Void, Never>
     ) {
         self.actions = actions
         self.useCases = useCases
+        self.reloadSubject = reloadSubject
         
         viewModel = HomeViewModel()
     }
@@ -78,6 +83,7 @@ final class HomePresenterImpl: HomePresenter {
 
         input
             .viewDidLoad
+            .merge(with: input.updateProfileImage)
             .withUnretained(self)
             .sink { presenter, _ in
                 let imUser = FirebaseServiceImpl.shared.getImUser()
@@ -86,6 +92,8 @@ final class HomePresenterImpl: HomePresenter {
                 } else {
                     presenter.viewModel.profileImageUrl =  UserDefaults.getCompanyUserModel()?.imageUrl
                 }
+                
+                presenter.reloadSubject.send()
             }
             .store(in: &cancellables)
     }

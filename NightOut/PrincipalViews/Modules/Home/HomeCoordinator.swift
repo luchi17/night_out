@@ -10,6 +10,8 @@ class HomeCoordinator {
     private let profileActions: MyUserProfilePresenterImpl.Actions
     private let locationManager: LocationManager
     
+    private let reloadSubject = PassthroughSubject<Void, Never>()
+                                        
     init(actions: HomePresenterImpl.Actions, mapActions: LocationsMapPresenterImpl.Actions, feedActions : FeedPresenterImpl.Actions, profileActions: MyUserProfilePresenterImpl.Actions, locationManager: LocationManager) {
         self.actions = actions
         self.mapActions = mapActions
@@ -22,7 +24,8 @@ class HomeCoordinator {
     func build() -> some View {
         let presenter = HomePresenterImpl(
             useCases: .init(),
-            actions: actions
+            actions: actions,
+            reloadSubject: reloadSubject
         )
         let mapPresenter = LocationsMapPresenterImpl(
             useCases: .init(companyLocationsUseCase: CompanyLocationsUseCaseImpl(repository: LocationRepositoryImpl.shared)),
@@ -34,7 +37,8 @@ class HomeCoordinator {
                 postsUseCase: PostsUseCaseImpl(repository: PostsRepositoryImpl.shared),
                 followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared), companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)),
-            actions: feedActions
+            actions: feedActions,
+            input: .init(reload: reloadSubject.eraseToAnyPublisher())
         )
         let userPresenter = MyUserProfilePresenterImpl(
             useCases: .init(

@@ -42,6 +42,10 @@ final class FeedPresenterImpl: FeedPresenter {
         
     }
     
+    struct Input {
+        let reload: AnyPublisher<Void, Never>
+    }
+    
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let openMaps: AnyPublisher<PostModel, Never>
@@ -54,16 +58,19 @@ final class FeedPresenterImpl: FeedPresenter {
     
     private let actions: Actions
     private let useCases: UseCases
+    private let outinput: Input
     private var cancellables = Set<AnyCancellable>()
     
     let defaultCoordinates = CLLocationCoordinate2D(latitude: Double(-90.0000), longitude: Double(-0.0000))
     
     init(
         useCases: UseCases,
-        actions: Actions
+        actions: Actions,
+        input: Input
     ) {
         self.actions = actions
         self.useCases = useCases
+        self.outinput = input
         
         viewModel = FeedViewModel()
     }
@@ -74,6 +81,7 @@ final class FeedPresenterImpl: FeedPresenter {
         
         let userPostsPublisher = input
             .viewDidLoad
+            .merge(with: outinput.reload)
             .withUnretained(self)
             .flatMap { presenter, _ in //Get user info and save it when feed appears
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
