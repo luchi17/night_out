@@ -73,7 +73,6 @@ final class CommentsPresenterImpl: CommentsPresenter {
             .withUnretained(self)
             .flatMap({ presenter, _ in
                 presenter.useCases.postsUseCase.getComments(postId: presenter.info.postId)
-                    .map({ Array($0.values) })
                     .eraseToAnyPublisher()
             })
             .handleEvents(receiveRequest: { [weak self] _ in

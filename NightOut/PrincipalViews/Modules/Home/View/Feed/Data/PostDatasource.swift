@@ -11,7 +11,7 @@ import FirebaseStorage
 protocol PostDatasource {
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never>
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
-    func getComments(postId: String) -> AnyPublisher<[String: CommentModel], Never>
+    func getComments(postId: String) -> AnyPublisher<[CommentModel], Never>
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never>
     func rejectFollowRequest(requesterUid: String)
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
@@ -88,33 +88,25 @@ struct PostDatasourceImpl: PostDatasource {
     }
     
     
-    func getComments(postId: String) -> AnyPublisher<[String: CommentModel], Never> {
-        return Future<[String: CommentModel], Never> { promise in
+    func getComments(postId: String) -> AnyPublisher<[CommentModel], Never> {
+        return Future<[CommentModel], Never> { promise in
             
             guard !postId.isEmpty else {
-                promise(.success([:]))
+                promise(.success([]))
                 return
             }
             
-            let ref = FirebaseServiceImpl.shared.getComments().child(postId).queryOrdered(byChild: "timestamp")
+            let ref = FirebaseServiceImpl.shared.getComments().child(postId)
             
-            ref.getData { error, snapshot in
-                guard error == nil else {
-                    print("Error fetching data: \(error!.localizedDescription)")
-                    promise(.success([:]))
-                    return
-                }
-                
-                do {
-                    if let comments = try snapshot?.data(as: [String: CommentModel].self) {
-                        promise(.success(comments))
-                    } else {
-                        promise(.success([:]))
+            ref.observe(.value) { snapshot in
+                var comments: [CommentModel] = []
+                for child in snapshot.children {
+                    if let snapshot = child as? DataSnapshot,
+                       let comment = try? snapshot.data(as: CommentModel.self) {
+                        comments.append(comment)
                     }
-                } catch {
-                    print("Error decoding data: \(error.localizedDescription)")
-                    promise(.success([:]))
                 }
+                promise(.success(comments))
             }
         }
         .eraseToAnyPublisher()
