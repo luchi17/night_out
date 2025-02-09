@@ -35,7 +35,6 @@ struct ChatView: View {
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, keyboardObserver.keyboardHeight + 50) // Ajusta el padding según el teclado
                     .animation(.easeOut(duration: 0.2), value: keyboardObserver.keyboardHeight + 50) // Suaviza la animación del teclado
                     .onChange(of: viewModel.messages.count) {
                         withAnimation {
