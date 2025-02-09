@@ -3,7 +3,7 @@ import Firebase
 
 struct PostModel: Hashable {
     var profileImageUrl: String?
-    var postImage: UIImage?
+    var postImage: UIImage
     var description: String?
     var location: String?
     var username: String?
@@ -12,7 +12,7 @@ struct PostModel: Hashable {
     var isFromUser: Bool
     var publisherId: String
     
-    init(profileImageUrl: String?, postImage: UIImage?, description: String?, location: String? , username: String?, fullName: String?, uid: String, isFromUser: Bool, publisherId: String) {
+    init(profileImageUrl: String?, postImage: UIImage, description: String?, location: String? , username: String?, fullName: String?, uid: String, isFromUser: Bool, publisherId: String) {
         self.profileImageUrl = profileImageUrl
         self.postImage = postImage
         self.description = description
@@ -37,20 +37,11 @@ struct PostView: View {
             topView
                 .zIndex(1)
             
-            if let postImage = model.postImage {
-                Image(uiImage: postImage)
-                .resizable()
-                .scaledToFill()
-                .frame(maxHeight: 300)
-                .clipped()
-            } else {
-                #warning("TODO: image post placeholder empty")
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxHeight: 300)
-                    .clipped()
-            }
+            Image(uiImage: model.postImage)
+            .resizable()
+            .scaledToFill()
+            .frame(maxHeight: 300)
+            .clipped()
             
             bottomView
         }

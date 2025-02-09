@@ -212,6 +212,7 @@ private extension FeedPresenterImpl {
             .withUnretained(self)
             .flatMapLatest({ presenter, userInfo in
                 presenter.getPostImagePublisher(image: post.postImage)
+                    .compactMap({ $0 }) //If no image, post hidden
                     .map( { (userInfo, $0) })
             })
             .withUnretained(self)
@@ -234,10 +235,11 @@ private extension FeedPresenterImpl {
     }
     
     func getPostFromCompanyInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
-        useCases.companyDataUseCase.getCompanyInfo(uid: post.publisherId)
+        return useCases.companyDataUseCase.getCompanyInfo(uid: post.publisherId)
             .withUnretained(self)
             .flatMapLatest({ presenter, companyInfo in
-                presenter.getPostImagePublisher(image: post.postImage)
+                presenter.getPostImagePublisher(image: post.postImage!)
+                    .compactMap({ $0 }) //If no image, post hidden
                     .map( { (companyInfo, $0) })
             })
             .withUnretained(self)
@@ -312,6 +314,7 @@ private extension FeedPresenterImpl {
         if let image = image, let url = URL(string: image) {
             return KingFisherImage.fetchImagePublisher(url: url)
         }
+        
         return Just(nil).eraseToAnyPublisher()
     }
     
