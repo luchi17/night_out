@@ -106,7 +106,10 @@ final class FeedPresenterImpl: FeedPresenter {
                 presenter.useCases.postsUseCase.fetchPosts()
                     .map { posts in
                         let matchingPosts = posts.filter { post in
-                            followModel?.following?.keys.contains(post.value.publisherId) ?? false
+                            let myFollowingPosts = followModel?.following?.keys.contains(post.value.publisherId) ?? false
+                            let myPosts = post.value.publisherId == FirebaseServiceImpl.shared.getCurrentUserUid()
+                            
+                            return myFollowingPosts || myPosts
                         }.values
                         return Array(matchingPosts)
                     }
