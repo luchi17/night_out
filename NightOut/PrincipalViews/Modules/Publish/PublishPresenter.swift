@@ -63,9 +63,9 @@ final class PublishPresenterImpl: PublishPresenter {
             .uploadPost
             .withUnretained(self)
             .sink { presenter, _ in
-                presenter.actions.goToFeed() //REmove, just to check
-                
-                //                presenter.uploadImage()
+                Task {
+                    await presenter.uploadImage()
+                }
             }
             .store(in: &cancellables)
         
@@ -131,8 +131,11 @@ final class PublishPresenterImpl: PublishPresenter {
             guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
             
             // Crear referencia de la imagen con timestamp
-            let fileRef = storageRef.child("\(UUID().uuidString).jpg")
+            let fileName = "\(Int(Date().timeIntervalSince1970)).jpg"
+            let fileRef = Storage.storage().reference().child("Post Pictures").child(fileName)
             
+            print("fileRef")
+            print(fileRef)
             // Subir la imagen
             _ = try await fileRef.putDataAsync(imageData)
             
@@ -142,7 +145,8 @@ final class PublishPresenterImpl: PublishPresenter {
             
             // Crear post en Firestore
             guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
-            let postId = postsRef.document().documentID
+            let postsRef = FirebaseServiceImpl.shared.getPosts()
+            let postId = postsRef.childByAutoId().key ?? UUID().uuidString
             
             let postModel = PostUserModel(
                 description: viewModel.description.lowercased(),
@@ -153,17 +157,19 @@ final class PublishPresenterImpl: PublishPresenter {
                 isFromUser: FirebaseServiceImpl.shared.getImUser(),
                 date: Date().toIsoString()
             )
+            print("imageUrl")
+            print(imageUrl)
             
             guard let postData = structToDictionary(postModel) else {
                 print("Error transforming data to json")
                 return
             }
             
-            try await postsRef.document(postId).setData(postData)
+            try await postsRef.child(postId).setValue(postData)
             
             // Verificar si hay un rankingEmoji antes de actualizar el contador de drinks
-            if hasRankingEmoji() {
-                await updateDrinksCounter(for: userId)
+            if viewModel.emojiSelected != nil {
+                await updateDrinksForUser(userId: userId)
             }
             
         } catch {
@@ -171,17 +177,16 @@ final class PublishPresenterImpl: PublishPresenter {
         }
     }
     
-    private func hasRankingEmoji() -> Bool {
-        // Aquí deberías revisar si el emoji está presente en la UI.
-        // Simulamos que siempre hay un emoji por ahora.
+    private func updateDrinksForUser(userId: String) async {
+        
         guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-            return false
+            return
         }
         
+        // Cargar las ligas del usuario
         let userLeagues = FirebaseServiceImpl.shared.getUsers().child(userId).child("misLigas")
         
         userLeagues.observeSingleEvent(of: .value) { snapshot in
-            // Para cada liga en la que el usuario participa, incrementa el valor de "drinks"
             
             for leagueSnapshot in snapshot.children {
                 
@@ -190,6 +195,7 @@ final class PublishPresenterImpl: PublishPresenter {
                 }
                 
                 let leagueId = leagueSnapshot.key
+                
                 // Acceder al nodo de drinks en cada liga del usuario
                 let leagueDrinksRef = FirebaseServiceImpl.shared.getLeagues().child(leagueId).child("drinks").child(userId)
                 
@@ -202,35 +208,10 @@ final class PublishPresenterImpl: PublishPresenter {
                         if let error = error {
                             // Manejar error si la actualización falla
                             print("Error al actualizar drinks: \(error.localizedDescription)")
-                        } else {
-                            // Actualización exitosa, aquí podrías agregar alguna notificación si es necesario
                         }
                     }
                 }
             }
-        }
-        
-        return true
-    }
-    
-    private func updateDrinksCounter(for userId: String) async {
-        let userRef = Firestore.firestore().collection("Users").document(userId)
-        
-        do {
-            let userSnapshot = try await userRef.getDocument()
-            if let leagues = userSnapshot.data()?["misLigas"] as? [String] {
-                for leagueId in leagues {
-                    let leagueRef = Firestore.firestore().collection("Leagues").document(leagueId)
-                        .collection("drinks").document(userId)
-                    
-                    let snapshot = try await leagueRef.getDocument()
-                    let currentDrinks = snapshot.data()?["drinks"] as? Int ?? 0
-                    
-                    try await leagueRef.setData(["drinks": currentDrinks + 1], merge: true)
-                }
-            }
-        } catch {
-            print("Error updating drinks count: \(error.localizedDescription)")
         }
     }
 }
