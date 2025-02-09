@@ -8,7 +8,6 @@ struct PostUserModel: Codable {
     let publisherId: String
     let location: String?
     let isFromUser: Bool?
-    let date: String?
     
     // Mapear claves JSON a propiedades Swift
     enum CodingKeys: String, CodingKey {
@@ -18,7 +17,6 @@ struct PostUserModel: Codable {
         case publisherId = "publisher"
         case location = "location"
         case isFromUser = "isFromUser"
-        case date = "date"
     }
 }
 

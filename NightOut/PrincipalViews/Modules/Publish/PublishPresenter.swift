@@ -154,8 +154,7 @@ final class PublishPresenterImpl: PublishPresenter {
                 postImage: imageUrl,
                 publisherId: userId,
                 location: viewModel.location ?? "",
-                isFromUser: FirebaseServiceImpl.shared.getImUser(),
-                date: Date().toIsoString()
+                isFromUser: FirebaseServiceImpl.shared.getImUser()
             )
             print("imageUrl")
             print(imageUrl)
