@@ -8,7 +8,6 @@ import FirebaseFirestore
 
 final class PublishViewModel: ObservableObject {
     @Published var capturedImage: UIImage?
-    @Published var imageData: Data?
     @Published var description: String = ""
     @Published var location: String?
     @Published var locations: [AddPostLocationModel] = []
@@ -47,10 +46,6 @@ final class PublishPresenterImpl: PublishPresenter {
     private let actions: Actions
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
-    
-    private let storageRef = Storage.storage().reference().child("post_images")
-    private let postsRef = Firestore.firestore().collection("Posts")
-    
     
     init(
         useCases: UseCases,
@@ -104,7 +99,7 @@ final class PublishPresenterImpl: PublishPresenter {
                 presenter.viewModel.location = club.location
                 presenter.viewModel.toast = .success(.init(
                     title: "",
-                    description: "El club seleccionado ha sido \(club.name)",
+                    description: "El club seleccionado ha sido \(club.name).",
                     image: nil
                 )
                 )
@@ -113,26 +108,20 @@ final class PublishPresenterImpl: PublishPresenter {
         
     }
     
+    @MainActor //to publish changes on view in an async function
     func uploadImage() async {
         guard let image = viewModel.capturedImage else {
-            viewModel.toast = .custom(.init(
-                title: "",
-                description: "Por favor, captura una imagen primero.",
-                image: nil
-            ))
             return
         }
         
         guard !viewModel.description.isEmpty else {
             viewModel.toast = .custom(.init(
                 title: "",
-                description: "Por favor, escribe una descripción",
+                description: "Por favor, escribe una descripción.",
                 image: nil
             ))
             return
         }
-        
-        
         
         // Redirigir a la pantalla principal antes de subir la imagen
         actions.goToFeed()
