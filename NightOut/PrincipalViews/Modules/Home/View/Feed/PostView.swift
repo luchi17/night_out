@@ -35,13 +35,13 @@ struct PostView: View {
         VStack(spacing: 0) {
             
             topView
-                .zIndex(1)
             
             Image(uiImage: model.postImage)
             .resizable()
             .scaledToFill()
-            .frame(maxHeight: 300)
+            .frame(height: 300)
             .clipped()
+            .allowsHitTesting(false)
             
             bottomView
         }
