@@ -272,7 +272,7 @@ private extension UserProfilePresenterImpl {
         let model = NotificationModel(
             ispost: false,
             postid: "",
-            text: "\(model.username ?? "Unknown user") \(GlobalStrings.shared.startFollowUserText)",
+            text: "\(GlobalStrings.shared.startFollowUserText)",
             userid: myUid
         )
         
