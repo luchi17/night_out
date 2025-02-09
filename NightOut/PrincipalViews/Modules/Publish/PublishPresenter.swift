@@ -13,6 +13,8 @@ final class PublishViewModel: ObservableObject {
     @Published var location: String?
     @Published var locations: [AddPostLocationModel] = []
     
+    @Published var toast: ToastType?
+    
     @Published var emojiSelected: String?
     
     @Published var locationManager: LocationManager = LocationManager.shared
@@ -66,8 +68,9 @@ final class PublishPresenterImpl: PublishPresenter {
             .uploadPost
             .withUnretained(self)
             .sink { presenter, _ in
+                presenter.actions.goToFeed() //REmove, just to check
                 
-//                presenter.uploadImage()
+                //                presenter.uploadImage()
             }
             .store(in: &cancellables)
         

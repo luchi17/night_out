@@ -124,6 +124,17 @@ struct AddPostView: View {
                 secondaryButton: .cancel()
             )
         }
+        .showToast(
+            error: (
+                type: viewModel.toast,
+                showCloseButton: false,
+                onDismiss: {
+                    viewModel.toast = nil
+                }
+            ),
+            isIdle: false,
+            toastExtraPadding: true
+        )
         .onAppear {
             cameraModel.startSession()
         }
