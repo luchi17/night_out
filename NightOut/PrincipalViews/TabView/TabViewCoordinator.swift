@@ -106,19 +106,19 @@ class TabViewCoordinator: ObservableObject, Hashable {
     }
     
     func makePublishFlow() -> AnyView {
-        let coordinator = PublishCoordinator(actions: .init())
+        let coordinator = PublishCoordinator(actions: .init(goToFeed: { [weak self] in
+            self?.viewModel.selectedTab = .home
+        }))
         return AnyView(coordinator.build())
-        
     }
     
-    #warning("REDO")
     func makeMapsFlow() -> AnyView {
         return AnyView(EmptyView())
     }
     
     func makeUserFlow() -> AnyView {
-        let coordinator = TicketsCoordinator(actions: .init(backToLogin: {
-            self.goToLogin()
+        let coordinator = TicketsCoordinator(actions: .init(backToLogin: { [weak self] in
+            self?.goToLogin()
         }))
         return AnyView(coordinator.build())
     }
