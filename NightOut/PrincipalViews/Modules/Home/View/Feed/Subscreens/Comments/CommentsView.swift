@@ -7,6 +7,8 @@ struct CommentsView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let publishCommentPublisher = PassthroughSubject<Void, Never>()
     
+    @ObservedObject private var keyboardObserver = KeyboardObserver()
+    
     @ObservedObject var viewModel: CommentsViewModel
     let presenter: CommentsPresenter
     
@@ -19,25 +21,45 @@ struct CommentsView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            topView
-            
-            Spacer()
-                .background(Color.black.opacity(0.9))
-            
-            // Lista de comentarios invertida
-            ScrollView {
-                VStack(spacing: 10) {
-                    ForEach(viewModel.comments.reversed(), id: \.uid) { commentModel in
-                        CommentView(commentModel: commentModel)
-                            .scaleEffect(y: -1) // Invierte cada fila
+        VStack {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    topView
+                    
+                    if viewModel.comments.isEmpty {
+                        Spacer()
+                            .background(Color.black.opacity(0.9))
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        ForEach(viewModel.comments.reversed(), id: \.uid) { commentModel in
+                            CommentView(commentModel: commentModel)
+                                .scaleEffect(y: -1) // Invierte cada fila
+                                .id(commentModel.uid)
+                        }
+                    }
+                    .scaleEffect(y: -1) // Invierte el contenedor
+                    .padding()
+                    .animation(.easeOut(duration: 0.2), value: keyboardObserver.keyboardHeight + 50) // Suaviza la animación del teclado
+                    .onChange(of: viewModel.comments.count) {
+                        withAnimation {
+                            proxy.scrollTo(viewModel.comments.last?.uid, anchor: .bottom)
+                        }
+                        
                     }
                 }
-                .scaleEffect(y: -1) // Invierte el contenedor
-                .padding()
+                .onChange(of: keyboardObserver.keyboardHeight) {
+                    // Cuando el teclado aparece o desaparece, desplazamos la vista
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation {
+                            proxy.scrollTo(viewModel.comments.last?.uid, anchor: .bottom)
+                        }
+                    }
+                }
             }
-
+            
             bottomView
+            
         }
         .background(Color.black.opacity(0.9))
         .showToast(
@@ -54,7 +76,7 @@ struct CommentsView: View {
             viewDidLoadPublisher.send()
         }
         .onTapGesture {
-             hideKeyboard()
+            hideKeyboard()
         }
     }
     
@@ -73,10 +95,10 @@ struct CommentsView: View {
             
             if let postImage = viewModel.postImage {
                 Image(uiImage: postImage)
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity, maxHeight: 300)
-                .clipped()
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity, maxHeight: 300)
+                    .clipped()
             } else {
                 Image("profile")
                     .resizable()
