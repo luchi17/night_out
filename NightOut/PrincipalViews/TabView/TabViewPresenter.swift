@@ -2,7 +2,6 @@ import SwiftUI
 import Combine
 
 protocol TabViewPresenter {
-    func onTapSelected(tabType: TabType)
     var viewModel: TabViewModel { get }
 }
 
@@ -18,11 +17,13 @@ class TabViewModel: ObservableObject {
 }
 
 
-struct TabViewPresenterImpl: TabViewPresenter {
+class TabViewPresenterImpl: TabViewPresenter {
     
     var viewModel: TabViewModel
     var openTab: (TabType) -> AnyView
 
+    private var cancellables = Set<AnyCancellable>()
+    
     init(
         viewModel: TabViewModel,
         openTab: @escaping (TabType) -> AnyView
@@ -30,13 +31,16 @@ struct TabViewPresenterImpl: TabViewPresenter {
         self.viewModel = viewModel
         self.openTab = openTab
         
-        if let tab = viewModel.selectedTab {
-            viewModel.viewToShow = openTab(tab)
-        }
-    }
-
-    func onTapSelected(tabType: TabType) {
-        viewModel.viewToShow = openTab(tabType)
+        viewModel
+            .$selectedTab
+            .removeDuplicates()
+            .withUnretained(self)
+            .sink { presenter, selectedTab in
+                if let tab = selectedTab {
+                    presenter.viewModel.viewToShow = openTab(tab)
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 

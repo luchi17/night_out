@@ -19,7 +19,7 @@ struct TabViewScreen: View {
             // Barra de navegación personalizada
             HStack {
                 Button(action: {
-                    presenter.onTapSelected(tabType: .home)
+                    viewModel.selectedTab = .home
                 }) {
                     VStack {
                         Image(systemName: "house.fill")
@@ -29,7 +29,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    presenter.onTapSelected(tabType: .search)
+                    viewModel.selectedTab = .search
                 }) {
                     VStack {
                         Image(systemName: "magnifyingglass")
@@ -39,7 +39,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    presenter.onTapSelected(tabType: .publish)
+                    viewModel.selectedTab = .publish
                 }) {
                     VStack {
                         Image(systemName: "plus")
@@ -49,7 +49,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    presenter.onTapSelected(tabType: .map)
+                    viewModel.selectedTab = .map
                 }) {
                     VStack {
                         Image(systemName: "map")
@@ -59,7 +59,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    presenter.onTapSelected(tabType: .user)
+                    viewModel.selectedTab = .user
                 }) {
                     VStack {
                         Image(systemName: "person.fill")

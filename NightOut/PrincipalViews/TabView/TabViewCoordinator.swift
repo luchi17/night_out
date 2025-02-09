@@ -32,6 +32,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let locationManager: LocationManager
     
     @Published var path: NavigationPath
+    @ObservedObject var viewModel: TabViewModel
     
     let id = UUID()
     
@@ -65,23 +66,24 @@ class TabViewCoordinator: ObservableObject, Hashable {
         self.showNotificationsView = showNotificationsView
         self.showProfile = showProfile
         self.openMessages = openMessages
+        self.viewModel = TabViewModel(selectedTab: .home)
     }
     
     @ViewBuilder
     func build() -> some View {
-        let viewModel = TabViewModel(selectedTab: .home)
-        let presenter = TabViewPresenterImpl(viewModel: viewModel) { selectedTab in
+        let presenter = TabViewPresenterImpl(viewModel: viewModel) { [weak self] selectedTab in
+            guard let self = self else { return AnyView(EmptyView()) }
             switch selectedTab {
             case .home:
-                self.makeHomeFlow()
+                return self.makeHomeFlow()
             case .search:
-                self.makeSearchFlow()
+                return self.makeSearchFlow()
             case .publish:
-                self.makePublishFlow()
+                return self.makePublishFlow()
             case .map:
-                self.makeMapsFlow()
+                return self.makeMapsFlow()
             case .user:
-                self.makeUserFlow()
+                return self.makeUserFlow()
             }
         }
         TabViewScreen(presenter: presenter)
