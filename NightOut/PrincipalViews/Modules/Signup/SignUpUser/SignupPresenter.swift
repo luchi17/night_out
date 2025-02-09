@@ -89,7 +89,7 @@ final class SignupPresenterImpl: SignupPresenter {
            
         signuppublisher
             .withUnretained(self)
-            .performRequest(request: { presenter, _ -> AnyPublisher<(Bool, UserModel?), Never> in
+            .performRequest(request: { presenter, fcmToken -> AnyPublisher<(Bool, UserModel?), Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just((false, nil))
                         .eraseToAnyPublisher()
@@ -98,7 +98,8 @@ final class SignupPresenterImpl: SignupPresenter {
                     uid: uid,
                     fullname: presenter.viewModel.fullName,
                     username: presenter.viewModel.userName.lowercased(),
-                    email: presenter.viewModel.email.lowercased()
+                    email: presenter.viewModel.email.lowercased(),
+                    fcm_token: fcmToken
                 )
                 return presenter.useCases.saveUserUseCase.execute(model: model)
                     .map({ ($0, model)})

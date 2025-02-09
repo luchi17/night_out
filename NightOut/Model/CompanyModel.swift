@@ -41,6 +41,7 @@ struct CompanyModel: Codable {
     var payment: PaymentMethodModel?
     var ticketsSold:  [String: TicketVendido]? = [:]
     var profile: String?
+    var fcm_token: String?
    
     var profileType: ProfileType {
         if profile == "private" {
@@ -64,6 +65,7 @@ struct CompanyModel: Codable {
             case imageUrl = "image"
             case ticketsSold = "TicketsVendidos"
             case profile = "profile"
+            case fcm_token
         }
 }
 

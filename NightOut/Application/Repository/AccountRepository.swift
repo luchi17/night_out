@@ -6,8 +6,8 @@ protocol AccountRepository {
     func login(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
     func loginGoogle() -> AnyPublisher<GIDGoogleUser, Error>
     func loginApple() -> AnyPublisher<Void, Error>
-    func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
-    func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
+    func signup(email: String, password: String) -> AnyPublisher<String, SignupNetworkError>
+    func signupCompany(email: String, password: String) -> AnyPublisher<String, SignupNetworkError>
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never>
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
     func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>
@@ -35,13 +35,13 @@ struct AccountRepositoryImpl: AccountRepository {
             .eraseToAnyPublisher()
     }
     
-    func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError> {
+    func signup(email: String, password: String) -> AnyPublisher<String, SignupNetworkError> {
         return network
             .signup(email: email, password: password)
             .eraseToAnyPublisher()
     }
     
-    func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError> {
+    func signupCompany(email: String, password: String) -> AnyPublisher<String, SignupNetworkError> {
         return network
             .signupCompany(email: email, password: password)
             .eraseToAnyPublisher()

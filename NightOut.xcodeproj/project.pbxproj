@@ -14,6 +14,7 @@
 		187F203E2CD939F7005469B5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 187F203D2CD939F7005469B5 /* FirebaseFirestore */; };
 		187F20402CD93A04005469B5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 187F203F2CD93A04005469B5 /* FirebaseStorage */; };
 		188167DA2D57808F005E7785 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 188167D92D57808F005E7785 /* GoogleService-Info.plist */; };
+		188169392D58E90A005E7785 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 188169382D58E90A005E7785 /* FirebaseMessaging */; };
 		18E175F22CB6893E00E3CA07 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F12CB6893E00E3CA07 /* FirebaseDatabase */; };
 		18E175F72CB6991A00E3CA07 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F62CB6991A00E3CA07 /* GoogleSignIn */; };
 		18E175F92CB6991A00E3CA07 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F82CB6991A00E3CA07 /* GoogleSignInSwift */; };
@@ -105,6 +106,7 @@
 			files = (
 				18E175F72CB6991A00E3CA07 /* GoogleSignIn in Frameworks */,
 				181656E52CB57BC1005063A9 /* FirebaseAnalytics in Frameworks */,
+				188169392D58E90A005E7785 /* FirebaseMessaging in Frameworks */,
 				181656E92CB57BC1005063A9 /* FirebaseCore in Frameworks */,
 				1839A6562CEBAE330062ED82 /* Kingfisher in Frameworks */,
 				18E175F92CB6991A00E3CA07 /* GoogleSignInSwift in Frameworks */,
@@ -190,6 +192,7 @@
 				187F203D2CD939F7005469B5 /* FirebaseFirestore */,
 				187F203F2CD93A04005469B5 /* FirebaseStorage */,
 				1839A6552CEBAE330062ED82 /* Kingfisher */,
+				188169382D58E90A005E7785 /* FirebaseMessaging */,
 			);
 			productName = NightOut;
 			productReference = 18AE85FA2CA6A900007448F3 /* NightOut.app */;
@@ -720,6 +723,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		188169382D58E90A005E7785 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 		18E175F12CB6893E00E3CA07 /* FirebaseDatabase */ = {
 			isa = XCSwiftPackageProductDependency;

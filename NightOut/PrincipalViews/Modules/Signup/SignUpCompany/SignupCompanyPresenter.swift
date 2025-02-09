@@ -51,6 +51,7 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var endTime: String = ""
     @Published var startTime: String = ""
+    @Published var fcmToken: String = ""
     @Published var selectedTag: LocationSelectedTag = .none
     @Published var imageData: Data? = nil
     @Published var locationString = ""
@@ -148,23 +149,27 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
            
         let saveImagePublisher = signuppublisher
             .withUnretained(self)
-            .performRequest(request: { presenter, _ -> AnyPublisher<String?, Never> in
+            .performRequest(request: { presenter, fcmToken -> AnyPublisher<(String?, String), Never> in
                 guard let imageData = presenter.viewModel.imageData else {
-                    return Just(nil)
+                    return Just((nil, fcmToken))
                         .eraseToAnyPublisher()
                 }
                 return presenter.useCases.saveCompanyUseCase.executeGetImageUrl(imageData: imageData)
+                    .map({ ($0, fcmToken)})
                     .eraseToAnyPublisher()
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }
                 self.viewModel.loading = loading
             }, onError: { _ in  })
-            .handleEvents(receiveOutput: { [weak self] imageUrl in
-                if let imageUrl = imageUrl {
+            .handleEvents(receiveOutput: { [weak self] data in
+                if let imageUrl = data.0 {
                     self?.viewModel.imageUrl = imageUrl
                 } else {
                     print("Image url no se ha podido obtener")
                 }
+                
+                self?.viewModel.fcmToken = data.1
+                
             })
             .eraseToAnyPublisher()
         
@@ -185,7 +190,8 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     imageUrl: presenter.viewModel.imageUrl,
                     location: presenter.viewModel.locationString,
                     startTime: presenter.viewModel.startTime,
-                    uid: uid
+                    uid: uid,
+                    fcm_token: presenter.viewModel.fcmToken
                 )
                 return presenter.useCases.saveCompanyUseCase.execute(model: model)
                     .map({ ($0, model)})

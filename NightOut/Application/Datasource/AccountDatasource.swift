@@ -6,13 +6,14 @@ import FirebaseAuth
 import FirebaseDatabase
 import FirebaseFirestore
 import FirebaseStorage
+import FirebaseMessaging
 
 protocol AccountDatasource {
     func login(email: String, password: String) -> AnyPublisher<Void, LoginNetworkError>
     func loginGoogle() -> AnyPublisher<GIDGoogleUser, Error>
     func loginApple() -> AnyPublisher<Void, Error>
-    func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
-    func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError>
+    func signup(email: String, password: String) -> AnyPublisher<String, SignupNetworkError>
+    func signupCompany(email: String, password: String) -> AnyPublisher<String, SignupNetworkError>
     func saveUser(model: UserModel) -> AnyPublisher<Bool, Never>
     func saveCompany(model: CompanyModel) -> AnyPublisher<Bool, Never>
     func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>
@@ -93,11 +94,11 @@ struct AccountDatasourceImpl: AccountDatasource {
                     return
                 }
                 
-                guard let firebaseUser = authResult?.user else {
+                guard authResult?.user != nil else {
                     publisher.send(completion: .failure(NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve Firebase user"])))
                     return
                 }
-               
+                
                 // El inicio de sesión fue exitoso
                 publisher.send(user)
                 // Finaliza el publisher
@@ -108,9 +109,9 @@ struct AccountDatasourceImpl: AccountDatasource {
         return publisher.eraseToAnyPublisher()
     }
     
-    func signup(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError> {
+    func signup(email: String, password: String) -> AnyPublisher<String, SignupNetworkError> {
         // Lógica con Firebase Auth para registrar el usuario
-        let publisher = PassthroughSubject<Void, SignupNetworkError>()
+        let publisher = PassthroughSubject<String, SignupNetworkError>()
         
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error as NSError? {
@@ -130,18 +131,23 @@ struct AccountDatasourceImpl: AccountDatasource {
             }
             else {
                 print("Registro exitoso.")
-                publisher.send()
-                publisher.send(completion: .finished)
-                
+                Messaging.messaging().token { token, error in
+                    if let error = error {
+                        publisher.send(completion:.failure(.noToken))
+                    } else if let token = token {
+                        publisher.send(token)
+                        publisher.send(completion: .finished)
+                    }
+                }
             }
         }
         
         return publisher.eraseToAnyPublisher()
     }
     
-    func signupCompany(email: String, password: String) -> AnyPublisher<Void, SignupNetworkError> {
+    func signupCompany(email: String, password: String) -> AnyPublisher<String, SignupNetworkError> {
         // Lógica con Firebase Auth para registrar el usuario
-        let publisher = PassthroughSubject<Void, SignupNetworkError>()
+        let publisher = PassthroughSubject<String, SignupNetworkError>()
         
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error as NSError? {
@@ -161,9 +167,14 @@ struct AccountDatasourceImpl: AccountDatasource {
             }
             else {
                 print("Registro exitoso de empresa.")
-                publisher.send()
-                publisher.send(completion: .finished)
-                
+                Messaging.messaging().token { token, error in
+                    if let error = error {
+                        publisher.send(completion:.failure(.noToken))
+                    } else if let token = token {
+                        publisher.send(token)
+                        publisher.send(completion: .finished)
+                    }
+                }
             }
         }
         
@@ -258,7 +269,7 @@ struct AccountDatasourceImpl: AccountDatasource {
         }
         return publisher.eraseToAnyPublisher()
     }
-
+    
     func getUrlCompanyImage(imageData: Data) -> AnyPublisher<String?, Never>  {
         let publisher = PassthroughSubject<String?, Never>()
         
@@ -356,8 +367,6 @@ struct AccountDatasourceImpl: AccountDatasource {
                     }
                 }
             }
-           
-           
         }
         .eraseToAnyPublisher()
     }
@@ -410,6 +419,7 @@ enum SignupNetworkError: Error {
     case emailAlreadyInUse
     case weakPassword
     case networkError
+    case noToken
     case unknown(Error)
     case custom(message: String)
     
@@ -423,6 +433,8 @@ enum SignupNetworkError: Error {
             return "La contraseña es demasiado débil."
         case .networkError:
             return "Ocurrió un problema de red. Por favor, intenta de nuevo."
+        case .noToken:
+            return "No se pudo obtener el token de FCM."
         case .unknown(let error):
             return "Ocurrió desconocido: \(error.localizedDescription)."
         case .custom(let message):
