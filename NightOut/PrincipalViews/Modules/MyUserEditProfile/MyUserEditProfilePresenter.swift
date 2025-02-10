@@ -117,8 +117,13 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
             .withUnretained(self)
             .flatMap { presenter, _ -> AnyPublisher<String?, Never> in
                 guard let imageData = presenter.viewModel.imageData else {
-                    return Just("")
-                        .eraseToAnyPublisher()
+                    if !FirebaseServiceImpl.shared.getImUser() {
+                        return Just(presenter.companyModel?.imageUrl)
+                            .eraseToAnyPublisher()
+                    } else {
+                        return Just(presenter.userModel?.image)
+                            .eraseToAnyPublisher()
+                    }
                 }
                 return presenter.useCases.saveCompanyUseCase.executeGetImageUrl(imageData: imageData)
                     .handleEvents(receiveRequest: { [weak self] _ in
