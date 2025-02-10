@@ -76,7 +76,7 @@ struct UserProfileView: View {
                 
                 Spacer()
                 
-                if viewModel.isCompanyProfile {
+                if viewModel.isCompanyProfile && FirebaseServiceImpl.shared.getImUser() {
                     Button(action: {
                         whiskyTappedPublisher.send()
                     }) {
@@ -137,7 +137,7 @@ struct UserProfileView: View {
         Button(action: {
             followPublisher.send()
         }) {
-            Text(viewModel.followButtonType == .follow ? "Follow" : "Following")
+            Text(viewModel.followButtonType?.title ?? "")
                 .font(.system(size: 18))
                 .padding()
                 .frame(maxWidth: .infinity)
