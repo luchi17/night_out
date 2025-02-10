@@ -160,7 +160,7 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                         misLigas: presenter.userModel?.misLigas,
                         profile: presenter.viewModel.isPrivate ? "private" : "public",
                         Liked: presenter.userModel?.Liked,
-                        social: presenter.viewModel.participate ? "participando" : ""
+                        social: presenter.viewModel.participate ? "participando" : "NO participando"
                     )
                     return presenter.useCases.saveUserUseCase.execute(model: model)
                         .map({ _ in imageUrl })
