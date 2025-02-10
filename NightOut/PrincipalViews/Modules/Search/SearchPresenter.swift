@@ -103,7 +103,8 @@ final class SearchPresenterImpl: SearchPresenter {
                             username: userModel.username,
                             fullname: userModel.fullname,
                             profileId: userModel.uid,
-                            isCompanyProfile: false
+                            isCompanyProfile: false,
+                            isPrivateProfile: userModel.profileType == .privateProfile
                         )
                         
                         if profile.profileId != FirebaseServiceImpl.shared.getCurrentUserUid() {
@@ -138,7 +139,8 @@ final class SearchPresenterImpl: SearchPresenter {
                             username: companyModel.username,
                             fullname: companyModel.fullname,
                             profileId: companyModel.uid,
-                            isCompanyProfile: true
+                            isCompanyProfile: true,
+                            isPrivateProfile: companyModel.profileType == .privateProfile
                         )
                         
                         if profile.profileId != FirebaseServiceImpl.shared.getCurrentUserUid() {

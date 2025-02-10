@@ -12,6 +12,7 @@ struct NotificationModelForView {
     var postId: String
     let notificationId: String
     let isFromCompany: Bool
+    let isPrivateProfile: Bool
 }
 
 struct FriendRequestNotificationView: View {

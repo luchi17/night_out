@@ -165,7 +165,8 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                     username: notificationModel.userName,
                     fullname: notificationModel.fullName,
                     profileId: notificationModel.userId,
-                    isCompanyProfile: notificationModel.isFromCompany
+                    isCompanyProfile: notificationModel.isFromCompany,
+                    isPrivateProfile: notificationModel.isPrivateProfile
                 )
                 presenter.actions.goToProfile(profileModel)
             }
@@ -188,7 +189,8 @@ private extension NotificationsPresenterImpl {
             userId: model.userid,
             postId: model.postid,
             notificationId: notificationId,
-            isFromCompany: true
+            isFromCompany: true,
+            isPrivateProfile: companyFound.profileType == .privateProfile
         )
         
         return Just(modelView)
@@ -209,7 +211,8 @@ private extension NotificationsPresenterImpl {
                     userId: model.userid,
                     postId: model.postid,
                     notificationId: notificationId,
-                    isFromCompany: false
+                    isFromCompany: false,
+                    isPrivateProfile: userModel?.profileType == .privateProfile
                 )
                 
                 return modelView
