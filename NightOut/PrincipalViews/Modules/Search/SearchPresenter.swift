@@ -19,10 +19,12 @@ protocol SearchPresenter {
 final class SearchPresenterImpl: SearchPresenter {
     
     struct UseCases {
+        let followUseCase: FollowUseCase
     }
     
     struct Actions {
         let goToProfile: InputClosure<ProfileModel>
+        let goToPrivateProfile: InputClosure<ProfileModel>
     }
     
     struct ViewInputs {
@@ -63,8 +65,29 @@ final class SearchPresenterImpl: SearchPresenter {
         input
             .goToProfile
             .withUnretained(self)
-            .sink { presenter, model in
-                presenter.actions.goToProfile(model)
+            .flatMap({ presenter, profileModel -> AnyPublisher<(FollowModel?, ProfileModel), Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just((nil, profileModel)).eraseToAnyPublisher()
+                }
+                return presenter.useCases.followUseCase.fetchFollow(id: uid)
+                    .map({ ($0, profileModel) })
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .sink { presenter, data in
+            
+                let profileModel = data.1
+                let following = data.0?.following?.keys.first(where: { $0 == profileModel.profileId }) != nil
+                
+                if following {
+                    presenter.actions.goToProfile(profileModel)
+                } else {
+                    if profileModel.isPrivateProfile {
+                        presenter.actions.goToPrivateProfile(profileModel)
+                    } else {
+                        presenter.actions.goToProfile(profileModel)
+                    }
+                }
             }
             .store(in: &cancellables)
         

@@ -23,7 +23,7 @@ class SearchCoordinator: ObservableObject, Hashable {
     @ViewBuilder
     func build() -> some View {
         let presenter = SearchPresenterImpl(
-            useCases: .init(),
+            useCases: .init(followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared)),
             actions: actions
         )
         SearchView(presenter: presenter)

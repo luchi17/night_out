@@ -28,6 +28,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
     
     struct Actions {
         let goToProfile: InputClosure<ProfileModel>
+        let goToPrivateProfile: InputClosure<ProfileModel>
         let goToPost: InputClosure<NotificationModelForView>
     }
     
@@ -117,7 +118,10 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 
                 if success {
                     presenter.viewModel.toast = .success(.init(title: "Solicitud aceptada", description: nil, image: nil))
-                    presenter.useCases.notificationsUseCase.removeNotification(notificationId: notificationId)
+                    presenter.useCases.notificationsUseCase.removeNotification(
+                        userId: FirebaseServiceImpl.shared.getCurrentUserUid() ?? "",
+                        notificationId: notificationId
+                    )
                     presenter.viewModel.notifications = presenter.viewModel.notifications
                         .filter({ $0.notificationId != notificationId })
                    
@@ -138,7 +142,10 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 
                 presenter.useCases.followUseCase.rejectFollowRequest(requesterUid: requesterUid)
                 presenter.viewModel.toast = .custom(.init(title: "Solicitud rechazada", description: nil, image: (image: Image(systemName: "xmark"), color: Color.white), backgroundColor: Color.gray))
-                presenter.useCases.notificationsUseCase.removeNotification(notificationId: notificationId)
+                presenter.useCases.notificationsUseCase.removeNotification(
+                    userId: FirebaseServiceImpl.shared.getCurrentUserUid() ?? "",
+                    notificationId: notificationId
+                )
                 presenter.viewModel.notifications = presenter.viewModel.notifications
                     .filter({ $0.notificationId != notificationId })
                
@@ -159,7 +166,17 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
         input
             .goToProfile
             .withUnretained(self)
-            .sink { presenter, notificationModel in
+            .flatMap({ presenter, notification -> AnyPublisher<(FollowModel?, NotificationModelForView), Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just((nil, notification)).eraseToAnyPublisher()
+                }
+                return presenter.useCases.followUseCase.fetchFollow(id: uid)
+                    .map({ ($0, notification) })
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .sink { presenter, data in
+                let notificationModel = data.1
                 let profileModel = ProfileModel(
                     profileImageUrl: notificationModel.profileImage,
                     username: notificationModel.userName,
@@ -168,7 +185,18 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                     isCompanyProfile: notificationModel.isFromCompany,
                     isPrivateProfile: notificationModel.isPrivateProfile
                 )
-                presenter.actions.goToProfile(profileModel)
+                let uid = FirebaseServiceImpl.shared.getCurrentUserUid() ?? ""
+                let following = data.0?.following?.keys.first(where: { $0 == profileModel.profileId }) != nil
+                
+                if following {
+                    presenter.actions.goToProfile(profileModel)
+                } else {
+                    if notificationModel.isPrivateProfile {
+                        presenter.actions.goToPrivateProfile(profileModel)
+                    } else {
+                        presenter.actions.goToProfile(profileModel)
+                    }
+                }
             }
             .store(in: &cancellables)
     }
