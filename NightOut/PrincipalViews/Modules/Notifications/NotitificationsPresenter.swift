@@ -185,7 +185,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                     isCompanyProfile: notificationModel.isFromCompany,
                     isPrivateProfile: notificationModel.isPrivateProfile
                 )
-                let uid = FirebaseServiceImpl.shared.getCurrentUserUid() ?? ""
+                
                 let following = data.0?.following?.keys.first(where: { $0 == profileModel.profileId }) != nil
                 
                 if following {
