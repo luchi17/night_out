@@ -2,7 +2,7 @@ import Combine
 import FirebaseAuth
 
 protocol NotificationsUseCase {
-    func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
+    func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
     func removeNotification(notificationId: String)
     func sendNotificationToFollowers(clubName: String)
@@ -15,9 +15,9 @@ struct NotificationsUseCaseImpl: NotificationsUseCase {
         self.repository = repository
     }
 
-    func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never> {
+    func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never> {
         return repository
-            .fetchNotifications(publisherId: publisherId)
+            .observeNotifications(publisherId: publisherId)
             .eraseToAnyPublisher()
     }
     

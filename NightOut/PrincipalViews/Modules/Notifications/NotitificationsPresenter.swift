@@ -64,7 +64,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just([:]).eraseToAnyPublisher()
                 }
-                return presenter.useCases.notificationsUseCase.fetchNotifications(publisherId: uid)
+                return presenter.useCases.notificationsUseCase.observeNotifications(publisherId: uid)
                 
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }

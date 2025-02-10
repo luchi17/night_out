@@ -7,7 +7,7 @@ import FirebaseFirestore
 import FirebaseStorage
 
 protocol NotificationsDatasource {
-    func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
+    func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
     func removeNotificationFromFirebase(notificationId: String)
     func sendNotificationToFollowers(clubName: String)
@@ -36,30 +36,21 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
         
     }
     
-    func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never> {
-        return Future<[String: NotificationModel], Never> { promise in
-            let ref = FirebaseServiceImpl.shared.getNotifications().child(publisherId)
-            
-            ref.getData { error, snapshot in
-                guard error == nil else {
-                    print("Error fetching data: \(error!.localizedDescription)")
-                    promise(.success([:]))
-                    return
-                }
-                
-                do {
-                    if let notifications = try snapshot?.data(as: [String: NotificationModel].self) {
-                        promise(.success(notifications))
-                    } else {
-                        promise(.success([:]))
-                    }
-                } catch {
-                    print("Error decoding data: \(error.localizedDescription)")
-                    promise(.success([:]))
-                }
+    func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never> {
+        let subject = CurrentValueSubject<[String: NotificationModel], Never>([:])
+        
+        let ref = FirebaseServiceImpl.shared.getNotifications().child(publisherId)
+        
+        ref.observe(.value) { snapshot in
+            do {
+                let posts = try snapshot.data(as: [String: NotificationModel].self)
+                subject.send(posts)
+            } catch {
+                print("Error decoding data: \(error.localizedDescription)")
+                subject.send([:])
             }
         }
-        .eraseToAnyPublisher()
+        return subject.eraseToAnyPublisher()
     }
     
     func removeNotificationFromFirebase(notificationId: String) {
