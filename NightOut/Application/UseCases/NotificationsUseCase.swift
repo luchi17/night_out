@@ -3,8 +3,9 @@ import FirebaseAuth
 
 protocol NotificationsUseCase {
     func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
+    func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
-    func removeNotification(notificationId: String)
+    func removeNotification(userId: String, notificationId: String)
     func sendNotificationToFollowers(clubName: String)
 }
 
@@ -21,15 +22,21 @@ struct NotificationsUseCaseImpl: NotificationsUseCase {
             .eraseToAnyPublisher()
     }
     
+    func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never> {
+        return repository
+            .fetchNotifications(publisherId: publisherId)
+            .eraseToAnyPublisher()
+    }
+    
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never> {
         return repository
             .addNotification(model: model, publisherId: publisherId)
             .eraseToAnyPublisher()
     }
     
-    func removeNotification(notificationId: String) {
+    func removeNotification(userId: String, notificationId: String) {
        repository
-            .removeNotificationFromFirebase(notificationId: notificationId)
+            .removeNotificationFromFirebase(userId:userId, notificationId: notificationId)
     }
     
     func sendNotificationToFollowers(clubName: String) {

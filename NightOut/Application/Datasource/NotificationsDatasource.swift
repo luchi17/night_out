@@ -8,6 +8,7 @@ import FirebaseStorage
 
 protocol NotificationsDatasource {
     func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
+    func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
     func removeNotificationFromFirebase(userId: String, notificationId: String)
     func sendNotificationToFollowers(clubName: String)
@@ -34,6 +35,23 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
         }
         .eraseToAnyPublisher()
         
+    }
+    
+    func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never> {
+        let subject = CurrentValueSubject<[String: NotificationModel], Never>([:])
+        
+        let ref = FirebaseServiceImpl.shared.getNotifications().child(publisherId)
+        
+        ref.observeSingleEvent(of: .value) { snapshot in
+            do {
+                let notifs = try snapshot.data(as: [String: NotificationModel].self)
+                subject.send(notifs)
+            } catch {
+                print("Error decoding data: \(error.localizedDescription)")
+                subject.send([:])
+            }
+        }
+        return subject.eraseToAnyPublisher()
     }
     
     func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never> {
