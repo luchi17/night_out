@@ -132,7 +132,7 @@ struct AccountDatasourceImpl: AccountDatasource {
             else {
                 print("Registro exitoso.")
                 Messaging.messaging().token { token, error in
-                    if let error = error {
+                    if error != nil {
                         publisher.send(completion:.failure(.noToken))
                     } else if let token = token {
                         publisher.send(token)
@@ -198,7 +198,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                     if let userModel = try snapshot?.data(as: UserModel.self) {
                         
                         if uid == FirebaseServiceImpl.shared.getCurrentUserUid() {
-                            _ = self.saveUser(model: userModel)
+                            UserDefaults.setUserModel(userModel)
                         }
                         promise(.success(userModel))
                     } else {
