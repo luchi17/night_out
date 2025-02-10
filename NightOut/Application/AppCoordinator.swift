@@ -94,8 +94,10 @@ final class AppCoordinator: ObservableObject {
     
     private func showProfile(model: ProfileModel) {
         let userProfileCoordinator = UserProfileCoordinator(
-            actions: .init(goBack: {
-                self.pop()
+            actions: .init(goBack: { [weak self] in
+                self?.pop()
+            }, openAnotherProfile: { [weak self] profile in
+                self?.showProfile(model: profile)
             }),
             model: model
         )

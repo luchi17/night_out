@@ -104,6 +104,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     
     struct Actions {
         let goBack: VoidClosure
+        let openAnotherProfile: InputClosure<ProfileModel>
     }
     
     struct ViewInputs {
@@ -256,8 +257,22 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         input
             .onUserSelected
             .withUnretained(self)
-            .sink { presenter, _ in
-                
+            .flatMap({ presenter, userGoingModel in
+                presenter.useCases.userDataUseCase.getUserInfo(uid: userGoingModel.id)
+                    .compactMap({ $0 })
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .sink { presenter, userModel in
+                let profileModel = ProfileModel(
+                    profileImageUrl: userModel.image,
+                    username: userModel.username,
+                    fullname: userModel.fullname,
+                    profileId: userModel.uid,
+                    isCompanyProfile: false,
+                    isPrivateProfile: userModel.profileType == .privateProfile
+                )
+                presenter.actions.openAnotherProfile(profileModel)
             }
             .store(in: &cancellables)
     }
