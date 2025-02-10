@@ -4,7 +4,7 @@ import Foundation
 protocol NotificationsRepository {
     func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
-    func removeNotificationFromFirebase(notificationId: String)
+    func removeNotificationFromFirebase(userId: String, notificationId: String)
     func sendNotificationToFollowers(clubName: String)
 }
 
@@ -31,9 +31,9 @@ struct NotificationsRepositoryImpl: NotificationsRepository {
             .eraseToAnyPublisher()
     }
     
-    func removeNotificationFromFirebase(notificationId: String) {
+    func removeNotificationFromFirebase(userId: String, notificationId: String) {
         network
-            .removeNotificationFromFirebase(notificationId: notificationId)
+            .removeNotificationFromFirebase(userId: userId, notificationId: notificationId)
     }
     
     func sendNotificationToFollowers(clubName: String) {

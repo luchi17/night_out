@@ -55,14 +55,6 @@ extension UserDefaults {
         self.objectForKey(forKey: companies, as: CompanyUsersModel.self)
     }
     
-    static func setFollowModel(_ value: FollowModel) {
-        self.setObject(value, forKey: followModel)
-    }
-    
-    static func getFollowModel() -> FollowModel? {
-        self.objectForKey(forKey: companies, as: FollowModel.self)
-    }
-    
     static func setUserModel(_ value: UserModel) {
         self.setObject(value, forKey: userModel)
     }
