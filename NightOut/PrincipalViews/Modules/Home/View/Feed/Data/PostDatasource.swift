@@ -56,7 +56,6 @@ struct PostDatasourceImpl: PostDatasource {
                 do {
                     if let followModel = try snapshot?.data(as: FollowModel.self) {
                         promise(.success(followModel))
-                        UserDefaults.setFollowModel(followModel)
                     } else {
                         promise(.success(nil))
                     }
@@ -79,7 +78,6 @@ struct PostDatasourceImpl: PostDatasource {
             do {
                 let followModel = try snapshot.data(as: FollowModel.self)
                 subject.send(followModel)
-                UserDefaults.setFollowModel(followModel)
             } catch {
                 print("Error decoding data: \(error.localizedDescription)")
                 subject.send(nil)
