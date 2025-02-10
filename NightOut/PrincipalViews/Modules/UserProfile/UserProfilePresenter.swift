@@ -148,7 +148,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         
         listenToInputs(input: input)
         
-        let followObserver =
+        let myFollowObserver =
         useCases.followUseCase.observeFollow(id: myUid)
             .eraseToAnyPublisher()
         
@@ -184,7 +184,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .flatMap({ presenter, _ in
                 Publishers.CombineLatest3(
                     assistanceObserver,
-                    followObserver,
+                    myFollowObserver,
                     myCurrentClubModelPublisher
                 )
             })
@@ -337,13 +337,28 @@ private extension UserProfilePresenterImpl {
                 profileUid: model.profileId
             )
             .withUnretained(self)
-            .sink { presenter, removeOk in
-                if removeOk {
-                    print("not following \(presenter.model.profileId) anymore")
-                } else {
-                    print("Error: not following \(presenter.model.profileId) anymore")
+            .flatMap({ presenter, _ in
+                presenter.useCases
+                    .noficationsUsecase
+                    .fetchNotifications(publisherId: presenter.model.profileId)
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .sink(receiveValue: { presenter, notifications in
+                
+                let matchingNotification = notifications.first { notificationDict in
+                    notificationDict.value.userid == presenter.myUid && notificationDict.value.text == "\(GlobalStrings.shared.startFollowUserText)"
                 }
-            }
+                
+                guard let matchingNotification = matchingNotification else {
+                    return
+                }
+                
+                presenter.useCases.noficationsUsecase.removeNotification(
+                    userId: presenter.model.profileId,
+                    notificationId: matchingNotification.key
+                )
+            })
             .store(in: &cancellables)
             
         default:

@@ -125,7 +125,7 @@ private extension PrivateUserProfilePresenterImpl {
     private func removeUserRequestFollowNotification() {
         useCases
             .noficationsUsecase
-            .observeNotifications(publisherId: model.profileId)
+            .fetchNotifications(publisherId: model.profileId)
             .withUnretained(self)
             .sink(receiveValue: { presenter, notifications in
                 let matchingNotification = notifications.first { notificationDict in
