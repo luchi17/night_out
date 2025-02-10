@@ -111,8 +111,6 @@ final class AppCoordinator: ObservableObject {
         )
         self.push(postDetailCoordinator)
     }
-    
-    
 }
 
 private extension AppCoordinator {

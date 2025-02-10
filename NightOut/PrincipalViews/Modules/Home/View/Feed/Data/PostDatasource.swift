@@ -17,6 +17,8 @@ protocol PostDatasource {
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never>
     func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never>
+    func addPendingRequest(otherUid: String)
+    func removePendingRequest(requesterUid: String, currentUserId: String)
 }
 
 struct PostDatasourceImpl: PostDatasource {
@@ -187,17 +189,21 @@ struct PostDatasourceImpl: PostDatasource {
     }
     
     func rejectFollowRequest(requesterUid: String) {
-        guard let currentUserId = FirebaseServiceImpl.shared.currentUser?.uid else { return }
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         
         removePendingRequest(requesterUid: requesterUid, currentUserId: currentUserId)
     }
     
     // Eliminar la solicitud pendiente de seguimiento
-    private func removePendingRequest(requesterUid: String, currentUserId: String) {
+    func removePendingRequest(requesterUid: String, currentUserId: String) {
         let pendingRef = FirebaseServiceImpl.shared.getFollow().child(currentUserId).child("Pending").child(requesterUid)
         pendingRef.removeValue()
     }
     
-    
-    
+    func addPendingRequest(otherUid: String) {
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        
+        let pendingRef = FirebaseServiceImpl.shared.getFollow().child(otherUid).child("Pending").child(currentUserId)
+        pendingRef.setValue(true)
+    }
 }

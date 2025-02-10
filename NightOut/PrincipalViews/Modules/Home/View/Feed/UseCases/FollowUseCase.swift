@@ -7,6 +7,8 @@ protocol FollowUseCase {
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never>
     func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never>
+    func addPendingRequest(otherUid: String)
+    func removePending(otherUid: String)
 }
 
 struct FollowUseCaseImpl: FollowUseCase {
@@ -34,6 +36,14 @@ struct FollowUseCaseImpl: FollowUseCase {
     
     func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never> {
         return repository.removeFollow(requesterProfileUid: requesterProfileUid, profileUid: profileUid)
+    }
+    
+    func addPendingRequest(otherUid: String) {
+        return repository.addPendingRequest(otherUid: otherUid)
+    }
+    
+    func removePending(otherUid: String) {
+        return repository.addPendingRequest(otherUid: otherUid)
     }
 }
 

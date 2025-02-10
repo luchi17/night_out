@@ -10,6 +10,8 @@ protocol PostsRepository {
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func addFollow(requesterProfileUid: String, profileUid: String, needRemoveFromPending: Bool) -> AnyPublisher<Bool, Never>
     func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never>
+    func addPendingRequest(otherUid: String)
+    func removePending(otherUid: String)
 }
 
 struct PostsRepositoryImpl: PostsRepository {
@@ -68,5 +70,15 @@ struct PostsRepositoryImpl: PostsRepository {
     
     func rejectFollowRequest(requesterUid: String) {
         network.rejectFollowRequest(requesterUid: requesterUid)
+    }
+    
+    func addPendingRequest(otherUid: String) {
+        network.addPendingRequest(otherUid: otherUid)
+    }
+    
+    func removePending(otherUid: String) {
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        network
+            .removePendingRequest(requesterUid: currentUserId, currentUserId: otherUid)
     }
 }
