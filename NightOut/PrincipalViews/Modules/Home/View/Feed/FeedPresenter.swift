@@ -102,7 +102,7 @@ final class FeedPresenterImpl: FeedPresenter {
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(nil).eraseToAnyPublisher()
                 }
-                return presenter.useCases.followUseCase.fetchFollow(id: uid)
+                return presenter.useCases.followUseCase.observeFollow(id: uid)
                 
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }
