@@ -8,6 +8,7 @@ struct ProfileModel: Hashable {
     var fullname: String?
     var profileId: String
     var isCompanyProfile: Bool
+    var isPrivateProfile: Bool
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(profileId)
