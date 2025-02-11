@@ -3,6 +3,7 @@ import SwiftUI
 struct ForgotPasswordView: View {
     
     @State var email: String = ""
+    @Binding var toast: ToastType?
     
     var sendEmailPassword: InputClosure<String>
     
@@ -44,9 +45,19 @@ struct ForgotPasswordView: View {
             Spacer()
         }
         .padding(.horizontal, 20)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             Color.black
+        )
+        .showToast(
+            error: (
+                type: toast,
+                showCloseButton: false,
+                onDismiss: {
+                    toast = nil
+                }
+            ),
+            isIdle: false,
+            extraPadding: .none
         )
     }
 }

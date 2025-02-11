@@ -9,6 +9,7 @@ final class LoginViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var loading: Bool = false
+    @Published var passwordToast: ToastType?
     @Published var toast: ToastType?
     
     @Published var showForgotPwdView: Bool = false
@@ -258,7 +259,7 @@ private extension LoginPresenterImpl {
     
     private func sendPasswordResetEmail(email: String) {
         guard isValidEmail(email) else {
-            self.viewModel.toast = .custom(.init(title: "", description: " Por favor, ingresa un correo válido.", image: nil))
+            self.viewModel.passwordToast = .custom(.init(title: "", description: " Por favor, ingresa un correo válido.", image: nil))
             return
         }
         
@@ -267,10 +268,10 @@ private extension LoginPresenterImpl {
         Auth.auth().sendPasswordReset(withEmail: email) { [weak self] error in
             self?.viewModel.loading = false
             if let error = error {
-                self?.viewModel.toast = .custom(.init(title: "Error", description: "Error al enviar correo \(error.localizedDescription).", image: nil))
+                self?.viewModel.passwordToast = .custom(.init(title: "Error", description: "Error al enviar correo \(error.localizedDescription).", image: nil))
                 print("Error al enviar correo: \(error.localizedDescription)")
             } else {
-                self?.viewModel.toast = .success(.init(title: "", description: "Correo de restablecimiento enviado a \(email). Por favor revisa tu bandeja.", image: nil))
+                self?.viewModel.passwordToast = .success(.init(title: "", description: "Correo de restablecimiento enviado a \(email). Por favor revisa tu bandeja.", image: nil))
                 self?.viewModel.showForgotPwdView = false
                 print("Correo de restablecimiento enviado a \(email)")
             }
