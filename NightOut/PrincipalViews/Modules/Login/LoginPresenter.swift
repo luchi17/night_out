@@ -11,6 +11,8 @@ final class LoginViewModel: ObservableObject {
     @Published var loading: Bool = false
     @Published var toast: ToastType?
     
+    @Published var showForgotPwdView: Bool = false
+    
     init() { }
     
 }
@@ -42,6 +44,7 @@ final class LoginPresenterImpl: LoginPresenter {
         let signupCompany: AnyPublisher<Void, Never>
         let signupWithGoogle: AnyPublisher<Void, Never>
         let signupWithApple: AnyPublisher<Void, Never>
+        let sendEmailForgotPwd: AnyPublisher<String, Never>
     }
     
     var viewModel: LoginViewModel
@@ -67,6 +70,14 @@ final class LoginPresenterImpl: LoginPresenter {
         signupCompanyListener(input: input)
         loginGoogleListener(input: input)
         loginAppleListener(input: input)
+        
+        input
+            .sendEmailForgotPwd
+            .withUnretained(self)
+            .sink { presenter, emailPwd in
+                presenter.sendPasswordResetEmail(email: emailPwd)
+            }
+            .store(in: &cancellables)
     }
     
     func loginListener(input: LoginPresenterImpl.ViewInputs) {
@@ -98,7 +109,7 @@ final class LoginPresenterImpl: LoginPresenter {
             })
             .withUnretained(self)
             .flatMap({ presenter, _ -> AnyPublisher<Bool, Never> in
-                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
+                presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
                     .map({ companies in
                         let imCompany = companies?.users.map({ $0.value.email }).contains(presenter.viewModel.email.lowercased()) ?? false
                         return imCompany
@@ -170,9 +181,9 @@ final class LoginPresenterImpl: LoginPresenter {
     }
     
     func loginAppleListener(input: LoginPresenterImpl.ViewInputs) {
-//        input
-//            .signupWithApple
-//            .withUnretained(self)
+        //        input
+        //            .signupWithApple
+        //            .withUnretained(self)
         
     }
 }
@@ -229,7 +240,7 @@ private extension LoginPresenterImpl {
                 .map({ _ in })
                 .eraseToAnyPublisher()
         } else {
-           getUserInfo()
+            getUserInfo()
                 .filter { [weak self] userModel in
                     if userModel == nil {
                         self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))
@@ -243,5 +254,31 @@ private extension LoginPresenterImpl {
                 .map({ _ in })
                 .eraseToAnyPublisher()
         }
+    }
+    
+    private func sendPasswordResetEmail(email: String) {
+        guard isValidEmail(email) else {
+            self.viewModel.toast = .custom(.init(title: "", description: " Por favor, ingresa un correo válido.", image: nil))
+            return
+        }
+        
+        viewModel.loading = true
+        
+        Auth.auth().sendPasswordReset(withEmail: email) { [weak self] error in
+            self?.viewModel.loading = false
+            if let error = error {
+                self?.viewModel.toast = .custom(.init(title: "Error", description: "Error al enviar correo \(error.localizedDescription).", image: nil))
+                print("Error al enviar correo: \(error.localizedDescription)")
+            } else {
+                self?.viewModel.toast = .success(.init(title: "", description: "Correo de restablecimiento enviado a \(email). Por favor revisa tu bandeja.", image: nil))
+                self?.viewModel.showForgotPwdView = false
+                print("Correo de restablecimiento enviado a \(email)")
+            }
+        }
+    }
+    
+    private func isValidEmail(_ email: String) -> Bool {
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}")
+        return emailPredicate.evaluate(with: email)
     }
 }

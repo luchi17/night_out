@@ -21,6 +21,8 @@ struct LoginView: View, Hashable {
     private let signupCompanyPublisher = PassthroughSubject<Void, Never>()
     private let signupGooglePublisher = PassthroughSubject<Void, Never>()
     private let signupApplePublisher = PassthroughSubject<Void, Never>()
+    private let sendEmailPasswordPublisher = PassthroughSubject<String, Never>()
+    
     
     @State private var showRegisterAlert = false
     
@@ -33,7 +35,7 @@ struct LoginView: View, Hashable {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack {
             Image("logo_amarillo")
                 .resizable()
                 .scaledToFit()
@@ -41,42 +43,46 @@ struct LoginView: View, Hashable {
                 .padding(.top, 90)
             
             // Email Input
-            TextField("Email...", text: $viewModel.email)
+            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.yellow))
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding()
-                .background(Color.white.opacity(0.2)) // Custom input background color
-                .foregroundColor(.white)
+                .background(Color.clear)
+                .foregroundColor(.yellow)
+                .accentColor(.yellow)
                 .cornerRadius(10)
+                .padding(.bottom, 12)
             
             // Password Input
-            SecureField("Password...", text: $viewModel.password)
+            SecureField("",text: $viewModel.password, prompt: Text("Password...").foregroundColor(.yellow))
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding()
-                .background(Color.white.opacity(0.2)) // Custom input background color
-                .foregroundColor(.white)
+                .background(Color.clear)
+                .foregroundColor(.yellow)
+                .accentColor(.yellow)
                 .cornerRadius(10)
+                .padding(.bottom, 20)
             
             // Login Button
             Button(action: {
                 loginPublisher.send()
             }) {
-                Text("Log in")
+                Text("Entrar".uppercased())
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.yellow)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.yellow) // Adjust as needed for your button style
+                    .background(Color.gray.opacity(0.5))
                     .cornerRadius(25)
                     .shadow(radius: 4)
             }
-            .padding(.top, 20)
-            
-            Spacer()
-            
-            appleLoginButton
+            .padding(.bottom, 12)
             
             googleLoginButton
             
+            appleLoginButton
+            
+            forgotPasswordButton
+
             Spacer()
             
             signupButton
@@ -84,10 +90,7 @@ struct LoginView: View, Hashable {
         }
         .padding(.horizontal, 20)
         .background(
-            Image("imagen_inicio")
-                .resizable()
-                .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
+            Color.black
         )
         .alert(isPresented: $showRegisterAlert) {
             Alert(
@@ -103,6 +106,13 @@ struct LoginView: View, Hashable {
                 })
             )
         }
+        .sheet(isPresented: $viewModel.showForgotPwdView) {
+            ForgotPasswordView(
+                sendEmailPassword: sendEmailPasswordPublisher.send
+            )
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
 //        .onAppear {
 //            viewModel.email = ""
 //            viewModel.password = ""
@@ -115,7 +125,8 @@ struct LoginView: View, Hashable {
                     viewModel.toast = nil
                 }
             ),
-            isIdle: viewModel.loading
+            isIdle: viewModel.loading,
+            extraPadding: .small
         )
         .navigationBarBackButtonHidden()
     }
@@ -124,36 +135,42 @@ struct LoginView: View, Hashable {
         Button(action: {
             signupGooglePublisher.send()
         }) {
-            HStack {
-                Image("google", bundle: .main)
-                    .frame(width: 30, height: 30)
-                    .scaledToFit()
-                    .padding(.leading, 12)
-                Text("Iniciar sesión con Google")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(Color.black)
-                    .frame(maxWidth: .infinity)
-            }
-            .padding(.vertical, 12)
-            .background(Color.gray.opacity(0.5))
+            Text("Iniciar sesión con Google".uppercased())
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(.yellow)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.gray.opacity(0.5))
+                .cornerRadius(25)
+                .shadow(radius: 4)
         }
         .cornerRadius(25)
+    }
+    
+    private var forgotPasswordButton: some View {
+        Button(action: {
+            viewModel.showForgotPwdView.toggle()
+        }) {
+            HStack {
+                Text("¿Olvidaste tu contraseña?")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(Color.white)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.top, 12)
+        }
     }
     
     private var signupButton: some View {
         Button(action: {
             showRegisterAlert = true
         }) {
-            Text("Need new account? Sign up")
+            Text("¿Cuenta nueva? Regístrate".uppercased())
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.purple)
-                .cornerRadius(25)
-                .shadow(radius: 4)
         }
-        .padding(.bottom, 40)
+        .padding(.bottom, 50)
     }
     
     private var appleLoginButton: some View {
@@ -162,13 +179,13 @@ struct LoginView: View, Hashable {
         }) {
             Text("Iniciar sesión con Apple")
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(Color.black)
+                .foregroundColor(Color.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.2))
+                .background(Color.gray.opacity(0.5))
                 .cornerRadius(25)
         }
-        .padding(.top, 16)
+        .padding(.top, 12)
     }
     
 }
@@ -181,7 +198,8 @@ private extension LoginView {
             signupUser: signupUserPublisher.eraseToAnyPublisher(),
             signupCompany: signupCompanyPublisher.eraseToAnyPublisher(),
             signupWithGoogle: signupGooglePublisher.eraseToAnyPublisher(),
-            signupWithApple: signupApplePublisher.eraseToAnyPublisher()
+            signupWithApple: signupApplePublisher.eraseToAnyPublisher(),
+            sendEmailForgotPwd: sendEmailPasswordPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
