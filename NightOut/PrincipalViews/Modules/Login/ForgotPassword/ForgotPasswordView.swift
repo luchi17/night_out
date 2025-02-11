@@ -1,16 +1,36 @@
 import SwiftUI
+import Combine
 
-struct ForgotPasswordView: View {
+struct ForgotPasswordView: View, Hashable {
+    
+    public let id = UUID()
+    
+    static func == (lhs: ForgotPasswordView, rhs: ForgotPasswordView) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
     
     @State var email: String = ""
-    @Binding var toast: ToastType?
     
-    var sendEmailPassword: InputClosure<String>
+    private let sendEmailPasswordPublisher = PassthroughSubject<String, Never>()
+    
+    @ObservedObject var viewModel: ForgotPasswordViewModel
+    let presenter: ForgotPasswordPresenter
+    
+    init(
+        presenter: ForgotPasswordPresenter
+    ) {
+        self.presenter = presenter
+        viewModel = presenter.viewModel
+        bindViewModel()
+    }
     
     var body: some View {
         
         VStack {
-            
             Text("Recuperar Contraseña".uppercased())
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.white)
@@ -29,7 +49,7 @@ struct ForgotPasswordView: View {
                 .padding(.top, 20)
             
             Button(action: {
-                sendEmailPassword(email)
+                sendEmailPasswordPublisher.send(email)
             }) {
                 Text("Enviar".uppercased())
                     .font(.system(size: 17, weight: .bold))
@@ -50,14 +70,24 @@ struct ForgotPasswordView: View {
         )
         .showToast(
             error: (
-                type: toast,
+                type: viewModel.passwordToast,
                 showCloseButton: false,
                 onDismiss: {
-                    toast = nil
+                    viewModel.passwordToast = nil
                 }
             ),
-            isIdle: false,
+            isIdle: viewModel.loading,
             extraPadding: .none
         )
+    }
+}
+
+private extension ForgotPasswordView {
+    
+    func bindViewModel() {
+        let input = ForgotPasswordPresenterImpl.ViewInputs(
+            sendEmailForgotPwd: sendEmailPasswordPublisher.eraseToAnyPublisher()
+        )
+        presenter.transform(input: input)
     }
 }

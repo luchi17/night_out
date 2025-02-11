@@ -21,7 +21,7 @@ struct LoginView: View, Hashable {
     private let signupCompanyPublisher = PassthroughSubject<Void, Never>()
     private let signupGooglePublisher = PassthroughSubject<Void, Never>()
     private let signupApplePublisher = PassthroughSubject<Void, Never>()
-    private let sendEmailPasswordPublisher = PassthroughSubject<String, Never>()
+    private let openForgotPasswordPublisher = PassthroughSubject<Void, Never>()
     
     
     @State private var showRegisterAlert = false
@@ -106,14 +106,6 @@ struct LoginView: View, Hashable {
                 })
             )
         }
-        .sheet(isPresented: $viewModel.showForgotPwdView) {
-            ForgotPasswordView(
-                toast: $viewModel.passwordToast,
-                sendEmailPassword: sendEmailPasswordPublisher.send
-            )
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
-        }
 //        .onAppear {
 //            viewModel.email = ""
 //            viewModel.password = ""
@@ -150,7 +142,7 @@ struct LoginView: View, Hashable {
     
     private var forgotPasswordButton: some View {
         Button(action: {
-            viewModel.showForgotPwdView.toggle()
+            openForgotPasswordPublisher.send()
         }) {
             HStack {
                 Text("¿Olvidaste tu contraseña?")
@@ -200,7 +192,7 @@ private extension LoginView {
             signupCompany: signupCompanyPublisher.eraseToAnyPublisher(),
             signupWithGoogle: signupGooglePublisher.eraseToAnyPublisher(),
             signupWithApple: signupApplePublisher.eraseToAnyPublisher(),
-            sendEmailForgotPwd: sendEmailPasswordPublisher.eraseToAnyPublisher()
+            openForgotPassword: openForgotPasswordPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

@@ -117,6 +117,11 @@ final class AppCoordinator: ObservableObject {
         )
         self.push(postDetailCoordinator)
     }
+    
+    private func showForgotPassword() {
+        let forgotPasswordCoordinator = ForgotPasswordCoordinator()
+        self.push(forgotPasswordCoordinator)
+    }
 }
 
 private extension AppCoordinator {
@@ -131,7 +136,8 @@ private extension AppCoordinator {
         return .init(
             goToTabView: showTabView,
             goToRegisterUser: showRegisterUserView,
-            goToRegisterCompany: showRegisterCompanyView
+            goToRegisterCompany: showRegisterCompanyView,
+            goToForgotPassword: showForgotPassword
         )
     }
     

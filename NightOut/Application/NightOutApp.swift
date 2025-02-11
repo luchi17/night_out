@@ -22,6 +22,11 @@ struct ContentView: View {
                 .navigationDestination(for: LoginCoordinator.self, destination: { coordinator in
                     coordinator
                         .build()
+                        .navigationDestination(for: ForgotPasswordCoordinator.self) { coordinator in
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
+                        }
                         .navigationDestination(for: SignupCoordinator.self) { coordinator in
                             coordinator
                                 .build()
