@@ -86,7 +86,7 @@ struct SignupView: View {
                 }
             ),
             isIdle: viewModel.loading,
-            toastExtraPadding: true
+            extraPadding: .large
         )
     }
     

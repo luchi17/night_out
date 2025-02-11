@@ -132,7 +132,7 @@ struct SignupCompanyView: View {
                 }
             ),
             isIdle: viewModel.loading,
-            toastExtraPadding: true
+            extraPadding: .large
         )
     }
     

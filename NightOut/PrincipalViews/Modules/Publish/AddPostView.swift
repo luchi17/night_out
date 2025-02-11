@@ -133,7 +133,7 @@ struct AddPostView: View {
                 }
             ),
             isIdle: false,
-            toastExtraPadding: true
+            extraPadding: .large
         )
         .onAppear {
             cameraModel.startSession()

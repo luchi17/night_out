@@ -1,12 +1,29 @@
 import SwiftUI
 
+public enum ToastPadding {
+    case small
+    case large
+    case none
+    
+    var value: CGFloat {
+        switch self {
+        case .small:
+            return 10
+        case .large:
+            return 42
+        case .none:
+            return 0
+        }
+    }
+}
+
 struct ToastView: View {
     var type: ToastType
     var onDismiss: VoidClosure?
     var showCloseButton: Bool = false
-    var showExtraPadding: Bool = false
+    var toastPadding: Bool = false
     
-    var extraPadding: CGFloat = 42
+    var extraPadding: ToastPadding = .none
     
     @State private var isVisible = false
     
@@ -53,7 +70,7 @@ struct ToastView: View {
                         .padding(.trailing, 20)
                     }
                 }
-                .padding(.top, showExtraPadding ? (15 + extraPadding) : 15) //extraPadding
+                .padding(.top, 15 + extraPadding.value) //extraPadding
                 .padding(.bottom, 15)
                 .background(type.backgroundColor) // Fondo azul claro, corner radius: , in: RoundedRectangle(cornerRadius: 10)
                 .transition(.move(edge: .top))  // Transición desde arriba
@@ -156,7 +173,7 @@ public extension View {
     func showToast(
         error: (type: ToastType?, showCloseButton: Bool, onDismiss: VoidClosure)?,
         isIdle: Bool,
-        toastExtraPadding: Bool = false
+        extraPadding: ToastPadding = ToastPadding.none
     ) -> some View {
         VStack(spacing: 0) {
             if isIdle {
@@ -173,7 +190,7 @@ public extension View {
                                 type: type,
                                 onDismiss: error.onDismiss,
                                 showCloseButton: error.showCloseButton,
-                                showExtraPadding: toastExtraPadding
+                                extraPadding: extraPadding
                             )
                         )
                 } else {

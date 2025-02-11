@@ -35,7 +35,7 @@ struct LoginView: View, Hashable {
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             Image("logo_amarillo")
                 .resizable()
                 .scaledToFit()
@@ -108,6 +108,7 @@ struct LoginView: View, Hashable {
         }
         .sheet(isPresented: $viewModel.showForgotPwdView) {
             ForgotPasswordView(
+                toast: $viewModel.passwordToast,
                 sendEmailPassword: sendEmailPasswordPublisher.send
             )
                 .presentationDetents([.large])
@@ -126,7 +127,7 @@ struct LoginView: View, Hashable {
                 }
             ),
             isIdle: viewModel.loading,
-            extraPadding: .small
+            extraPadding: .none
         )
         .navigationBarBackButtonHidden()
     }
