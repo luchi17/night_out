@@ -10,7 +10,7 @@ public enum ToastPadding {
         case .small:
             return 10
         case .large:
-            return 42
+            return 55
         case .none:
             return 0
         }
