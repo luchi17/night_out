@@ -177,11 +177,11 @@ public extension View {
     ) -> some View {
         VStack(spacing: 0) {
             if isIdle {
-                ZStack(alignment: .top) {
+                ZStack {
                     self
                     DefaultIdleView()
                 }
-                .ignoresSafeArea()
+//                .ignoresSafeArea()
             } else {
                 if let error = error, let type = error.type {
                     self
