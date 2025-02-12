@@ -8,6 +8,11 @@ struct UserPostProfileInfo {
     var fullName: String
 }
 
+struct IdentifiableImage: Identifiable {
+    let id = UUID()
+    let image: UIImage
+}
+
 final class UserPostProfileViewModel: ObservableObject {
     @Published var profileImageUrl: String?
     @Published var username: String = "Nombre no disponible"
@@ -15,7 +20,8 @@ final class UserPostProfileViewModel: ObservableObject {
     @Published var followersCount: String = "0"
     @Published var discosCount: String = "0"
     @Published var copasCount: String = "0"
-    
+    @Published var images: [IdentifiableImage] = []
+
     init(profileImageUrl: String? = nil, username: String, fullname: String, discosCount: String, copasCount: String) {
         self.profileImageUrl = profileImageUrl
         self.username = username
@@ -34,6 +40,7 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     
     struct UseCases {
         let followUseCase: FollowUseCase
+        let postsUseCase: PostsUseCase
     }
     
     struct Actions {
@@ -71,16 +78,58 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     }
     
     func transform(input: UserPostProfilePresenterImpl.ViewInputs) {
-        input
+        let postsPublisher = input
             .viewDidLoad
             .withUnretained(self)
             .flatMap({ presenter, _ in
                 presenter.useCases.followUseCase.fetchFollow(id: presenter.info.profileId)
+                    .handleEvents(receiveOutput: { [weak self] followModel in
+                        self?.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
+                        
+                    })
+                    .eraseToAnyPublisher()
             })
+            .filter({ _ in !FirebaseServiceImpl.shared.getImUser() })
             .withUnretained(self)
-            .sink { presenter, followModel in
-                presenter.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
+            .flatMap({ presenter, _ in
+                presenter.useCases.postsUseCase.fetchPosts()
+                    .map { posts in
+                        let matchingPosts = posts.filter { post in
+                            return post.value.publisherId == presenter.info.profileId
+                        }.values
+                        return Array(matchingPosts)
+                    }
+                    .eraseToAnyPublisher()
+            })
+            .eraseToAnyPublisher()
+        
+        postsPublisher
+            .withUnretained(self)
+            .flatMap { presenter, posts in
+                let publishers: [AnyPublisher<IdentifiableImage, Never>] = posts.map { post in
+                    
+                    presenter.getPostImagePublisher(image: post.postImage)
+                        .compactMap({ $0 })
+                        .map({ IdentifiableImage(image: $0 )})
+                        .eraseToAnyPublisher()
+                }
+                return Publishers.MergeMany(publishers)
+                    .collect()
+                    .eraseToAnyPublisher()
+            }
+            .withUnretained(self)
+            .sink { presenter, images in
+                presenter.viewModel.images = images
             }
             .store(in: &cancellables)
+
+    }
+    
+    func getPostImagePublisher(image: String?) -> AnyPublisher<UIImage?, Never> {
+        if let image = image, let url = URL(string: image) {
+            return KingFisherImage.fetchImagePublisher(url: url)
+        }
+        
+        return Just(nil).eraseToAnyPublisher()
     }
 }

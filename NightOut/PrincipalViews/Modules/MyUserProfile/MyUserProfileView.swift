@@ -87,8 +87,8 @@ struct MyUserProfileView: View {
                 CounterView(count: viewModel.followersCount, label: "Seguidores")
                 if FirebaseServiceImpl.shared.getImUser() {
                     CounterView(count: viewModel.discosCount, label: "Discotecas")
+                    CounterView(count: viewModel.copasCount, label: "Copas")
                 }
-                CounterView(count: viewModel.copasCount, label: "Copas")
             }
             .padding(.top, 16)
             

@@ -2,7 +2,9 @@ import SwiftUI
 import Combine
 
 struct UserPostProfileView: View {
-
+    
+    @State private var selectedImage: IdentifiableImage? = nil
+    
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: UserPostProfileViewModel
@@ -16,11 +18,15 @@ struct UserPostProfileView: View {
         bindViewModel()
     }
     
+    let columns = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
+    ]
+    
     var body: some View {
         ZStack {
-            Image("fondo_azul")
-                .resizable()
-                .scaledToFill()
+            Color.black
                 .edgesIgnoringSafeArea(.all)
             VStack {
                 // Imagen de perfil
@@ -39,27 +45,52 @@ struct UserPostProfileView: View {
                         .clipShape(Circle())
                         .padding(.top, 40)
                 }
-
+                
                 // Nombre y username
                 Text(viewModel.fullname)
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.top, 8)
-
+                
                 Text(viewModel.username)
                     .font(.system(size: 14))
                     .foregroundColor(.white)
-
+                
                 // Contadores
                 HStack(spacing: 8) {
                     CounterView(count: viewModel.followersCount, label: "Seguidores")
-                    CounterView(count: viewModel.discosCount, label: "Discotecas")
-                    CounterView(count: viewModel.copasCount, label: "Copas")
+                    if FirebaseServiceImpl.shared.getImUser() {
+                        CounterView(count: viewModel.discosCount, label: "Discotecas")
+                        CounterView(count: viewModel.copasCount, label: "Copas")
+                    }
                 }
-                .padding(.top, 16)
+                .padding(.vertical, 16)
                 
+                if !FirebaseServiceImpl.shared.getImUser() {
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 10) {
+                            ForEach(viewModel.images, id: \.id) { imageName in
+                                Image(uiImage: imageName.image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 100, height: 100)
+                                    .clipped()
+                                    .onTapGesture {
+                                        selectedImage = imageName
+                                    }
+                            }
+                        }
+                        .padding()
+                    }
+                    
+                }
                 Spacer()
             }
+        }
+        .fullScreenCover(item: $selectedImage) { imageName in
+            FullScreenImageView(imageName: imageName, onClose: {
+                selectedImage = nil
+            })
         }
         .onAppear {
             viewDidLoadPublisher.send()
@@ -80,7 +111,7 @@ private extension UserPostProfileView {
 struct CounterView: View {
     var count: String
     var label: String
-
+    
     var body: some View {
         VStack {
             Text(count)
@@ -97,4 +128,49 @@ struct CounterView: View {
     }
 }
 
-
+// Vista de imagen a pantalla completa con zoom
+struct FullScreenImageView: View {
+    let imageName: IdentifiableImage
+    let onClose: () -> Void
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+    
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            Image(uiImage: imageName.image)
+                .resizable()
+                .scaledToFit()
+                .scaleEffect(scale)
+                .gesture(
+                    MagnificationGesture()
+                        .onChanged { value in
+                            scale = lastScale * value
+                        }
+                        .onEnded { _ in
+                            lastScale = scale
+                        }
+                )
+                .onTapGesture(count: 2) {
+                    withAnimation {
+                        scale = scale > 1 ? 1 : 2
+                        lastScale = scale
+                    }
+                }
+            
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.white)
+                            .font(.largeTitle)
+                            .padding()
+                    }
+                }
+                Spacer()
+            }
+        }
+    }
+}
