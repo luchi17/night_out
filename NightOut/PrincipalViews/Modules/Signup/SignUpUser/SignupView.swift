@@ -20,48 +20,64 @@ struct SignupView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 10) {
             // Logo
-            Image("logo_amarillo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 162, height: 157)
-                .padding(.top, 90)
-            
-            TextField("Full Name...", text: $viewModel.fullName)
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding()
-                .background(Color.white.opacity(0.2)) // Custom input background color
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            
-            // Password Input
-            TextField("User Name...", text: $viewModel.userName)
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding()
-                .background(Color.white.opacity(0.2)) // Custom input background color
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            
-            // Email Input
-            TextField("Email...", text: $viewModel.email)
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding()
-                .background(Color.white.opacity(0.2)) // Custom input background color
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            
-            // Password Input
-            SecureField("Password...", text: $viewModel.password)
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding()
-                .background(Color.white.opacity(0.2)) // Custom input background color
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            
-            TermsAndConditionsView(isAccepted: $termsAccepted)
             
             Spacer()
+            
+            Image("nightout")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 90)
+                .foregroundStyle(.white)
+            
+            imagePicker
+                .padding(.bottom, 20)
+            
+            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(.all, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                )
+                .foregroundColor(.white)
+                .accentColor(.white)
+            
+            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(.all, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                )
+                .foregroundColor(.white)
+                .accentColor(.white)
+            
+            // Email Input
+            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(.all, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                )
+                .foregroundColor(.white)
+                .accentColor(.white)
+            
+            // Password Input
+            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(.all, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                )
+                .foregroundColor(.white)
+                .accentColor(.white)
+                .padding(.bottom, 10)
+            
+            genderView
+                .padding(.bottom, 10)
+            
+            TermsAndConditionsView(isAccepted: $termsAccepted)
+                .padding(.bottom, 10)
             
             registerButton
             
@@ -72,10 +88,7 @@ struct SignupView: View {
         }
         .padding(.horizontal, 20)
         .background(
-            Image("imagen_inicio")
-                .resizable()
-                .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
+            Color.black
         )
         .showToast(
             error: (
@@ -86,43 +99,74 @@ struct SignupView: View {
                 }
             ),
             isIdle: viewModel.loading,
-            extraPadding: .large
+            extraPadding: .none
         )
+        .onTapGesture {
+            hideKeyboard()
+        }
+    }
+    
+    private var genderView: some View {
+        HStack {
+            GenderCheckbox(gender: .male, selectedGender: $viewModel.gender)
+            GenderCheckbox(gender: .female, selectedGender: $viewModel.gender)
+            
+            Spacer()
+        }
+    }
+    
+    private var imagePicker: some View {
+        ImagePickerView(
+            imageData: $viewModel.imageData,
+            selectedImage: $viewModel.selectedImage
+        ) {
+            ZStack {
+                Circle()
+                    .stroke(Color.white, lineWidth: 2) // Borde blanco
+                    .frame(width: 120, height: 120) // Tamaño del círculo
+                if let selectedImage = viewModel.selectedImage {
+                    Image(uiImage: selectedImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 120, height: 120)
+                        .clipShape(Circle())
+                } else {
+                    Image("profile")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 120, height: 120)
+                        .clipShape(Circle())
+                }
+            }
+        }
     }
     
     private var registerButton: some View {
         Button(action: {
             signupPublisher.send()
         }) {
-            Text("Register")
+            Text("Registrarse")
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(!termsAccepted ? Color.gray : Color.yellow)
-                .foregroundColor(.white)
                 .cornerRadius(25)
-                .shadow(radius: 4)
         }
         .disabled(!termsAccepted)
-        .padding(.bottom, 40)
-        
+        .padding(.bottom, 30)
     }
     
     private var alreadyHaveAnAccountButton: some View {
         Button(action: {
             loginPublisher.send()
         }) {
-            Text("Already have an account account? Sign in")
+            Text("¿Tienes cuenta? Inicia Sesión")
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.purple)
-                .cornerRadius(25)
-                .shadow(radius: 4)
         }
-        .padding(.bottom, 100)
+        .padding(.bottom, 60)
     }
     
 }
@@ -135,5 +179,40 @@ private extension SignupView {
             login: loginPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
+    }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+
+struct GenderCheckbox: View {
+    let gender: Gender
+    @Binding var selectedGender: Gender?
+    
+    var body: some View {
+        Button(action: {
+            selectedGender = gender
+        }) {
+            HStack {
+                ZStack {
+                    Circle()
+                        .stroke(Color.white, lineWidth: 2) // Círculo exterior
+                        .frame(width: 24, height: 24)
+                    
+                    if selectedGender == gender {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 20, height: 20) // Círculo interno más pequeño para dejar padding
+                    }
+                }
+                
+                Text(gender.title)
+                    .foregroundColor(.white)
+                    .font(.system(size: 14, weight: .medium))
+            }
+        }
+        .buttonStyle(PlainButtonStyle()) // Evita la animación del botón
     }
 }

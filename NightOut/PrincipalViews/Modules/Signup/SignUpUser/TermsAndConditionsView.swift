@@ -7,21 +7,23 @@ struct TermsAndConditionsView: View {
     var body: some View {
         HStack {
             Toggle(isOn: $isAccepted) {
-                HStack {
-                    Text("He leído y acepto los ")
-                        .foregroundColor(.black)
+                HStack(spacing: 0) {
+                    Text("Acepto los ")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white)
                     Button(action: {
-                        // Mostrar la sheet con los términos y condiciones
                         showTermsSheet.toggle()
                     }) {
                         Text("Términos y Condiciones")
+                            .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.blue) // Color azul para el texto
                     }
                 }
             }
             .toggleStyle(CheckboxToggleStyle())
+            
+            Spacer()
         }
-        .padding()
         .sheet(isPresented: $showTermsSheet) {
             // Vista que se muestra en la sheet
             TermsAndConditionsSheetView(onCloseTap: {
@@ -88,7 +90,10 @@ struct CheckboxToggleStyle: ToggleStyle {
         }) {
             HStack {
                 Image(systemName: configuration.isOn ? "checkmark.square" : "square")
-                    .foregroundColor(configuration.isOn ? .blue : .gray)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(.white)
                 configuration.label
             }
         }

@@ -7,9 +7,15 @@ final class SignupViewModel: ObservableObject {
     @Published var userName: String = ""
     @Published var fullName: String = ""
     @Published var email: String = ""
+    @Published var gender: Gender?
     @Published var password: String = ""
     @Published var loading: Bool = false
     @Published var toast: ToastType?
+    @Published var selectedImage: UIImage?
+    @Published var imageData: Data? = nil
+    @Published var fcmToken: String = ""
+    
+    var imageUrl: String?
     
     init() { }
     
@@ -25,6 +31,7 @@ final class SignupPresenterImpl: SignupPresenter {
     struct UseCases {
         let signupUseCase: SignupUseCase
         let saveUserUseCase: SaveUserUseCase
+        let saveCompanyUseCase: SaveCompanyUseCase
     }
     
     struct Actions {
@@ -87,9 +94,33 @@ final class SignupPresenterImpl: SignupPresenter {
                 }
             })
            
-        signuppublisher
+        let saveImagePublisher = signuppublisher
             .withUnretained(self)
-            .performRequest(request: { presenter, fcmToken -> AnyPublisher<(Bool, UserModel?), Never> in
+            .flatMapLatest({ presenter, fcmToken -> AnyPublisher<(String?, String), Never> in
+                guard let imageData = presenter.viewModel.imageData else {
+                    return Just((nil, fcmToken))
+                        .eraseToAnyPublisher()
+                }
+                return presenter.useCases.saveCompanyUseCase.executeGetImageUrl(imageData: imageData)
+                    .map({ ($0, fcmToken)})
+                    .handleEvents(receiveOutput: { [weak self] data in
+                        if let imageUrl = data.0 {
+                            self?.viewModel.imageUrl = imageUrl
+                        } else {
+                            print("Image url no se ha podido obtener")
+                        }
+                        self?.viewModel.fcmToken = data.1
+                        
+                    }, receiveRequest: { [weak self] _ in
+                        self?.viewModel.loading = true
+                    })
+                    .eraseToAnyPublisher()
+            })
+            .eraseToAnyPublisher()
+        
+        saveImagePublisher
+            .withUnretained(self)
+            .performRequest(request: { presenter, imageUrl -> AnyPublisher<(Bool, UserModel?), Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just((false, nil))
                         .eraseToAnyPublisher()
@@ -99,7 +130,9 @@ final class SignupPresenterImpl: SignupPresenter {
                     fullname: presenter.viewModel.fullName,
                     username: presenter.viewModel.userName.lowercased(),
                     email: presenter.viewModel.email.lowercased(),
-                    fcm_token: fcmToken
+                    gender: presenter.viewModel.gender?.firebaseTitle,
+                    image: presenter.viewModel.imageUrl,
+                    fcm_token: presenter.viewModel.fcmToken
                 )
                 return presenter.useCases.saveUserUseCase.execute(model: model)
                     .map({ ($0, model)})
@@ -112,6 +145,7 @@ final class SignupPresenterImpl: SignupPresenter {
                     .eraseToAnyPublisher()
             })
             .sink(receiveValue: { [weak self] data in
+                self?.viewModel.loading = false
                 if data.0, let model = data.1 {
                     UserDefaults.setUserModel(model)
                     self?.actions.goToTabView()

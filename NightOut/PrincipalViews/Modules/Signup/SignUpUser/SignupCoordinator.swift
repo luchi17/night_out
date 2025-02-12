@@ -24,7 +24,9 @@ class SignupCoordinator: ObservableObject, Hashable {
         SignupView(presenter: SignupPresenterImpl(
             useCases: .init(
                 signupUseCase: SignupUseCaseImpl(repository: AccountRepositoryImpl.shared),
-                saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared)),
+                saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                saveCompanyUseCase: SaveCompanyUseCaseImpl(repository: AccountRepositoryImpl.shared)
+            ),
             actions: actions
         ))
     }
