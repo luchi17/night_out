@@ -56,9 +56,9 @@ enum Gender {
     var title: String {
         switch self {
         case .male:
-            return "Mujer"
-        case .female:
             return "Hombre"
+        case .female:
+            return "Mujer"
         }
     }
     
