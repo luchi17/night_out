@@ -18,12 +18,6 @@ struct UserPostProfileView: View {
         bindViewModel()
     }
     
-    let columns = [
-        GridItem(.flexible(), spacing: 10),
-        GridItem(.flexible(), spacing: 10),
-        GridItem(.flexible(), spacing: 10)
-    ]
-    
     var body: some View {
         ZStack {
             Color.black
@@ -67,22 +61,10 @@ struct UserPostProfileView: View {
                 .padding(.vertical, 16)
                 
                 if viewModel.isCompanyProfile {
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(viewModel.images, id: \.id) { imageName in
-                                Image(uiImage: imageName.image)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 100, height: 100)
-                                    .clipped()
-                                    .onTapGesture {
-                                        selectedImage = imageName
-                                    }
-                            }
-                        }
-                        .padding()
-                    }
-                    
+                    ImagesGrid(
+                        images: $viewModel.images,
+                        selectedImage: $selectedImage
+                    )
                 }
                 Spacer()
             }
@@ -127,4 +109,3 @@ struct CounterView: View {
         .padding(.horizontal, 8)
     }
 }
-

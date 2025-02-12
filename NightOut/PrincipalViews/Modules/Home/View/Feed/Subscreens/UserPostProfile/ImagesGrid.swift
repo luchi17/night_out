@@ -1,5 +1,37 @@
 import SwiftUI
 
+struct ImagesGrid: View {
+    
+    @Binding var images: [IdentifiableImage]
+    @Binding var selectedImage: IdentifiableImage?
+    
+    
+    let columns = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
+    ]
+    
+    var body: some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(images, id: \.id) { imageName in
+                    Image(uiImage: imageName.image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 100, height: 100)
+                        .clipped()
+                        .onTapGesture {
+                            selectedImage = imageName
+                        }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+
 // Vista de imagen a pantalla completa con zoom
 struct FullScreenImageView: View {
     let imageName: IdentifiableImage
