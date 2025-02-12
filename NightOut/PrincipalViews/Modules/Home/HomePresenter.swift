@@ -19,6 +19,7 @@ enum HomeSelectedTab {
 final class HomeViewModel: ObservableObject {
     @Published var selectedTab: HomeSelectedTab = .feed
     @Published var profileImageUrl: String?
+    @Published var showCompanyFirstAlert: Bool = false
 }
 
 protocol HomePresenter {
@@ -86,6 +87,13 @@ final class HomePresenterImpl: HomePresenter {
             .merge(with: input.updateProfileImage)
             .withUnretained(self)
             .sink { presenter, _ in
+                
+                if (UserDefaults.getIsFirstLoggedIn() ?? false) && !FirebaseServiceImpl.shared.getImUser() {
+                    presenter.viewModel.showCompanyFirstAlert = true
+                }
+                
+                UserDefaults.setIsFirstLoggedIn(false)
+                
                 let imUser = FirebaseServiceImpl.shared.getImUser()
                 if imUser {
                     presenter.viewModel.profileImageUrl =  UserDefaults.getUserModel()?.image

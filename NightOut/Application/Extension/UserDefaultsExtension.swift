@@ -1,5 +1,6 @@
 import Foundation
 
+private let isFirstLoggedIn: String = "isFirstLoggedIn"
 private let companies: String = "locationModels"
 private let followModel: String = "followModel"
 private let userModel: String = "userModel"
@@ -45,6 +46,14 @@ extension UserDefaults {
     
     static func removeObjectForKey(_ key: String) {
         UserDefaults.standard.removeObject(forKey: key)
+    }
+    
+    static func setIsFirstLoggedIn(_ value: Bool) {
+        self.setObject(value, forKey: isFirstLoggedIn)
+    }
+    
+    static func getIsFirstLoggedIn() -> Bool? {
+        self.objectForKey(forKey: isFirstLoggedIn, as: Bool.self)
     }
     
     static func setCompanies(_ value: CompanyUsersModel) {

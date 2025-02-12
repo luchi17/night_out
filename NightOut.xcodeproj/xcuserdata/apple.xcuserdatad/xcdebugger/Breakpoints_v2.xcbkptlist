@@ -7,15 +7,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "6678CDA2-B92B-4E33-874A-19F1B2375E63"
+            uuid = "39C377BF-C502-4F5B-B965-A08C52D34424"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "NightOut/PrincipalViews/Modules/Home/View/Feed/Subscreens/PostDetail/PostDetailPresenter.swift"
+            filePath = "NightOut/PrincipalViews/Modules/Home/HomePresenter.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "129"
-            endingLineNumber = "129"
+            startingLineNumber = "92"
+            endingLineNumber = "92"
             landmarkName = "transform(input:)"
             landmarkType = "7">
          </BreakpointContent>

@@ -6,6 +6,7 @@ struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel
     
     @State private var showMyProfile = false
+    @State private var showCompanyFirstAlert = false
     
     let presenter: HomePresenter
     let mapPresenter: LocationsMapPresenter
@@ -64,6 +65,15 @@ struct HomeView: View {
             )
                 .presentationDetents([.large])
                 .presentationBackground(.regularMaterial)
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $viewModel.showCompanyFirstAlert) {
+            HomeCompanySheetView(close: {
+                showCompanyFirstAlert.toggle()
+                viewModel.showCompanyFirstAlert = false
+                
+            })
+                .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
         .padding(.top, 20)

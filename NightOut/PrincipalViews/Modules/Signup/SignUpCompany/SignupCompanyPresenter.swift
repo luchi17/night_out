@@ -214,6 +214,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
             })
             .sink(receiveValue: { [weak self] data in
                 if data.0, let model = data.1 {
+                    UserDefaults.setIsFirstLoggedIn(true)
                     UserDefaults.setCompanyUserModel(model)
                     self?.actions.goToTabView()
                 } else {
