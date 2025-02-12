@@ -440,7 +440,7 @@ enum SignupNetworkError: Error {
         case .noToken:
             return "No se pudo obtener el token de FCM."
         case .unknown(let error):
-            return "Ocurrió desconocido: \(error.localizedDescription)."
+            return "Error desconocido: \(error.localizedDescription)."
         case .custom(let message):
             return message
         }

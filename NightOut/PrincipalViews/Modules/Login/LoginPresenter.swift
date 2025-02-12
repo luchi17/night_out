@@ -254,9 +254,48 @@ private extension LoginPresenterImpl {
                 .eraseToAnyPublisher()
         }
     }
-    
-    private func isValidEmail(_ email: String) -> Bool {
-        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}")
-        return emailPredicate.evaluate(with: email)
-    }
 }
+
+//private fun loginAsAdmin(email: String, password: String) {
+//    // Validar si son las credenciales de administrador
+//    if (email == "admin@nightout.com" && password == "Admin_NightOut_04052001_28022001") {
+//        // Autenticar con Firebase Authentication
+//        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+//            .addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    // Obtener el usuario autenticado
+//                    val currentUser = FirebaseAuth.getInstance().currentUser
+//                    if (currentUser != null) {
+//                        val adminUid = currentUser.uid
+//
+//                        // Verificar si este UID está registrado en el nodo Admins
+//                        val adminsRef = FirebaseDatabase.getInstance().getReference("Admins")
+//                        adminsRef.child(adminUid).addListenerForSingleValueEvent(object : ValueEventListener {
+//                            override fun onDataChange(snapshot: DataSnapshot) {
+//                                if (snapshot.exists()) {
+//                                    // Es un administrador válido, redirigir a AdminActivity
+//                                    val adminIntent = Intent(this@SignInActivity, AdminActivity::class.java)
+//                                    startActivity(adminIntent)
+//                                    finish() // Opcional: cerrar esta actividad
+//                                } else {
+//                                    Toast.makeText(this@SignInActivity, "El UID no está autorizado como administrador", Toast.LENGTH_LONG).show()
+//                                    FirebaseAuth.getInstance().signOut() // Cierra sesión si no está autorizado
+//                                }
+//                            }
+//
+//                            override fun onCancelled(error: DatabaseError) {
+//                                Toast.makeText(this@SignInActivity, "Error al verificar administrador: ${error.message}", Toast.LENGTH_LONG).show()
+//                            }
+//                        })
+//                    } else {
+//                        Toast.makeText(this, "Error al obtener usuario actual", Toast.LENGTH_LONG).show()
+//                    }
+//                } else {
+//                    Toast.makeText(this, "Error de autenticación: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+//                }
+//            }
+//    } else {
+//        // Credenciales incorrectas
+//
+//    }
+//}

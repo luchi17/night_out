@@ -75,8 +75,6 @@ struct TermsAndConditionsSheetView: View {
             
             Button("Cerrar") {
                 onCloseTap()
-                // Acción para cerrar la sheet
-                // La sheet se cerrará automáticamente al pulsar el botón
             }
             .padding()
         }
