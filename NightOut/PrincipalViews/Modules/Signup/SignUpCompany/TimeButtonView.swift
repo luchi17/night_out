@@ -10,16 +10,16 @@ struct TimeButtonView: View {
     
     var body: some View {
         Button(action: {
-            firstTime = false
+//            firstTime = false
             showTimePicker.toggle()
         }) {
-            Text(firstTime ? title : selectedTimeString)
+            Text(selectedTimeString.isEmpty ? title: selectedTimeString)
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.white)
-                .shadow(radius: 4)
+                .padding(.vertical, 8)
+                .background(Color.gray)
+                .cornerRadius(25)
         }
         .if(showTimePicker) { view in
             VStack {
@@ -28,13 +28,11 @@ struct TimeButtonView: View {
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
                     .onChange(of: selectedTime, { _ , newValue in
-//                        showTimePicker.toggle() // Cierra el picker al seleccionar
                         selectedTimeString = timeString(from: selectedTime)
                     })
                     .padding()
                     .background(Color(UIColor.systemBackground))
-                    .cornerRadius(8)
-                    .shadow(radius: 5)
+                    .cornerRadius(25)
             }
         }
     }

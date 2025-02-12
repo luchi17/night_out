@@ -49,12 +49,12 @@ struct SignupMapView: View {
                     locationModel = auxModel
                     presentationMode.wrappedValue.dismiss()
                 }) {
-                    Text("SAVE")
+                    Text("GUARDAR")
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue) // Adjust as needed for your button style
+                        .background(Color.black) // Adjust as needed for your button style
                         .cornerRadius(25)
                         .shadow(radius: 4)
                 }

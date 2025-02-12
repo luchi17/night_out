@@ -171,14 +171,18 @@ struct AccountDatasourceImpl: AccountDatasource {
             }
             else {
                 print("Registro exitoso de empresa.")
-                Messaging.messaging().token { token, error in
-                    if let error = error {
-                        publisher.send(completion:.failure(.noToken))
-                    } else if let token = token {
-                        publisher.send(token)
-                        publisher.send(completion: .finished)
-                    }
-                }
+#warning("TODO: APNS messaging - ver notas mac")
+                publisher.send("")
+                publisher.send(completion: .finished)
+                
+//                Messaging.messaging().token { token, error in
+//                    if let error = error {
+//                        publisher.send(completion:.failure(.noToken))
+//                    } else if let token = token {
+//                        publisher.send(token)
+//                        publisher.send(completion: .finished)
+//                    }
+//                }
             }
         }
         
