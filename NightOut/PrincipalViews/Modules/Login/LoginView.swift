@@ -45,21 +45,23 @@ struct LoginView: View, Hashable {
             // Email Input
             TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.yellow))
                 .textFieldStyle(PlainTextFieldStyle())
-                .padding()
-                .background(Color.clear)
+                .padding(.all, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
+                )
                 .foregroundColor(.yellow)
                 .accentColor(.yellow)
-                .cornerRadius(10)
                 .padding(.bottom, 12)
             
             // Password Input
-            SecureField("",text: $viewModel.password, prompt: Text("Password...").foregroundColor(.yellow))
+            SecureField("",text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.yellow))
                 .textFieldStyle(PlainTextFieldStyle())
-                .padding()
-                .background(Color.clear)
+                .padding(.all, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
+                )
                 .foregroundColor(.yellow)
                 .accentColor(.yellow)
-                .cornerRadius(10)
                 .padding(.bottom, 20)
             
             // Login Button
