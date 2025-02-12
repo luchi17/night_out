@@ -185,11 +185,13 @@ final class FeedPresenterImpl: FeedPresenter {
             .showUserOrCompanyProfile
             .withUnretained(self)
             .sink { presenter, model in
+            
                 let profileInfo = UserPostProfileInfo(
                     profileId: model.publisherId,
                     profileImageUrl: model.profileImageUrl,
                     username: model.username ?? "Unknown",
-                    fullName: model.fullName ?? "Unknown"
+                    fullName: model.fullName ?? "Unknown",
+                    isCompanyProfile: !model.isFromUser
                 )
                 presenter.actions.onShowUserProfile(profileInfo)
             }

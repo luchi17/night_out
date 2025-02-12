@@ -6,6 +6,7 @@ struct UserPostProfileInfo {
     var profileImageUrl: String?
     var username: String
     var fullName: String
+    var isCompanyProfile: Bool
 }
 
 struct IdentifiableImage: Identifiable {
@@ -21,13 +22,15 @@ final class UserPostProfileViewModel: ObservableObject {
     @Published var discosCount: String = "0"
     @Published var copasCount: String = "0"
     @Published var images: [IdentifiableImage] = []
+    @Published var isCompanyProfile: Bool
 
-    init(profileImageUrl: String? = nil, username: String, fullname: String, discosCount: String, copasCount: String) {
+    init(profileImageUrl: String? = nil, username: String, fullname: String, discosCount: String, copasCount: String, isCompanyProfile: Bool) {
         self.profileImageUrl = profileImageUrl
         self.username = username
         self.fullname = fullname
         self.discosCount = discosCount
         self.copasCount = copasCount
+        self.isCompanyProfile = isCompanyProfile
     }
 }
 
@@ -72,8 +75,8 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
             username: info.username,
             fullname: info.fullName,
             discosCount: "0",
-            copasCount: "0"
-            
+            copasCount: "0",
+            isCompanyProfile: info.isCompanyProfile
         )
     }
     
@@ -89,7 +92,7 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
                     })
                     .eraseToAnyPublisher()
             })
-            .filter({ _ in !FirebaseServiceImpl.shared.getImUser() })
+            .filter({ [weak self] _ in  self?.info.isCompanyProfile ?? false })
             .withUnretained(self)
             .flatMap({ presenter, _ in
                 presenter.useCases.postsUseCase.fetchPosts()

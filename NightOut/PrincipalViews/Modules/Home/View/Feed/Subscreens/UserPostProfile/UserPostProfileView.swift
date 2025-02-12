@@ -59,14 +59,14 @@ struct UserPostProfileView: View {
                 // Contadores
                 HStack(spacing: 8) {
                     CounterView(count: viewModel.followersCount, label: "Seguidores")
-                    if FirebaseServiceImpl.shared.getImUser() {
+                    if !viewModel.isCompanyProfile {
                         CounterView(count: viewModel.discosCount, label: "Discotecas")
                         CounterView(count: viewModel.copasCount, label: "Copas")
                     }
                 }
                 .padding(.vertical, 16)
                 
-                if !FirebaseServiceImpl.shared.getImUser() {
+                if viewModel.isCompanyProfile {
                     ScrollView {
                         LazyVGrid(columns: columns, spacing: 10) {
                             ForEach(viewModel.images, id: \.id) { imageName in
@@ -128,49 +128,3 @@ struct CounterView: View {
     }
 }
 
-// Vista de imagen a pantalla completa con zoom
-struct FullScreenImageView: View {
-    let imageName: IdentifiableImage
-    let onClose: () -> Void
-    @State private var scale: CGFloat = 1.0
-    @State private var lastScale: CGFloat = 1.0
-    
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            
-            Image(uiImage: imageName.image)
-                .resizable()
-                .scaledToFit()
-                .scaleEffect(scale)
-                .gesture(
-                    MagnificationGesture()
-                        .onChanged { value in
-                            scale = lastScale * value
-                        }
-                        .onEnded { _ in
-                            lastScale = scale
-                        }
-                )
-                .onTapGesture(count: 2) {
-                    withAnimation {
-                        scale = scale > 1 ? 1 : 2
-                        lastScale = scale
-                    }
-                }
-            
-            VStack {
-                HStack {
-                    Spacer()
-                    Button(action: onClose) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.white)
-                            .font(.largeTitle)
-                            .padding()
-                    }
-                }
-                Spacer()
-            }
-        }
-    }
-}
