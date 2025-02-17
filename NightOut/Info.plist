@@ -6,15 +6,15 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf</string>
+			<string>16597384086-uf4a5k28qlrdp53n2st8uv8rciqgaog0</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf</string>
+				<string>com.googleusercontent.apps.16597384086-uf4a5k28qlrdp53n2st8uv8rciqgaog0</string>
 			</array>
 		</dict>
 	</array>
 	<key>GIDClientID</key>
-	<string>714999336065-ntnevar6dhvn3u1b2eqog3lf625cheqf.apps.googleusercontent.com</string>
+	<string>16597384086-uf4a5k28qlrdp53n2st8uv8rciqgaog0.apps.googleusercontent.com</string>
 	<key>MKDirectionsApplicationSupportedModes</key>
 	<array>
 		<string>MKDirectionsModeBike</string>
