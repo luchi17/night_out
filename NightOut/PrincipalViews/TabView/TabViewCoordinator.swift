@@ -138,7 +138,9 @@ private extension TabViewCoordinator {
     func homeActions() -> HomePresenterImpl.Actions {
         .init(
             onOpenNotifications: showNotificationsView,
-            openMessages: openMessages
+            openMessages: openMessages,
+            openHub: { },
+            openTinder: { }
         )
     }
     

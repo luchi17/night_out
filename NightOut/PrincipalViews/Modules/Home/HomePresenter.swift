@@ -20,6 +20,9 @@ final class HomeViewModel: ObservableObject {
     @Published var selectedTab: HomeSelectedTab = .feed
     @Published var profileImageUrl: String?
     @Published var showCompanyFirstAlert: Bool = false
+    @Published var showNighoutAlert: Bool = false
+    @Published var nighoutAlertTitle: String = ""
+    @Published var nighoutAlertMessage: String = ""
 }
 
 protocol HomePresenter {
@@ -36,6 +39,8 @@ final class HomePresenterImpl: HomePresenter {
     struct Actions {
         let onOpenNotifications: VoidClosure
         let openMessages: VoidClosure
+        let openHub: VoidClosure
+        let openTinder: VoidClosure
     }
     
     struct ViewInputs {
@@ -43,6 +48,8 @@ final class HomePresenterImpl: HomePresenter {
         let openMessages: AnyPublisher<Void, Never>
         let viewDidLoad: AnyPublisher<Void, Never>
         let updateProfileImage: AnyPublisher<Void, Never>
+        let openHub: AnyPublisher<Void, Never>
+        let openTinder: AnyPublisher<Void, Never>
     }
     
     var viewModel: HomeViewModel
@@ -69,10 +76,41 @@ final class HomePresenterImpl: HomePresenter {
         input
             .openNotifications
             .withUnretained(self)
-            .sink { presenter in
+            .sink { presenter, _ in
                 self.actions.onOpenNotifications()
             }
             .store(in: &cancellables)
+        
+        input
+            .openHub
+            .withUnretained(self)
+            .sink { presenter, _ in
+                self.actions.openHub()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openTinder
+            .withUnretained(self)
+            .sink { presenter, _ in
+                if FirebaseServiceImpl.shared.getImUser() {
+                    if presenter.isPastNinePM() {
+                        presenter.actions.openTinder()
+                    } else {
+                        presenter.viewModel.showNighoutAlert = true
+                        presenter.viewModel.nighoutAlertTitle = "Social NightOut"
+                        presenter.viewModel.nighoutAlertMessage = "Social NightOut no estará disponible hasta las 21:00."
+                        
+                    }
+                } else {
+                    presenter.viewModel.showNighoutAlert = true
+                    presenter.viewModel.nighoutAlertTitle = "Acceso Denegado"
+                    presenter.viewModel.nighoutAlertMessage = "Las discotecas no tienen acceso a Social NightOut."
+                }
+                
+            }
+            .store(in: &cancellables)
+        
         
         input
             .openMessages
@@ -105,4 +143,20 @@ final class HomePresenterImpl: HomePresenter {
             }
             .store(in: &cancellables)
     }
+    
+    func isPastNinePM() -> Bool {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        // Extraemos la hora y los minutos de la fecha actual
+        let components = calendar.dateComponents([.hour, .minute], from: now)
+        
+        // Comparamos si es 21:00 (9 PM) o más tarde
+        if let hour = components.hour, let minute = components.minute {
+            return hour > 21 || (hour == 21 && minute >= 0)
+        }
+        
+        return false
+    }
+
 }

@@ -20,7 +20,10 @@ struct HomeView: View {
     private let openMessagesPublisher = PassthroughSubject<Void, Never>()
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let updateProfileImagePublisher = PassthroughSubject<Void, Never>()
+    private let openTinderPublisher = PassthroughSubject<Void, Never>()
+    private let openHubPublisher = PassthroughSubject<Void, Never>()
     
+
     @State private var updateProfileImage: Bool = false
     
     init(
@@ -83,6 +86,16 @@ struct HomeView: View {
                 .edgesIgnoringSafeArea(.all)
                 .aspectRatio(contentMode: .fill)
         )
+        .alert(isPresented: $viewModel.showNighoutAlert) {
+            Alert(
+                title: Text(viewModel.nighoutAlertTitle)
+                    .foregroundColor(.white),
+                message: Text(viewModel.nighoutAlertMessage)
+                    .foregroundColor(.white),
+                dismissButton: .default(Text("ACEPTAR"))
+            )
+        }
+        .preferredColorScheme(.dark)
         .navigationBarHidden(true)
         .onChange(of: updateProfileImage, { oldValue, newValue in
             updateProfileImagePublisher.send()
@@ -104,7 +117,7 @@ struct HomeView: View {
                 }
                 
                 Button(action: {
-                        #warning("TODO: open hub")
+                    openHubPublisher.send()
                 }) {
                     Text("HUB")
                         .foregroundStyle(.white)
@@ -117,7 +130,7 @@ struct HomeView: View {
             Spacer()
             
             Button(action: {
-                #warning("TODO: open tinder")
+                openTinderPublisher.send()
             }) {
                 Image("nightout")
                     .resizable()
@@ -189,7 +202,9 @@ private extension HomeView {
             openNotifications: openNotificationsPublisher.eraseToAnyPublisher(),
             openMessages: openMessagesPublisher.eraseToAnyPublisher(),
             viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
-            updateProfileImage: updateProfileImagePublisher.eraseToAnyPublisher()
+            updateProfileImage: updateProfileImagePublisher.eraseToAnyPublisher(),
+            openHub: openHubPublisher.eraseToAnyPublisher(),
+            openTinder: openTinderPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
