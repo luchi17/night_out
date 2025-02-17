@@ -33,7 +33,7 @@ class UserProfileCoordinator: ObservableObject, Hashable {
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
                 clubUseCase: ClubUseCaseImpl(repository: ClubRepositoryImpl.shared),
                 noficationsUsecase: NotificationsUseCaseImpl(repository: NotificationsRepositoryImpl.shared),
-                companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
+                companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared), postsUseCase: PostsUseCaseImpl(repository: PostsRepositoryImpl.shared)
             ),
             actions: actions,
             model: model

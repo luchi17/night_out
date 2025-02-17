@@ -78,6 +78,8 @@ final class UserProfileViewModel: ObservableObject {
     
     @Published var myUserModel: UserModel?
     
+//    @Published var images: [IdentifiableImage] = []
+    
     
     init(profileImageUrl: String?, username: String?, fullname: String?, isCompanyProfile: Bool) {
         self.profileImageUrl = profileImageUrl
@@ -101,6 +103,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         let clubUseCase: ClubUseCase
         let noficationsUsecase: NotificationsUseCase
         let companyDataUseCase: CompanyDataUseCase
+        let postsUseCase: PostsUseCase
     }
     
     struct Actions {
@@ -175,6 +178,40 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             }
             .eraseToAnyPublisher()
         
+        //Post when
+//        input
+//            .viewDidLoad
+//            .filter({ [weak self] _ in  self?.model.isCompanyProfile ?? false })
+//            .withUnretained(self)
+//            .flatMap({ presenter, _ in
+//                presenter.useCases.postsUseCase.fetchPosts()
+//                    .map { posts in
+//                        let matchingPosts = posts.filter { post in
+//                            return post.value.publisherId == presenter.model.profileId
+//                        }.values
+//                        return Array(matchingPosts)
+//                    }
+//                    .eraseToAnyPublisher()
+//            })
+//            .withUnretained(self)
+//            .flatMap { presenter, posts in
+//                let publishers: [AnyPublisher<IdentifiableImage, Never>] = posts.map { post in
+//                    
+//                    presenter.getPostImagePublisher(image: post.postImage)
+//                        .compactMap({ $0 })
+//                        .map({ IdentifiableImage(image: $0 )})
+//                        .eraseToAnyPublisher()
+//                }
+//                return Publishers.MergeMany(publishers)
+//                    .collect()
+//                    .eraseToAnyPublisher()
+//            }
+//            .withUnretained(self)
+//            .sink { presenter, images in
+//                presenter.viewModel.images = images
+//            }
+//            .store(in: &cancellables)
+        
         input
             .viewDidLoad
             .handleEvents(receiveRequest: { [weak self] _ in
@@ -227,6 +264,14 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         return Publishers.MergeMany(publishers)
             .collect()
             .eraseToAnyPublisher()
+    }
+    
+    private func getPostImagePublisher(image: String?) -> AnyPublisher<UIImage?, Never> {
+        if let image = image, let url = URL(string: image) {
+            return KingFisherImage.fetchImagePublisher(url: url)
+        }
+        
+        return Just(nil).eraseToAnyPublisher()
     }
     
     func listenToInputs(input: UserProfilePresenterImpl.ViewInputs) {
