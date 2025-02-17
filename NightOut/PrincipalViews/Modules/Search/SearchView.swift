@@ -80,10 +80,8 @@ struct SearchView: View {
             Spacer()
         }
         .background(
-            Image("fondo_azul")
-                .resizable()
+            Color.black
                 .edgesIgnoringSafeArea(.top)
-                .aspectRatio(contentMode: .fill)
         )
         .showToast(
             error: (

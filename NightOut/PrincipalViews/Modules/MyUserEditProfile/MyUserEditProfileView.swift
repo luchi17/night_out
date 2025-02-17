@@ -104,10 +104,8 @@ struct MyUserEditProfileView: View {
         .padding(.horizontal, 20)
         .padding(.top, 16)
         .background(
-            Image("fondo_azul")
-                .resizable()
+            Color.black
                 .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
         )
         .sheet(isPresented: $showGenderSheet) {
             GenderPicker(selectedGender: $viewModel.genderType, showSheet: $showGenderSheet)

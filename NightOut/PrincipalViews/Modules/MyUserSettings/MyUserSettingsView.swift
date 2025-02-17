@@ -105,10 +105,8 @@ struct MyUserSettingsView: View {
             .padding(20)
         }
         .background(
-            Image("fondo_azul")
-                .resizable()
+            Color.black
                 .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
         )
         .alert(isPresented: $viewModel.showAlertMessage) {
             Alert(

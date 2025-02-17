@@ -76,10 +76,8 @@ struct MyUserCompanySettingsView: View {
             .padding(.all, 20)
         }
         .background(
-            Image("fondo_azul")
-                .resizable()
+            Color.black
                 .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
         )
         .sheet(
             isPresented: $showLocation,

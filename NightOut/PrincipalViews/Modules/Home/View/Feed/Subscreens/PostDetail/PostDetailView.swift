@@ -45,10 +45,8 @@ struct PostDetailView: View {
             
         }
         .background(
-            Image("fondo_azul")
-                .resizable()
+            Color.black
                 .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
         )
         .onAppear {
             viewDidLoadPublisher.send()

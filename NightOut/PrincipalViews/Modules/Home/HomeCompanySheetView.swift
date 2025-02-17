@@ -41,9 +41,7 @@ struct HomeCompanySheetView: View {
         }
         .padding(.all, 12)
         .background(
-            Image("fondo_azul")
-                .resizable()
-                .scaledToFill()
+            Color.black
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         )
     }
