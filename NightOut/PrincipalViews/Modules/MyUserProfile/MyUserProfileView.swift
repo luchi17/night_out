@@ -113,6 +113,7 @@ struct MyUserProfileView: View {
         }
         .sheet(isPresented: $showEditSheet, onDismiss: {
             viewDidLoadPublisher.send()
+            levelsViewModel.loadUserLevels()
             updateProfileImage.toggle()
         }) {
             MyUserEditProfileView(

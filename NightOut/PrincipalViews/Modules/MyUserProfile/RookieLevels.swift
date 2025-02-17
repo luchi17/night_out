@@ -67,6 +67,7 @@ struct RookieLevelsView: View {
         var body: some View {
             List(viewModel.levelList) { level in
                 LevelRow(level: level)
+                    .listRowBackground(Color.clear)
             }
             .background(Color.clear)
             .scrollContentBackground(.hidden)
@@ -77,20 +78,19 @@ struct LevelRow: View {
     let level: Level
     
     var body: some View {
-        HStack {
+        VStack(alignment: .center, spacing: 8) {
             Image(level.imageName)
                 .resizable()
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
+                .scaledToFill()
+                .frame(width: 60, height: 60)
             
-            VStack(alignment: .leading) {
-                Text(level.name)
-                    .font(.headline)
-                ProgressView(value: level.progress, total: 100)
-                    .progressViewStyle(LinearProgressViewStyle())
-            }
-            .padding(.leading, 8)
+            Text(level.name)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(.white)
+            
+            ProgressView(value: level.progress, total: 100)
+                .progressViewStyle(LinearProgressViewStyle())
         }
-        .padding()
+        .padding(.horizontal, 25)
     }
 }
