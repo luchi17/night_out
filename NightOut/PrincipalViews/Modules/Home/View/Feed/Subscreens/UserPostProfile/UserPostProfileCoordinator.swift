@@ -29,7 +29,8 @@ class UserPostProfileCoordinator: ObservableObject, Hashable {
     func build() -> some View {
         let presenter = UserPostProfilePresenterImpl(
             useCases: .init(followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
-                            postsUseCase: PostsUseCaseImpl(repository: PostsRepositoryImpl.shared)),
+                            postsUseCase: PostsUseCaseImpl(repository: PostsRepositoryImpl.shared),
+                            userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: actions,
             info: info
         )

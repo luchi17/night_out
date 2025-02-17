@@ -66,7 +66,16 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
                 return presenter.useCases.followUseCase.fetchFollow(id: uid)
             })
             .withUnretained(self)
-            .sink { presenter, followModel in
+            .flatMap({ presenter, followModel -> AnyPublisher<(FollowModel?, UserModel?), Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just((nil, nil)).eraseToAnyPublisher()
+                }
+                return presenter.useCases.userDataUseCase.getUserInfo(uid: uid)
+                    .map({ (followModel, $0 )})
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .sink { presenter, data in
                 let userModel = UserDefaults.getUserModel()
                 let profileImage = userModel?.image
                 let username = userModel?.username
@@ -75,7 +84,12 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
                 presenter.viewModel.profileImageUrl = profileImage
                 presenter.viewModel.username = username ?? "Username no disponible"
                 presenter.viewModel.fullname = fullname ?? "Fullname no disponible"
-                presenter.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
+                presenter.viewModel.followersCount = String(data.0?.followers?.count ?? 0)
+                presenter.viewModel.copasCount = String(data.1?.MisCopas ?? 0)
+                
+                let uniqueDiscotecasCount = Set(data.1?.MisEntradas?.values.map { $0.discoteca } ?? []).count
+
+                presenter.viewModel.discosCount = String(uniqueDiscotecasCount)
             }
             .store(in: &cancellables)
         

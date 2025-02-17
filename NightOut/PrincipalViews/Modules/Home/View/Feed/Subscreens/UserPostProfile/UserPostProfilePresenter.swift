@@ -44,6 +44,7 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     struct UseCases {
         let followUseCase: FollowUseCase
         let postsUseCase: PostsUseCase
+        let userDataUseCase: UserDataUseCase
     }
     
     struct Actions {
@@ -81,6 +82,25 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     }
     
     func transform(input: UserPostProfilePresenterImpl.ViewInputs) {
+        
+        input
+            .viewDidLoad
+            .filter({ [weak self] _ in  !(self?.info.isCompanyProfile ?? false) })
+            .withUnretained(self)
+            .flatMap({ presenter, _ in
+                presenter.useCases.userDataUseCase.getUserInfo(uid: presenter.info.profileId)
+            })
+            .withUnretained(self)
+            .sink { presenter, userModel in
+                presenter.viewModel.copasCount = String(userModel?.MisCopas ?? 0)
+                
+                let uniqueDiscotecasCount = Set(userModel?.MisEntradas?.values.map { $0.discoteca } ?? []).count
+
+                presenter.viewModel.discosCount = String(uniqueDiscotecasCount)
+            }
+            .store(in: &cancellables)
+        
+        
         let postsPublisher = input
             .viewDidLoad
             .withUnretained(self)

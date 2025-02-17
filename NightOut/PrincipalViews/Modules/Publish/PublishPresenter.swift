@@ -182,6 +182,21 @@ final class PublishPresenterImpl: PublishPresenter {
             return
         }
         
+        // Aumentar MisCopas en userModel
+        let copasRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId).child("MisCopas")
+        
+        do {
+                try await copasRef.runTransactionBlock { currentData in
+                    var currentValue = currentData.value as? Int ?? 0
+                    currentValue += 1
+                    currentData.value = currentValue
+                    return .success(withValue: currentData)
+                }
+                print("MisCopas actualizado correctamente")
+            } catch {
+                print("Error al actualizar MisCopas: \(error.localizedDescription)")
+            }
+
         // Cargar las ligas del usuario
         let userLeagues = FirebaseServiceImpl.shared.getUsers().child(userId).child("misLigas")
         

@@ -14,6 +14,8 @@ struct UserModel: Codable {
     var profile: String?
     var Liked: [String: Bool]?
     var social: String?
+    var MisCopas: Int 
+    var MisEntradas: [String: EntradaUserModel]?
     
     var genderType: Gender? {
         if gender == "Male" {
@@ -33,7 +35,7 @@ struct UserModel: Codable {
         }
     }
     
-    init(uid: String, fullname: String, username: String, email: String, gender: String? = nil, image: String? = nil, fcm_token: String? = nil, attendingClub: String? = nil, misLigas: [String : Bool]? = nil, profile: String? = nil, Liked: [String: Bool]? = nil, social: String? = nil) {
+    init(uid: String, fullname: String, username: String, email: String, gender: String? = nil, image: String? = nil, fcm_token: String? = nil, attendingClub: String? = nil, misLigas: [String : Bool]? = nil, profile: String? = nil, Liked: [String: Bool]? = nil, social: String? = nil, misCopas: Int = 0, misEntradas: [String: EntradaUserModel]? = nil) {
         self.uid = uid
         self.fullname = fullname
         self.username = username
@@ -46,6 +48,8 @@ struct UserModel: Codable {
         self.profile = profile
         self.Liked = Liked
         self.social = social
+        self.MisCopas = misCopas
+        self.MisEntradas = misEntradas
     }
 }
 
@@ -75,4 +79,18 @@ enum Gender {
 enum ProfileType {
     case privateProfile
     case publicProfile
+}
+
+
+struct EntradaUserModel: Codable {
+    let apellido: String?
+    let correo: String?
+    let discoteca: String?
+    let dni: String?
+    let evento: String?
+    let fecha: String?
+    let nombre: String?
+    let numeroTicket: String?
+    let qrCodeBase64: String?
+    let qrText: String?
 }
