@@ -22,6 +22,7 @@ protocol AccountDatasource {
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
     func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
     func setTerms() -> AnyPublisher<Bool, Never>
+    func findUserByEmail(_ email: String) -> AnyPublisher<UserModel?, Never>
 }
 
 struct AccountDatasourceImpl: AccountDatasource {
@@ -216,6 +217,34 @@ struct AccountDatasourceImpl: AccountDatasource {
                     print("Error decoding data: \(error.localizedDescription)")
                     promise(.success(nil))
                 }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func findUserByEmail(_ email: String) -> AnyPublisher<UserModel?, Never> {
+        
+        return Future<UserModel?, Never> { promise in
+            
+            let ref = FirebaseServiceImpl.shared.getUsers()
+            
+            ref.observeSingleEvent(of: .value) { snapshot in
+                
+                for child in snapshot.children {
+                    
+                    guard let userSnapshot = child as? DataSnapshot else {
+                        promise(.success(nil))
+                        return
+                    }
+                    
+                    let userModel = try? userSnapshot.data(as: UserModel.self)
+                    
+                    if userModel?.email.lowercased() == email.lowercased() {
+                        promise(.success(userModel))
+                        return
+                    }
+                }
+                promise(.success(nil))
             }
         }
         .eraseToAnyPublisher()

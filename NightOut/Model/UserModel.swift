@@ -14,7 +14,7 @@ struct UserModel: Codable {
     var profile: String?
     var Liked: [String: Bool]?
     var social: String?
-    var MisCopas: Int 
+    var MisCopas: Int?
     var MisEntradas: [String: EntradaUserModel]?
     
     var genderType: Gender? {

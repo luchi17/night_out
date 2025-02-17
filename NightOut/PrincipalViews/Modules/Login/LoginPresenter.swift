@@ -160,12 +160,38 @@ final class LoginPresenterImpl: LoginPresenter {
                 }
             })
             .withUnretained(self)
-            .flatMap({ presenter, googleUser in
-                return presenter.useCases.saveUserUseCase.execute(model: presenter.getGoogleUserInfo(googleUser: googleUser))
+            .flatMap({ presenter, googleUser -> AnyPublisher<(GIDGoogleUser, UserModel?), Never> in
+                
+                let email = googleUser.profile?.email ?? ""
+                
+                return presenter.useCases.userDataUseCase.findUserByEmail(email)
+                    .map({ (googleUser, $0) })
+                    .eraseToAnyPublisher()
             })
             .withUnretained(self)
-            .flatMap({ presenter, _ in
-                return presenter.useCases.saveUserUseCase.executeTerms()
+            .flatMap({ presenter, data -> AnyPublisher<UserModel?, Never> in
+                let googleUser = data.0
+                let userModel = data.1
+                
+                if let userModel = userModel {
+                    return presenter.saveInfo(imCompany: false) //Google accounts not for companyusers
+                        .map({ _ in userModel })
+                        .eraseToAnyPublisher()
+                } else {
+                    return presenter.useCases.saveUserUseCase.execute(model: presenter.getGoogleUserInfo(googleUser: googleUser))
+                        .map({ _ in userModel })
+                        .eraseToAnyPublisher()
+                }
+            })
+        
+            .withUnretained(self)
+            .flatMap({ presenter, userModel in
+                if userModel != nil { //User already existed
+                    return Just(true).eraseToAnyPublisher()
+                } else {
+                    return presenter.useCases.saveUserUseCase.executeTerms()
+                }
+               
             })
             .withUnretained(self)
             .flatMap({ presenter, _ in
@@ -185,6 +211,7 @@ final class LoginPresenterImpl: LoginPresenter {
         //            .withUnretained(self)
         
     }
+
 }
 
 private extension LoginPresenterImpl {

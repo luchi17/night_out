@@ -3,6 +3,7 @@ import Foundation
 
 protocol UserDataUseCase {
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
+    func findUserByEmail(_ email: String) -> AnyPublisher<UserModel?, Never>
 }
 
 struct UserDataUseCaseImpl: UserDataUseCase {
@@ -15,6 +16,12 @@ struct UserDataUseCaseImpl: UserDataUseCase {
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never> {
         return repository
             .getUserInfo(uid: uid)
+            .eraseToAnyPublisher()
+    }
+    
+    func findUserByEmail(_ email: String) -> AnyPublisher<UserModel?, Never> {
+        return repository
+            .findUserByEmail(email)
             .eraseToAnyPublisher()
     }
 }

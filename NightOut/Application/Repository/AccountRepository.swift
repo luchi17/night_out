@@ -16,6 +16,7 @@ protocol AccountRepository {
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
     func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
     func executeTerms() -> AnyPublisher<Bool, Never>
+    func findUserByEmail(_ email: String) -> AnyPublisher<UserModel?, Never>
 }
 
 struct AccountRepositoryImpl: AccountRepository {
@@ -104,6 +105,12 @@ struct AccountRepositoryImpl: AccountRepository {
     func deleteAccount() -> AnyPublisher<String?, Never> {
         return network
             .deleteAccount()
+            .eraseToAnyPublisher()
+    }
+    
+    func findUserByEmail(_ email: String) -> AnyPublisher<UserModel?, Never> {
+        return network
+            .findUserByEmail(email)
             .eraseToAnyPublisher()
     }
 }
