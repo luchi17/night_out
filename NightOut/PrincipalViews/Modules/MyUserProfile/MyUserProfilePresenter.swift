@@ -1,7 +1,6 @@
 import SwiftUI
 import Combine
 
-
 final class MyUserProfileViewModel: ObservableObject {
     @Published var profileImageUrl: String?
     @Published var username: String = ""
@@ -149,8 +148,6 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
                 }
             }
             .store(in: &cancellables)
-        
-        
     }
 }
 

@@ -8,6 +8,8 @@ struct UserPostProfileView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: UserPostProfileViewModel
+    @ObservedObject var levelsViewModel: LevelsViewModel
+    
     let presenter: UserPostProfilePresenter
     
     init(
@@ -15,6 +17,7 @@ struct UserPostProfileView: View {
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
+        levelsViewModel = LevelsViewModel()
         bindViewModel()
     }
     
@@ -66,6 +69,11 @@ struct UserPostProfileView: View {
                         selectedImage: $selectedImage
                     )
                 }
+                
+                if !viewModel.isCompanyProfile && !levelsViewModel.levelList.isEmpty {
+                    RookieLevelsView(viewModel: levelsViewModel)
+                }
+                
                 Spacer()
             }
         }
@@ -76,6 +84,7 @@ struct UserPostProfileView: View {
         }
         .onAppear {
             viewDidLoadPublisher.send()
+            levelsViewModel.loadUserLevels()
         }
     }
 }

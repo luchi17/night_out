@@ -235,9 +235,6 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                 }
             })
             .store(in: &cancellables)
-        
-        
-        
     }
 }
 

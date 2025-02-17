@@ -16,6 +16,8 @@ struct MyUserProfileView: View {
     private let goToLoginPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: MyUserProfileViewModel
+    @ObservedObject var levelsViewModel: LevelsViewModel
+    
     let presenter: MyUserProfilePresenter
     let settingsPresenter: MyUserSettingsPresenter
     let editProfilePresenter: MyUserEditProfilePresenter
@@ -34,6 +36,7 @@ struct MyUserProfileView: View {
         self.editProfilePresenter = editProfilePresenter
         self._updateProfileImage = updateProfileImage
         viewModel = presenter.viewModel
+        levelsViewModel = LevelsViewModel()
         bindViewModel()
     }
     
@@ -92,14 +95,15 @@ struct MyUserProfileView: View {
             }
             .padding(.top, 16)
             
+            if FirebaseServiceImpl.shared.getImUser() && !levelsViewModel.levelList.isEmpty {
+                RookieLevelsView(viewModel: levelsViewModel)
+            }
+            
             Spacer()
             
         }
         .background(
-            Image("fondo_azul")
-                .resizable()
-                .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
+            Color.black
         )
         .sheet(isPresented: $showShareSheet) {
             if let currentId = FirebaseServiceImpl.shared.getCurrentUserUid() {
@@ -133,6 +137,7 @@ struct MyUserProfileView: View {
         })
         .onAppear {
             viewDidLoadPublisher.send()
+            levelsViewModel.loadUserLevels()
         }
     }
     
