@@ -67,16 +67,20 @@ final class FriendsPresenterImpl: FriendsPresenter {
         
         let publishers: [AnyPublisher<ProfileModel, Never>] = followerIds.map { followerId in
             useCases.userDataUseCase.getUserInfo(uid: followerId)
-                .compactMap({ $0 })
                 .map { userModel in
-                    return ProfileModel(
-                        profileImageUrl: userModel.image,
-                        username: userModel.username,
-                        fullname: userModel.fullname,
-                        profileId: userModel.uid,
-                        isCompanyProfile: false,
-                        isPrivateProfile: userModel.profileType == .privateProfile
-                    )
+                    if let userModel = userModel {
+                        return ProfileModel(
+                            profileImageUrl: userModel.image,
+                            username: userModel.username,
+                            fullname: userModel.fullname,
+                            profileId: userModel.uid,
+                            isCompanyProfile: false,
+                            isPrivateProfile: userModel.profileType == .privateProfile
+                        )
+                    } else {
+                        return ProfileModel(profileId: "", isCompanyProfile: false, isPrivateProfile: false)
+                    }
+                   
                 }
                 .eraseToAnyPublisher()
         }

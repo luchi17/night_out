@@ -29,7 +29,13 @@ struct FriendsView: View {
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach(viewModel.followers, id: \.self) { user in
-                        ListUserSubView(user: user)
+                        
+                        if user.profileId.isEmpty {
+                            ListUserEmptySubView()
+                        } else {
+                            ListUserSubView(user: user)
+                        }
+                       
                     }
                 }
             }
@@ -37,7 +43,7 @@ struct FriendsView: View {
         }
         .background(
             Color.black
-                .edgesIgnoringSafeArea(.top)
+                .edgesIgnoringSafeArea(.all)
         )
         .applyStates(error: nil, isIdle: viewModel.loading)
         .onAppear {
@@ -84,3 +90,24 @@ struct FriendRow: View {
         .cornerRadius(10)
     }
 }
+
+struct ListUserEmptySubView: View {
+    
+    var body: some View {
+        
+        HStack(spacing: 10) {
+            
+            Circle()
+                .fill(Color.gray) // Color mientras carga
+                .frame(width: 40, height: 40)
+                .padding(.leading, 5)
+            
+            Text("Usuario eliminado")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.white)
+            
+            Spacer()
+        }
+    }
+}
+
