@@ -4,6 +4,7 @@ protocol ClubUseCase {
     func observeAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never>
     func removeAssistingToClub(clubId: String) -> AnyPublisher<Bool, Never>
     func addAssistingToClub(clubId: String, clubAssistance: ClubAssistance) -> AnyPublisher<Bool, Never>
+    func getAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never>
 }
 
 struct ClubUseCaseImpl: ClubUseCase {
@@ -28,6 +29,12 @@ struct ClubUseCaseImpl: ClubUseCase {
     func addAssistingToClub(clubId: String, clubAssistance: ClubAssistance) -> AnyPublisher<Bool, Never> {
         return repository
             .addAssistingToClub(clubId: clubId, clubAssistance: clubAssistance)
+            .eraseToAnyPublisher()
+    }
+    
+    func getAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never> {
+        return repository
+            .getAssistance(profileId: profileId)
             .eraseToAnyPublisher()
     }
 }

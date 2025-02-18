@@ -10,7 +10,7 @@ struct LocationModel: Identifiable, Hashable {
     var startTime: String? = ""
     var endTime: String? = ""
     var selectedTag: LocationSelectedTag?
-    var usersGoing: Int
+    var followingGoing: Int
     var distanceToUser: Double
     
     static func == (lhs: Self, rhs: Self) -> Bool {
@@ -21,7 +21,7 @@ struct LocationModel: Identifiable, Hashable {
         hasher.combine(id)
     }
     
-    init(id: String = UUID().uuidString, name: String = "", coordinate: LocationCoordinate = LocationCoordinate(), image: String? = nil, startTime: String? = nil, endTime: String? = nil, selectedTag: LocationSelectedTag? = LocationSelectedTag.none, usersGoing: Int  = 0, distanceToUser: Double = 0.0) {
+    init(id: String = UUID().uuidString, name: String = "", coordinate: LocationCoordinate = LocationCoordinate(), image: String? = nil, startTime: String? = nil, endTime: String? = nil, selectedTag: LocationSelectedTag? = LocationSelectedTag.none, followingGoing: Int = 0, distanceToUser: Double = 0.0) {
         self.id = id
         self.name = name
         self.coordinate = coordinate
@@ -29,7 +29,7 @@ struct LocationModel: Identifiable, Hashable {
         self.startTime = startTime
         self.endTime = endTime
         self.selectedTag = selectedTag
-        self.usersGoing = usersGoing
+        self.followingGoing = followingGoing
         self.distanceToUser = distanceToUser
     }
 }

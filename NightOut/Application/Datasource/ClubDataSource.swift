@@ -11,6 +11,7 @@ protocol ClubDataSource {
     func observeAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never>
     func removeAssistingToClub(clubId: String) -> AnyPublisher<Bool, Never>
     func addAssistingToClub(clubId: String, clubAssistance: ClubAssistance) -> AnyPublisher<Bool, Never>
+    func getAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never>
 }
 
 struct ClubDataSourceImpl: ClubDataSource {
@@ -19,9 +20,18 @@ struct ClubDataSourceImpl: ClubDataSource {
     // equivalente: addValueEventListener en Android
     func observeAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never> {
         
-        let subject = CurrentValueSubject<[String: ClubAssistance], Never>([:])
+        let subject = PassthroughSubject<[String: ClubAssistance], Never>()
         let ref = FirebaseServiceImpl.shared.getAssistance(profileId: profileId)
         
+        ref.observeSingleEvent(of: .value) { snapshot in
+            do {
+                let assistance = try snapshot.data(as: [String: ClubAssistance].self)
+                subject.send(assistance)
+            } catch {
+                print("Error decoding data: \(error.localizedDescription)")
+                subject.send([:])
+            }
+        }
         ref.observe(.value) { snapshot in
             do {
                 let assistance = try snapshot.data(as: [String: ClubAssistance].self)
@@ -33,6 +43,26 @@ struct ClubDataSourceImpl: ClubDataSource {
         }
         
         return subject.eraseToAnyPublisher()
+    }
+    
+    func getAssistance(profileId: String) -> AnyPublisher<[String: ClubAssistance], Never> {
+        
+        return Future<[String: ClubAssistance], Never> { promise in
+            let ref = FirebaseServiceImpl.shared.getAssistance(profileId: profileId)
+            
+            ref.observeSingleEvent(of: .value) { snapshot in
+                do {
+                    let assistance = try snapshot.data(as: [String: ClubAssistance].self)
+                    promise(.success(assistance))
+                } catch {
+                    print("Error decoding data: \(error.localizedDescription)")
+                    promise(.success([:]))
+                }
+            }
+           
+            
+        }
+        .eraseToAnyPublisher()
     }
     
     func removeAssistingToClub(clubId: String) -> AnyPublisher<Bool, Never> {

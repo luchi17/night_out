@@ -36,7 +36,7 @@ struct LocationDetailSheet: View {
                             .padding(.bottom, 10)
                     }
                     
-                    Text("Asistentes: \(String(describing: selectedLocation.usersGoing))")
+                    Text("Asistentes que conoces: \(String(describing: selectedLocation.followingGoing))")
                         .font(.subheadline)
                         .padding(.bottom, 10)
                 }

@@ -30,6 +30,8 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     
     struct UseCases {
         let companyLocationsUseCase: CompanyLocationsUseCase
+        let followUseCase: FollowUseCase
+        let clubUseCase: ClubUseCase
     }
     
     struct Actions {
@@ -65,54 +67,54 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     func transform(input: LocationsMapPresenterImpl.ViewInputs){
         listenToInput(input: input)
         
-         let companyModelsPublisher = input
-                    .viewDidLoad
-                    .withUnretained(self)
-                    .performRequest(request: { presenter, _ in
-                        presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
-                    }, loadingClosure: { [weak self] loading in
-                        guard let self = self else { return }
-                        self.viewModel.loading = loading
-                    }, onError: { _ in })
-                    .eraseToAnyPublisher()
+        let companyModelsPublisher = input
+            .viewDidLoad
+            .withUnretained(self)
+            .performRequest(request: { presenter, _ in
+                presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in })
+            .eraseToAnyPublisher()
         
         companyModelsPublisher
             .withUnretained(self)
-            .flatMap { presenter, companyUsers -> AnyPublisher<(CompanyUsersModel?, [String: Int]), Never> in
-                presenter.useCases.companyLocationsUseCase.fetchAttendanceData()
-                    .map { attendanceData in
-                        return (companyUsers, attendanceData)
+            .flatMap({ presenter, companyUsers -> AnyPublisher<(CompanyUsersModel?, [String: Bool]), Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just((companyUsers, [:])).eraseToAnyPublisher()
+                }
+                return presenter.useCases.followUseCase.fetchFollow(id: uid)
+                    .map { followModel in
+                        return (companyUsers, followModel?.following ?? [:])
                     }
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .flatMap { presenter, data -> AnyPublisher<([(String, [String])], [String], [CompanyModel]), Never> in
+                let companies = data.0?.users.map({ $0.value }) ?? []
+                let followingPeople = Array(data.1.keys)
+                
+                return presenter.getClubAssistance(companies: companies)
+                    .map({ ($0, followingPeople, companies) })
                     .eraseToAnyPublisher()
             }
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
-                let companyUsers = data.0
-                let attendanceData = data.1
-                
-                if let companyUsers = companyUsers {
+                let assistance = data.0
+                let followingPeople = data.1
+                let companies = data.2
+
+                if !companies.isEmpty {
                     presenter.viewModel.toastError = nil
                     
-                    let locations = companyUsers.users.values.compactMap({ $0 })
-                    
-                    let allClubsModel = locations.compactMap { companyModel in
+                    let allClubsModel = companies.compactMap { companyModel in
                         
-                        if let location = companyModel.location,
-                           let coordinates = presenter.viewModel.locationManager.getCoordinatesFromString(location) {
-                           
-                            
-                            return LocationModel(
-                                id: companyModel.uid,
-                                name: companyModel.username ?? "",
-                                coordinate: LocationCoordinate(id: companyModel.uid, location: coordinates),
-                                image: companyModel.imageUrl,
-                                startTime: companyModel.startTime,
-                                endTime: companyModel.endTime,
-                                selectedTag: LocationSelectedTag(rawValue: companyModel.selectedTag),
-                                usersGoing: attendanceData[companyModel.uid] ?? 0
-                            )
-                        }
-                        return nil
+                        presenter.transformCompanyModel(
+                            companyModel,
+                            assistance: assistance,
+                            followingPeople: followingPeople
+                        )
                     }
                     presenter.viewModel.currentShowingLocationList = allClubsModel
                     presenter.viewModel.allClubsModels = allClubsModel
@@ -142,7 +144,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                 presenter.actions.onOpenAppleMaps(data)
             }
             .store(in: &cancellables)
-
+        
         input
             .onFilterSelected
             .withUnretained(self)
@@ -166,7 +168,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                     presenter.viewModel.currentShowingLocationList = sortedClubsByDistance
                     
                 case .people:
-                    let sortedClubsByUsersGoing = presenter.viewModel.allClubsModels.sorted { $0.usersGoing > $1.usersGoing }
+                    let sortedClubsByUsersGoing = presenter.viewModel.allClubsModels.sorted { $0.followingGoing > $1.followingGoing }
                     presenter.viewModel.currentShowingLocationList = sortedClubsByUsersGoing
                 }
                 
@@ -177,7 +179,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .locationInListSelected
             .withUnretained(self)
             .sink { presenter, locationSelected in
-              presenter.viewModel.selectedMarkerLocation = locationSelected
+                presenter.viewModel.selectedMarkerLocation = locationSelected
             }
             .store(in: &cancellables)
     }
@@ -190,4 +192,46 @@ private extension LocationsMapPresenterImpl {
         return currentLoc.distance(from: destLoc)
     }
     
+    func getClubAssistance(companies: [CompanyModel]) -> AnyPublisher<[(String, [String])], Never> {
+        
+        let publishers: [AnyPublisher<(String, [String]), Never>] = companies.map { company in
+            
+            return useCases.clubUseCase.getAssistance(profileId: company.uid)
+                .map { clubAssistance in
+                    return (company.uid, Array(clubAssistance.keys))
+                }
+                .eraseToAnyPublisher()
+        }
+        
+        return Publishers.MergeMany(publishers)
+            .collect()
+            .eraseToAnyPublisher()
+    }
+    
+    func transformCompanyModel(_ companyModel: CompanyModel, assistance: [(String, [String])], followingPeople: [String]) -> LocationModel? {
+        
+        if let location = companyModel.location,
+           let coordinates = viewModel.locationManager.getCoordinatesFromString(location) {
+            
+            let matchingAssistance = assistance.first(where: { $0.0 == companyModel.uid })
+            
+            let usersGoingToClub = matchingAssistance?.1
+            
+            let followingUsersMatchingAssistance = usersGoingToClub?.filter({ userGoing in
+                followingPeople.contains(where: { userGoing == $0 })
+            })
+            
+            return LocationModel(
+                id: companyModel.uid,
+                name: companyModel.username ?? "",
+                coordinate: LocationCoordinate(id: companyModel.uid, location: coordinates),
+                image: companyModel.imageUrl,
+                startTime: companyModel.startTime,
+                endTime: companyModel.endTime,
+                selectedTag: LocationSelectedTag(rawValue: companyModel.selectedTag),
+                followingGoing: followingUsersMatchingAssistance?.count ?? 0
+            )
+        }
+        return nil
+    }
 }

@@ -28,7 +28,11 @@ class HomeCoordinator {
             reloadSubject: reloadSubject
         )
         let mapPresenter = LocationsMapPresenterImpl(
-            useCases: .init(companyLocationsUseCase: CompanyLocationsUseCaseImpl(repository: LocationRepositoryImpl.shared)),
+            useCases: .init(
+                companyLocationsUseCase: CompanyLocationsUseCaseImpl(repository: LocationRepositoryImpl.shared),
+                followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
+                clubUseCase: ClubUseCaseImpl(repository: ClubRepositoryImpl.shared)
+            ),
             actions: mapActions,
             locationManager: locationManager
         )
