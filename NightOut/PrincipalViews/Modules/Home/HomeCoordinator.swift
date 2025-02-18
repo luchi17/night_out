@@ -75,6 +75,9 @@ class HomeCoordinator {
             useCases: .init(saveCompanyDataUseCase: SaveCompanyUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: .init()
         )
+        
+        let friendsPresenter = FriendsPresenterImpl(useCases: .init(userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared)), actions: .init()
+        )
 
         HomeView(
             presenter: presenter,
@@ -83,6 +86,7 @@ class HomeCoordinator {
             userPresenter: userPresenter,
             settingsPresenter: settingsPresenter,
             companySettingsPresenter: companySettingsPresenter,
+            friendsPresenter: friendsPresenter,
             editProfilePresenter: editProfilePresenter
         )
     }

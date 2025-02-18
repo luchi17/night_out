@@ -181,7 +181,6 @@ public extension View {
                     self
                     DefaultIdleView()
                 }
-//                .ignoresSafeArea()
             } else {
                 if let error = error, let type = error.type {
                     self

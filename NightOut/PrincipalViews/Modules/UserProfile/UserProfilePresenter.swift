@@ -2,13 +2,15 @@ import SwiftUI
 import Combine
 
 
-struct ProfileModel: Hashable {
+struct ProfileModel: Hashable, Identifiable {
     var profileImageUrl: String?
     var username: String?
     var fullname: String?
     var profileId: String
     var isCompanyProfile: Bool
     var isPrivateProfile: Bool
+    
+    let id = UUID()
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(profileId)

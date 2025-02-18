@@ -51,6 +51,11 @@ struct ContentView: View {
                             coordinator
                                 .build()
                                 .showCustomBackButtonNavBar()
+                                .navigationDestination(for: FriendsCoordinator.self) { coordinator in
+                                    coordinator
+                                        .build()
+                                        .showCustomBackButtonNavBar()
+                                }
                         }
                         .navigationDestination(for: NotificationsCoordinator.self) { coordinator in
                             coordinator

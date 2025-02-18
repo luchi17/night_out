@@ -11,6 +11,8 @@ final class MyUserProfileViewModel: ObservableObject {
     @Published var discosCount: String = "0"
     
     @Published var companyMenuSelection: CompanyMenuSelection?
+    
+    var followers: [String] = []
 }
 
 protocol MyUserProfilePresenter {
@@ -83,6 +85,11 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
                 presenter.viewModel.profileImageUrl = profileImage
                 presenter.viewModel.username = username ?? "Username no disponible"
                 presenter.viewModel.fullname = fullname ?? "Fullname no disponible"
+                
+                if let followers = data.0?.followers?.keys {
+                    presenter.viewModel.followers = Array(followers)
+                }
+            
                 presenter.viewModel.followersCount = String(data.0?.followers?.count ?? 0)
                 presenter.viewModel.copasCount = String(data.1?.MisCopas ?? 0)
                 

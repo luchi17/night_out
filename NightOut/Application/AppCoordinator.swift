@@ -53,6 +53,11 @@ final class AppCoordinator: ObservableObject {
         self.push(tabBarCoordinator)
     }
     
+    private func goToFriendsList(followerIds: [String]) {
+        let friendsCoordinator = FriendsCoordinator(actions: .init(), followerIds: followerIds)
+        self.push(friendsCoordinator)
+    }
+    
     private func showNotificationsView() {
         let notificationsView = NotificationsCoordinator(actions: makeNotificationsActions())
         self.push(notificationsView)
@@ -69,7 +74,7 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func showPostUserProfileView(info: UserPostProfileInfo) {
-        let postUserProfileView = UserPostProfileCoordinator(actions: .init(), info: info)
+        let postUserProfileView = UserPostProfileCoordinator(actions: .init(goToFriendsList: goToFriendsList), info: info)
         self.push(postUserProfileView)
     }
     

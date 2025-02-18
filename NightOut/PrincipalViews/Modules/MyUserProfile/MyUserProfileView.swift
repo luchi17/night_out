@@ -5,6 +5,7 @@ struct MyUserProfileView: View {
     
     @State private var showShareSheet = false
     @State private var showEditSheet = false
+    @State private var showFollowersSheet = false
     @State private var showCompanyMenu = false
     
     @State private var closeAllSheets = false
@@ -20,6 +21,7 @@ struct MyUserProfileView: View {
     
     let presenter: MyUserProfilePresenter
     let settingsPresenter: MyUserSettingsPresenter
+    let friendsPresenter: FriendsPresenter
     let editProfilePresenter: MyUserEditProfilePresenter
     let companySettingsPresenter: MyUserCompanySettingsPresenter
     
@@ -28,12 +30,14 @@ struct MyUserProfileView: View {
         settingsPresenter: MyUserSettingsPresenter,
         companySettingsPresenter: MyUserCompanySettingsPresenter,
         editProfilePresenter: MyUserEditProfilePresenter,
+        friendsPresenter: FriendsPresenter,
         updateProfileImage: Binding<Bool>
     ) {
         self.presenter = presenter
         self.settingsPresenter = settingsPresenter
         self.companySettingsPresenter = companySettingsPresenter
         self.editProfilePresenter = editProfilePresenter
+        self.friendsPresenter = friendsPresenter
         self._updateProfileImage = updateProfileImage
         viewModel = presenter.viewModel
         levelsViewModel = LevelsViewModel()
@@ -88,6 +92,9 @@ struct MyUserProfileView: View {
             
             HStack(spacing: 8) {
                 CounterView(count: viewModel.followersCount, label: "Seguidores")
+                    .onTapGesture {
+                        showFollowersSheet.toggle()
+                    }
                 if FirebaseServiceImpl.shared.getImUser() {
                     CounterView(count: viewModel.discosCount, label: "Discotecas")
                     CounterView(count: viewModel.copasCount, label: "Copas")
@@ -125,10 +132,19 @@ struct MyUserProfileView: View {
              .presentationDetents([.large])
              .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showFollowersSheet) {
+            FriendsView(
+                presenter: friendsPresenter,
+                followerIds: viewModel.followers
+            )
+            .presentationDetents([.large])
+             .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $showCompanyMenu) {
             CompanyMenu(
                 selection: $viewModel.companyMenuSelection,
-                showSheet: $showCompanyMenu)
+                showSheet: $showCompanyMenu
+            )
         }
         .onChange(of: closeAllSheets, { oldValue, newValue in
             if newValue {

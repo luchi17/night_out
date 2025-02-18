@@ -23,6 +23,8 @@ final class UserPostProfileViewModel: ObservableObject {
     @Published var copasCount: String = "0"
     @Published var images: [IdentifiableImage] = []
     @Published var isCompanyProfile: Bool
+    
+    var followers: [String] = []
 
     init(profileImageUrl: String? = nil, username: String, fullname: String, discosCount: String, copasCount: String, isCompanyProfile: Bool) {
         self.profileImageUrl = profileImageUrl
@@ -48,10 +50,12 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     }
     
     struct Actions {
+        let goToFriendsList: InputClosure<[String]>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
+        let goToFriendsList: AnyPublisher<Void, Never>
     }
     
     var viewModel: UserPostProfileViewModel
@@ -84,6 +88,14 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     func transform(input: UserPostProfilePresenterImpl.ViewInputs) {
         
         input
+            .goToFriendsList
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.goToFriendsList(presenter.viewModel.followers)
+            }
+            .store(in: &cancellables)
+        
+        input
             .viewDidLoad
             .filter({ [weak self] _ in  !(self?.info.isCompanyProfile ?? false) })
             .withUnretained(self)
@@ -107,6 +119,10 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
             .flatMap({ presenter, _ in
                 presenter.useCases.followUseCase.fetchFollow(id: presenter.info.profileId)
                     .handleEvents(receiveOutput: { [weak self] followModel in
+                        
+                        if let followers = followModel?.followers?.keys {
+                            self?.viewModel.followers = Array(followers)
+                        }
                         self?.viewModel.followersCount = String(followModel?.followers?.count ?? 0)
                         
                     })

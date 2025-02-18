@@ -61,7 +61,7 @@ struct SearchView: View {
                 ScrollView {
                     VStack(spacing: 10) {
                         ForEach(viewModel.searchResults, id: \.self) { user in
-                            SearchUserSubView(user: user)
+                            ListUserSubView(user: user)
                                 .onTapGesture {
                                     hideKeyboard()
                                     goToProfilePublisher.send(user)
@@ -134,7 +134,7 @@ private extension SearchView {
     }
 }
 
-struct SearchUserSubView: View {
+struct ListUserSubView: View {
     
     var user: ProfileModel
     

@@ -6,6 +6,7 @@ struct UserPostProfileView: View {
     @State private var selectedImage: IdentifiableImage? = nil
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
+    private let goToFriendsListPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: UserPostProfileViewModel
     @ObservedObject var levelsViewModel: LevelsViewModel
@@ -56,6 +57,9 @@ struct UserPostProfileView: View {
                 // Contadores
                 HStack(spacing: 8) {
                     CounterView(count: viewModel.followersCount, label: "Seguidores")
+                        .onTapGesture {
+                            goToFriendsListPublisher.send()
+                        }
                     if !viewModel.isCompanyProfile {
                         CounterView(count: viewModel.discosCount, label: "Discotecas")
                         CounterView(count: viewModel.copasCount, label: "Copas")
@@ -92,7 +96,8 @@ struct UserPostProfileView: View {
 private extension UserPostProfileView {
     func bindViewModel() {
         let input = UserPostProfilePresenterImpl.ViewInputs(
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            goToFriendsList: goToFriendsListPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

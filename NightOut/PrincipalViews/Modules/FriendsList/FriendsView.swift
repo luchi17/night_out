@@ -1,0 +1,86 @@
+
+import SwiftUI
+import Combine
+
+struct FriendsView: View {
+    
+    private let viewDidLoadPublisher = PassthroughSubject<[String], Never>()
+    private let goToProfilePublisher = PassthroughSubject<ProfileModel, Never>()
+    
+    @ObservedObject var viewModel: FriendsViewModel
+    let presenter: FriendsPresenter
+    let followerIds: [String]
+    
+    init(
+        presenter: FriendsPresenter,
+        followerIds: [String]
+    ) {
+        self.presenter = presenter
+        self.followerIds = followerIds
+        viewModel = presenter.viewModel
+        bindViewModel()
+    }
+    
+    var body: some View {
+        VStack {
+            
+            Spacer().frame(height: 20)
+            
+            ScrollView {
+                VStack(spacing: 10) {
+                    ForEach(viewModel.followers, id: \.self) { user in
+                        ListUserSubView(user: user)
+                    }
+                }
+            }
+            Spacer()
+        }
+        .background(
+            Color.black
+                .edgesIgnoringSafeArea(.top)
+        )
+        .applyStates(error: nil, isIdle: viewModel.loading)
+        .onAppear {
+            viewDidLoadPublisher.send(followerIds)
+        }
+    }
+}
+
+private extension FriendsView {
+    func bindViewModel() {
+        let input = FriendsPresenterImpl.ViewInputs(
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            goToProfile: goToProfilePublisher.eraseToAnyPublisher()
+        )
+        presenter.transform(input: input)
+    }
+}
+
+
+struct FriendRow: View {
+    
+    var user: ProfileModel
+    
+    var body: some View {
+        HStack {
+            AsyncImage(url: URL(string: user.profileImageUrl ?? "")) { image in
+                image.resizable()
+            } placeholder: {
+                Circle()
+                    .fill(Color.gray.opacity(0.5)) // Color mientras carga
+                    .frame(width: 50, height: 50)
+            }
+            .frame(width: 50, height: 50)
+            .clipShape(Circle())
+            
+            Text(user.username ?? "Desconocido")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.white)
+            
+            Spacer()
+        }
+        .padding()
+        .background(Color.black.opacity(0.6)) // Fondo oscuro para cada fila
+        .cornerRadius(10)
+    }
+}

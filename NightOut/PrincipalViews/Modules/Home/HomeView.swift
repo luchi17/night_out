@@ -15,6 +15,7 @@ struct HomeView: View {
     let settingsPresenter: MyUserSettingsPresenter
     let companySettingsPresenter: MyUserCompanySettingsPresenter
     let editProfilePresenter: MyUserEditProfilePresenter
+    let friendsPresenter: FriendsPresenter
     
     private let openNotificationsPublisher = PassthroughSubject<Void, Never>()
     private let openMessagesPublisher = PassthroughSubject<Void, Never>()
@@ -33,6 +34,7 @@ struct HomeView: View {
         userPresenter: MyUserProfilePresenter,
         settingsPresenter: MyUserSettingsPresenter,
         companySettingsPresenter: MyUserCompanySettingsPresenter,
+        friendsPresenter: FriendsPresenter,
         editProfilePresenter: MyUserEditProfilePresenter
     ) {
         self.presenter = presenter
@@ -42,6 +44,7 @@ struct HomeView: View {
         self.settingsPresenter = settingsPresenter
         self.companySettingsPresenter = companySettingsPresenter
         self.editProfilePresenter = editProfilePresenter
+        self.friendsPresenter = friendsPresenter
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -64,6 +67,7 @@ struct HomeView: View {
                 settingsPresenter: settingsPresenter,
                 companySettingsPresenter: companySettingsPresenter,
                 editProfilePresenter: editProfilePresenter,
+                friendsPresenter: friendsPresenter,
                 updateProfileImage: $updateProfileImage
             )
                 .presentationDetents([.large])

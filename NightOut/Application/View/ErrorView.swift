@@ -255,7 +255,7 @@ public extension View {
     ) -> some View {
         VStack(spacing: 0) {
             if error?.state == nil, isIdle {
-                ZStack(alignment: .top) {
+                ZStack { //(alignment: .top)
                     self
                     DefaultIdleView()
                 }
