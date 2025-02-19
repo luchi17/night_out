@@ -24,7 +24,7 @@ struct TinderView: View {
     
     var body: some View {
         ZStack {
-            if showInitSheet {
+            if showInitSheet || viewModel.showAlert {
                 Color.black
                     .edgesIgnoringSafeArea(.all)
             } else {
@@ -82,10 +82,9 @@ struct TinderView: View {
         })
         .sheet(isPresented: $showInitSheet) {
             TinderInitView(
-                openUsers: {
+                showUsers: {
                     showInitSheet = false
                     initTinderTappedPublisher.send()
-//                    viewDidLoadPublisher.send()
                 },
                 cancel: {
                     showInitSheet = false
@@ -102,7 +101,10 @@ struct TinderView: View {
                     .foregroundColor(.white),
                 message: Text(viewModel.alertMessage)
                     .foregroundColor(.white),
-                dismissButton: .default(Text("ACEPTAR"))
+                dismissButton: .default(Text("ACEPTAR"), action: {
+                    viewModel.showAlert = false
+                    goBackPublisher.send()
+                })
             )
         }
         .edgesIgnoringSafeArea(.bottom)
@@ -153,8 +155,6 @@ struct TinderView: View {
             Spacer()
         }
     }
-    
-    
 }
 
 private extension TinderView {
