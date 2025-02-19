@@ -27,6 +27,8 @@ final class TinderViewModel: ObservableObject {
     @Published var alertButtonText: String = ""
     @Published var shouldOpenConfig: Bool = false
     
+    @Published var currentIndex: Int = 0
+    
 }
 
 protocol TinderPresenter {
@@ -81,7 +83,8 @@ final class TinderPresenterImpl: TinderPresenter {
             .sink { presenter, userLikedUid in
                 presenter.setUserLiked(likedUserId: userLikedUid)
                 presenter.viewModel.users = presenter.viewModel.users.filter({ $0.uid != userLikedUid })
-                //TODO: Move to next user
+                //TODO: Move to next user: CHECK
+                presenter.viewModel.currentIndex += 1
             }
             .store(in: &cancellables)
         
@@ -108,22 +111,16 @@ final class TinderPresenterImpl: TinderPresenter {
                 print("DATA")
                 print(data.0)
                 print(data.1)
-                
-                presenter.viewModel.showAlert = true
-                presenter.viewModel.shouldOpenConfig = true
-                presenter.viewModel.alertTitle = "Género"
-                presenter.viewModel.alertMessage = "Debes seleccionar el género en los ajustes de tu perfil."
-                presenter.viewModel.alertButtonText = "Abrir configuración"
-                
-//                if data.1 != nil {
-//                    presenter.viewModel.users = data.0
-//                } else {
-//                    presenter.viewModel.showAlert = true
-//                    presenter.viewModel.shouldOpenConfig = true
-//                    presenter.viewModel.alertTitle = "Género"
-//                    presenter.viewModel.alertMessage = "Debes seleccionar el género en los ajustes de tu perfil."
-//                    presenter.viewModel.alertButtonText = "Abrir configuración"
-//                }
+
+                if data.1 != nil {
+                    presenter.viewModel.users = data.0
+                } else {
+                    presenter.viewModel.showAlert = true
+                    presenter.viewModel.shouldOpenConfig = true
+                    presenter.viewModel.alertTitle = "Género"
+                    presenter.viewModel.alertMessage = "Debes seleccionar el género en los ajustes de tu perfil."
+                    presenter.viewModel.alertButtonText = "Abrir configuración"
+                }
             }
             .store(in: &cancellables)
         

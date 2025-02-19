@@ -3,7 +3,6 @@ import Combine
 
 struct TinderView: View {
     
-    @State private var currentIndex: Int = 0
     @State private var showInitSheet: Bool = true
     
     private let initTinderTappedPublisher = PassthroughSubject<Void, Never>()
@@ -33,8 +32,8 @@ struct TinderView: View {
                     noUsersView
                     
                 } else {
-                    if currentIndex < viewModel.users.count {
-                        let user = $viewModel.users[currentIndex]
+                    if viewModel.currentIndex < viewModel.users.count {
+                        let user = $viewModel.users[viewModel.currentIndex]
                         
                         CardView(
                             user: user,
@@ -45,13 +44,13 @@ struct TinderView: View {
                                     .onEnded { gesture in
                                         if gesture.translation.width > 100 {
                                             // Swipe Right (Next User)
-                                            if currentIndex < viewModel.users.count - 1 {
-                                                currentIndex += 1
+                                            if viewModel.currentIndex < viewModel.users.count - 1 {
+                                                viewModel.currentIndex += 1
                                             }
                                         } else if gesture.translation.width < -100 {
                                             // Swipe Left (Previous User)
-                                            if currentIndex > 0 {
-                                                currentIndex -= 1
+                                            if viewModel.currentIndex > 0 {
+                                                viewModel.currentIndex -= 1
                                             }
                                         }
                                     }
