@@ -42,6 +42,11 @@ struct ContentView: View {
                     coordinator
                         .build()
                         .edgesIgnoringSafeArea(.top)
+                        .navigationDestination(for: TinderCoordinator.self) { coordinator in
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
+                        }
                         .navigationDestination(for: CommentsCoordinator.self) { coordinator in
                             coordinator
                                 .build()

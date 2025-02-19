@@ -40,17 +40,26 @@ final class AppCoordinator: ObservableObject {
             locationManager: LocationManager.shared,
             openMaps: openGoogleMaps(latitude:longitude:),
             openAppleMaps: openAppleMaps(coordinate:placeName:),
-            goToLogin: {
-                self.pop()
+            goToLogin: { [weak self] in
+                self?.pop()
             },
             showPostUserProfileView: showPostUserProfileView,
             onShowPostComments: showPostComments,
             showNotificationsView: showNotificationsView,
             showProfile: showProfile,
             openMessages: openMessages,
-            showPrivateProfile: showPrivateProfile
+            showPrivateProfile: showPrivateProfile,
+            openTinder: openTinder
         )
         self.push(tabBarCoordinator)
+    }
+    
+    private func openTinder() {
+        let tinderCoordinator = TinderCoordinator(actions: .init(goBack: { [weak self] in
+            self?.pop()
+        }))
+        
+        self.push(tinderCoordinator)
     }
     
     private func goToFriendsList(followerIds: [String]) {

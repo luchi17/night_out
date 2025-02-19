@@ -30,6 +30,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let showProfile: InputClosure<ProfileModel>
     private let showPrivateProfile: InputClosure<ProfileModel>
     private let openMessages: VoidClosure
+    private let openTinder: VoidClosure
     private let locationManager: LocationManager
     
     @Published var path: NavigationPath
@@ -56,7 +57,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
         showNotificationsView: @escaping VoidClosure,
         showProfile: @escaping InputClosure<ProfileModel>,
         openMessages: @escaping VoidClosure,
-        showPrivateProfile: @escaping InputClosure<ProfileModel>
+        showPrivateProfile: @escaping InputClosure<ProfileModel>,
+        openTinder: @escaping VoidClosure
     ) {
         self.path = path
         self.locationManager = locationManager
@@ -69,6 +71,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
         self.showProfile = showProfile
         self.showPrivateProfile = showPrivateProfile
         self.openMessages = openMessages
+        self.openTinder = openTinder
         self.viewModel = TabViewModel(selectedTab: .home)
     }
     
@@ -140,7 +143,7 @@ private extension TabViewCoordinator {
             onOpenNotifications: showNotificationsView,
             openMessages: openMessages,
             openHub: { },
-            openTinder: { }
+            openTinder: openTinder
         )
     }
     
