@@ -29,14 +29,17 @@ struct TinderView: View {
                     .edgesIgnoringSafeArea(.all)
             } else {
                 
-                if viewModel.users.isEmpty {
+                if viewModel.users.isEmpty && !viewModel.loadingUsers {
                     noUsersView
                     
                 } else {
                     if currentIndex < viewModel.users.count {
                         let user = $viewModel.users[currentIndex]
                         
-                        CardView(user: user)
+                        CardView(
+                            user: user,
+                            userLikedTapped: userLikedPublisher.send
+                        )
                             .gesture(
                                 DragGesture()
                                     .onEnded { gesture in
@@ -61,7 +64,6 @@ struct TinderView: View {
             }
             
         }
-        //        .padding(.horizontal, 20)
         .background(
             Color.black
         )
@@ -179,7 +181,11 @@ private extension TinderView {
 
 
 struct CardView: View {
+    
     @Binding var user: TinderUser
+    @State private var userLiked: Bool = false
+    
+    var userLikedTapped: InputClosure<String>
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -208,12 +214,13 @@ struct CardView: View {
                 HStack {
                     Spacer()
                     Button(action: {
-                        user.isLiked.toggle()
+                        userLiked = true
+                        userLikedTapped(user.uid)
                     }) {
-                        Image(user.isLiked ? "heart_clicked" : "heart")
+                        Image(userLiked ? "heart_clicked" : "heart")
                             .resizable()
                             .frame(width: 50, height: 50)
-                            .foregroundColor(user.isLiked ? .red : .white)
+                            .foregroundColor(userLiked ? .red : .white)
                             .padding()
                     }
                 }
@@ -237,10 +244,10 @@ struct TinderLoadingUsersView: View {
                     .edgesIgnoringSafeArea(.all)
 
                 // Imagen de carga
-                Image("carga_social_nbg") // Asegúrate de tener esta imagen en Assets.xcassets
+                Image("carga_social_nbg")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 150, height: 150) // Ajusta el tamaño según necesites
+                    .frame(width: 200, height: 200) // Ajusta el tamaño según necesites
                     .opacity(isLoading ? 1 : 0)
                     .animation(.easeInOut(duration: 0.5), value: isLoading)
             }
@@ -249,7 +256,7 @@ struct TinderLoadingUsersView: View {
                 // Mantener la imagen visible 2 segundos antes de desaparecer
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     withAnimation {
-                        isLoading = false
+//                        isLoading = false
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         onAnimationEnd() // Llamar la acción al terminar la animación
