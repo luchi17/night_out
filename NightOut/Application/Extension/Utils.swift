@@ -1,8 +1,6 @@
 import Foundation
 
 class Utils {
-    // ascending: comments
-    // descending not y posts 
     static func sortByDate<T>(objects: [T], dateExtractor: (T) -> String, ascending: Bool) -> [T] {
         let dateFormatter = ISO8601DateFormatter()
         return objects.sorted { obj1, obj2 in
@@ -13,5 +11,4 @@ class Utils {
             return ascending ? date1 < date2 : date1 > date2
         }
     }
-
 }
