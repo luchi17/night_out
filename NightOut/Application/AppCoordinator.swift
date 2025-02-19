@@ -78,7 +78,11 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func openChat(chat: Chat) {
-        let messagesView = ChatCoordinator(actions: .init(goBack: self.pop), chat: chat)
+        let messagesView = ChatCoordinator(actions: .init(goBack: {
+            [weak self] in
+            self?.pop()
+        }), chat: chat)
+        
         self.push(messagesView)
     }
     
@@ -161,7 +165,10 @@ private extension AppCoordinator {
                 self.pop()
                 self.showTabView()
             },
-            backToLogin: self.pop
+            backToLogin: {
+                [weak self] in
+                self?.pop()
+            }
         )
     }
     
@@ -171,7 +178,10 @@ private extension AppCoordinator {
                 self.pop()
                 self.showTabView()
             },
-            backToLogin: self.pop
+            backToLogin: {
+                [weak self] in
+                self?.pop()
+            }
         )
     }
     
@@ -186,7 +196,10 @@ private extension AppCoordinator {
     func makeMessagesActions() -> MessagesPresenterImpl.Actions {
         return .init(
             goToChat: openChat,
-            goBack: self.pop
+            goBack: {
+                [weak self] in
+                self?.pop()
+            }
         )
     }
 }
