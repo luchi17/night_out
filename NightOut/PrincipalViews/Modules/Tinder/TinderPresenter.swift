@@ -157,34 +157,38 @@ final class TinderPresenterImpl: TinderPresenter {
                 
                 if clubId != nil {
                     
-                    #warning("TODO: REMOVE, just to try")
+#warning("TODO: REMOVE, just to try")
                     presenter.viewModel.loadingUsers = true
                     presenter.loadUsersSubject.send()
                     
-//                    // Validar horario permitido (21:00 - 00:00)
-//                    let calendar = Calendar.current
-//                    let currentHour = calendar.component(.hour, from: Date())
-//                    
-//                    if currentHour >= 21 || currentHour < 2 {
-//                        // Navegar a TinderListView dentro del horario permitido
-//                        presenter.viewModel.loadingUsers = true
-//                    } else {
-//                        // Mostrar diálogo indicando fuera de horario
-//                        presenter.viewModel.showAlert = true
-//                        presenter.viewModel.alertTitle = "Fuera de horario"
-//                        presenter.viewModel.alertMessage = "Solo puedes acceder a las fotos de los demás entre las 21:00 y las 00:00."
-//                    }
+                    //                    // Validar horario permitido (21:00 - 00:00)
+                    //                    let calendar = Calendar.current
+                    //                    let currentHour = calendar.component(.hour, from: Date())
+                    //
+                    //                    if currentHour >= 21 || currentHour < 2 {
+                    //                        // Navegar a TinderListView dentro del horario permitido
+                    //                        presenter.viewModel.loadingUsers = true
+                    //                    } else {
+                    //                        // Mostrar diálogo indicando fuera de horario
+                    //                        presenter.viewModel.showAlert = true
+                    //                    presenter.viewModel.shouldOpenConfig = false
+                    //                        presenter.viewModel.alertTitle = "Fuera de horario"
+                    //                        presenter.viewModel.alertMessage = "Solo puedes acceder a las fotos de los demás entre las 21:00 y las 00:00."
+                    //                    presenter.viewModel.alertButtonText = "ACEPTAR"
+                    //                    }
                 } else {
                     presenter.viewModel.showAlert = true
+                    presenter.viewModel.shouldOpenConfig = false
                     presenter.viewModel.alertTitle = "Confirmar asistencia"
                     presenter.viewModel.alertMessage = "Debes confirmar tu asistencia a un club para continuar."
+                    presenter.viewModel.alertButtonText = "ACEPTAR"
                 }
             }
             .store(in: &cancellables)
         
     }
     
-    func getClubIdForCurrentUser() -> AnyPublisher<String?, Never> {
+    private func getClubIdForCurrentUser() -> AnyPublisher<String?, Never> {
         return Future { promise in
             guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                 promise(.success(nil))
@@ -205,9 +209,127 @@ final class TinderPresenterImpl: TinderPresenter {
                 promise(.success(nil)) // No se encontró el club
             } withCancel: { error in
                 print("Error fetching club: \(error.localizedDescription)")
-                promise(.success(nil)) // Manejo de error
+                promise(.success(nil))
             }
         }
         .eraseToAnyPublisher()
+    }
+    
+    private func setUserLiked(likedUserId: String) {
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            return
+        }
+        FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: currentUserId).child("Liked").child(likedUserId).setValue(true) { error, _ in
+            if let error = error {
+                print("Error al dar like al usuario \(likedUserId): \(error.localizedDescription)")
+            } else {
+                print("Usuario \(likedUserId) liked exitosamente")
+            }
+        }
+    }
+    
+    private func loadCurrentUserSex() -> AnyPublisher<String?, Never> {
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            return Just(nil).eraseToAnyPublisher()
+        }
+        
+        return self.getClubIdForCurrentUser()
+            .withUnretained(self)
+            .flatMap { presenter, clubId -> AnyPublisher<String?, Never> in
+                guard let clubId = clubId else {
+                    print("Club ID no encontrado")
+                    return Just(nil).eraseToAnyPublisher()
+                }
+                return presenter.useCases.clubUseCase.getAssistance(profileId: clubId)
+                    .map { assistance in
+                        let myGender = assistance[currentUserId]?.gender
+                        return myGender
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    private func loadUsers(currentUserSex: String) -> AnyPublisher<[TinderUser], Never> {
+        
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            return Just([]).eraseToAnyPublisher()
+        }
+        
+        return getClubIdForCurrentUser()
+            .withUnretained(self)
+            .flatMap({ presenter, clubId -> AnyPublisher<(String?, [String]), Never> in
+                presenter.useCases.userDataUseCase.getUserInfo(uid: currentUserId)
+                    .map { userModel in
+                        if let liked = userModel?.Liked?.keys {
+                            return (clubId, Array(liked))
+                        } else {
+                            return (clubId, [])
+                        }
+                    }
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .flatMap { presenter, data -> AnyPublisher<([ClubAssistance], String), Never> in
+                guard let clubId = data.0 else {
+                    print("Club ID no encontrado")
+                    return Just(([], "")).eraseToAnyPublisher()
+                }
+                return presenter.useCases.clubUseCase.getAssistance(profileId: clubId)
+                    .map { users in
+                        
+                        let usersToLoad =
+                        users.filter { user in
+                            return user.key != currentUserId &&
+                            !data.1.contains(where: { $0 != user.key }) //Filter liked users
+                        }.values
+                        
+                        return (Array(usersToLoad), currentUserSex)
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .withUnretained(self)
+            .flatMap { presenter, data -> AnyPublisher<[TinderUser], Never> in
+
+                presenter.loadUsersDetails(
+                    users: data.0,
+                    currentUserSex: data.1
+                )
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    private func loadUsersDetails(users: [ClubAssistance], currentUserSex: String) -> AnyPublisher<[TinderUser], Never> {
+        
+        print("loadUserDetails")
+        print(users)
+        let publishers: [AnyPublisher<TinderUser, Never>] = users.map { user in
+            
+            return useCases.userDataUseCase.getUserInfo(uid: user.uid)
+                .compactMap({ userModel -> TinderUser? in
+                    
+                    guard let userModel = userModel else {
+                        return nil
+                    }
+                    if userModel.gender == nil ||
+                        userModel.gender == currentUserSex ||
+                        userModel.social?.lowercased() == "no participando" {
+                        return nil
+                    } else {
+                        return TinderUser(
+                            uid: userModel.uid,
+                            name: userModel.username,
+                            image: userModel.image,
+                            gender: user.gender
+                        )
+                    }
+                })
+                .compactMap({ $0 })
+                .eraseToAnyPublisher()
+        }
+        
+        return Publishers.MergeMany(publishers)
+            .collect()
+            .eraseToAnyPublisher()
     }
 }
