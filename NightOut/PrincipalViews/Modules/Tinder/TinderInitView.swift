@@ -38,16 +38,15 @@ struct TinderInitView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(height: 150)
-//                    .padding(.top, 40)
                 
                 Text("¡Bienvenido a Social\nNightOut!")
-                    .font(.system(size: 26, weight: .bold))
+                    .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-//                    .padding(.horizontal)
+                    .frame(height: 70, alignment: .center)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
                 
                 gridView
-                    .transition(.opacity)
                 
                 Spacer()
                 
@@ -57,15 +56,14 @@ struct TinderInitView: View {
                     Text("Iniciar".uppercased())
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
-                        .padding(.all, 10)
+                        .padding(.all, 14)
                         .background(Color.gray)
-                        .cornerRadius(8)
+                        .cornerRadius(20)
                 }
-                .padding(.bottom, 40)
+                .padding(.bottom, 20)
             }
             .padding(.horizontal, 20)
         }
-       
     }
     
     var gridView: some View {
