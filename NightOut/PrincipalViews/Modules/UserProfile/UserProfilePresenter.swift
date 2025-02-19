@@ -450,7 +450,8 @@ private extension UserProfilePresenterImpl {
                 let clubAssistance = ClubAssistance(
                     uid: myUid,
                     gender: viewModel.myUserModel?.gender,
-                    tinderPhoto: nil
+                    tinderPhoto: nil,
+                    social: viewModel.myUserModel?.social
                 )
                 useCases.clubUseCase.addAssistingToClub(
                     clubId: model.profileId,
