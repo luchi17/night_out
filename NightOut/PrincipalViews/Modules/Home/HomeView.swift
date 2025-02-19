@@ -61,7 +61,7 @@ struct HomeView: View {
                 FeedView(presenter: feedPresenter)
             }
         }
-        .sheet(isPresented: $showMyProfile) {
+        .sheet(isPresented: $viewModel.showMyProfile) {
             MyUserProfileView(
                 presenter: userPresenter,
                 settingsPresenter: settingsPresenter,

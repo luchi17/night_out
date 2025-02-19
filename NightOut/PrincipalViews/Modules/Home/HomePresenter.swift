@@ -21,6 +21,7 @@ final class HomeViewModel: ObservableObject {
     @Published var profileImageUrl: String?
     @Published var showCompanyFirstAlert: Bool = false
     @Published var showNighoutAlert: Bool = false
+    @Published var showMyProfile: Bool = false
     @Published var nighoutAlertTitle: String = ""
     @Published var nighoutAlertMessage: String = ""
 }
@@ -52,10 +53,16 @@ final class HomePresenterImpl: HomePresenter {
         let openTinder: AnyPublisher<Void, Never>
     }
     
+    struct Input {
+        let openProfile: AnyPublisher<Void, Never>
+    }
+    
     var viewModel: HomeViewModel
     
     private let actions: Actions
     private let useCases: UseCases
+    private let outinput: Input
+    
     private let reloadSubject: PassthroughSubject<Void, Never>
     
     private var cancellables = Set<AnyCancellable>()
@@ -63,16 +70,27 @@ final class HomePresenterImpl: HomePresenter {
     init(
         useCases: UseCases,
         actions: Actions,
-        reloadSubject: PassthroughSubject<Void, Never>
+        reloadSubject: PassthroughSubject<Void, Never>,
+        input: Input
     ) {
         self.actions = actions
         self.useCases = useCases
         self.reloadSubject = reloadSubject
+        self.outinput = input
         
         viewModel = HomeViewModel()
     }
     
-    func transform(input: HomePresenterImpl.ViewInputs){
+    func transform(input: HomePresenterImpl.ViewInputs) {
+        
+        outinput
+            .openProfile
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.viewModel.showMyProfile = true
+            }
+            .store(in: &cancellables)
+        
         input
             .openNotifications
             .withUnretained(self)
@@ -94,14 +112,15 @@ final class HomePresenterImpl: HomePresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 if FirebaseServiceImpl.shared.getImUser() {
-                    if presenter.isPastNinePM() {
-                        presenter.actions.openTinder()
-                    } else {
-                        presenter.viewModel.showNighoutAlert = true
-                        presenter.viewModel.nighoutAlertTitle = "Social NightOut"
-                        presenter.viewModel.nighoutAlertMessage = "Social NightOut no estará disponible hasta las 21:00."
-                        
-                    }
+//                    if presenter.isPastNinePM() {
+//                        presenter.actions.openTinder()
+//                    } else {
+//                        presenter.viewModel.showNighoutAlert = true
+//                        presenter.viewModel.nighoutAlertTitle = "Social NightOut"
+//                        presenter.viewModel.nighoutAlertMessage = "Social NightOut no estará disponible hasta las 21:00."
+//                        
+//                    }
+                    presenter.actions.openTinder()
                 } else {
                     presenter.viewModel.showNighoutAlert = true
                     presenter.viewModel.nighoutAlertTitle = "Acceso Denegado"

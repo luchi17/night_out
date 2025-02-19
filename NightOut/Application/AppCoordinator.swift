@@ -9,6 +9,8 @@ import MapKit
 final class AppCoordinator: ObservableObject {
     @Published var path: NavigationPath
     
+    private let showMyProfileSubject = PassthroughSubject<Void, Never>()
+    
     // MARK: - Stored Properties for redirections
     
     @ViewBuilder
@@ -37,6 +39,7 @@ final class AppCoordinator: ObservableObject {
     private func showTabView() {
         let tabBarCoordinator = TabViewCoordinator(
             path: path,
+            showMyProfileSubject: showMyProfileSubject,
             locationManager: LocationManager.shared,
             openMaps: openGoogleMaps(latitude:longitude:),
             openAppleMaps: openAppleMaps(coordinate:placeName:),
@@ -57,6 +60,9 @@ final class AppCoordinator: ObservableObject {
     private func openTinder() {
         let tinderCoordinator = TinderCoordinator(actions: .init(goBack: { [weak self] in
             self?.pop()
+        }, openProfile: { [weak self] in
+            self?.pop()
+            self?.showMyProfileSubject.send()
         }))
         
         self.push(tinderCoordinator)

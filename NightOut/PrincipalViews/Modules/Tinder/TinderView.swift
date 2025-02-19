@@ -107,7 +107,8 @@ struct TinderView: View {
                     .foregroundColor(.white),
                 message: Text(viewModel.alertMessage)
                     .foregroundColor(.white),
-                dismissButton: .default(Text("ACEPTAR"), action: {
+                dismissButton: .default(Text(viewModel.alertButtonText), action: {
+//                    viewModel.shouldOpenConfig = false
                     viewModel.showAlert = false
                     goBackPublisher.send()
                 })

@@ -32,6 +32,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let openMessages: VoidClosure
     private let openTinder: VoidClosure
     private let locationManager: LocationManager
+    private let showMyProfileSubject: PassthroughSubject<Void, Never>
     
     @Published var path: NavigationPath
     @ObservedObject var viewModel: TabViewModel
@@ -48,6 +49,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     init(
         path: NavigationPath,
+        showMyProfileSubject: PassthroughSubject<Void, Never>,
         locationManager: LocationManager,
         openMaps: @escaping (Double, Double) -> Void,
         openAppleMaps: @escaping (CLLocationCoordinate2D, String?) -> Void,
@@ -72,6 +74,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
         self.showPrivateProfile = showPrivateProfile
         self.openMessages = openMessages
         self.openTinder = openTinder
+        self.showMyProfileSubject = showMyProfileSubject
         self.viewModel = TabViewModel(selectedTab: .home)
     }
     
@@ -101,7 +104,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
             mapActions: mapActions(),
             feedActions: feedActions(),
             profileActions: profileActions(),
-            locationManager: locationManager
+            locationManager: locationManager,
+            showMyProfileSubject: showMyProfileSubject
         )
         return AnyView(coordinator.build())
     }
