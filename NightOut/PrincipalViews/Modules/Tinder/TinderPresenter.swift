@@ -110,7 +110,6 @@ final class TinderPresenterImpl: TinderPresenter {
             })
             .withUnretained(self)
             .sink { presenter, clubId in
-                presenter.viewModel.loadingAssistance = false
                 
                 if clubId != nil {
                     // Validar horario permitido (21:00 - 00:00)

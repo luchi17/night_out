@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TinderInitView: View {
     
-    let openUsers: VoidClosure
+    let showUsers: VoidClosure
     let cancel: VoidClosure
     
     let items: [(String, String)] = [
@@ -51,7 +51,7 @@ struct TinderInitView: View {
                 Spacer()
                 
                 Button(action: {
-                    openUsers()
+                    showUsers()
                 }) {
                     Text("Iniciar".uppercased())
                         .font(.system(size: 18, weight: .bold))
