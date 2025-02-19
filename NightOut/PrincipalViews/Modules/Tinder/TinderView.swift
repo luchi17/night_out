@@ -80,6 +80,12 @@ struct TinderView: View {
                     }
                 }
         })
+        .if(viewModel.loadingUsers, transform: { view in
+            TinderLoadingUsersView(
+                isLoading: $viewModel.loadingUsers) {
+                    //Do something ?
+                }
+        })
         .sheet(isPresented: $showInitSheet) {
             TinderInitView(
                 showUsers: {
@@ -214,5 +220,41 @@ struct CardView: View {
         }
         .padding()
         .background(LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0.7), Color.clear]), startPoint: .bottom, endPoint: .top))
+    }
+}
+
+
+struct TinderLoadingUsersView: View {
+    @Binding var isLoading: Bool
+    var onAnimationEnd: () -> Void
+    
+    var body: some View {
+        if isLoading {
+            ZStack {
+                // Fondo semitransparente
+                Color.black.opacity(0.8)
+                    .edgesIgnoringSafeArea(.all)
+
+                // Imagen de carga
+                Image("carga_social_nbg") // Asegúrate de tener esta imagen en Assets.xcassets
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 150, height: 150) // Ajusta el tamaño según necesites
+                    .opacity(isLoading ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.5), value: isLoading)
+            }
+            .transition(.opacity)
+            .onAppear {
+                // Mantener la imagen visible 2 segundos antes de desaparecer
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    withAnimation {
+                        isLoading = false
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        onAnimationEnd() // Llamar la acción al terminar la animación
+                    }
+                }
+            }
+        }
     }
 }
