@@ -8,7 +8,7 @@ struct TinderUser: Identifiable {
     let uid: String
     let name: String
     let image: String?
-    var isLiked: Bool = false
+    let gender: String?
 }
 
 
@@ -24,6 +24,8 @@ final class TinderViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     @Published var alertMessage: String = ""
     @Published var alertTitle: String = ""
+    @Published var alertButtonText: String = ""
+    @Published var shouldOpenConfig: Bool = false
     
 }
 
@@ -36,10 +38,12 @@ final class TinderPresenterImpl: TinderPresenter {
     
     struct UseCases {
         let userDataUseCase: UserDataUseCase
+        let clubUseCase: ClubUseCase
     }
     
     struct Actions {
         let goBack: VoidClosure
+        let openProfile: VoidClosure
     }
     
     struct ViewInputs {
@@ -71,24 +75,67 @@ final class TinderPresenterImpl: TinderPresenter {
     
     func transform(input: TinderPresenterImpl.ViewInputs) {
         
-        //        input
-        //            .userLiked
-        //            .withUnretained(self)
-        //            .flatMap { presenter, _ in
-        //                //Add user liked to array
-        //            }
+        input
+            .userLiked
+            .withUnretained(self)
+            .sink { presenter, userLikedUid in
+                presenter.setUserLiked(likedUserId: userLikedUid)
+                presenter.viewModel.users = presenter.viewModel.users.filter({ $0.uid != userLikedUid })
+                //TODO: Move to next user
+            }
+            .store(in: &cancellables)
         
-//        loadUsersSubject
-//            .withUnretained(self)
-//            .flatMap { presenter, _ in
-//                //Users that also go to the club and im following (creo)
-//            }
+        loadUsersSubject
+            .withUnretained(self)
+            .flatMap { presenter, _ in
+                presenter.loadCurrentUserSex()
+            }
+            .withUnretained(self)
+            .flatMap { presenter, currentSex -> AnyPublisher<([TinderUser], String?), Never> in
+                if let currentSex = currentSex {
+                    return presenter.loadUsers(currentUserSex: currentSex)
+                        .map({ ($0, currentSex) })
+                        .eraseToAnyPublisher()
+                } else {
+                    print("Failed to load current user sex")
+                    return Just(([], currentSex)).eraseToAnyPublisher()
+                }
+            }
+            .withUnretained(self)
+            .sink { presenter, data in
+                presenter.viewModel.loadingUsers = false
+                
+                print("DATA")
+                print(data.0)
+                print(data.1)
+                
+                presenter.viewModel.showAlert = true
+                presenter.viewModel.shouldOpenConfig = true
+                presenter.viewModel.alertTitle = "Género"
+                presenter.viewModel.alertMessage = "Debes seleccionar el género en los ajustes de tu perfil."
+                presenter.viewModel.alertButtonText = "Abrir configuración"
+                
+//                if data.1 != nil {
+//                    presenter.viewModel.users = data.0
+//                } else {
+//                    presenter.viewModel.showAlert = true
+//                    presenter.viewModel.shouldOpenConfig = true
+//                    presenter.viewModel.alertTitle = "Género"
+//                    presenter.viewModel.alertMessage = "Debes seleccionar el género en los ajustes de tu perfil."
+//                    presenter.viewModel.alertButtonText = "Abrir configuración"
+//                }
+            }
+            .store(in: &cancellables)
         
         input
             .goBack
             .withUnretained(self)
             .sink { presenter, _ in
-                presenter.actions.goBack()
+                if presenter.viewModel.shouldOpenConfig {
+                    presenter.actions.openProfile()
+                } else {
+                    presenter.actions.goBack()
+                }
             }
             .store(in: &cancellables)
         

@@ -165,7 +165,7 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                         misLigas: presenter.userModel?.misLigas,
                         profile: presenter.viewModel.isPrivate ? "private" : "public",
                         Liked: presenter.userModel?.Liked,
-                        social: presenter.viewModel.participate ? "participando" : "NO participando",
+                        social: presenter.viewModel.participate ? "participando" : "no participando",
                         misCopas: presenter.userModel?.MisCopas ?? 0,
                         misEntradas: presenter.userModel?.MisEntradas
                     )

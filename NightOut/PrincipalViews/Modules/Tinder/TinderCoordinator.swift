@@ -26,7 +26,8 @@ class TinderCoordinator: ObservableObject, Hashable {
     func build() -> some View {
         let presenter = TinderPresenterImpl(
             useCases: .init(
-                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
+                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                clubUseCase: ClubUseCaseImpl(repository: ClubRepositoryImpl.shared)
             ),
             actions: actions
         )
