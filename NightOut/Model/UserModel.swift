@@ -18,10 +18,10 @@ struct UserModel: Codable {
     var MisEntradas: [String: EntradaUserModel]?
     
     var genderType: Gender? {
-        if gender == "Male" {
-            return .male
-        } else if gender == "Female" {
-            return .female
+        if gender == "Hombre" {
+            return .hombre
+        } else if gender == "Mujer" {
+            return .mujer
         } else {
             return nil
         }
@@ -54,24 +54,24 @@ struct UserModel: Codable {
 }
 
 enum Gender {
-    case male
-    case female
+    case hombre
+    case mujer
     
     var title: String {
         switch self {
-        case .male:
+        case .hombre:
             return "Hombre"
-        case .female:
+        case .mujer:
             return "Mujer"
         }
     }
     
     var firebaseTitle: String {
         switch self {
-        case .male:
-            return "Male"
-        case .female:
-            return "Female"
+        case .hombre:
+            return "Hombre"
+        case .mujer:
+            return "Mujer"
         }
     }
 }

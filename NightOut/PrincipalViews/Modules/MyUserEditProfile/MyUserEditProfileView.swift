@@ -235,7 +235,7 @@ struct MyUserEditProfileView: View {
                 .foregroundColor(.white)
             Spacer()
             
-            Text(viewModel.genderType == .male ? "Hombre" : "Mujer")
+            Text(viewModel.genderType?.title ?? "Selecciona")
                 .font(.system(size: 18, weight: .medium))
                 .foregroundColor(.white)
             Button {
@@ -381,7 +381,7 @@ struct GenderPicker: View {
                 .padding(.top, 8)
             
             Button(action: {
-                selectedGender = .male
+                selectedGender = .hombre
                 showSheet = false
             }) {
                 Text("Hombre")
@@ -393,7 +393,7 @@ struct GenderPicker: View {
             }
             
             Button(action: {
-                selectedGender = .female
+                selectedGender = .mujer
                 showSheet = false
             }) {
                 Text("Mujer")
