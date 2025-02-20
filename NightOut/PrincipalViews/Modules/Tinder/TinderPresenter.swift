@@ -8,6 +8,7 @@ struct TinderUser: Identifiable {
     let uid: String
     let name: String
     let image: String
+    var liked: Bool = false
 }
 
 
@@ -85,7 +86,6 @@ final class TinderPresenterImpl: TinderPresenter {
             .sink { presenter, userLikedUid in
                 presenter.setUserLiked(likedUserId: userLikedUid)
                 presenter.viewModel.users = presenter.viewModel.users.filter({ $0.uid != userLikedUid })
-                presenter.viewModel.currentIndex += 1 //Move to next user
             }
             .store(in: &cancellables)
         
@@ -262,7 +262,7 @@ final class TinderPresenterImpl: TinderPresenter {
                         let usersToLoad =
                         users.filter { user in
                             return user.key != currentUserId &&
-                            !likedUsers.contains(where: { $0 != user.key }) //Filter liked users
+                            !likedUsers.contains(where: { $0 == user.key }) //Filter liked users
                         }.values
                         
                         return Array(usersToLoad)

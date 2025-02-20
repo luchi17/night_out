@@ -26,10 +26,10 @@ struct TinderCardView: View {
                 VStack {
                     // Ícono de corazón
                     Button(action: {
-                        userLiked = true
+                        user.liked = true
                         userLikedTapped(user.uid)
                     }) {
-                        Image(userLiked ? "heart_clicked" : "heart")
+                        Image(user.liked ? "heart_clicked" : "heart")
                             .resizable()
                             .frame(width: 70, height: 70)
                             .foregroundColor(.red)

@@ -42,7 +42,6 @@ struct TinderView: View {
                         .gesture(
                             DragGesture()
                                 .onEnded { gesture in
-                                    print(gesture.translation.width)
                                     if gesture.translation.width < -100 {
                                         // Swipe Right (Next User)
                                         viewModel.currentIndex += 1
@@ -60,9 +59,9 @@ struct TinderView: View {
                             .gesture(
                                 DragGesture()
                                     .onEnded { gesture in
-                                       if gesture.translation.width > 100 {
+                                        if gesture.translation.width > 100 {
                                             // Swipe Left (Previous User)
-                                           viewModel.currentIndex -= 1
+                                            viewModel.currentIndex -= 1
                                         }
                                     }
                             )
@@ -149,21 +148,21 @@ struct TinderView: View {
             Image("tick_icon")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 60)
+                .frame(height: 70)
                 .foregroundStyle(.white)
             
             Text("!Gracias por ver todos los perfiles!")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.white)
             
             Text("!Suerte con tus matches!")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.white)
             
             Image("icono_cupido")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 60)
+                .frame(height: 70)
             
             Spacer()
         }
@@ -202,17 +201,6 @@ struct TinderLoadingUsersView: View {
                     .animation(.easeInOut(duration: 0.5), value: isLoading)
             }
             .transition(.opacity)
-            .onAppear {
-                // Mantener la imagen visible 2 segundos antes de desaparecer
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    withAnimation {
-                        //                        isLoading = false
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        onAnimationEnd() // Llamar la acción al terminar la animación
-                    }
-                }
-            }
         }
     }
 }
