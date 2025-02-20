@@ -85,42 +85,27 @@ final class TinderPresenterImpl: TinderPresenter {
             .sink { presenter, userLikedUid in
                 presenter.setUserLiked(likedUserId: userLikedUid)
                 presenter.viewModel.users = presenter.viewModel.users.filter({ $0.uid != userLikedUid })
-                //TODO: Move to next user: CHECK
-                presenter.viewModel.currentIndex += 1
+                presenter.viewModel.currentIndex += 1 //Move to next user
             }
             .store(in: &cancellables)
         
         loadGenderSubject
             .withUnretained(self)
             .flatMap { presenter, _ in
-                presenter.loadCurrentUserSexAndSocial()
+                presenter.loadCurrentUserSex()
             }
             .withUnretained(self)
-            .sink { presenter, data in
+            .sink { presenter, currentUserSex in
                 
-                let participating = data.1?.lowercased() != "no participando"
-                
-                if let currentSex = data.0, participating {
+                if let currentSex = currentUserSex {
                     presenter.viewModel.currentUserSex = currentSex
                     presenter.loadUsersSubject.send()
                 } else {
                     presenter.viewModel.showAlert = true
                     presenter.viewModel.shouldOpenConfig = true
                     presenter.viewModel.alertButtonText = "Abrir configuración"
-                    
-                    if data.0 == nil {
-                        
-                        presenter.viewModel.alertTitle = "Género"
-                        presenter.viewModel.alertMessage = "Debes seleccionar el género en los ajustes de tu perfil."
-                        
-                    } else if data.1  == nil {
-                        presenter.viewModel.alertTitle = "Social"
-                        presenter.viewModel.alertMessage = "Debes activar Social NightOut en los ajustes de tu perfil."
-                        
-                    } else if data.0 == nil && data.1  == nil {
-                        presenter.viewModel.alertTitle = "Género y Social"
-                        presenter.viewModel.alertMessage = "Debes activar Social NightOut y seleccionar tu género en los ajustes de tu perfil."
-                    }
+                    presenter.viewModel.alertTitle = "Género"
+                    presenter.viewModel.alertMessage = "Debes seleccionar el género en los ajustes de tu perfil."
                 }
             }
             .store(in: &cancellables)
@@ -135,10 +120,6 @@ final class TinderPresenterImpl: TinderPresenter {
             .withUnretained(self)
             .sink { presenter, users in
                 presenter.viewModel.loadingUsers = false
-                
-                print("users")
-                print(users)
-
                 presenter.viewModel.users = users
             }
             .store(in: &cancellables)
@@ -246,14 +227,14 @@ final class TinderPresenterImpl: TinderPresenter {
         }
     }
     
-    private func loadCurrentUserSexAndSocial() -> AnyPublisher<(String?, String?), Never> {
+    private func loadCurrentUserSex() -> AnyPublisher<String?, Never> {
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-            return Just((nil, nil)).eraseToAnyPublisher()
+            return Just(nil).eraseToAnyPublisher()
         }
         
         return useCases.userDataUseCase.getUserInfo(uid: currentUserId)
             .map { userModel in
-                return (userModel?.gender, userModel?.social)
+                return userModel?.gender
             }
             .eraseToAnyPublisher()
     }
@@ -299,7 +280,7 @@ final class TinderPresenterImpl: TinderPresenter {
     private func loadUsersDetails(users: [ClubAssistance]) -> AnyPublisher<[TinderUser], Never> {
         
         print("loadUserDetails")
-        print(users)
+        print(users.map({ ($0.gender, $0.social, $0.uid )}))
         let publishers: [AnyPublisher<TinderUser, Never>] = users.map { user in
             
             return useCases.userDataUseCase.getUserInfo(uid: user.uid)
@@ -310,7 +291,7 @@ final class TinderPresenterImpl: TinderPresenter {
                     }
                     if userModel.gender == nil ||
                         userModel.gender == self.viewModel.currentUserSex ||
-                        userModel.social?.lowercased() != "participando" ||
+                        userModel.social?.lowercased() == "no participando" ||
                         userModel.image == nil
                     {
                         return nil
