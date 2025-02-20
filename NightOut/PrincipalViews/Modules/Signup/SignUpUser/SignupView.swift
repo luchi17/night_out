@@ -107,8 +107,8 @@ struct SignupView: View {
     
     private var genderView: some View {
         HStack {
-            GenderCheckbox(gender: .male, selectedGender: $viewModel.gender)
-            GenderCheckbox(gender: .female, selectedGender: $viewModel.gender)
+            GenderCheckbox(gender: .hombre, selectedGender: $viewModel.gender)
+            GenderCheckbox(gender: .mujer, selectedGender: $viewModel.gender)
             
             Spacer()
         }
