@@ -28,10 +28,7 @@ struct TinderView: View {
                     .edgesIgnoringSafeArea(.all)
             } else {
                 
-                if viewModel.users.isEmpty && !viewModel.loadingUsers {
-                    noUsersView
-                    
-                } else {
+                if !viewModel.users.isEmpty {
                     if viewModel.currentIndex < viewModel.users.count {
                         let user = $viewModel.users[viewModel.currentIndex]
                         
@@ -68,11 +65,16 @@ struct TinderView: View {
                     }
                 }
             }
-            
         }
         .background(
             Color.black
         )
+        .if(viewModel.showNoUsersForClub, transform: { view in
+            noUsersView
+        })
+        .if(viewModel.showEndView, transform: { view in
+            endView
+        })
         .if(viewModel.loadingAssistance, transform: { view in
             Color.black
                 .edgesIgnoringSafeArea(.all)

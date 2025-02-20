@@ -27,6 +27,9 @@ final class TinderViewModel: ObservableObject {
     @Published var alertButtonText: String = ""
     @Published var shouldOpenConfig: Bool = false
     
+    @Published var showNoUsersForClub: Bool = false
+    @Published var showEndView: Bool = false
+    
     @Published var currentIndex: Int = 0
     
     var currentUserSex: String = ""
@@ -113,14 +116,23 @@ final class TinderPresenterImpl: TinderPresenter {
         
         loadUsersSubject
             .withUnretained(self)
-            .flatMap { presenter, currentSex -> AnyPublisher<[TinderUser], Never> in
+            .flatMap { presenter, currentSex -> AnyPublisher<[TinderUser]?, Never> in
                 presenter.loadUsers(currentUserSex: presenter.viewModel.currentUserSex)
                     .eraseToAnyPublisher()
             }
             .withUnretained(self)
             .sink { presenter, users in
+                
                 presenter.viewModel.loadingUsers = false
-                presenter.viewModel.users = users
+            
+                if let users = users {
+                    presenter.viewModel.users = users
+                    if users.isEmpty {
+                        presenter.viewModel.showEndView = true
+                    }
+                } else {
+                    presenter.viewModel.showNoUsersForClub = true
+                }
             }
             .store(in: &cancellables)
         
@@ -239,7 +251,7 @@ final class TinderPresenterImpl: TinderPresenter {
             .eraseToAnyPublisher()
     }
     
-    private func loadUsers(currentUserSex: String) -> AnyPublisher<[TinderUser], Never> {
+    private func loadUsers(currentUserSex: String) -> AnyPublisher<[TinderUser]?, Never> {
         
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
             return Just([]).eraseToAnyPublisher()
@@ -255,33 +267,39 @@ final class TinderPresenterImpl: TinderPresenter {
             }
             .eraseToAnyPublisher()
             .withUnretained(self)
-            .flatMap { presenter, likedUsers -> AnyPublisher<[ClubAssistance], Never> in
+            .flatMap { presenter, likedUsers -> AnyPublisher<([ClubAssistance], [String]), Never> in
                 return presenter.useCases.clubUseCase.getAssistance(profileId: presenter.viewModel.clubId)
                     .map { users in
-                        
-                        let usersToLoad =
-                        users.filter { user in
-                            return user.key != currentUserId &&
-                            !likedUsers.contains(where: { $0 == user.key }) //Filter liked users
-                        }.values
-                        
-                        return Array(usersToLoad)
+                        return (Array(users.values), likedUsers)
                     }
                     .eraseToAnyPublisher()
             }
             .withUnretained(self)
-            .flatMap { presenter, users -> AnyPublisher<[TinderUser], Never> in
-
-                presenter.loadUsersDetails(users: users)
+            .flatMap { presenter, data -> AnyPublisher<[TinderUser]?, Never> in
+                presenter.loadUsersDetails(
+                    users: data.0,
+                    likedUsers: data.1
+                )
             }
             .eraseToAnyPublisher()
     }
     
-    private func loadUsersDetails(users: [ClubAssistance]) -> AnyPublisher<[TinderUser], Never> {
+    private func loadUsersDetails(users: [ClubAssistance], likedUsers: [String]) -> AnyPublisher<[TinderUser]?, Never> {
+       
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            return Just(nil).eraseToAnyPublisher()
+        }
         
-        print("loadUserDetails")
-        print(users.map({ ($0.gender, $0.social, $0.uid )}))
-        let publishers: [AnyPublisher<TinderUser, Never>] = users.map { user in
+        let usersToLoad = users.filter { user in
+            return user.uid != currentUserId &&
+            !likedUsers.contains(where: { $0 == user.uid }) //Filter liked users
+        }
+        
+        if users.filter({ $0.uid != currentUserId }).isEmpty {
+            return Just(nil).eraseToAnyPublisher()
+        }
+        
+        let publishers: [AnyPublisher<TinderUser, Never>] = usersToLoad.map { user in
             
             return useCases.userDataUseCase.getUserInfo(uid: user.uid)
                 .compactMap({ userModel -> TinderUser? in
@@ -309,6 +327,7 @@ final class TinderPresenterImpl: TinderPresenter {
         
         return Publishers.MergeMany(publishers)
             .collect()
+            .map({ $0 as? [TinderUser] })
             .eraseToAnyPublisher()
     }
 }
