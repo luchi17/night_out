@@ -27,7 +27,7 @@ struct PostDatasourceImpl: PostDatasource {
         
         let subject = CurrentValueSubject<[String: PostUserModel], Never>([:])
         
-        let ref = FirebaseServiceImpl.shared.getPosts().queryOrdered(byChild: "timestamp")
+        let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
         
         ref.observe(.value) { snapshot in
             do {
