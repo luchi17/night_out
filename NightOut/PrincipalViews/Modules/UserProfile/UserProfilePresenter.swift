@@ -171,13 +171,14 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         
         let myCurrentClubModelPublisher =
         useCases.userDataUseCase.getUserInfo(uid: myUid)
-            .map({ $0?.attendingClub })
             .withUnretained(self)
-            .flatMap { presenter, attendingClubId -> AnyPublisher<CompanyModel?, Never> in
-                if let attendingClubId = attendingClubId {
+            .flatMap { presenter, userModel -> AnyPublisher<(UserModel?, CompanyModel?), Never> in
+                if let attendingClubId = userModel?.attendingClub {
                     return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: attendingClubId)
+                        .map({ (userModel, $0) })
+                        .eraseToAnyPublisher()
                 } else {
-                    return Just(nil)
+                    return Just((userModel, nil))
                         .eraseToAnyPublisher()
                 }
             }
@@ -231,12 +232,15 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 )
             })
             .withUnretained(self)
-            .sink { data in
+            .sink { presenter, data in
                 
-                let presenter = data.0
-                let usersGoingToClub = data.1.0
-                let followingPeople = data.1.1?.following ?? [:]
-                let myCurrentClubModel = data.1.2
+                let usersGoingToClub = data.0
+                let followingPeople = data.1?.following ?? [:]
+                let myUserModel = data.2.0
+                let myCurrentClubModel = data.2.1
+                
+                presenter.viewModel.myUserModel = myUserModel
+                presenter.viewModel.myCurrentClubModel = myCurrentClubModel
                 
                 presenter.viewModel.loading = false
                 
@@ -252,10 +256,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 presenter.viewModel.usersGoingToClub = usersGoingToClub.compactMap({ $0 }).map({ $0.toUserGoingCellModel() })
                 
                 presenter.viewModel.imGoingToClub = usersGoingToClub.contains(where: { $0?.uid == presenter.myUid }) ? .going : .notGoing
-                presenter.viewModel.myUserModel = usersGoingToClub.compactMap({ $0 }).first(where: { $0.uid == presenter.myUid })
-                
-                presenter.viewModel.myCurrentClubModel = myCurrentClubModel
-                
+
             }
             .store(in: &cancellables)
     }
@@ -477,7 +478,7 @@ private extension UserProfilePresenterImpl {
                 .withUnretained(self)
                 .sink { presenter, ok in
                     if ok {
-                        presenter.useCases.noficationsUsecase.sendNotificationToFollowers(clubName: presenter.model.profileId)
+                        presenter.useCases.noficationsUsecase.sendNotificationToFollowers(clubName: presenter.model.fullname ?? "Sitio desconocido")
                     } else {
                         presenter.viewModel.toast = .custom(.init(
                             title: "Error",
