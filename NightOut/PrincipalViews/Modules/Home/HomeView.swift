@@ -5,9 +5,6 @@ struct HomeView: View {
     
     @ObservedObject var viewModel: HomeViewModel
     
-    @State private var showMyProfile = false
-    @State private var showCompanyFirstAlert = false
-    
     let presenter: HomePresenter
     let mapPresenter: LocationsMapPresenter
     let feedPresenter: FeedPresenter
@@ -76,9 +73,7 @@ struct HomeView: View {
         }
         .sheet(isPresented: $viewModel.showCompanyFirstAlert) {
             HomeCompanySheetView(close: {
-                showCompanyFirstAlert.toggle()
                 viewModel.showCompanyFirstAlert = false
-                
             })
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
@@ -115,7 +110,7 @@ struct HomeView: View {
             // Botón de perfil
             HStack(spacing: 12) {
                 Button(action: {
-                    showMyProfile.toggle()
+                    viewModel.showMyProfile.toggle()
                 }) {
                     profileImage
                 }
