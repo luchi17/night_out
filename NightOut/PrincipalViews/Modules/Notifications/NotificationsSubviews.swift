@@ -135,24 +135,42 @@ struct DefaultNotificationView: View {
 
 struct CircleImage: View {
     var imageUrl: String?
+    var size: CGFloat = 60.0
+    var border: Bool = true
     
     var body: some View {
         if let imageUrl = imageUrl, let url = URL(string: imageUrl) {
-            KingFisherImage(url: url)
-                .resizable()
-                .placeholder(Image("profile"))
-                .scaledToFill()
-                .clipShape(Circle())
-                .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                .frame(width: 60, height: 60)
+            AsyncImage(url: URL(string: imageUrl)) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .clipShape(Circle())
+                    .frame(width: size, height: size)
+                    .if(border) { view in
+                        view
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                    }
+            } placeholder: {
+                Image("profile")
+                    .resizable()
+                    .scaledToFill()
+                    .clipShape(Circle())
+                    .frame(width: size, height: size)
+                    .if(border) { view in
+                        view
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                    }
+            }
         } else {
             Image("profile")
                 .resizable()
-                .aspectRatio(contentMode: .fill)
-                .foregroundStyle(.white)
+                .scaledToFill()
                 .clipShape(Circle())
-                .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                .frame(width: 60, height: 60)
+                .frame(width: size, height: size)
+                .if(border) { view in
+                    view
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                }
         }
     }
 }

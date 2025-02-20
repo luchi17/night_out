@@ -51,28 +51,13 @@ struct PostView: View {
     
     var topView: some View {
         HStack(spacing: 10) {
-            if let profileImageUrl = model.profileImageUrl {
-                KingFisherImage(url: URL(string: profileImageUrl))
-                    .placeholder({
-                        Image("profile")
-                            .resizable()
-                            .scaledToFill()
-                            .clipShape(Circle())
-                            .frame(width: 50, height: 50, alignment: .leading)
-                            .clipped()
-                    })
-                    .scaledToFill()
-                    .clipShape(Circle())
-                    .frame(width: 50, height: 50, alignment: .leading)
-                    .onTapGesture {
-                        showUserOrCompanyProfile()
-                    }
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .clipShape(Circle())
-                    .frame(width: 50, height: 50, alignment: .leading)
+            CircleImage(
+                imageUrl: model.profileImageUrl,
+                size: 50,
+                border: false
+            )
+            .onTapGesture {
+                showUserOrCompanyProfile()
             }
             
             VStack(alignment: .leading, spacing: 5) {
@@ -95,7 +80,7 @@ struct PostView: View {
             }
         }
         .padding(.horizontal, 18)
-        .padding(.vertical, 5)
+        .padding(.vertical, 12)
     }
     
     var bottomView: some View {
@@ -124,7 +109,7 @@ struct PostView: View {
             }
         }
         .padding(.horizontal, 18)
-        .padding(.vertical, 5)
+        .padding(.vertical, 12)
     }
 }
 

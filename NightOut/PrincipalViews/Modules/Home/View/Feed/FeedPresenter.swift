@@ -272,11 +272,31 @@ private extension FeedPresenterImpl {
     }
     
     func getLocationFromCompanyPost(postLocation: String?, companylocation: String?) -> String {
-        if let location = postLocation {
-            return "📍 \(location)"
+        if let location = postLocation, let coord = truncateCoordinates(location) {
+            return "📍 \(coord)"
+           
         } else {
+            if let companyLocation = companylocation,
+                let coord = truncateCoordinates(companyLocation) {
+                return "📍 \(coord)"
+            }
             return "📍 \(companylocation ?? "")"
         }
+    }
+    
+    func truncateCoordinates(_ coordinateString: String) -> String? {
+        let components = coordinateString.split(separator: ",")
+
+        if let lat = Double(components[0]), let lon = Double(components[1]) {
+            let truncatedLat = String(format: "%.4f", lat)
+            let truncatedLon = String(format: "%.4f", lon)
+            
+            let truncatedCoordinates = "\(truncatedLat),\(truncatedLon)"
+            
+            return truncatedCoordinates// "40.41,-3.70"
+        }
+        
+        return nil
     }
     
     func getClubNameByPostLocation(postLocation: String?) -> String {
