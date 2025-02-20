@@ -124,7 +124,7 @@ final class TinderPresenterImpl: TinderPresenter {
             .sink { presenter, users in
                 
                 presenter.viewModel.loadingUsers = false
-            
+                
                 if let users = users {
                     presenter.viewModel.users = users
                     if users.isEmpty {
@@ -163,30 +163,30 @@ final class TinderPresenterImpl: TinderPresenter {
             })
             .withUnretained(self)
             .sink { presenter, clubId in
-                if let clubId = clubId {
-                    
+                
 #warning("TODO: REMOVE, just to try")
+                
+                if let clubId = clubId {
                     presenter.viewModel.clubId = clubId
-                    
                     presenter.viewModel.loadingUsers = true
                     presenter.loadGenderSubject.send()
                     
-                    //                    // Validar horario permitido (21:00 - 00:00)
-                    //                    let calendar = Calendar.current
-                    //                    let currentHour = calendar.component(.hour, from: Date())
-                    //
-                    //                    if currentHour >= 21 || currentHour < 2 {
-                    //                        // Navegar a TinderListView dentro del horario permitido
-                    //                        presenter.viewModel.loadingUsers = true
-//                    presenter.loadGenderSubject.send()
-                    //                    } else {
-                    //                        // Mostrar diálogo indicando fuera de horario
-                    //                        presenter.viewModel.showAlert = true
-                    //                    presenter.viewModel.shouldOpenConfig = false
-                    //                        presenter.viewModel.alertTitle = "Fuera de horario"
-                    //                        presenter.viewModel.alertMessage = "Solo puedes acceder a las fotos de los demás entre las 21:00 y las 00:00."
-                    //                    presenter.viewModel.alertButtonText = "ACEPTAR"
-                    //                    }
+//                    // Validar horario permitido (21:00 - 00:00)
+//                    let calendar = Calendar.current
+//                    let currentHour = calendar.component(.hour, from: Date())
+//                    
+//                    if currentHour >= 21 || currentHour < 2 {
+//                        // Navegar a TinderListView dentro del horario permitido
+//                        presenter.viewModel.loadingUsers = true
+//                        presenter.loadGenderSubject.send()
+//                    } else {
+//                        // Mostrar diálogo indicando fuera de horario
+//                        presenter.viewModel.showAlert = true
+//                        presenter.viewModel.shouldOpenConfig = false
+//                        presenter.viewModel.alertTitle = "Fuera de horario"
+//                        presenter.viewModel.alertMessage = "Solo puedes acceder a las fotos de los demás entre las 21:00 y las 00:00."
+//                        presenter.viewModel.alertButtonText = "ACEPTAR"
+//                    }
                 } else {
                     presenter.viewModel.showAlert = true
                     presenter.viewModel.shouldOpenConfig = false
@@ -285,7 +285,7 @@ final class TinderPresenterImpl: TinderPresenter {
     }
     
     private func loadUsersDetails(users: [ClubAssistance], likedUsers: [String]) -> AnyPublisher<[TinderUser]?, Never> {
-       
+        
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
             return Just(nil).eraseToAnyPublisher()
         }
