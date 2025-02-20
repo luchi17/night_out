@@ -10,6 +10,7 @@ struct UserProfileView: View {
     private let whiskyTappedPublisher = PassthroughSubject<Void, Never>()
     private let goBackPublisher = PassthroughSubject<Void, Never>()
     private let userSelectedPublisher = PassthroughSubject<UserGoingCellModel, Never>()
+    private let openConfigPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: UserProfileViewModel
     let presenter: UserProfilePresenter
@@ -52,6 +53,17 @@ struct UserProfileView: View {
             isIdle: viewModel.loading
         )
         .edgesIgnoringSafeArea(.bottom)
+        .alert(isPresented: $viewModel.showGenderAlert) {
+            Alert(
+                title: Text("Género")
+                    .foregroundColor(.white),
+                message: Text("Debes seleccionar el género en los ajustes de tu perfil.")
+                    .foregroundColor(.white),
+                dismissButton: .default(Text("Abrir configuración"), action: {
+                    openConfigPublisher.send()
+                })
+            )
+        }
         .onAppear {
             viewDidLoadPublisher.send()
         }
@@ -157,7 +169,8 @@ private extension UserProfileView {
             followProfile: followPublisher.eraseToAnyPublisher(),
             goToClub: whiskyTappedPublisher.eraseToAnyPublisher(),
             goBack: goBackPublisher.eraseToAnyPublisher(),
-            onUserSelected: userSelectedPublisher.eraseToAnyPublisher()
+            onUserSelected: userSelectedPublisher.eraseToAnyPublisher(),
+            openConfig: openConfigPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

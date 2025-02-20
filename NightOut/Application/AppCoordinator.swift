@@ -11,6 +11,8 @@ final class AppCoordinator: ObservableObject {
     
     private let showMyProfileSubject = PassthroughSubject<Void, Never>()
     
+    @ObservedObject var tabViewModel: TabViewModel
+    
     // MARK: - Stored Properties for redirections
     
     @ViewBuilder
@@ -20,6 +22,7 @@ final class AppCoordinator: ObservableObject {
     
     init(path: NavigationPath) {
         self.path = path
+        self.tabViewModel = TabViewModel(selectedTab: .home)
     }
     
     private func push<T: Hashable>(_ coordinator: T) {
@@ -40,6 +43,7 @@ final class AppCoordinator: ObservableObject {
         let tabBarCoordinator = TabViewCoordinator(
             path: path,
             showMyProfileSubject: showMyProfileSubject,
+            tabViewModel: tabViewModel,
             locationManager: LocationManager.shared,
             openMaps: openGoogleMaps(latitude:longitude:),
             openAppleMaps: openAppleMaps(coordinate:placeName:),
@@ -123,7 +127,12 @@ final class AppCoordinator: ObservableObject {
                 self?.pop()
             }, openAnotherProfile: { [weak self] profile in
                 self?.showProfile(model: profile)
-            }),
+            }, openConfig: { [weak self] in
+                self?.pop()
+                self?.tabViewModel.selectedTab = .home
+                self?.showMyProfileSubject.send()
+            }
+           ),
             model: model
         )
         self.push(userProfileCoordinator)

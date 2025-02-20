@@ -76,6 +76,7 @@ final class UserProfileViewModel: ObservableObject {
     @Published var isCompanyProfile: Bool
     
     @Published var loading: Bool = false
+    @Published var showGenderAlert: Bool = false
     @Published var toast: ToastType?
     
     @Published var myUserModel: UserModel?
@@ -111,6 +112,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     struct Actions {
         let goBack: VoidClosure
         let openAnotherProfile: InputClosure<ProfileModel>
+        let openConfig: VoidClosure
     }
     
     struct ViewInputs {
@@ -119,6 +121,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         let goToClub: AnyPublisher<Void, Never>
         let goBack: AnyPublisher<Void, Never>
         let onUserSelected: AnyPublisher<UserGoingCellModel, Never>
+        let openConfig: AnyPublisher<Void, Never>
     }
     
     var viewModel: UserProfileViewModel
@@ -303,6 +306,14 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .store(in: &cancellables)
         
         input
+            .openConfig
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.openConfig()
+            }
+            .store(in: &cancellables)
+        
+        input
             .onUserSelected
             .withUnretained(self)
             .flatMap({ presenter, userGoingModel in
@@ -440,6 +451,12 @@ private extension UserProfilePresenterImpl {
             
         case .notGoing:
             //Quiero asistir al club
+            
+            if viewModel.myUserModel?.gender == nil {
+                //Open configuration
+                viewModel.showGenderAlert = true
+                return
+            }
             if let myCurrentClub = viewModel.myCurrentClubModel, myCurrentClub.uid != model.profileId {  //Pero ya estoy asistiendo a otro
                 viewModel.toast = .custom(.init(
                     title: "Asistencia Actual",

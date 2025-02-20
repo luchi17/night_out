@@ -35,7 +35,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let showMyProfileSubject: PassthroughSubject<Void, Never>
     
     @Published var path: NavigationPath
-    @ObservedObject var viewModel: TabViewModel
+    @ObservedObject var tabViewModel: TabViewModel
     
     let id = UUID()
     
@@ -50,6 +50,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     init(
         path: NavigationPath,
         showMyProfileSubject: PassthroughSubject<Void, Never>,
+        tabViewModel: TabViewModel,
         locationManager: LocationManager,
         openMaps: @escaping (Double, Double) -> Void,
         openAppleMaps: @escaping (CLLocationCoordinate2D, String?) -> Void,
@@ -63,6 +64,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
         openTinder: @escaping VoidClosure
     ) {
         self.path = path
+        self.tabViewModel = tabViewModel
         self.locationManager = locationManager
         self.openMaps = openMaps
         self.openAppleMaps = openAppleMaps
@@ -75,12 +77,11 @@ class TabViewCoordinator: ObservableObject, Hashable {
         self.openMessages = openMessages
         self.openTinder = openTinder
         self.showMyProfileSubject = showMyProfileSubject
-        self.viewModel = TabViewModel(selectedTab: .home)
     }
     
     @ViewBuilder
     func build() -> some View {
-        let presenter = TabViewPresenterImpl(viewModel: viewModel) { [weak self] selectedTab in
+        let presenter = TabViewPresenterImpl(viewModel: tabViewModel) { [weak self] selectedTab in
             guard let self = self else { return AnyView(EmptyView()) }
             switch selectedTab {
             case .home:
@@ -117,7 +118,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     func makePublishFlow() -> AnyView {
         let coordinator = PublishCoordinator(actions: .init(goToFeed: { [weak self] in
-            self?.viewModel.selectedTab = .home
+            self?.tabViewModel.selectedTab = .home
         }))
         return AnyView(coordinator.build())
     }
