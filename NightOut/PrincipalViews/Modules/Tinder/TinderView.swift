@@ -35,7 +35,7 @@ struct TinderView: View {
                     if viewModel.currentIndex < viewModel.users.count {
                         let user = $viewModel.users[viewModel.currentIndex]
                         
-                        CardView(
+                        TinderCardView(
                             user: user,
                             userLikedTapped: userLikedPublisher.send
                         )
@@ -181,62 +181,6 @@ private extension TinderView {
         presenter.transform(input: input)
     }
 }
-
-
-
-struct CardView: View {
-    
-    @Binding var user: TinderUser
-    @State private var userLiked: Bool = false
-    
-    var userLikedTapped: InputClosure<String>
-    
-    var body: some View {
-        
-        ZStack(alignment: .bottom) {
-            AsyncImage(url: URL(string: user.image)) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .clipped()
-                        } placeholder: {
-                            Color.gray
-                        }
-                        .edgesIgnoringSafeArea([.bottom, .horizontal])
-            
-            VStack(alignment: .center, spacing: 20) {
-                
-                Spacer()
-                
-                buttonView
-                
-                Text(user.name)
-                    .font(.title)
-                    .bold()
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.black.opacity(0.7)))
-                    .padding(.bottom, 35)
-            }
-            
-        }
-    }
-    
-    var buttonView: some View {
-        Button(action: {
-            userLiked = true
-            userLikedTapped(user.uid)
-        }) {
-            Image(userLiked ? "heart_clicked" : "heart")
-                .resizable()
-                .frame(width: 70, height: 70)
-                .foregroundColor(.red)
-        }
-        .padding(.bottom, 64)
-    }
-}
-
 
 struct TinderLoadingUsersView: View {
     @Binding var isLoading: Bool
