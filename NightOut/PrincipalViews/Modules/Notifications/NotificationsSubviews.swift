@@ -139,7 +139,7 @@ struct CircleImage: View {
     var border: Bool = true
     
     var body: some View {
-        if let imageUrl = imageUrl, let url = URL(string: imageUrl) {
+        if let imageUrl = imageUrl {
             AsyncImage(url: URL(string: imageUrl)) { image in
                 image
                     .resizable()
