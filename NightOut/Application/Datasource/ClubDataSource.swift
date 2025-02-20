@@ -22,16 +22,7 @@ struct ClubDataSourceImpl: ClubDataSource {
         
         let subject = PassthroughSubject<[String: ClubAssistance], Never>()
         let ref = FirebaseServiceImpl.shared.getAssistance(profileId: profileId)
-        
-        ref.observeSingleEvent(of: .value) { snapshot in
-            do {
-                let assistance = try snapshot.data(as: [String: ClubAssistance].self)
-                subject.send(assistance)
-            } catch {
-                print("Error decoding data: \(error.localizedDescription)")
-                subject.send([:])
-            }
-        }
+
         ref.observe(.value) { snapshot in
             do {
                 let assistance = try snapshot.data(as: [String: ClubAssistance].self)
