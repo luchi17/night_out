@@ -3,103 +3,126 @@ import SwiftUI
 struct RuletaView: View {
     @State private var names: [(String, Color)] = []
     @State private var newName: String = ""
-    @State private var spinning = false
-    @State private var rotationAngle: Double = 0
-    @State private var winner: String? = nil
+    @State private var winner: String?
     
     var body: some View {
         VStack {
             TextField("Introduce un nombre", text: $newName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                
+            
             Button("Añadir Nombre") {
                 if !newName.isEmpty {
-                    names.append((newName, Color.random()))
+                    let color = Color(
+                        red: Double.random(in: 0...1),
+                        green: Double.random(in: 0...1),
+                        blue: Double.random(in: 0...1)
+                    )
+                    names.append((newName, color))
                     newName = ""
                 }
             }
-            .buttonStyle(.borderedProminent)
             .padding()
             
-            ScrollView {
-                VStack {
-                    ForEach(names, id: \.0) { name, color in
-                        Text(name)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(color)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
-                }
-                .padding()
+            RuletaSubview(names: $names) { winner in
+                self.winner = winner
             }
-            .frame(height: 200)
-            
-            ZStack {
-                Circle()
-                    .stroke(Color.gray, lineWidth: 3)
-                    .frame(width: 300, height: 300)
-                
-                ForEach(0..<names.count, id: \.self) { index in
-                    let angle = Angle(degrees: Double(index) * (360.0 / Double(names.count)))
-                    Text(names[index].0)
-                        .rotationEffect(-angle)
-                        .position(x: 150 + cos(angle.radians) * 100, y: 150 + sin(angle.radians) * 100)
-                }
-                
-                Triangle()
-                    .fill(Color.red)
-                    .frame(width: 20, height: 20)
-                    .offset(y: -150)
-                    .rotationEffect(.degrees(rotationAngle))
-            }
-            .rotationEffect(.degrees(rotationAngle))
-            .animation(spinning ? .easeOut(duration: 3) : .default, value: rotationAngle)
-            .padding()
-            
-            Button("Girar Ruleta") {
-                if !names.isEmpty {
-                    spinning = true
-                    let randomIndex = Int.random(in: 0..<names.count)
-                    let newAngle = Double.random(in: 1440...1800) + Double(randomIndex) * (360.0 / Double(names.count))
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        winner = names[randomIndex].0
-                        spinning = false
-                    }
-                    
-                    rotationAngle += newAngle
-                }
-            }
-            .buttonStyle(.borderedProminent)
             .padding()
             
             if let winner = winner {
-                Text("¡El ganador es: \(winner)!")
-                    .font(.title)
-                    .padding()
+                Text("¡El ganador es: \(winner)!").font(.largeTitle).padding()
             }
         }
+        .padding()
     }
 }
 
-struct Triangle: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.closeSubpath()
-        return path
+struct RuletaSubview: View {
+    
+    @Binding var names: [(String, Color)]
+    @State private var currentAngle: Double = 0
+    @State private var strokeWidth: Double = 3
+    
+    @State private var winnerIndex: Int? = nil
+    
+    var onResult: (String) -> Void
+    
+    let radius: CGFloat = 150
+
+    var body: some View {
+        VStack {
+            ZStack {
+                // Círculo de la ruleta
+                Circle()
+                    .fill(Color.gray)
+                    .frame(width: 2 * radius, height: 2 * radius)
+                    .overlay(Circle().stroke(Color.white, lineWidth: strokeWidth))
+                
+                if !names.isEmpty {
+                    // Dibujar los segmentos de la ruleta
+                    ForEach(0..<names.count, id: \.self) { index in
+                        RouletteSegment(startAngle: angleForSegment(index),
+                                        sweepAngle: angleForSegment(index + 1) - angleForSegment(index),
+                                        color: names[index].1,
+                                        radius: radius,
+                                        name: names[index].0
+                        )
+                    }
+                }
+            }
+            .frame(width: 2 * radius, height: 2 * radius)
+            .padding(20)
+            .rotationEffect(.degrees(currentAngle)) // Gira la ruleta toda
+            
+            Button("Girar Ruleta") {
+                spin()
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+    }
+    
+    private func spin() {
+        
+        withAnimation(.easeInOut(duration: 3)) {
+            currentAngle += 3600
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            winnerIndex = Int.random(in: 0..<names.count)
+            onResult(names[winnerIndex ?? 0].0)
+        }
+    }
+    
+    // Cálculo del ángulo inicial para cada segmento
+    func angleForSegment(_ index: Int) -> Double {
+        return Double(index) * (360 / Double(names.count))
     }
 }
 
-extension Color {
-    static func random() -> Color {
-        return Color(red: Double.random(in: 0...1),
-                     green: Double.random(in: 0...1),
-                     blue: Double.random(in: 0...1))
+struct RouletteSegment: View {
+    var startAngle: Double
+    var sweepAngle: Double
+    var color: Color
+    var radius: CGFloat
+    var name: String
+    
+    var body: some View {
+        Path { path in
+            let center = CGPoint(x: radius, y: radius)
+            path.move(to: center)
+            path.addArc(center: center, radius: radius, startAngle: Angle(degrees: startAngle), endAngle: Angle(degrees: startAngle + sweepAngle), clockwise: false)
+        }
+        .fill(color)
+        .overlay(
+            Text(name)
+                .font(.headline)
+                .foregroundColor(.white)
+                .rotationEffect(.degrees(startAngle + sweepAngle / 2))
+                .position(x: radius + radius * 0.6 * cos(CGFloat(startAngle + sweepAngle / 2) * .pi / 180),
+                          y: radius + radius * 0.6 * sin(CGFloat(startAngle + sweepAngle / 2) * .pi / 180))
+        )
     }
 }

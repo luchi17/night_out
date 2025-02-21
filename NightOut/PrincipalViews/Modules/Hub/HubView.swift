@@ -110,7 +110,7 @@ struct HubView: View {
             } else if viewModel.selectedGame == .verdadOreto {
                 VerdadORetoView()
             } else if viewModel.selectedGame == .ruleta {
-                YoNuncaView()
+                RuletaView()
             } else if viewModel.selectedGame == .publicamosTuVideo {
                 YoNuncaView()
             }

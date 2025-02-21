@@ -27,7 +27,7 @@ public extension View {
                 }
             }
     }
-    
+
     func showCustomNavBar<T: View>(
         title: String,
         goBack: @escaping VoidClosure,
