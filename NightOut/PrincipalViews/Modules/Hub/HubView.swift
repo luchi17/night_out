@@ -10,6 +10,8 @@ struct HubView: View {
     @ObservedObject var viewModel: HubViewModel
     let presenter: HubPresenter
     
+    @State private var dragOffset = CGSize.zero
+    
     init(
         presenter: HubPresenter
     ) {
@@ -21,40 +23,44 @@ struct HubView: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-
-            VStack {
-                // Header Image
-                Image("hub_no_bg")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 120, height: 120)
-                    .padding(.top, 20)
-
-                // Scroll horizontal de botones
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        GameButton(game: .yonunca, gameTapped: $viewModel.gameTapped)
-                        GameButton(game: .chupitowars, gameTapped: $viewModel.gameTapped)
-                        GameButton(game: .verdadOreto, gameTapped: $viewModel.gameTapped)
-                        GameButton(game: .ruleta, gameTapped: $viewModel.gameTapped)
-                        GameButton(game: .publicamosTuVideo, gameTapped: $viewModel.gameTapped)
-                    }
-                    .padding(.horizontal, 16)
+            
+            if let game = viewModel.selectedGame {
+                
+                VStack {
+                    
+                    Spacer()
+                    
+                    gameView
+                    
+                    Spacer()
+                    // Agregar gesto de deslizamiento para volver
+                    Text("Desliza hacia abajo para volver")
+                        .foregroundColor(.white)
+                        .padding(.bottom, 35)
                 }
-                .padding(.top, 16)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            self.dragOffset = value.translation
+                        }
+                        .onEnded { value in
+                            print(self.dragOffset.height)
+                            if self.dragOffset.height > 100 {
+                                // Si el usuario desliza suficientemente hacia abajo, volver a la lista
+                                self.viewModel.selectedGame = nil
+                            }
+                        }
+                )
+                .transition(.move(edge: .bottom)) // Animación de entrada desde abajo
 
-                Spacer()
-
-                // Video o imagen en la parte inferior
-                VideoPlaceholderView()
-                    .frame(height: 100)
-                    .padding(.bottom, 50)
+            } else {
+                
+                topView
+                    .transition(.move(edge: .top)) // Animación de salida hacia arriba
+                
             }
         }
-        .background(
-            Color.black
-                .edgesIgnoringSafeArea(.top)
-        )
+        .animation(.easeInOut, value: viewModel.selectedGame)
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -69,16 +75,57 @@ struct HubView: View {
             viewDidLoadPublisher.send()
         }
     }
+    
+    var topView: some View {
+        VStack {
+            Image("hub_no_bg")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 120, height: 120)
+                .padding(.top, 20)
+            
+            // Scroll horizontal de botones
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    GameButton(game: .yonunca, selectedGame: $viewModel.selectedGame)
+                    GameButton(game: .chupitowars, selectedGame: $viewModel.selectedGame)
+                    GameButton(game: .verdadOreto, selectedGame: $viewModel.selectedGame)
+                    GameButton(game: .ruleta, selectedGame: $viewModel.selectedGame)
+                    GameButton(game: .publicamosTuVideo, selectedGame: $viewModel.selectedGame)
+                }
+                .padding(.horizontal, 16)
+            }
+            .padding(.top, 16)
+            
+            Spacer()
+        }
+    }
+    
+    var gameView: some View {
+        VStack {
+            if viewModel.selectedGame == .yonunca {
+                YoNuncaView()
+            } else if viewModel.selectedGame == .chupitowars {
+                YoNuncaView()
+            } else if viewModel.selectedGame == .verdadOreto {
+                VerdadORetoView()
+            } else if viewModel.selectedGame == .ruleta {
+                YoNuncaView()
+            } else if viewModel.selectedGame == .publicamosTuVideo {
+                YoNuncaView()
+            }
+        }
+    }
 }
 
 
 struct GameButton: View {
     var game: GameType
-    @Binding var gameTapped: GameType?
-
+    @Binding var selectedGame: GameType?
+    
     var body: some View {
         Button(action: {
-            gameTapped = game
+            selectedGame = game
         }) {
             Text(game.title.uppercased())
                 .padding(.horizontal, 15)

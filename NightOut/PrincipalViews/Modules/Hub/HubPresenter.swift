@@ -6,7 +6,7 @@ final class HubViewModel: ObservableObject {
    
     
     @Published var toast: ToastType?
-    @Published var gameTapped: GameType?
+    @Published var selectedGame: GameType?
     @Published var loading: Bool = false
     
     init() {
