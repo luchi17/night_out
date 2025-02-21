@@ -217,7 +217,7 @@ private extension NotificationsPresenterImpl {
             userId: model.userid,
             postId: model.postid,
             notificationId: notificationId,
-            isFromCompany: true,
+            isFromCompany: !(companyFound.location?.isEmpty ?? true),
             isPrivateProfile: companyFound.profileType == .privateProfile
         )
         

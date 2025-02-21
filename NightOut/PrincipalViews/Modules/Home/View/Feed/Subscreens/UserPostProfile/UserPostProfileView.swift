@@ -45,10 +45,19 @@ struct UserPostProfileView: View {
                 }
                 
                 // Nombre y username
-                Text(viewModel.fullname)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.top, 8)
+                HStack(spacing: 10) {
+                    Text(viewModel.fullname)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.top, 8)
+                    if viewModel.isCompanyProfile {
+                        Image("verified_profile_icon") // Ícono de ejemplo
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 25, height: 25)
+                            .clipShape(Circle())
+                    }
+                }
                 
                 Text(viewModel.username)
                     .font(.system(size: 14))

@@ -28,7 +28,10 @@ public extension View {
             }
     }
     
-    func showCustomNavBar(title: String, goBack: @escaping VoidClosure) -> some View {
+    func showCustomNavBar<T: View>(
+        title: String,
+        goBack: @escaping VoidClosure,
+        @ViewBuilder image: @escaping () -> T = { EmptyView() } ) -> some View {
         self
             .navigationBarBackButtonHidden(true)
             .navigationBarTitleDisplayMode(.inline)
@@ -45,9 +48,12 @@ public extension View {
                 }
                 
                 ToolbarItem(placement: .principal) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundStyle(.white)
+                    HStack {
+                        Text(title)
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                        image()
+                    }
                 }
             }
     }

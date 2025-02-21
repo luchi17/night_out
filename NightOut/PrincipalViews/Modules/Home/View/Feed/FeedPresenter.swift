@@ -191,7 +191,7 @@ final class FeedPresenterImpl: FeedPresenter {
                     profileImageUrl: model.profileImageUrl,
                     username: model.username ?? "Unknown",
                     fullName: model.fullName ?? "Unknown",
-                    isCompanyProfile: !model.isFromUser
+                    isCompanyProfile: (!model.isFromUser && !(model.location?.isEmpty ?? true))
                 )
                 presenter.actions.onShowUserProfile(profileInfo)
             }

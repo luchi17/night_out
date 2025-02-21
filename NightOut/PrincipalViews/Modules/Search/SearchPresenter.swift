@@ -162,7 +162,7 @@ final class SearchPresenterImpl: SearchPresenter {
                             username: companyModel.username,
                             fullname: companyModel.fullname,
                             profileId: companyModel.uid,
-                            isCompanyProfile: true,
+                            isCompanyProfile: !(companyModel.location?.isEmpty ?? true),
                             isPrivateProfile: companyModel.profileType == .privateProfile
                         )
                         

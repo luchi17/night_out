@@ -40,7 +40,15 @@ struct UserProfileView: View {
         .background(Color.black)
         .showCustomNavBar(
             title: viewModel.username,
-            goBack: goBackPublisher.send
+            goBack: goBackPublisher.send,
+            image: {
+                Image("verified_profile_icon") // Ícono de ejemplo
+                    .resizable()
+                    .scaledToFill()
+                    .background(Color.clear)
+                    .frame(width: viewModel.isCompanyProfile ? 25 : 0, height: viewModel.isCompanyProfile ? 25 : 0) // Ajusta el tamaño
+                    .clipShape(Circle())
+            }
         )
         .showToast(
             error: (
@@ -72,10 +80,15 @@ struct UserProfileView: View {
     var profileInfo: some View {
         ZStack(alignment: .bottomLeading) {
             if let profileImage = viewModel.profileImageUrl {
-                KingFisherImage(url: URL(string: profileImage))
-                    .centerCropped(width: .infinity, height: 300, placeholder: {
-                        ProgressView()
-                    })
+                AsyncImage(url: URL(string: profileImage)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 350)
+                        .clipped()
+                } placeholder: {
+                    ProgressView()
+                }
             } else {
                 Image("profile")
                     .resizable()
