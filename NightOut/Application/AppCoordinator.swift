@@ -56,7 +56,8 @@ final class AppCoordinator: ObservableObject {
             showProfile: showProfile,
             openMessages: openMessages,
             showPrivateProfile: showPrivateProfile,
-            openTinder: openTinder
+            openTinder: openTinder,
+            openHub: openHub
         )
         self.push(tabBarCoordinator)
     }
@@ -70,6 +71,11 @@ final class AppCoordinator: ObservableObject {
         }))
         
         self.push(tinderCoordinator)
+    }
+    
+    private func openHub() {
+        let hubCoordinator = HubCoordinator(actions: .init())
+        self.push(hubCoordinator)
     }
     
     private func goToFriendsList(followerIds: [String]) {
