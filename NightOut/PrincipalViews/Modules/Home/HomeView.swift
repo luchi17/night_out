@@ -131,7 +131,7 @@ struct HomeView: View {
             Button(action: {
                 openTinderPublisher.send()
             }) {
-                Image("nightout")
+                Image(viewModel.nighoutLogo)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 150, height: 60)

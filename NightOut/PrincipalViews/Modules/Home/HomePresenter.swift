@@ -24,6 +24,7 @@ final class HomeViewModel: ObservableObject {
     @Published var showMyProfile: Bool = false
     @Published var nighoutAlertTitle: String = ""
     @Published var nighoutAlertMessage: String = ""
+    @Published var nighoutLogo: String = ""
 }
 
 protocol HomePresenter {
@@ -79,6 +80,12 @@ final class HomePresenterImpl: HomePresenter {
         self.outinput = input
         
         viewModel = HomeViewModel()
+        
+        if isPastNinePM() {
+            viewModel.nighoutLogo = "n_social_logo"
+        } else {
+            viewModel.nighoutLogo = "n_logo"
+        }
     }
     
     func transform(input: HomePresenterImpl.ViewInputs) {
