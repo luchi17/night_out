@@ -34,25 +34,12 @@ struct HubView: View {
                     
                     Spacer()
                     // Agregar gesto de deslizamiento para volver
-                    Text("Desliza hacia abajo para volver")
+                    Text("Desliza hacia abajo para volver a los juegos")
                         .foregroundColor(.white)
                         .padding(.bottom, 35)
                 }
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            self.dragOffset = value.translation
-                        }
-                        .onEnded { value in
-                            print(self.dragOffset.height)
-                            if self.dragOffset.height > 100 {
-                                // Si el usuario desliza suficientemente hacia abajo, volver a la lista
-                                self.viewModel.selectedGame = nil
-                            }
-                        }
-                )
                 .transition(.move(edge: .bottom)) // Animación de entrada desde abajo
-
+                
             } else {
                 
                 topView
@@ -61,6 +48,19 @@ struct HubView: View {
             }
         }
         .animation(.easeInOut, value: viewModel.selectedGame)
+        .gesture(
+            DragGesture()
+                .onChanged { value in
+                    self.dragOffset = value.translation
+                }
+                .onEnded { value in
+                    print(self.dragOffset.height)
+                    if self.dragOffset.height > 100 {
+                        // Si el usuario desliza suficientemente hacia abajo, volver a la lista
+                        self.viewModel.selectedGame = nil
+                    }
+                }
+        )
         .showToast(
             error: (
                 type: viewModel.toast,
