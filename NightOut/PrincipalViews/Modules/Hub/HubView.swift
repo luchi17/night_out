@@ -30,7 +30,7 @@ struct HubView: View {
                     
                     Spacer()
                     
-                    gameView
+                    game.view
                     
                     Spacer()
                     // Agregar gesto de deslizamiento para volver
@@ -100,22 +100,6 @@ struct HubView: View {
             Spacer()
         }
     }
-    
-    var gameView: some View {
-        VStack {
-            if viewModel.selectedGame == .yonunca {
-                YoNuncaView()
-            } else if viewModel.selectedGame == .chupitowars {
-                YoNuncaView()
-            } else if viewModel.selectedGame == .verdadOreto {
-                VerdadORetoView()
-            } else if viewModel.selectedGame == .ruleta {
-                RuletaView()
-            } else if viewModel.selectedGame == .publicamosTuVideo {
-                YoNuncaView()
-            }
-        }
-    }
 }
 
 
@@ -164,7 +148,6 @@ enum GameType {
     case verdadOreto
     case ruleta
     case publicamosTuVideo
-    case none
     
     var title: String {
         switch self {
@@ -178,16 +161,25 @@ enum GameType {
             return "Ruleta 🎯"
         case .publicamosTuVideo:
             return "Publicamos tu vídeo"
-        case .none:
-            return ""
         }
     }
     
-    init?(rawValue: String?) {
-        guard let rawValue = rawValue else {
-            self = .none
-            return
+    var view: some View {
+        switch self {
+        case .yonunca:
+            return YoNuncaView()
+        case .chupitowars:
+            return ChupitoWarsView()
+        case .verdadOreto:
+            return VerdadORetoView()
+        case .ruleta:
+            return RuletaView()
+        case .publicamosTuVideo:
+            return RuletaView()
         }
+    }
+    
+    init?(rawValue: String) {
         if rawValue == GameType.yonunca.title {
             self = .yonunca
         }
@@ -200,12 +192,8 @@ enum GameType {
         else if rawValue == GameType.ruleta.title {
             self = .ruleta
         }
-        else if rawValue == GameType.publicamosTuVideo.title {
+        else {
             self = .publicamosTuVideo
         }
-        else {
-            self = .none
-        }
-        
     }
 }
