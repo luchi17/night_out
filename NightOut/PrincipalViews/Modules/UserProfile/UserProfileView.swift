@@ -45,8 +45,7 @@ struct UserProfileView: View {
                 Image("verified_profile_icon") // Ícono de ejemplo
                     .resizable()
                     .scaledToFill()
-                    .background(Color.clear)
-                    .frame(width: viewModel.isCompanyProfile ? 25 : 0, height: viewModel.isCompanyProfile ? 25 : 0) // Ajusta el tamaño
+                    .frame(width: viewModel.isCompanyProfile ? 45 : 0, height: viewModel.isCompanyProfile ? 45 : 0) // Ajusta el tamaño
                     .clipShape(Circle())
             }
         )

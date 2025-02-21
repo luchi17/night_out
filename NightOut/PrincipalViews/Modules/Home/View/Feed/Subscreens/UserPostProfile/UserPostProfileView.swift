@@ -54,7 +54,7 @@ struct UserPostProfileView: View {
                         Image("verified_profile_icon") // Ícono de ejemplo
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 25, height: 25)
+                            .frame(width: 50, height: 50)
                             .clipShape(Circle())
                     }
                 }
