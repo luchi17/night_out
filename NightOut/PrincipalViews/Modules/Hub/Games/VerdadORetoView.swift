@@ -1,30 +1,107 @@
 import SwiftUI
 
 struct VerdadORetoView: View {
-    @State private var challengeText: String = ""
-
+    
+    @State private var names: [(String, Color)] = []
+    @State private var newName: String = ""
+    @State private var winner: String = ""
+    
+    @State private var challengeText: String?
+    
     var body: some View {
         VStack {
-            Text(challengeText)
-                .font(.system(size: 18))
-                .foregroundColor(.white)
-                .padding()
-
-            Button(action: {
-                showRandomChallenge()
-            }) {
-                Text("Otro reto".uppercased())
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
+            if let challengeText = challengeText {
+                
+                VStack(alignment: .center, spacing: 10) {
+                    Text("\(winner)")
+                        .font(.largeTitle)
+                        .bold()
+                        .padding()
+                        .onAppear {
+                            withAnimation(.easeIn(duration: 2)) {}
+                        }
+                    Text("\(challengeText)")
+                        .font(.largeTitle)
+                        .padding()
+                        .onAppear {
+                            withAnimation(.easeIn(duration: 2)) {}
+                        }
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    self.winner = ""
+                    self.challengeText = nil
+                }) {
+                    Text("Volver".uppercased())
+                        .font(.system(size: 18, weight: .bold))
+                        .padding(.vertical, 8)
+                        .padding(.horizontal)
+                        .background(Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
+                }
+                
+            } else {
+                Image("ruleta")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 70, height: 70)
+                    .transition(.scale)
+                
+                TextField("", text: $newName, prompt: Text("Introduce un nombre...").foregroundColor(.white))
+                    .foregroundColor(.white) // Color del texto
+                    .accentColor(.white)
                     .padding()
-                    .background(Color.gray)
-                    .cornerRadius(25)
+                
+                Button(action: {
+                    if !newName.isEmpty {
+                        let color = Color(
+                            red: Double.random(in: 0...1),
+                            green: Double.random(in: 0...1),
+                            blue: Double.random(in: 0...1)
+                        )
+                        names.append((newName, color))
+                        newName = ""
+                    }
+                }) {
+                    Text("Añadir jugador".uppercased())
+                        .font(.system(size: 18, weight: .bold))
+                        .padding(.vertical, 8)
+                        .padding(.horizontal)
+                        .background(Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
+                }
+                .padding()
+                
+                if !names.isEmpty {
+                    RuletaSubview(names: $names) { winner in
+                        self.winner = winner
+                        showRandomChallenge()
+                    }
+                    .padding()
+                    
+                    Button(action: {
+                        self.names = []
+                        self.winner = ""
+                        self.newName = ""
+                    }) {
+                        Text("Empezar de nuevo".uppercased())
+                            .font(.system(size: 18, weight: .bold))
+                            .padding(.vertical, 8)
+                            .padding(.horizontal)
+                            .background(Color.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(25)
+                    }
+                } else {
+                    Spacer()
+                }
             }
-            .padding()
         }
-        .onAppear {
-            showRandomChallenge()
-        }
+        .padding()
     }
     
     private func showRandomChallenge() {
