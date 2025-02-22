@@ -116,36 +116,6 @@ private extension ChatView {
 }
 
 
-class KeyboardObserver: ObservableObject {
-    @Published var keyboardHeight: CGFloat = 0
-
-    private var cancellables: Set<AnyCancellable> = []
-
-    init() {
-        // Observa la notificación de la aparición del teclado
-        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
-            .map { notification -> CGFloat in
-                guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
-                    return 0
-                }
-                return keyboardFrame.height
-            }
-            .sink { [weak self] height in
-                self?.keyboardHeight = height
-            }
-            .store(in: &cancellables)
-
-        // Observa la notificación de la desaparición del teclado
-        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
-            .map { _ in CGFloat(0) }
-            .sink { [weak self] height in
-                self?.keyboardHeight = height
-            }
-            .store(in: &cancellables)
-    }
-}
-
-
 struct MessageBubble: View {
     let message: MessageModel
     let isFromCurrentUser: Bool
