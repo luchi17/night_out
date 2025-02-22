@@ -79,6 +79,7 @@ struct ChupitoWarsView: View {
                     }
                 }
             }
+            .scrollIndicators(.hidden)
         }
         .if(userHasFailed, transform: { view in
             
