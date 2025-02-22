@@ -5,43 +5,110 @@ struct RuletaView: View {
     @State private var newName: String = ""
     @State private var winner: String?
     
+    @State private var showInitIcon = false
+    @State private var iconSize: CGFloat = 200
+    @State private var iconOpacity = 1.0
+    
     var body: some View {
         VStack {
-            TextField("Introduce un nombre", text: $newName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            
-            Button("Añadir Nombre") {
-                if !newName.isEmpty {
-                    let color = Color(
-                        red: Double.random(in: 0...1),
-                        green: Double.random(in: 0...1),
-                        blue: Double.random(in: 0...1)
-                    )
-                    names.append((newName, color))
-                    newName = ""
-                }
-            }
-            .padding()
-            
-            RuletaSubview(names: $names) { winner in
-                self.winner = winner
-            }
-            .padding()
             
             if let winner = winner {
                 Text("¡El ganador es: \(winner)!").font(.largeTitle).padding()
+                    .onAppear {
+                        withAnimation(.easeIn(duration: 2)) {}
+                        
+                        // Mantener visible durante x segundos y luego desaparecer
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                self.winner = nil
+                                self.names = []
+                                self.newName = ""
+                            }
+                        }
+                    }
+            } else {
+                Image("ruleta")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 70, height: 70)
+                    .transition(.scale)
+                
+                TextField("", text: $newName, prompt: Text("Introduce un nombre...").foregroundColor(.white))
+                    .foregroundColor(.white) // Color del texto
+                    .accentColor(.white)
+                    .padding()
+                
+                Button(action: {
+                    if !newName.isEmpty {
+                        let color = Color(
+                            red: Double.random(in: 0...1),
+                            green: Double.random(in: 0...1),
+                            blue: Double.random(in: 0...1)
+                        )
+                        names.append((newName, color))
+                        newName = ""
+                    }
+                }) {
+                    Text("Añadir jugador".uppercased())
+                        .font(.system(size: 18, weight: .bold))
+                        .padding(.vertical, 8)
+                        .padding(.horizontal)
+                        .background(Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
+                }
+                .padding()
+                
+                if !names.isEmpty {
+                    RuletaSubview(names: $names) { winner in
+                        self.winner = winner
+                    }
+                    .padding()
+                } else {
+                    Spacer()
+                }
             }
         }
         .padding()
+        .if(showInitIcon, transform: { view in
+            initIconView
+        })
+        .onAppear {
+            self.showInitIcon = true
+        }
     }
+    
+    var initIconView: some View {
+        Color.black
+            .opacity(0.8)
+            .edgesIgnoringSafeArea(.all)
+            .overlay {
+                Image("ruleta")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: iconSize, height: iconSize)
+                    .opacity(iconOpacity)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                iconSize = 120
+                                iconOpacity = 0
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                showInitIcon = false
+                            }
+                        }
+                    }
+            }
+    }
+    
 }
 
 struct RuletaSubview: View {
     
     @Binding var names: [(String, Color)]
     @State private var currentAngle: Double = 0
-    @State private var strokeWidth: Double = 3
+    @State private var strokeWidth: Double = 1
     
     @State private var winnerIndex: Int? = nil
     
@@ -54,7 +121,7 @@ struct RuletaSubview: View {
             ZStack {
                 // Círculo de la ruleta
                 Circle()
-                    .fill(Color.gray)
+                    .fill(Color.black.opacity(0.7))
                     .frame(width: 2 * radius, height: 2 * radius)
                     .overlay(Circle().stroke(Color.white, lineWidth: strokeWidth))
                 
@@ -74,13 +141,18 @@ struct RuletaSubview: View {
             .padding(20)
             .rotationEffect(.degrees(currentAngle)) // Gira la ruleta toda
             
-            Button("Girar Ruleta") {
+            Button(action: {
                 spin()
+            }) {
+                Text("Girar Ruleta".uppercased())
+                    .font(.system(size: 18, weight: .bold))
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(25)
             }
             .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
         }
     }
     
