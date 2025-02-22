@@ -37,15 +37,18 @@ struct ChupitoWarsView: View {
                     .frame(height: 65)
             }
             
-            topView
-            
-            Spacer()
-            
-            gameStartedView
-            
-            Spacer()
+            VStack {
+                topView
+                
+                Spacer()
+                
+                gameStartedView
+                
+                Spacer()
+            }
+            .padding()
+           
         }
-        .padding()
         .if(userHasFailed, transform: { view in
             
             ZStack(alignment: .top) {
