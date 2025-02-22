@@ -9,6 +9,7 @@ struct ChupitoWarsView: View {
     @State private var answer: String = ""
     
     @State private var userHasFailed: Bool = false
+    @State private var playerName: String = ""
     
     @State private var showChupitoInitIcon = false
     @State private var iconSize: CGFloat = 200
@@ -19,115 +20,131 @@ struct ChupitoWarsView: View {
     var body: some View {
         VStack {
             // Header Image
-            Image("chupitowar_icon")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 150, height: 150) // Tamaño reducido
-                .transition(.scale)
-                .padding(.top, 20) // Ajuste para que quede arriba
-            
-            // Add Player Input Field
-            HStack {
-                TextField("", text: $answer, prompt: Text("Introduce el nombre del jugador").foregroundColor(.white))
-                    .foregroundColor(.white) // Color del texto
-                    .accentColor(.white)
-                    .padding()
-                
-                Button(action: {
-                    addPlayer()
-                }) {
-                    Text("Añadir jugador".uppercased())
-                        .bold()
-                        .padding()
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(25)
-                }
+            if let toast = toast {
+                ToastView(
+                    type: toast,
+                    onDismiss: {
+                        self.toast = nil
+                    },
+                    showCloseButton: false,
+                    extraPadding: .none,
+                    showTransition: false
+                )
+                .padding(.vertical, 0)
+                .frame(height: 60)
+            } else {
+                Spacer()
+                    .frame(height: 65)
             }
             
-            // Start Game Button
-            Button(action: {
-                startGame()
-            }) {
-                Text("Empezar juego".uppercased())
-                    .bold()
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(25)
-            }
-            .padding(.top, 20)
+            topView
+            
+            Spacer()
             
             gameStartedView
+            
+            Spacer()
         }
         .padding()
         .if(userHasFailed, transform: { view in
-            ChupitoView(showChupito: $userHasFailed)
+            
+            ZStack(alignment: .top) {
+                ChupitoView(showChupito: $userHasFailed)
+                
+                let correctAnswer = questionsAndAnswers.first(where: { $0.question == currentQuestion })?.answer.lowercased()
+                ToastView(
+                    type: .custom(.init(title: "", description: "Respuesta Correcta: \(correctAnswer ?? "")", image: nil)),
+                    onDismiss: {
+                        self.toast = nil
+                    },
+                    showCloseButton: false,
+                    extraPadding: .none,
+                    showTransition: false
+                )
+                .padding(.top, 0)
+                .frame(height: 60)
+            }
         })
         .if(showChupitoInitIcon, transform: { view in
-            Color.black
-                .opacity(0.8)
-                .edgesIgnoringSafeArea(.all)
-                .overlay {
-                    Image("chupitowar_icon")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: iconSize, height: iconSize)
-                        .opacity(iconOpacity)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                withAnimation(.easeInOut(duration: 0.5)) {
-                                    iconSize = 50
-                                    iconOpacity = 0
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                    showChupitoInitIcon = false
-                                }
-                            }
-                        }
-                }
+            chupitoInitIconView
         })
-        .showToast(
-            error: (
-                type: toast,
-                showCloseButton: false,
-                onDismiss: {
-                    toast = nil
-                }
-            ),
-            isIdle: false,
-            extraPadding: .none
-        )
         .onAppear {
             self.showChupitoInitIcon = true
         }
     }
     
-    var gameStartedView: some View {
+    var topView: some View {
         VStack {
+            Image("chupitowar_icon")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 120, height: 120)
+                .transition(.scale)
+            
+            TextField("", text: $playerName, prompt: Text("Introduce un nombre...").foregroundColor(.white))
+                .foregroundColor(.white) // Color del texto
+                .accentColor(.white)
+                .padding()
+            
+            Button(action: {
+                addPlayer()
+            }) {
+                Text("Añadir jugador".uppercased())
+                    .font(.system(size: 18, weight: .bold))
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(25)
+            }
+            .padding(.top, 10)
+            
+            Button(action: {
+                if gameStarted {
+                    startGameAgain()
+                } else {
+                    startGame()
+                }
+                
+            }) {
+                Text(gameStarted ? "Empezar de nuevo".uppercased() : "Empezar juego".uppercased())
+                    .font(.system(size: 18, weight: .bold))
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(gameStarted ? Color.gray : Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(25)
+            }
+            .padding(.top, 10)
+        }
+    }
+    
+    var gameStartedView: some View {
+        VStack(spacing: 20) {
             // Display Game Elements
             if gameStarted {
                 Text("Turno de: \(players[currentPlayerIndex])")
-                    .font(.system(size: 24, weight: .regular))
-                    .padding()
+                    .font(.system(size: 24, weight: .bold))
+                    .padding(.horizontal, 12)
                 
                 Text(currentQuestion)
                     .font(.system(size: 20, weight: .bold))
-                    .padding()
+                    .padding(.horizontal, 12)
                 
                 TextField("", text: $answer, prompt: Text("Escribe tu respuesta").foregroundColor(.white))
                     .foregroundColor(.white)
                     .accentColor(.white)
-                    .padding()
+                    .padding(.horizontal, 12)
                 
                 Button(action: {
                     submitAnswer()
                 }) {
                     Text("Responder".uppercased())
-                        .bold()
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(.vertical, 10)
+                        .padding(.horizontal)
                         .background(Color.gray)
                         .cornerRadius(25)
                 }
@@ -135,9 +152,28 @@ struct ChupitoWarsView: View {
         }
     }
     
-    private func createQuestionAnswerField() {
-        // Lógica para generar la pregunta aleatoria
-        showRandomQuestion()
+    var chupitoInitIconView: some View {
+        Color.black
+            .opacity(0.8)
+            .edgesIgnoringSafeArea(.all)
+            .overlay {
+                Image("chupitowar_icon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: iconSize, height: iconSize)
+                    .opacity(iconOpacity)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                iconSize = 80
+                                iconOpacity = 0
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                showChupitoInitIcon = false
+                            }
+                        }
+                    }
+            }
     }
     
     private func submitAnswer() {
@@ -146,32 +182,42 @@ struct ChupitoWarsView: View {
         
         if correctAnswer != userAnswer { // Has fallado
             userHasFailed = true
-            toast = .custom(.init(title: "", description: "Respuesta Correcta: \(correctAnswer ?? "")", image: nil))
+            //            toast = .custom(.init(title: "", description: "Respuesta Correcta: \(correctAnswer ?? "")", image: nil))
         }
         
+        answer = ""
         // Pasar turno al siguiente jugador
         currentPlayerIndex = (currentPlayerIndex + 1) % players.count
         showRandomQuestion()
     }
     
     private func addPlayer() {
-        let playerName = answer.trimmingCharacters(in: .whitespaces)
-        if !playerName.isEmpty && !players.contains(playerName) {
+        let player = playerName.trimmingCharacters(in: .whitespaces)
+        if !player.isEmpty && !players.contains(player) {
             players.append(playerName)
             toast = .success(.init(title: "", description: "\(playerName) añadido", image: nil))
-            answer = ""
         } else {
-            toast = .success(.init(title: "", description: "Nombre inválido o ya existente", image: nil))
+            toast = .custom(.init(title: "", description: "Nombre inválido o ya existente", image: nil))
         }
+        playerName = ""
     }
     
     private func startGame() {
         if !players.isEmpty {
             gameStarted = true
-            createQuestionAnswerField()
+            showRandomQuestion()
         } else {
-            toast = .success(.init(title: "", description: "Añade al menos un jugador para empezar", image: nil))
+            toast = .custom(.init(title: "", description: "Añade al menos un jugador para empezar", image: nil))
         }
+    }
+    
+    private func startGameAgain() {
+        gameStarted = false
+        players = []
+        playerName = ""
+        answer = ""
+        currentQuestion = ""
+        currentPlayerIndex = 0
     }
     
     private func showRandomQuestion() {
@@ -458,36 +504,29 @@ struct ChupitoView: View {
                     .edgesIgnoringSafeArea(.all)
                     .transition(.opacity)
                     .zIndex(1)
-            }
-            
-            VStack {
-                // El resto de tu vista principal
-                Text("Juego de Chupito")
-                    .font(.largeTitle)
-                    .foregroundColor(.white)
-            }
-            
-            // Imagen de chupito
-            if showChupito {
-                Image("chupito_image") // Asegúrate de tener la imagen en el Assets
+                
+                Image("chupito_image")
                     .resizable()
-                    .scaledToFit()
-                    .frame(width: 200, height: 200)
-                    .opacity(showChupito ? 1 : 0) // Controlar la visibilidad
+                    .scaledToFill()
+                    .frame(width: 250, height: 250)
+                    .opacity(showChupito ? 1 : 0)
                     .transition(.opacity)
                     .zIndex(2)
                     .onAppear {
-                        withAnimation(.easeIn(duration: 0.2)) {
+                        withAnimation(.easeIn(duration: 1.2)) {
                             self.showChupito = true
                         }
                         
                         // Mantener visible durante 0.5 segundos y luego desaparecer
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            withAnimation(.easeOut(duration: 0.2)) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation(.easeOut(duration: 0.3)) {
                                 self.showChupito = false
                             }
                         }
                     }
+                
+//                ToastView
+                
             }
         }
     }

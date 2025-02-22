@@ -30,7 +30,7 @@ struct HubView: View {
                     
                     Spacer()
                     
-                    game.view
+                    gameView
                     
                     Spacer()
                     // Agregar gesto de deslizamiento para volver
@@ -61,16 +61,6 @@ struct HubView: View {
                     }
                 }
         )
-        .showToast(
-            error: (
-                type: viewModel.toast,
-                showCloseButton: false,
-                onDismiss: {
-                    viewModel.toast = nil
-                }
-            ),
-            isIdle: viewModel.loading
-        )
         .onAppear {
             viewDidLoadPublisher.send()
         }
@@ -100,6 +90,23 @@ struct HubView: View {
             Spacer()
         }
     }
+    
+    var gameView: some View {
+        VStack {
+            if viewModel.selectedGame == .yonunca {
+                YoNuncaView()
+            } else if viewModel.selectedGame == .chupitowars {
+                ChupitoWarsView()
+            } else if viewModel.selectedGame == .verdadOreto {
+                VerdadORetoView()
+            } else if viewModel.selectedGame == .ruleta {
+                RuletaView()
+            } else if viewModel.selectedGame == .publicamosTuVideo {
+                YoNuncaView()
+            }
+        }
+    }
+
 }
 
 
@@ -161,21 +168,6 @@ enum GameType {
             return "Ruleta 🎯"
         case .publicamosTuVideo:
             return "Publicamos tu vídeo"
-        }
-    }
-    
-    var view: some View {
-        switch self {
-        case .yonunca:
-            return YoNuncaView()
-        case .chupitowars:
-            return ChupitoWarsView()
-        case .verdadOreto:
-            return VerdadORetoView()
-        case .ruleta:
-            return RuletaView()
-        case .publicamosTuVideo:
-            return RuletaView()
         }
     }
     
