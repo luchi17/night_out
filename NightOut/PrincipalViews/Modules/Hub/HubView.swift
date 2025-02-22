@@ -8,6 +8,8 @@ struct HubView: View {
     private let gameTappedPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: HubViewModel
+    @ObservedObject private var keyboardObserver = KeyboardObserver()
+    
     let presenter: HubPresenter
     
     @State private var dragOffset = CGSize.zero
@@ -34,9 +36,11 @@ struct HubView: View {
                     
                     Spacer()
                     // Agregar gesto de deslizamiento para volver
-                    Text("Desliza hacia abajo para volver a los juegos")
-                        .foregroundColor(.white)
-                        .padding(.bottom, 35)
+                    if keyboardObserver.keyboardHeight == 0 {
+                        Text("Desliza hacia abajo para volver a los juegos")
+                            .foregroundColor(.white)
+                            .padding(.bottom, 35)
+                    }
                 }
                 .transition(.move(edge: .bottom)) // Animación de entrada desde abajo
                 
@@ -47,9 +51,8 @@ struct HubView: View {
                 
             }
         }
-        .ignoresSafeArea(.keyboard, edges: .bottom)
         .animation(.easeInOut, value: viewModel.selectedGame)
-        .gesture(
+        .simultaneousGesture(
             DragGesture()
                 .onChanged { value in
                     self.dragOffset = value.translation

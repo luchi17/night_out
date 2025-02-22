@@ -17,38 +17,67 @@ struct ChupitoWarsView: View {
     
     @State private var toast: ToastType?
     
+    @State private var lastItemInScrollId: UUID = UUID()
+    
     var body: some View {
-        ScrollView {
-            VStack {
-                // Header Image
-                if let toast = toast {
-                    ToastView(
-                        type: toast,
-                        onDismiss: {
-                            self.toast = nil
-                        },
-                        showCloseButton: false,
-                        extraPadding: .none,
-                        showTransition: false
-                    )
-                    .padding(.vertical, 0)
-                    .frame(height: 60)
-                } else {
-                    Spacer()
-                        .frame(height: 65)
+        VStack {
+            ScrollView {
+                ScrollViewReader { proxy in
+                    VStack {
+                        // Header Image
+                        if let toast = toast {
+                            ToastView(
+                                type: toast,
+                                onDismiss: {
+                                    self.toast = nil
+                                },
+                                showCloseButton: false,
+                                extraPadding: .none,
+                                showTransition: false
+                            )
+                            .padding(.vertical, 0)
+                            .frame(height: 60)
+                        } else {
+                            Spacer()
+                                .frame(height: 65)
+                        }
+                        
+                        VStack {
+                            topView
+                            
+                            Spacer()
+                            
+                            VStack(alignment: .center, spacing: 20) {
+                                if gameStarted {
+                                    Text("Turno de: \(players[currentPlayerIndex])")
+                                        .font(.system(size: 24, weight: .bold))
+                                        .padding(.horizontal, 12)
+                                    
+                                    Text(currentQuestion)
+                                        .font(.system(size: 20, weight: .bold))
+                                        .padding(.horizontal, 12)
+                                    
+                                    TextField("", text: $answer, prompt: Text("Escribe tu respuesta").foregroundColor(.white))
+                                        .onTapGesture {
+                                             withAnimation {
+                                                  proxy.scrollTo(lastItemInScrollId, anchor: .bottom)
+                                             }
+                                        }
+                                        .foregroundColor(.white)
+                                        .accentColor(.white)
+                                        .padding(.horizontal, 12)
+                                    
+                                    submitButton
+                                        .id(lastItemInScrollId)
+                                }
+                            }
+                            
+                            Spacer()
+                        }
+                        .padding()
+                       
+                    }
                 }
-                
-                VStack {
-                    topView
-                    
-                    Spacer()
-                    
-                    gameStartedView
-                    
-                    Spacer()
-                }
-                .padding()
-               
             }
         }
         .if(userHasFailed, transform: { view in
@@ -131,35 +160,18 @@ struct ChupitoWarsView: View {
         }
     }
     
-    var gameStartedView: some View {
-        VStack(spacing: 20) {
-            if gameStarted {
-                Text("Turno de: \(players[currentPlayerIndex])")
-                    .font(.system(size: 24, weight: .bold))
-                    .padding(.horizontal, 12)
-                
-                Text(currentQuestion)
-                    .font(.system(size: 20, weight: .bold))
-                    .padding(.horizontal, 12)
-                
-                TextField("", text: $answer, prompt: Text("Escribe tu respuesta").foregroundColor(.white))
-                    .foregroundColor(.white)
-                    .accentColor(.white)
-                    .padding(.horizontal, 12)
-                
-                Button(action: {
-                    submitAnswer()
-                }) {
-                    Text("Responder".uppercased())
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal)
-                        .background(Color.gray)
-                        .cornerRadius(25)
-                }
-            }
+    var submitButton: some View {
+        Button(action: {
+            submitAnswer()
+        }) {
+            Text("Responder".uppercased())
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .padding(.horizontal)
+                .background(Color.gray)
+                .cornerRadius(25)
         }
     }
     
