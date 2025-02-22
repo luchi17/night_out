@@ -23,7 +23,7 @@ struct ToastView: View {
     var showCloseButton: Bool = false
     
     var extraPadding: ToastPadding = .none
-    var showTransition: Bool = false
+    var showTransition: Bool = true
     
     @State private var isVisible = false
     
