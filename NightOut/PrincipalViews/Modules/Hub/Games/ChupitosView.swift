@@ -56,6 +56,7 @@ struct ChupitoWarsView: View {
                     type: .custom(.init(title: "", description: "Respuesta Correcta: \(correctAnswer ?? "")", image: nil)),
                     onDismiss: {
                         self.toast = nil
+                        self.showRandomQuestion()
                     },
                     showCloseButton: false,
                     extraPadding: .none,
@@ -121,7 +122,6 @@ struct ChupitoWarsView: View {
     
     var gameStartedView: some View {
         VStack(spacing: 20) {
-            // Display Game Elements
             if gameStarted {
                 Text("Turno de: \(players[currentPlayerIndex])")
                     .font(.system(size: 24, weight: .bold))
@@ -182,13 +182,13 @@ struct ChupitoWarsView: View {
         
         if correctAnswer != userAnswer { // Has fallado
             userHasFailed = true
-            //            toast = .custom(.init(title: "", description: "Respuesta Correcta: \(correctAnswer ?? "")", image: nil))
+        } else {
+            showRandomQuestion()
         }
         
         answer = ""
         // Pasar turno al siguiente jugador
         currentPlayerIndex = (currentPlayerIndex + 1) % players.count
-        showRandomQuestion()
     }
     
     private func addPlayer() {
@@ -317,7 +317,7 @@ struct ChupitoWarsView: View {
         ("¿Quién fue el primer presidente de los Estados Unidos?", "george washington"),
         ("¿Qué serie incluye a los personajes Monica, Ross y Chandler?", "friends"),
         ("¿Qué metal se encuentra principalmente en el núcleo de la Tierra?", "hierro"),
-        ("¿Cómo se llama la capital de México?", "ciudad de mexico"),
+        ("¿Cómo se llama la capital de México?", "ciudad de méxico"),
         ("¿Quién pintó 'El grito'?", "edvard munch"),
         ("¿Qué videojuego incluye el personaje Link?", "the legend of zelda"),
         ("¿Cuál es el océano más pequeño del mundo?", "artico"),
@@ -513,20 +513,17 @@ struct ChupitoView: View {
                     .transition(.opacity)
                     .zIndex(2)
                     .onAppear {
-                        withAnimation(.easeIn(duration: 1.2)) {
+                        withAnimation(.easeIn(duration: 2)) {
                             self.showChupito = true
                         }
                         
-                        // Mantener visible durante 0.5 segundos y luego desaparecer
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        // Mantener visible durante x segundos y luego desaparecer
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                             withAnimation(.easeOut(duration: 0.3)) {
                                 self.showChupito = false
                             }
                         }
                     }
-                
-//                ToastView
-                
             }
         }
     }
