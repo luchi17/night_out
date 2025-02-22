@@ -24,7 +24,7 @@ struct HubView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            if let game = viewModel.selectedGame {
+            if viewModel.selectedGame != nil {
                 
                 VStack {
                     
@@ -47,6 +47,7 @@ struct HubView: View {
                 
             }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .animation(.easeInOut, value: viewModel.selectedGame)
         .gesture(
             DragGesture()
@@ -80,6 +81,7 @@ struct HubView: View {
                     GameButton(game: .yonunca, selectedGame: $viewModel.selectedGame)
                     GameButton(game: .chupitowars, selectedGame: $viewModel.selectedGame)
                     GameButton(game: .verdadOreto, selectedGame: $viewModel.selectedGame)
+                    GameButton(game: .retos, selectedGame: $viewModel.selectedGame)
                     GameButton(game: .ruleta, selectedGame: $viewModel.selectedGame)
                     GameButton(game: .publicamosTuVideo, selectedGame: $viewModel.selectedGame)
                 }
@@ -99,6 +101,8 @@ struct HubView: View {
                 ChupitoWarsView()
             } else if viewModel.selectedGame == .verdadOreto {
                 VerdadORetoView()
+            } else if viewModel.selectedGame == .retos {
+                RetosView()
             } else if viewModel.selectedGame == .ruleta {
                 RuletaView()
             } else if viewModel.selectedGame == .publicamosTuVideo {
@@ -153,6 +157,7 @@ enum GameType {
     case yonunca
     case chupitowars
     case verdadOreto
+    case retos
     case ruleta
     case publicamosTuVideo
     
@@ -164,6 +169,8 @@ enum GameType {
             return "Chupito Wars 🥃"
         case .verdadOreto:
             return "Verdad o reto 🎭"
+        case .retos:
+            return "Retos 🏆"
         case .ruleta:
             return "Ruleta 🎯"
         case .publicamosTuVideo:
@@ -180,6 +187,9 @@ enum GameType {
         }
         else if rawValue == GameType.verdadOreto.title {
             self = .verdadOreto
+        }
+        else if rawValue == GameType.verdadOreto.title {
+            self = .retos
         }
         else if rawValue == GameType.ruleta.title {
             self = .ruleta
