@@ -21,9 +21,9 @@ struct ToastView: View {
     var type: ToastType
     var onDismiss: VoidClosure?
     var showCloseButton: Bool = false
-    var toastPadding: Bool = false
     
     var extraPadding: ToastPadding = .none
+    var showTransition: Bool = false
     
     @State private var isVisible = false
     
@@ -72,8 +72,11 @@ struct ToastView: View {
                 }
                 .padding(.top, 15 + extraPadding.value) //extraPadding
                 .padding(.bottom, 15)
-                .background(type.backgroundColor) // Fondo azul claro, corner radius: , in: RoundedRectangle(cornerRadius: 10)
-                .transition(.move(edge: .top))  // Transición desde arriba
+                .background(type.backgroundColor) // corner radius: , in: RoundedRectangle(cornerRadius: 10)
+                .if(showTransition, transform: { view in
+                    view
+                        .transition(.move(edge: .top))  // Transición desde arriba
+                })
                 .zIndex(1)  // Asegura que el toast esté sobre otras vistas
             }
             Spacer()
