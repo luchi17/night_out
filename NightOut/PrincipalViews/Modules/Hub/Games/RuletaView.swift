@@ -111,6 +111,8 @@ struct RuletaSubview: View {
     
     @State private var winnerIndex: Int? = nil
     
+    @State var showNames: Bool = false
+    
     var onResult: (String) -> Void
     
     let radius: CGFloat = 150
@@ -131,7 +133,8 @@ struct RuletaSubview: View {
                                         sweepAngle: angleForSegment(index + 1) - angleForSegment(index),
                                         color: names[index].1,
                                         radius: radius,
-                                        name: names[index].0
+                                        name: names[index].0,
+                                        showNames: showNames
                         )
                     }
                 }
@@ -179,6 +182,7 @@ struct RouletteSegment: View {
     var color: Color
     var radius: CGFloat
     var name: String
+    var showNames: Bool
     
     var body: some View {
         Path { path in
@@ -187,13 +191,16 @@ struct RouletteSegment: View {
             path.addArc(center: center, radius: radius, startAngle: Angle(degrees: startAngle), endAngle: Angle(degrees: startAngle + sweepAngle), clockwise: false)
         }
         .fill(color)
-        .overlay(
-            Text(name)
-                .font(.headline)
-                .foregroundColor(.white)
-                .rotationEffect(.degrees(startAngle + sweepAngle / 2))
-                .position(x: radius + radius * 0.6 * cos(CGFloat(startAngle + sweepAngle / 2) * .pi / 180),
-                          y: radius + radius * 0.6 * sin(CGFloat(startAngle + sweepAngle / 2) * .pi / 180))
-        )
+        .if(showNames, transform: { path in
+            path
+                .overlay {
+                    Text(name)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .rotationEffect(.degrees(startAngle + sweepAngle / 2))
+                        .position(x: radius + radius * 0.6 * cos(CGFloat(startAngle + sweepAngle / 2) * .pi / 180),
+                                  y: radius + radius * 0.6 * sin(CGFloat(startAngle + sweepAngle / 2) * .pi / 180))
+                }
+        })
     }
 }
