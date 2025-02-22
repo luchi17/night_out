@@ -9,65 +9,77 @@ struct RuletaView: View {
     @State private var iconSize: CGFloat = 200
     @State private var iconOpacity = 1.0
     
+    @State private var lastItemInScrollId: UUID = UUID()
+    
     var body: some View {
-        VStack {
-            if let winner = winner {
-                Text("¡El ganador es: \(winner)!").font(.largeTitle).padding()
-                    .onAppear {
-                        withAnimation(.easeIn(duration: 2)) {}
+        ScrollView {
+            ScrollViewReader { proxy in
+                VStack {
+                    if let winner = winner {
                         
-                        // Mantener visible durante x segundos y luego desaparecer
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                            withAnimation(.easeOut(duration: 0.3)) {
-                                self.winner = nil
-                                self.names = []
-                                self.newName = ""
+                        Spacer()
+                        
+                        Text("¡El ganador es: \(winner)!").font(.largeTitle).padding()
+                            .onAppear {
+                                withAnimation(.easeIn(duration: 2)) {}
+                                
+                                // Mantener visible durante x segundos y luego desaparecer
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    withAnimation(.easeOut(duration: 0.3)) {
+                                        self.winner = nil
+                                        self.names = []
+                                        self.newName = ""
+                                    }
+                                }
                             }
+                        
+                        Spacer()
+                    } else {
+                        Image("ruleta")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 70, height: 70)
+                            .transition(.scale)
+                        
+                        TextField("", text: $newName, prompt: Text("Introduce un nombre...").foregroundColor(.white))
+                            .foregroundColor(.white) // Color del texto
+                            .accentColor(.white)
+                            .padding()
+                        
+                        Button(action: {
+                            if !newName.isEmpty {
+                                let color = Color(
+                                    red: Double.random(in: 0...1),
+                                    green: Double.random(in: 0...1),
+                                    blue: Double.random(in: 0...1)
+                                )
+                                names.append((newName, color))
+                                newName = ""
+                            }
+                        }) {
+                            Text("Añadir jugador".uppercased())
+                                .font(.system(size: 18, weight: .bold))
+                                .padding(.vertical, 8)
+                                .padding(.horizontal)
+                                .background(Color.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(25)
+                        }
+                        .padding(.bottom, 20)
+                        
+                        if !names.isEmpty {
+                            RuletaSubview(names: $names) { winner in
+                                self.winner = winner
+                            }
+                        } else {
+                            Spacer()
                         }
                     }
-            } else {
-                Image("ruleta")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 70, height: 70)
-                    .transition(.scale)
-                
-                TextField("", text: $newName, prompt: Text("Introduce un nombre...").foregroundColor(.white))
-                    .foregroundColor(.white) // Color del texto
-                    .accentColor(.white)
-                    .padding()
-                
-                Button(action: {
-                    if !newName.isEmpty {
-                        let color = Color(
-                            red: Double.random(in: 0...1),
-                            green: Double.random(in: 0...1),
-                            blue: Double.random(in: 0...1)
-                        )
-                        names.append((newName, color))
-                        newName = ""
-                    }
-                }) {
-                    Text("Añadir jugador".uppercased())
-                        .font(.system(size: 18, weight: .bold))
-                        .padding(.vertical, 8)
-                        .padding(.horizontal)
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(25)
-                }
-                .padding()
-                
-                if !names.isEmpty {
-                    RuletaSubview(names: $names) { winner in
-                        self.winner = winner
-                    }
-                    .padding()
-                } else {
-                    Spacer()
                 }
             }
         }
+        .scrollIndicators(.hidden)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .padding()
         .if(showInitIcon, transform: { view in
             initIconView
@@ -75,6 +87,10 @@ struct RuletaView: View {
         .onAppear {
             self.showInitIcon = true
         }
+    }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
     var initIconView: some View {
@@ -154,8 +170,9 @@ struct RuletaSubview: View {
                     .foregroundColor(.white)
                     .cornerRadius(25)
             }
-            .padding()
+            .padding(.vertical, 10)
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
     
     private func spin() {
