@@ -11,7 +11,6 @@ struct RuletaView: View {
     
     var body: some View {
         VStack {
-            
             if let winner = winner {
                 Text("¡El ganador es: \(winner)!").font(.largeTitle).padding()
                     .onAppear {
