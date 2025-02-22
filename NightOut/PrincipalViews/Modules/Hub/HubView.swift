@@ -5,7 +5,7 @@ import Combine
 struct HubView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
-    private let gameTappedPublisher = PassthroughSubject<Void, Never>()
+    private let stopImageSwitcherPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: HubViewModel
     @ObservedObject private var keyboardObserver = KeyboardObserver()
@@ -24,7 +24,8 @@ struct HubView: View {
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            
+            Color.black
             
             if viewModel.selectedGame != nil {
                 
@@ -46,11 +47,20 @@ struct HubView: View {
                 
             } else {
                 
-                topView
-                    .transition(.move(edge: .top)) // Animación de salida hacia arriba
-                
+                VStack {
+                    topView
+                        .transition(.move(edge: .top)) // Animación de salida hacia arriba
+                    
+                    Spacer()
+                    
+                    AdvertisementView(
+                        imageList: $viewModel.imageList,
+                        currentIndex: $viewModel.currentIndex
+                    )
+                }
             }
         }
+        .padding(.bottom, 45)
         .animation(.easeInOut, value: viewModel.selectedGame)
         .simultaneousGesture(
             DragGesture()
@@ -67,6 +77,9 @@ struct HubView: View {
         )
         .onAppear {
             viewDidLoadPublisher.send()
+        }
+        .onDisappear {
+            stopImageSwitcherPublisher.send()
         }
     }
     
@@ -134,23 +147,11 @@ struct GameButton: View {
     }
 }
 
-// Vista de placeholder para el VideoView / ImageView
-struct VideoPlaceholderView: View {
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.5)
-            Image("video_placeholder")
-                .resizable()
-                .scaledToFill()
-        }
-        .cornerRadius(10)
-    }
-}
-
 private extension HubView {
     func bindViewModel() {
         let input = HubPresenterImpl.ViewInputs(
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            stopImageSwitcher: stopImageSwitcherPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
