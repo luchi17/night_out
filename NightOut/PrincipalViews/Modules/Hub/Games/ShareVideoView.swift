@@ -23,6 +23,8 @@ class VideoShareViewModel: ObservableObject {
     @Published var selectedItem: PhotosPickerItem?
     @Published var loadingVideo: Bool = false
     
+    @Published var videoPlayer: AVPlayer?
+    
     private var cancellables = Set<AnyCancellable>()
     
     func shareVideo() {
@@ -78,6 +80,7 @@ class VideoShareViewModel: ObservableObject {
     }
     
     func deleteVideo() {
+        self.videoPlayer = nil
         self.videoUrl = nil
         self.selectedItem = nil
     }
@@ -108,8 +111,9 @@ class VideoShareViewModel: ObservableObject {
 struct ShareVideoView: View {
     
     @ObservedObject private var viewModel = VideoShareViewModel()
-    @State private var videoPlayer: AVPlayer?
 
+    @State var videoPlayer: AVPlayer?
+    
     var body: some View {
         VStack(alignment: .leading) {
             
@@ -124,13 +128,13 @@ struct ShareVideoView: View {
                     .frame(height: 350)
                     .cornerRadius(8)
                 
-                if viewModel.loadingVideo {
-                    ProgressView()
+                if let player = videoPlayer {
+                    VideoPlayer(player: player)
+                        .frame(height: 350)
+                        .cornerRadius(8)
                 } else {
-                    if viewModel.videoUrl != nil {
-                        VideoPlayer(player: videoPlayer)
-                            .frame(height: 350)
-                            .cornerRadius(8)
+                    if viewModel.loadingVideo {
+                        ProgressView()
                     } else {
                         Button(action: {
                             viewModel.checkPermissionsAndOpenPicker()
@@ -150,6 +154,7 @@ struct ShareVideoView: View {
                             }
                         }
                     }
+                    
                 }
             }
             
@@ -165,8 +170,8 @@ struct ShareVideoView: View {
                 if let movie = try await viewModel.selectedItem?.loadTransferable(type: Movie.self) {
                     self.viewModel.loadingVideo = false
                     self.viewModel.videoUrl = movie.url
-                    videoPlayer = AVPlayer(url: movie.url)
-                    videoPlayer?.play()
+                    self.videoPlayer = AVPlayer(url: movie.url)
+                    self.videoPlayer?.play()
                 }
             }
         }
@@ -251,7 +256,7 @@ struct ShareVideoView: View {
                 .disabled(viewModel.isProgressBarVisible)
                 
                 Button(action: {
-                    videoPlayer?.pause()
+                    viewModel.videoPlayer?.pause()
                     viewModel.deleteVideo()
                 }) {
                     Image(systemName: "xmark") // Icono de cerrar estándar
