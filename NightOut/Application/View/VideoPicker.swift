@@ -1,101 +1,48 @@
-import AVKit
-import PhotosUI
 import SwiftUI
+import PhotosUI
+import AVKit
 
-struct Movie: Transferable {
-    let url: URL
+struct VideoPicker: UIViewControllerRepresentable {
+    @Binding var videoURL: URL?
 
-    static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(contentType: .movie) { movie in
-            SentTransferredFile(movie.url)
-        } importing: { received in
-            let copy = URL.documentsDirectory.appending(path: "movie.mp4")
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        var parent: VideoPicker
 
-            if FileManager.default.fileExists(atPath: copy.path()) {
-                try FileManager.default.removeItem(at: copy)
-            }
-
-            try FileManager.default.copyItem(at: received.file, to: copy)
-            return Self.init(url: copy)
+        init(parent: VideoPicker) {
+            self.parent = parent
         }
-    }
-}
 
-struct VideoPickerView<Content: View>: View {
-    @State private var selectedItem: PhotosPickerItem?
-    
-    @State private var videoData: PhotosPickerItem?
-//    @Binding var videoData: Data?
-    @Binding var selectedVideoURL: URL?
-    
-    let content: () -> Content
-    
-    var body: some View {
-        VStack {
-            PhotosPicker(
-                selection: $selectedItem,
-                matching: .videos,
-                photoLibrary: .shared()) {
-                    content()
-                }
-                .onChange(of: selectedItem) { _, newItem in
-                    Task {
-                        if let newItem = newItem {
-                            if let movie = try? await newItem.loadTransferable(type: Movie.self) {
-                                selectedVideoURL = movie.url
-                                if let data = try? Data(contentsOf: movie.url) {
-//                                    videoData = data
-                                    print("data")
-                                    print(data)
-                                }
-                            }
-                        }
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            picker.dismiss(animated: true)
+
+            guard let provider = results.first?.itemProvider,
+                  provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) else { return }
+
+            provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { url, error in
+                if let url = url {
+                    DispatchQueue.main.async {
+                        print("url")
+                        print(url)
+                        self.parent.videoURL = url
                     }
                 }
+            }
         }
     }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.filter = .videos
+        config.selectionLimit = 1
+
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
 }
-
-
-//struct ContentView: View {
-//    enum LoadState {
-//        case unknown, loading, loaded(Movie), failed
-//    }
-//
-//    @State private var selectedItem: PhotosPickerItem?
-//    @State private var loadState = LoadState.unknown
-//
-//    var body: some View {
-//        VStack {
-//            PhotosPicker("Select movie", selection: $selectedItem, matching: .videos)
-//
-//            switch loadState {
-//            case .unknown:
-//                EmptyView()
-//            case .loading:
-//                ProgressView()
-//            case .loaded(let movie):
-//                VideoPlayer(player: AVPlayer(url: movie.url))
-//                    .scaledToFit()
-//                    .frame(width: 300, height: 300)
-//            case .failed:
-//                Text("Import failed")
-//            }
-//        }
-//        .onChange(of: selectedItem) { _ in
-//            Task {
-//                do {
-//                    loadState = .loading
-//
-//                    if let movie = try await selectedItem?.loadTransferable(type: Movie.self) {
-//                        loadState = .loaded(movie)
-//                    } else {
-//                        loadState = .failed
-//                    }
-//                } catch {
-//                    loadState = .failed
-//                }
-//            }
-//        }
-//    }
-//}
