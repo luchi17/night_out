@@ -39,7 +39,7 @@ struct HubView: View {
                     Spacer()
                     // Agregar gesto de deslizamiento para volver
                     if keyboardObserver.keyboardHeight == 0 {
-                        Text("Desliza hacia abajo para volver a los juegos")
+                        Text(viewModel.selectedGame == .publicamosTuVideo ? "Desliza hacia abajo para volver" : "Desliza hacia abajo para volver a los juegos")
                             .foregroundColor(.white)
                             .padding(.bottom, 15)
                     }
