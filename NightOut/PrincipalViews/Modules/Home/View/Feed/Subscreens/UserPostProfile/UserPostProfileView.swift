@@ -26,7 +26,7 @@ struct UserPostProfileView: View {
         ZStack {
             Color.black
                 .edgesIgnoringSafeArea(.all)
-            VStack {
+            VStack(spacing: 0) {
                 // Imagen de perfil
                 if let profileImageUrl = viewModel.profileImageUrl {
                     KingFisherImage(url: URL(string: profileImageUrl))
@@ -45,23 +45,27 @@ struct UserPostProfileView: View {
                 }
                 
                 // Nombre y username
-                HStack(spacing: 10) {
+                
+                ZStack(alignment: .leading) {
                     Text(viewModel.fullname)
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.top, 8)
+                    
                     if viewModel.isCompanyProfile {
-                        Image("verified_profile_icon") // Ícono de ejemplo
+                        Image("verified_profile_icon")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 50, height: 50)
                             .clipShape(Circle())
+                            .offset(x: 190)
                     }
                 }
                 
                 Text(viewModel.username)
                     .font(.system(size: 14))
                     .foregroundColor(.white)
+                    .padding(.top, 0)
                 
                 // Contadores
                 HStack(spacing: 8) {
