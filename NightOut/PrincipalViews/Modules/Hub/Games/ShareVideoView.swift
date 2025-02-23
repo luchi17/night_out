@@ -85,13 +85,14 @@ struct ShareVideoView: View {
     @State private var openPicker: Bool = false
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: 16) {
             // Title
             Text("Comparte tu video y podrás salir en nuestras redes sociales.")
                 .font(.system(size: 19, weight: .regular))
                 .foregroundColor(.white)
-                .frame(height: 35)
-                .padding(.top, 16)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 22)
             
             // Video container
             ZStack {
@@ -151,20 +152,25 @@ struct ShareVideoView: View {
             
             Spacer()
             
-            // Share button
-            Button(action: {
-                viewModel.shareVideo()
-            }) {
-                Text("Compartir video".uppercased())
-                    .font(.system(size: 18, weight: .bold))
-                    .padding(.vertical, 8)
-                    .padding(.horizontal)
-                    .background(Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(25)
+            HStack {
+                Spacer()
+                
+                Button(action: {
+                    viewModel.shareVideo()
+                }) {
+                    Text("Compartir video".uppercased())
+                        .font(.system(size: 18, weight: .bold))
+                        .padding(.vertical, 8)
+                        .padding(.horizontal)
+                        .background(Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
+                }
+                .opacity(viewModel.isProgressBarVisible ? 0.5 : 1)
+                .disabled(viewModel.isProgressBarVisible)
+                
+                Spacer()
             }
-            .opacity(viewModel.isProgressBarVisible ? 0.5 : 1)
-            .disabled(viewModel.isProgressBarVisible)
             
             Spacer()
             
