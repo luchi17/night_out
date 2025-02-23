@@ -30,11 +30,13 @@ final class HubPresenterImpl: HubPresenter {
     }
     
     struct Actions {
+        let openUrl: InputClosure<String>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let stopImageSwitcher: AnyPublisher<Void, Never>
+        let openUrl: AnyPublisher<String, Never>
     }
     
     var viewModel: HubViewModel
@@ -68,6 +70,14 @@ final class HubPresenterImpl: HubPresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 presenter.stopImageSwitcher()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openUrl
+            .withUnretained(self)
+            .sink { presenter, url in
+                presenter.actions.openUrl(url)
             }
             .store(in: &cancellables)
     }

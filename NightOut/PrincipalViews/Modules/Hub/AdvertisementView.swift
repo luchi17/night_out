@@ -7,8 +7,10 @@ struct AdvertisementView: View {
     
     let defaultImageName = "logo_amarillo"
     
+    var openUrl: InputClosure<String>
+    
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             
             if let imageUrl = imageList.isEmpty ? nil : URL(string: imageList[currentIndex]) {
                 AsyncImage(url: imageUrl) { phase in
@@ -19,25 +21,29 @@ struct AdvertisementView: View {
                         image.resizable()
                             .scaledToFill()
                             .transition(.opacity)
-                            .frame(maxWidth: .infinity, maxHeight: 50)
+                            .frame(maxWidth: .infinity, maxHeight: 110)
+                            .clipped()
+                            .onTapGesture {
+                                openUrl(imageList[currentIndex])
+                            }
                     case .failure:
                         Image(defaultImageName)
                             .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity, maxHeight: 50)
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, maxHeight: 90)
                     @unknown default:
                         Image(defaultImageName)
                             .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity, maxHeight: 50)
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, maxHeight: 90)
                         
                     }
                 }
             } else {
                 Image(defaultImageName)
                     .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: 50)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: 90)
             }
         }
     }

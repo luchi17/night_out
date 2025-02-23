@@ -6,6 +6,7 @@ struct HubView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let stopImageSwitcherPublisher = PassthroughSubject<Void, Never>()
+    private let openUrlPublisher = PassthroughSubject<String, Never>()
     
     @ObservedObject var viewModel: HubViewModel
     @ObservedObject private var keyboardObserver = KeyboardObserver()
@@ -40,7 +41,7 @@ struct HubView: View {
                     if keyboardObserver.keyboardHeight == 0 {
                         Text("Desliza hacia abajo para volver a los juegos")
                             .foregroundColor(.white)
-                            .padding(.bottom, 35)
+                            .padding(.bottom, 15)
                     }
                 }
                 .transition(.move(edge: .bottom)) // Animación de entrada desde abajo
@@ -55,12 +56,15 @@ struct HubView: View {
                     
                     AdvertisementView(
                         imageList: $viewModel.imageList,
-                        currentIndex: $viewModel.currentIndex
+                        currentIndex: $viewModel.currentIndex,
+                        openUrl: openUrlPublisher.send
                     )
+                    .frame(maxWidth: .infinity, maxHeight: 110)
+                    .padding(.bottom, 5)
                 }
             }
         }
-        .padding(.bottom, 45)
+        .padding(.bottom, 20)
         .animation(.easeInOut, value: viewModel.selectedGame)
         .simultaneousGesture(
             DragGesture()
@@ -151,7 +155,8 @@ private extension HubView {
     func bindViewModel() {
         let input = HubPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            stopImageSwitcher: stopImageSwitcherPublisher.eraseToAnyPublisher()
+            stopImageSwitcher: stopImageSwitcherPublisher.eraseToAnyPublisher(),
+            openUrl: openUrlPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

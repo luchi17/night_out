@@ -74,7 +74,7 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func openHub() {
-        let hubCoordinator = HubCoordinator(actions: .init())
+        let hubCoordinator = HubCoordinator(actions: .init(openUrl: openUrl))
         self.push(hubCoordinator)
     }
     
@@ -243,6 +243,12 @@ extension AppCoordinator {
                 let browserUrl = URL(string: "https://www.google.com/maps/search/?api=1&query=\(latitude),\(longitude)")!
                 UIApplication.shared.open(browserUrl, options: [:], completionHandler: nil)
             }
+        }
+    }
+    
+    func openUrl(urlString: String) {
+        if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     }
     
