@@ -131,7 +131,7 @@ final class PublishPresenterImpl: PublishPresenter {
             guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
             
             // Crear referencia de la imagen con timestamp
-            let fileName = "\(Int(Date().timeIntervalSince1970)).jpg"
+            let fileName = "\(Int64(Date().timeIntervalSince1970)).jpg"
             let fileRef = Storage.storage().reference().child("Post Pictures").child(fileName)
             
             print("fileRef")

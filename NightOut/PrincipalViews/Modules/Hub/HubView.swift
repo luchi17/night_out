@@ -126,7 +126,7 @@ struct HubView: View {
             } else if viewModel.selectedGame == .ruleta {
                 RuletaView()
             } else if viewModel.selectedGame == .publicamosTuVideo {
-                YoNuncaView()
+                ShareVideoView()
             }
         }
     }
