@@ -15,6 +15,9 @@ class VideoShareViewModel: ObservableObject {
     @Published var isProgressBarVisible: Bool = false
     @Published var toast: ToastType?
     
+    @Published var openPicker: Bool = false
+    @Published var showPermissionAlert: Bool = false
+    
     private var cancellables = Set<AnyCancellable>()
     
     func shareVideo() {
@@ -76,25 +79,44 @@ class VideoShareViewModel: ObservableObject {
     func applyButtonPressAnimation() {
         // Animación de presión del botón
     }
+    
+    func checkPermissionsAndOpenPicker() {
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        switch status {
+        case .authorized, .limited:
+            openPicker = true  // Permiso concedido, abrir picker
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] newStatus in
+                DispatchQueue.main.async {
+                    if newStatus == .authorized || newStatus == .limited {
+                        self?.openPicker = true
+                    } else {
+                        self?.showPermissionAlert = true
+                    }
+                }
+            }
+        case .denied, .restricted:
+            showPermissionAlert = true  // Mostrar alerta para abrir Configuración
+        @unknown default:
+            break
+        }
+    }
 }
 
 struct ShareVideoView: View {
     
     @ObservedObject private var viewModel = VideoShareViewModel()
     @State private var videoPlayer: AVPlayer?
-    @State private var openPicker: Bool = false
+    
+    @State private var selectedItem: PhotosPickerItem?
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Title
-            Text("Comparte tu video y podrás salir en nuestras redes sociales.")
-                .font(.system(size: 19, weight: .regular))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 22)
+        VStack(alignment: .leading) {
             
-            // Video container
+            shareTitle()
+            
+            Spacer()
+            
             ZStack {
                 Rectangle()
                     .stroke(style: StrokeStyle(lineWidth: 3, dash: [12]))
@@ -123,7 +145,7 @@ struct ShareVideoView: View {
                     }
                 } else {
                     Button(action: {
-                        openPicker = true
+                        viewModel.checkPermissionsAndOpenPicker()
                     }) {
                         ZStack {
                             Circle()
@@ -142,44 +164,8 @@ struct ShareVideoView: View {
                 }
             }
             
-            // Progress bar visibility
-            if viewModel.isProgressBarVisible {
-                ProgressView("Uploading...")
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(2)
-                    .padding()
-            }
+            bottomView()
             
-            Spacer()
-            
-            HStack {
-                Spacer()
-                
-                Button(action: {
-                    viewModel.shareVideo()
-                }) {
-                    Text("Compartir video".uppercased())
-                        .font(.system(size: 18, weight: .bold))
-                        .padding(.vertical, 8)
-                        .padding(.horizontal)
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(25)
-                }
-                .opacity(viewModel.isProgressBarVisible ? 0.5 : 1)
-                .disabled(viewModel.isProgressBarVisible)
-                
-                Spacer()
-            }
-            
-            Spacer()
-            
-            // Social Media Row
-            VStack(spacing: 2) {
-                socialMediaRow(iconName: "instagram_icon", platformName: "Instagram")
-                socialMediaRow(iconName: "x_icon", platformName: "X")
-                socialMediaRow(iconName: "tiktok_icon", platformName: "TikTok")
-            }
         }
         .padding()
         .background(Color.black.edgesIgnoringSafeArea(.all))
@@ -188,15 +174,19 @@ struct ShareVideoView: View {
                 videoPlayer = AVPlayer(url: videoUrl)
             }
         }
-        .sheet(isPresented: $openPicker) {
-            VideoPickerView(
-                selectedVideoURL: $viewModel.videoUrl,
-                content: {
-                    EmptyView()
+        .sheet(isPresented: $viewModel.openPicker) {
+            VideoPicker(
+                videoURL: $viewModel.videoUrl)
+        }
+        .alert("Permiso requerido", isPresented: $viewModel.showPermissionAlert) {
+            Button("Abrir Configuración") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
                 }
-            )
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
+            }
+            Button("Cancelar", role: .cancel) { }
+        } message: {
+            Text("Esta aplicación necesita acceso a tu galería para seleccionar videos.")
         }
         .showToast(
             error: (
