@@ -80,7 +80,6 @@ struct RuletaView: View {
         }
         .scrollIndicators(.hidden)
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .padding()
         .if(showInitIcon, transform: { view in
             initIconView
         })
