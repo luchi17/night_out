@@ -2,47 +2,24 @@ import SwiftUI
 import PhotosUI
 import AVKit
 
-struct VideoPicker: UIViewControllerRepresentable {
-    @Binding var videoURL: URL?
+struct Movie: Transferable {
+  let url: URL
 
-    class Coordinator: NSObject, PHPickerViewControllerDelegate {
-        var parent: VideoPicker
+  static var transferRepresentation: some TransferRepresentation {
+      
+    FileRepresentation(contentType: .movie) { movie in
+      SentTransferredFile(movie.url)
+        
+    } importing: { receivedData in
+    
+      let copy = URL.documentsDirectory.appending(path: "movie.mp4")
 
-        init(parent: VideoPicker) {
-            self.parent = parent
-        }
+      if FileManager.default.fileExists(atPath: copy.path) {
+        try FileManager.default.removeItem(at: copy)
+      }
 
-        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            picker.dismiss(animated: true)
-
-            guard let provider = results.first?.itemProvider,
-                  provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) else { return }
-
-            provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { url, error in
-                if let url = url {
-                    DispatchQueue.main.async {
-                        print("url")
-                        print(url)
-                        self.parent.videoURL = url
-                    }
-                }
-            }
-        }
+      try FileManager.default.copyItem(at: receivedData.file, to: copy)
+      return .init(url: copy)
     }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
-    }
-
-    func makeUIViewController(context: Context) -> PHPickerViewController {
-        var config = PHPickerConfiguration()
-        config.filter = .videos
-        config.selectionLimit = 1
-
-        let picker = PHPickerViewController(configuration: config)
-        picker.delegate = context.coordinator
-        return picker
-    }
-
-    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
+  }
 }

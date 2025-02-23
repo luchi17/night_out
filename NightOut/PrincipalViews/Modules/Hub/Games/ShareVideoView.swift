@@ -5,6 +5,8 @@ import FirebaseStorage
 import FirebaseFirestore
 import Combine
 
+import PhotosUI
+
 class VideoShareViewModel: ObservableObject {
     private let firestore = Firestore.firestore()
     private let storage = Storage.storage()
@@ -17,6 +19,9 @@ class VideoShareViewModel: ObservableObject {
     
     @Published var openPicker: Bool = false
     @Published var showPermissionAlert: Bool = false
+    
+    @Published var selectedItem: PhotosPickerItem?
+    @Published var loadingVideo: Bool = false
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -74,17 +79,14 @@ class VideoShareViewModel: ObservableObject {
     
     func deleteVideo() {
         self.videoUrl = nil
+        self.selectedItem = nil
     }
-    
-    func applyButtonPressAnimation() {
-        // Animación de presión del botón
-    }
-    
+
     func checkPermissionsAndOpenPicker() {
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         switch status {
         case .authorized, .limited:
-            openPicker = true  // Permiso concedido, abrir picker
+            openPicker = true
         case .notDetermined:
             PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] newStatus in
                 DispatchQueue.main.async {
@@ -96,7 +98,7 @@ class VideoShareViewModel: ObservableObject {
                 }
             }
         case .denied, .restricted:
-            showPermissionAlert = true  // Mostrar alerta para abrir Configuración
+            showPermissionAlert = true
         @unknown default:
             break
         }
@@ -107,9 +109,7 @@ struct ShareVideoView: View {
     
     @ObservedObject private var viewModel = VideoShareViewModel()
     @State private var videoPlayer: AVPlayer?
-    
-    @State private var selectedItem: PhotosPickerItem?
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             
@@ -124,41 +124,30 @@ struct ShareVideoView: View {
                     .frame(height: 350)
                     .cornerRadius(8)
                 
-                if let videoUrl = viewModel.videoUrl {
-                    ZStack(alignment: .topTrailing) {
+                if viewModel.loadingVideo {
+                    ProgressView()
+                } else {
+                    if viewModel.videoUrl != nil {
                         VideoPlayer(player: videoPlayer)
                             .frame(height: 350)
                             .cornerRadius(8)
-                            .onAppear {
-                                videoPlayer = AVPlayer(url: videoUrl)
-                                videoPlayer?.play()
-                            }
-                        
+                    } else {
                         Button(action: {
-                            videoPlayer?.pause()
-                            viewModel.deleteVideo()
+                            viewModel.checkPermissionsAndOpenPicker()
                         }) {
-                            Image(systemName: "xmark") // Icono de cerrar estándar
-                                .font(.system(size: 25, weight: .bold))
-                                .foregroundStyle(.white)
-                        }
-                    }
-                } else {
-                    Button(action: {
-                        viewModel.checkPermissionsAndOpenPicker()
-                    }) {
-                        ZStack {
-                            Circle()
-                                .stroke(lineWidth: 2)
-                                .foregroundStyle(.white)
-                                .frame(width: 45, height: 45)
-                                .shadow(radius: 4)
-                            
-                            Image(systemName: "plus")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 25, height: 25)
-                                .foregroundColor(.white)
+                            ZStack {
+                                Circle()
+                                    .stroke(lineWidth: 2)
+                                    .foregroundStyle(.white)
+                                    .frame(width: 45, height: 45)
+                                    .shadow(radius: 4)
+                                
+                                Image(systemName: "plus")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 25, height: 25)
+                                    .foregroundColor(.white)
+                            }
                         }
                     }
                 }
@@ -169,14 +158,17 @@ struct ShareVideoView: View {
         }
         .padding()
         .background(Color.black.edgesIgnoringSafeArea(.all))
-        .onChange(of: viewModel.videoUrl) { old, new in
-            if let videoUrl = viewModel.videoUrl {
-                videoPlayer = AVPlayer(url: videoUrl)
+        .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .videos)
+        .onChange(of: viewModel.selectedItem) {
+            Task {
+                self.viewModel.loadingVideo = true
+                if let movie = try await viewModel.selectedItem?.loadTransferable(type: Movie.self) {
+                    self.viewModel.loadingVideo = false
+                    self.viewModel.videoUrl = movie.url
+                    videoPlayer = AVPlayer(url: movie.url)
+                    videoPlayer?.play()
+                }
             }
-        }
-        .sheet(isPresented: $viewModel.openPicker) {
-            VideoPicker(
-                videoURL: $viewModel.videoUrl)
         }
         .alert("Permiso requerido", isPresented: $viewModel.showPermissionAlert) {
             Button("Abrir Configuración") {
@@ -201,6 +193,16 @@ struct ShareVideoView: View {
         )
     }
     
+    private func shareTitle() -> some View {
+        Text("Comparte tu video y podrás salir en nuestras redes sociales.")
+            .font(.system(size: 19, weight: .regular))
+            .foregroundColor(.white)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, 10)
+    }
+    
+    
     private func socialMediaRow(iconName: String, platformName: String) -> some View {
         HStack {
             Image(iconName)
@@ -215,6 +217,59 @@ struct ShareVideoView: View {
             
             Spacer()
         }
-        .padding(.bottom, 8)
+        .padding(.bottom, 4)
+    }
+    
+    private func bottomView() -> some View {
+        VStack {
+            
+            // Progress bar visibility
+            if viewModel.isProgressBarVisible {
+                ProgressView("Uploading...")
+                    .progressViewStyle(CircularProgressViewStyle())
+                    .scaleEffect(2)
+                    .padding()
+            }
+            
+            Spacer()
+            
+            HStack(spacing: 10) {
+                Spacer()
+                
+                Button(action: {
+                    viewModel.shareVideo()
+                }) {
+                    Text("Compartir video".uppercased())
+                        .font(.system(size: 18, weight: .bold))
+                        .padding(.vertical, 8)
+                        .padding(.horizontal)
+                        .background(Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
+                }
+                .opacity(viewModel.isProgressBarVisible ? 0.5 : 1)
+                .disabled(viewModel.isProgressBarVisible)
+                
+                Button(action: {
+                    videoPlayer?.pause()
+                    viewModel.deleteVideo()
+                }) {
+                    Image(systemName: "xmark") // Icono de cerrar estándar
+                        .font(.system(size: 25, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                
+                Spacer()
+            }
+            
+            Spacer()
+            
+            // Social Media Row
+            VStack {
+                socialMediaRow(iconName: "instagram_icon", platformName: "Instagram")
+                socialMediaRow(iconName: "x_icon", platformName: "X")
+                socialMediaRow(iconName: "tiktok_icon", platformName: "TikTok")
+            }
+        }
     }
 }
