@@ -12,6 +12,8 @@ struct UserProfileView: View {
     private let userSelectedPublisher = PassthroughSubject<UserGoingCellModel, Never>()
     private let openConfigPublisher = PassthroughSubject<Void, Never>()
     
+    @State private var selectedImage: IdentifiableImage? = nil
+    
     @ObservedObject var viewModel: UserProfileViewModel
     let presenter: UserProfilePresenter
     
@@ -151,8 +153,12 @@ struct UserProfileView: View {
                     users: $viewModel.usersGoingToClub,
                     onUserSelected: userSelectedPublisher.send
                 )
-                
             }
+            
+            ImagesGrid(
+                images: $viewModel.images,
+                selectedImage: $selectedImage
+            )
         }
         .padding(.top, 20)
     }

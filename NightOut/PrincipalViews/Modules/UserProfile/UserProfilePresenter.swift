@@ -81,7 +81,7 @@ final class UserProfileViewModel: ObservableObject {
     
     @Published var myUserModel: UserModel?
     
-//    @Published var images: [IdentifiableImage] = []
+    @Published var images: [IdentifiableImage] = []
     
     
     init(profileImageUrl: String?, username: String?, fullname: String?, isCompanyProfile: Bool) {
@@ -185,38 +185,38 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .eraseToAnyPublisher()
         
         //Post when
-//        input
-//            .viewDidLoad
-//            .filter({ [weak self] _ in  self?.model.isCompanyProfile ?? false })
-//            .withUnretained(self)
-//            .flatMap({ presenter, _ in
-//                presenter.useCases.postsUseCase.fetchPosts()
-//                    .map { posts in
-//                        let matchingPosts = posts.filter { post in
-//                            return post.value.publisherId == presenter.model.profileId
-//                        }.values
-//                        return Array(matchingPosts)
-//                    }
-//                    .eraseToAnyPublisher()
-//            })
-//            .withUnretained(self)
-//            .flatMap { presenter, posts in
-//                let publishers: [AnyPublisher<IdentifiableImage, Never>] = posts.map { post in
-//                    
-//                    presenter.getPostImagePublisher(image: post.postImage)
-//                        .compactMap({ $0 })
-//                        .map({ IdentifiableImage(image: $0 )})
-//                        .eraseToAnyPublisher()
-//                }
-//                return Publishers.MergeMany(publishers)
-//                    .collect()
-//                    .eraseToAnyPublisher()
-//            }
-//            .withUnretained(self)
-//            .sink { presenter, images in
-//                presenter.viewModel.images = images
-//            }
-//            .store(in: &cancellables)
+        input
+            .viewDidLoad
+            .filter({ [weak self] _ in  self?.model.isCompanyProfile ?? false })
+            .withUnretained(self)
+            .flatMap({ presenter, _ in
+                presenter.useCases.postsUseCase.fetchPosts()
+                    .map { posts in
+                        let matchingPosts = posts.filter { post in
+                            return post.value.publisherId == presenter.model.profileId
+                        }.values
+                        return Array(matchingPosts)
+                    }
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .flatMap { presenter, posts in
+                let publishers: [AnyPublisher<IdentifiableImage, Never>] = posts.map { post in
+                    
+                    presenter.getPostImagePublisher(image: post.postImage)
+                        .compactMap({ $0 })
+                        .map({ IdentifiableImage(image: $0 )})
+                        .eraseToAnyPublisher()
+                }
+                return Publishers.MergeMany(publishers)
+                    .collect()
+                    .eraseToAnyPublisher()
+            }
+            .withUnretained(self)
+            .sink { presenter, images in
+                presenter.viewModel.images = images
+            }
+            .store(in: &cancellables)
         
         input
             .viewDidLoad
