@@ -6,12 +6,12 @@ enum TabType: Equatable {
     case home
     case search
     case publish
-    case map
+    case leagues
     case user
     
     public static func == (lhs: TabType, rhs: TabType) -> Bool {
         switch(lhs, rhs) {
-        case (.home, .home), (.search, .search), (.publish, .publish), (.map, .map), (.user, .user):
+        case (.home, .home), (.search, .search), (.publish, .publish), (.leagues, .leagues), (.user, .user):
             return true
         default:
             return false
@@ -94,8 +94,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
                 return self.makeSearchFlow()
             case .publish:
                 return self.makePublishFlow()
-            case .map:
-                return self.makeMapsFlow()
+            case .leagues:
+                return self.makeLeaguesFlow()
             case .user:
                 return self.makeUserFlow()
             }
@@ -127,8 +127,9 @@ class TabViewCoordinator: ObservableObject, Hashable {
         return AnyView(coordinator.build())
     }
     
-    func makeMapsFlow() -> AnyView {
-        return AnyView(EmptyView())
+    func makeLeaguesFlow() -> AnyView {
+        let coordinator = LeagueCoordinator(actions: .init())
+        return AnyView(coordinator.build())
     }
     
     func makeUserFlow() -> AnyView {

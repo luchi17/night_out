@@ -49,11 +49,15 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    viewModel.selectedTab = .map
+                    viewModel.selectedTab = .leagues
                 }) {
                     VStack {
-                        Image(systemName: "map")
+                        Image("leaguesIcon")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 25, height: 25)
                             .foregroundColor(.white)
+                            
                     }
                 }
                 .frame(maxWidth: .infinity)
