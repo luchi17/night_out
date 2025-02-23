@@ -65,13 +65,14 @@ struct UserPostProfileView: View {
                 
                 // Contadores
                 HStack(spacing: 8) {
-                    CounterView(count: viewModel.followersCount, label: "Seguidores")
-                        .onTapGesture {
-                            goToFriendsListPublisher.send()
-                        }
                     if !viewModel.isCompanyProfile {
                         CounterView(count: viewModel.discosCount, label: "Discotecas")
                         CounterView(count: viewModel.copasCount, label: "Copas")
+                    } else {
+                        CounterView(count: viewModel.followersCount, label: "Seguidores")
+                            .onTapGesture {
+                                goToFriendsListPublisher.send()
+                            }
                     }
                 }
                 .padding(.vertical, 16)
