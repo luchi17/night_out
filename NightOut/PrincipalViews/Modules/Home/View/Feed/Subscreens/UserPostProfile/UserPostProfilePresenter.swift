@@ -23,16 +23,18 @@ final class UserPostProfileViewModel: ObservableObject {
     @Published var copasCount: String = "0"
     @Published var images: [IdentifiableImage] = []
     @Published var isCompanyProfile: Bool
+    @Published var profileId: String = ""
     
     var followers: [String] = []
 
-    init(profileImageUrl: String? = nil, username: String, fullname: String, discosCount: String, copasCount: String, isCompanyProfile: Bool) {
+    init(profileImageUrl: String? = nil, username: String, fullname: String, discosCount: String, copasCount: String, isCompanyProfile: Bool, profileId: String) {
         self.profileImageUrl = profileImageUrl
         self.username = username
         self.fullname = fullname
         self.discosCount = discosCount
         self.copasCount = copasCount
         self.isCompanyProfile = isCompanyProfile
+        self.profileId = profileId
     }
 }
 
@@ -81,7 +83,8 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
             fullname: info.fullName,
             discosCount: "0",
             copasCount: "0",
-            isCompanyProfile: info.isCompanyProfile
+            isCompanyProfile: info.isCompanyProfile,
+            profileId: info.profileId
         )
     }
     

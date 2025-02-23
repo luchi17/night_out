@@ -12,11 +12,9 @@ struct Level: Identifiable {
 class LevelsViewModel: ObservableObject {
     @Published var levelList: [Level] = []
     
-    func loadUserLevels() {
-        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
-        
+    func loadUserLevels(profileId: String) {
         let entriesRef =
-        FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: currentUserId)
+        FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: profileId)
             .child("MisEntradas")
         
         entriesRef.observeSingleEvent(of: .value) { snapshot in
@@ -78,7 +76,7 @@ struct LevelRow: View {
     let level: Level
     
     var body: some View {
-        VStack(alignment: .center, spacing: 8) {
+        VStack(alignment: .center, spacing: 12) {
             Image(level.imageName)
                 .resizable()
                 .scaledToFill()
@@ -90,6 +88,7 @@ struct LevelRow: View {
             
             ProgressView(value: level.progress, total: 100)
                 .progressViewStyle(LinearProgressViewStyle())
+                .tint(.yellow)
         }
         .padding(.horizontal, 25)
     }

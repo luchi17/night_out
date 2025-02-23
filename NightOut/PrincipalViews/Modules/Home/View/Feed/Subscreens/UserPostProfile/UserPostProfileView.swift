@@ -102,7 +102,7 @@ struct UserPostProfileView: View {
         }
         .onAppear {
             viewDidLoadPublisher.send()
-            levelsViewModel.loadUserLevels()
+            levelsViewModel.loadUserLevels(profileId: viewModel.profileId)
         }
     }
 }

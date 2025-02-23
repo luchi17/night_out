@@ -120,7 +120,9 @@ struct MyUserProfileView: View {
         }
         .sheet(isPresented: $showEditSheet, onDismiss: {
             viewDidLoadPublisher.send()
-            levelsViewModel.loadUserLevels()
+            if let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() {
+                levelsViewModel.loadUserLevels(profileId: currentUserId)
+            }
             updateProfileImage.toggle()
         }) {
             MyUserEditProfileView(
@@ -154,7 +156,9 @@ struct MyUserProfileView: View {
         })
         .onAppear {
             viewDidLoadPublisher.send()
-            levelsViewModel.loadUserLevels()
+            if let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() {
+                levelsViewModel.loadUserLevels(profileId: currentUserId)
+            }
         }
     }
     
