@@ -66,6 +66,10 @@ struct HubView: View {
             }
         }
         .padding(.bottom, 20)
+        .background(
+            Color.blackColor
+            .edgesIgnoringSafeArea(.all)
+        )
         .animation(.easeInOut, value: viewModel.selectedGame)
         .simultaneousGesture(
             DragGesture()
