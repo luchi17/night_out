@@ -176,7 +176,8 @@ public extension View {
     func showToast(
         error: (type: ToastType?, showCloseButton: Bool, onDismiss: VoidClosure)?,
         isIdle: Bool,
-        extraPadding: ToastPadding = ToastPadding.none
+        extraPadding: ToastPadding = ToastPadding.none,
+        showAnimation: Bool = true
     ) -> some View {
         VStack(spacing: 0) {
             if isIdle {
@@ -192,7 +193,8 @@ public extension View {
                                 type: type,
                                 onDismiss: error.onDismiss,
                                 showCloseButton: error.showCloseButton,
-                                extraPadding: extraPadding
+                                extraPadding: extraPadding,
+                                showTransition: showAnimation
                             )
                         )
                 } else {
