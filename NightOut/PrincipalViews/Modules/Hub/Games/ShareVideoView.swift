@@ -20,8 +20,7 @@ class VideoShareViewModel: ObservableObject {
     
     @Published var selectedItem: PhotosPickerItem?
     @Published var loadingVideo: Bool = false
-    
-    @Published var videoPlayer: AVPlayer?
+    @Published var shouldResetVideoPlayer: Bool = false
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -82,11 +81,9 @@ class VideoShareViewModel: ObservableObject {
     }
     
     func deleteVideo() {
-        self.videoPlayer = nil
-        self.videoUrl = nil
-        self.selectedItem = nil
+        shouldResetVideoPlayer = true
     }
-
+    
     func checkPermissionsAndOpenPicker() {
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         switch status {
@@ -181,6 +178,11 @@ struct ShareVideoView: View {
                 }
             }
         }
+        .onChange(of: viewModel.shouldResetVideoPlayer) {
+            if viewModel.shouldResetVideoPlayer {
+                self.resetVideoPlayer()
+            }
+        }
         .alert("Permiso requerido", isPresented: $viewModel.showPermissionAlert) {
             Button("Abrir Configuración") {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -262,8 +264,7 @@ struct ShareVideoView: View {
                 .disabled(viewModel.isProgressBarVisible)
                 
                 Button(action: {
-                    viewModel.videoPlayer?.pause()
-                    viewModel.deleteVideo()
+                    resetVideoPlayer()
                 }) {
                     Image(systemName: "xmark") // Icono de cerrar estándar
                         .font(.system(size: 25, weight: .bold))
@@ -282,5 +283,13 @@ struct ShareVideoView: View {
                 socialMediaRow(iconName: "tiktok_icon", platformName: "TikTok")
             }
         }
+    }
+    
+    func resetVideoPlayer() {
+        videoPlayer?.pause()
+        viewModel.videoUrl = nil
+        viewModel.selectedItem = nil
+        viewModel.loadingVideo = false
+        videoPlayer = nil
     }
 }
