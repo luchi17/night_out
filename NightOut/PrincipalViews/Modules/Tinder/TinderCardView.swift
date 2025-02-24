@@ -19,7 +19,7 @@ struct TinderCardView: View {
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .clipped()
                 } placeholder: {
-                    Color.gray
+                    Color.grayColor
                 }
                 .edgesIgnoringSafeArea([.bottom])
                 

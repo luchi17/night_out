@@ -23,7 +23,7 @@ struct MessagesView: View {
             if viewModel.chatList.isEmpty && !viewModel.loading {
                 Spacer()
                 Text("No has dado match con ningún usuario")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.grayColor)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Spacer()
             } else if !viewModel.chatList.isEmpty && !viewModel.loading {

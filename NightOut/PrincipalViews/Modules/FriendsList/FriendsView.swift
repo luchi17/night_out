@@ -73,7 +73,7 @@ struct FriendRow: View {
                 image.resizable()
             } placeholder: {
                 Circle()
-                    .fill(Color.gray.opacity(0.5)) // Color mientras carga
+                    .fill(Color.grayColor.opacity(0.5)) // Color mientras carga
                     .frame(width: 50, height: 50)
             }
             .frame(width: 50, height: 50)
@@ -98,7 +98,7 @@ struct ListUserEmptySubView: View {
         HStack(spacing: 10) {
             
             Circle()
-                .fill(Color.gray) // Color mientras carga
+                .fill(Color.grayColor) // Color mientras carga
                 .frame(width: 40, height: 40)
                 .padding(.leading, 5)
             

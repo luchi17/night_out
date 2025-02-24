@@ -163,7 +163,7 @@ struct SignupCompanyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
     }
@@ -177,7 +177,7 @@ struct SignupCompanyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
     }
@@ -191,7 +191,7 @@ struct SignupCompanyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
     }
@@ -205,7 +205,7 @@ struct SignupCompanyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
         .confirmationDialog("Elija vestimenta", isPresented: $showTagSelection) {

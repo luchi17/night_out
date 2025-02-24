@@ -73,7 +73,7 @@ struct LoginView: View, Hashable {
                     .foregroundColor(.yellow)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.gray.opacity(0.5))
+                    .background(Color.grayColor.opacity(0.5))
                     .cornerRadius(25)
                     .shadow(radius: 4)
             }
@@ -135,7 +135,7 @@ struct LoginView: View, Hashable {
                 .foregroundColor(.yellow)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.5))
+                .background(Color.grayColor.opacity(0.5))
                 .cornerRadius(25)
                 .shadow(radius: 4)
         }
@@ -177,7 +177,7 @@ struct LoginView: View, Hashable {
                 .foregroundColor(Color.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.5))
+                .background(Color.grayColor.opacity(0.5))
                 .cornerRadius(25)
         }
         .padding(.top, 12)

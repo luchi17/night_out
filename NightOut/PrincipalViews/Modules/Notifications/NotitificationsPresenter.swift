@@ -141,7 +141,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 let requesterUid = data.1
                 
                 presenter.useCases.followUseCase.rejectFollowRequest(requesterUid: requesterUid)
-                presenter.viewModel.toast = .custom(.init(title: "Solicitud rechazada", description: nil, image: (image: Image(systemName: "xmark"), color: Color.white), backgroundColor: Color.gray))
+                presenter.viewModel.toast = .custom(.init(title: "Solicitud rechazada", description: nil, image: (image: Image(systemName: "xmark"), color: Color.white), backgroundColor: Color.grayColor))
                 presenter.useCases.notificationsUseCase.removeNotification(
                     userId: FirebaseServiceImpl.shared.getCurrentUserUid() ?? "",
                     notificationId: notificationId

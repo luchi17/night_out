@@ -224,7 +224,7 @@ struct MyUserEditProfileView: View {
                 .foregroundColor(.white)
             Spacer()
             Toggle(isOn: $viewModel.isPrivate) { }
-                .toggleStyle(SwitchToggleStyle(tint: viewModel.isPrivate ? .pink : .gray))
+                .toggleStyle(SwitchToggleStyle(tint: viewModel.isPrivate ? .pink : .grayColor))
         }
     }
     
@@ -267,7 +267,7 @@ struct MyUserEditProfileView: View {
                 .foregroundColor(.white)
             Spacer()
             Toggle(isOn: $viewModel.participate) { }
-                .toggleStyle(SwitchToggleStyle(tint: viewModel.participate ? .pink : .gray))
+                .toggleStyle(SwitchToggleStyle(tint: viewModel.participate ? .pink : .grayColor))
         }
     }
     
@@ -299,7 +299,7 @@ struct MyUserEditProfileView: View {
                 .font(.system(size: 18))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }
@@ -313,7 +313,7 @@ struct MyUserEditProfileView: View {
                 .font(.system(size: 18))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }
@@ -327,7 +327,7 @@ struct MyUserEditProfileView: View {
                 .font(.system(size: 18))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }

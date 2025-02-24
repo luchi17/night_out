@@ -267,7 +267,7 @@ private struct CompanyMenu: View {
             Spacer()
         }
         .presentationDetents([.fraction(0.25)])
-        .presentationBackground(Color.gray)
+        .presentationBackground(Color.grayColor)
         .presentationDragIndicator(.visible)
     }
 }

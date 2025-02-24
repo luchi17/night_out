@@ -57,7 +57,7 @@ struct TinderInitView: View {
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.all, 14)
-                        .background(Color.gray)
+                        .background(Color.grayColor)
                         .cornerRadius(20)
                 }
                 .padding(.bottom, 20)

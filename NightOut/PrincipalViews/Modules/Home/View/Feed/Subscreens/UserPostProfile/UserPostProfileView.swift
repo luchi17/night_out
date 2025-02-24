@@ -132,7 +132,7 @@ struct CounterView: View {
                 .foregroundColor(.white)
         }
         .frame(width: 100, height: 80)
-        .background(Color.gray)
+        .background(Color.grayColor)
         .cornerRadius(10)
         .padding(.horizontal, 8)
     }

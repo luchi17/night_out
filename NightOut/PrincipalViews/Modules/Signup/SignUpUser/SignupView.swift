@@ -149,7 +149,7 @@ struct SignupView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(!termsAccepted ? Color.gray : Color.yellow)
+                .background(!termsAccepted ? Color.grayColor : Color.yellow)
                 .cornerRadius(25)
         }
         .disabled(!termsAccepted)

@@ -130,7 +130,7 @@ struct CommentsView: View {
             
             TextField("Escriba aquí ...", text: $viewModel.commentText)
                 .padding(10)
-                .background(Color.gray.opacity(0.2))
+                .background(Color.grayColor.opacity(0.2))
                 .cornerRadius(8)
                 .foregroundColor(.white)
             

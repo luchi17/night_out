@@ -18,7 +18,7 @@ struct TimeButtonView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
         .if(showTimePicker) { view in

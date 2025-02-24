@@ -38,7 +38,7 @@ struct PrivateUserProfileView: View {
                 .padding(.bottom, 12)
             
             Text("Envía una solicitud para seguir este perfil.")
-                .foregroundStyle(.gray)
+                .foregroundStyle(Color.grayColor)
                 .font(.system(size: 16))
                 .padding(.bottom, 20)
             

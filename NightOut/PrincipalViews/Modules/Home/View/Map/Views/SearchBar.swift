@@ -17,7 +17,7 @@ struct SearchBar: View {
             .autocorrectionDisabled()
             .padding(7)
             .padding(.horizontal, 25)
-            .background(.gray.opacity(0.6))
+            .background(Color.grayColor.opacity(0.6))
             .foregroundColor(.primary)
             .cornerRadius(8)
             .overlay(
@@ -32,7 +32,7 @@ struct SearchBar: View {
                             self.searchText = ""
                         }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.grayColor)
                                 .padding(.trailing, 8)
                         }
                     }

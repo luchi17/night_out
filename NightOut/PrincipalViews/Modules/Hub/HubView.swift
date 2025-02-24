@@ -9,11 +9,11 @@ struct HubView: View {
     private let openUrlPublisher = PassthroughSubject<String, Never>()
     
     @ObservedObject var viewModel: HubViewModel
-    @ObservedObject var shareVideoModel: VideoShareViewModel
     
     @ObservedObject private var keyboardObserver = KeyboardObserver()
     
     let presenter: HubPresenter
+    let shareVideoPresenter: ShareVideoPresenter
     
     @State private var dragOffset = CGSize.zero
     
@@ -22,9 +22,7 @@ struct HubView: View {
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
-        shareVideoModel = VideoShareViewModel()
-        
-        bindViewModel()
+        shareVideoPresenter = ShareVideoPresenterImpl()
     }
     
     var body: some View {
@@ -134,11 +132,10 @@ struct HubView: View {
             } else if viewModel.selectedGame == .ruleta {
                 RuletaView()
             } else if viewModel.selectedGame == .publicamosTuVideo {
-                ShareVideoView(viewModel: shareVideoModel)
+                ShareVideoView(presenter: shareVideoPresenter)
             }
         }
     }
-
 }
 
 
@@ -154,7 +151,7 @@ struct GameButton: View {
                 .padding(.horizontal, 15)
                 .padding(.vertical, 9)
                 .foregroundColor(.white)
-                .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.3)))
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.grayColor.opacity(0.3)))
         }
     }
 }

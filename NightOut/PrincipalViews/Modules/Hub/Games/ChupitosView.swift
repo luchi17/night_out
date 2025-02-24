@@ -136,7 +136,7 @@ struct ChupitoWarsView: View {
                     .font(.system(size: 18, weight: .bold))
                     .padding(.vertical, 8)
                     .padding(.horizontal)
-                    .background(Color.gray)
+                    .background(Color.grayColor)
                     .foregroundColor(.white)
                     .cornerRadius(25)
             }
@@ -155,7 +155,7 @@ struct ChupitoWarsView: View {
                     .font(.system(size: 18, weight: .bold))
                     .padding(.vertical, 8)
                     .padding(.horizontal)
-                    .background(gameStarted ? Color.gray : Color.green)
+                    .background(gameStarted ? Color.grayColor : Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(25)
             }
@@ -173,7 +173,7 @@ struct ChupitoWarsView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .padding(.horizontal)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
     }

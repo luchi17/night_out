@@ -24,7 +24,7 @@ struct RetosView: View {
                         .font(.system(size: 18, weight: .bold))
                         .padding(.vertical, 8)
                         .padding(.horizontal)
-                        .background(Color.gray)
+                        .background(Color.grayColor)
                         .foregroundColor(.white)
                         .cornerRadius(25)
                 }
