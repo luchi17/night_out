@@ -236,20 +236,13 @@ struct ShareVideoView: View {
     private func bottomView() -> some View {
         VStack {
             
-            // Progress bar visibility
-            if viewModel.isProgressBarVisible {
-                ProgressView("Uploading...")
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(2)
-                    .padding()
-            }
-            
             Spacer()
             
             HStack(spacing: 10) {
                 Spacer()
                 
                 Button(action: {
+                    videoPlayer?.pause()
                     viewModel.shareVideo()
                 }) {
                     Text("Compartir video".uppercased())
@@ -262,6 +255,12 @@ struct ShareVideoView: View {
                 }
                 .opacity(viewModel.isProgressBarVisible ? 0.5 : 1)
                 .disabled(viewModel.isProgressBarVisible)
+                .overlay {
+                    if viewModel.isProgressBarVisible {
+                        ProgressView()
+                            .padding()
+                    }
+                }
                 
                 Button(action: {
                     resetVideoPlayer()
