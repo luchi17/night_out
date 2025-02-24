@@ -203,7 +203,7 @@ struct GenderCheckbox: View {
                     if selectedGender == gender {
                         Circle()
                             .fill(Color.white)
-                            .frame(width: 18, height: 18) // Círculo interno más pequeño para dejar padding
+                            .frame(width: 16, height: 16) // Círculo interno más pequeño para dejar padding
                     }
                 }
                 

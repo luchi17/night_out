@@ -21,7 +21,7 @@ struct HomeView: View {
     private let openTinderPublisher = PassthroughSubject<Void, Never>()
     private let openHubPublisher = PassthroughSubject<Void, Never>()
     
-
+    
     @State private var updateProfileImage: Bool = false
     
     init(
@@ -77,23 +77,21 @@ struct HomeView: View {
                 friendsPresenter: friendsPresenter,
                 updateProfileImage: $updateProfileImage
             )
-                .presentationDetents([.large])
-                .presentationBackground(.regularMaterial)
-                .presentationDragIndicator(.visible)
+            .presentationDetents([.large])
+            .presentationBackground(.regularMaterial)
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $viewModel.showCompanyFirstAlert) {
             HomeCompanySheetView(close: {
                 viewModel.showCompanyFirstAlert = false
             })
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
         .padding(.top, 20)
         .background(
-            Image("fondo_azul")
-                .resizable()
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
         )
         .alert(isPresented: $viewModel.showNighoutAlert) {
             Alert(
@@ -176,7 +174,7 @@ struct HomeView: View {
                 }
             }
             .frame(width: 90)
-           
+            
         }
         .padding(.top, 30)
         .padding(.horizontal, 16)
@@ -247,21 +245,21 @@ struct HomeGenderAlertView: View {
                 }
                 .padding()
             }
-        .transition(.move(edge: .bottom))
-        .shadow(radius: 10)
-        .background(Color.blackColor.opacity(0.7))
-        .frame(width: 300, height: 120)
-        .padding(40)
-        .onChange(of: selectedGender) { oldValue, newValue in
-            dismissWithDelay()
-        }
+            .transition(.opacity)
+            .shadow(radius: 10)
+            .background(Color.blackColor.opacity(0.7))
+            .frame(width: 300, height: 120)
+            .padding(40)
+            .onChange(of: selectedGender) { oldValue, newValue in
+                dismissWithDelay()
+            }
     }
     
     private func dismissWithDelay() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                withAnimation {
-                    isPresented = false
-                }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation {
+                isPresented = false
             }
         }
+    }
 }

@@ -37,7 +37,8 @@ protocol HomePresenter {
 final class HomePresenterImpl: HomePresenter {
     
     struct UseCases {
-        
+//        let userDataUseCase: UserDataUseCase
+        let saveUserUseCase: SaveUserUseCase
     }
     
     struct Actions {
@@ -70,6 +71,10 @@ final class HomePresenterImpl: HomePresenter {
     
     private var cancellables = Set<AnyCancellable>()
     
+    private var myUserModel: UserModel? = {
+        UserDefaults.getUserModel()
+    }()
+    
     init(
         useCases: UseCases,
         actions: Actions,
@@ -91,6 +96,28 @@ final class HomePresenterImpl: HomePresenter {
     }
     
     func transform(input: HomePresenterImpl.ViewInputs) {
+        viewModel
+            .$gender
+            .filter({ $0 != nil })
+            .withUnretained(self)
+            .flatMap { presenter, gender -> AnyPublisher<Bool, Never> in
+                
+                guard var userModel = presenter.myUserModel else {
+                    return Just(false).eraseToAnyPublisher()
+                }
+                
+                userModel.gender = gender?.firebaseTitle
+                return presenter.useCases.saveUserUseCase.execute(model: userModel)
+            }
+            .withUnretained(self)
+            .sink { presenter, saved in
+                if saved {
+                    print("saved")
+                } else {
+                    print("not saved")
+                }
+            }
+            .store(in: &cancellables)
         
         outinput
             .openProfile
@@ -122,9 +149,7 @@ final class HomePresenterImpl: HomePresenter {
             .sink { presenter, _ in
                 if FirebaseServiceImpl.shared.getImUser() {
                     
-                    let myUserModel = UserDefaults.getUserModel()
-                    
-                    if myUserModel?.social?.lowercased() == "no participando" {
+                    if presenter.myUserModel?.social?.lowercased() == "no participando" {
                         
                         presenter.viewModel.showNighoutAlert = true
                         presenter.viewModel.nighoutAlertTitle = "Social NightOut"

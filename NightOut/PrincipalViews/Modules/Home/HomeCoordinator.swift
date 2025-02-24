@@ -25,7 +25,7 @@ class HomeCoordinator {
     @ViewBuilder
     func build() -> some View {
         let presenter = HomePresenterImpl(
-            useCases: .init(),
+            useCases: .init(saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: actions,
             reloadSubject: reloadSubject,
             input: .init(openProfile: showMyProfileSubject.eraseToAnyPublisher())
