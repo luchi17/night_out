@@ -25,6 +25,8 @@ final class HomeViewModel: ObservableObject {
     @Published var nighoutAlertTitle: String = ""
     @Published var nighoutAlertMessage: String = ""
     @Published var nighoutLogo: String = ""
+    @Published var showGenderAlert: Bool = false
+    @Published var gender: Gender?
 }
 
 protocol HomePresenter {
@@ -168,6 +170,10 @@ final class HomePresenterImpl: HomePresenter {
                 }
                 
                 UserDefaults.setIsFirstLoggedIn(false)
+                
+                if presenter.myUserModel?.gender == nil {
+                    presenter.viewModel.showGenderAlert = true
+                }
                 
                 let imUser = FirebaseServiceImpl.shared.getImUser()
                 if imUser {

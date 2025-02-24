@@ -198,12 +198,12 @@ struct GenderCheckbox: View {
                 ZStack {
                     Circle()
                         .stroke(Color.white, lineWidth: 2) // Círculo exterior
-                        .frame(width: 24, height: 24)
+                        .frame(width: 20, height: 20)
                     
                     if selectedGender == gender {
                         Circle()
                             .fill(Color.white)
-                            .frame(width: 20, height: 20) // Círculo interno más pequeño para dejar padding
+                            .frame(width: 18, height: 18) // Círculo interno más pequeño para dejar padding
                     }
                 }
                 

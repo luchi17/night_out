@@ -58,6 +58,16 @@ struct HomeView: View {
                 FeedView(presenter: feedPresenter)
             }
         }
+        .overlay {
+            if viewModel.showGenderAlert {
+                HomeGenderAlertView(
+                    isPresented: $viewModel.showGenderAlert,
+                    selectedGender: $viewModel.gender
+                )
+                
+                Spacer()
+            }
+        }
         .sheet(isPresented: $viewModel.showMyProfile) {
             MyUserProfileView(
                 presenter: userPresenter,
@@ -207,4 +217,51 @@ private extension HomeView {
         )
         presenter.transform(input: input)
     }
+}
+
+
+struct HomeGenderAlertView: View {
+    @Binding var isPresented: Bool
+    @Binding var selectedGender: Gender?
+    
+    var body: some View {
+        
+        Rectangle()
+            .stroke(lineWidth: 1)
+            .foregroundStyle(.blue)
+            .background(Color.blackColor)
+            .overlay {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("¡Vaya! No tenemos registrado tu género.")
+                        .font(.system(size: 16))
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundStyle(.white)
+                    
+                    HStack {
+                        GenderCheckbox(gender: .hombre, selectedGender: $selectedGender)
+                        GenderCheckbox(gender: .mujer, selectedGender: $selectedGender)
+                        
+                        Spacer()
+                    }
+                }
+                .padding()
+            }
+        .transition(.move(edge: .bottom))
+        .shadow(radius: 10)
+        .background(Color.blackColor.opacity(0.7))
+        .frame(width: 300, height: 120)
+        .padding(40)
+        .onChange(of: selectedGender) { oldValue, newValue in
+            dismissWithDelay()
+        }
+    }
+    
+    private func dismissWithDelay() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation {
+                    isPresented = false
+                }
+            }
+        }
 }
