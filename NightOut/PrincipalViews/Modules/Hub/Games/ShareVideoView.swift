@@ -8,10 +8,8 @@ import Combine
 import PhotosUI
 
 class VideoShareViewModel: ObservableObject {
-    private let firestore = Firestore.firestore()
-    private let storage = Storage.storage()
-    private let rrssRef = Database.database().reference().child("rrss")
-    private let storageRef = Storage.storage().reference().child("videos")
+    
+    private let rrssRef = FirebaseServiceImpl.shared.getRrss()
     
     @Published var videoUrl: URL?
     @Published var isProgressBarVisible: Bool = false
@@ -48,8 +46,12 @@ class VideoShareViewModel: ObservableObject {
     }
     
     private func uploadVideoToFirebase(uri: URL) {
+        
         isProgressBarVisible = true
+        
+        let storageRef = Storage.storage().reference().child("videos")
         let videoRef = storageRef.child("\(Int64(Date().timeIntervalSince1970)).mp4")
+        
         let uploadTask = videoRef.putFile(from: uri, metadata: nil)
         
         uploadTask.observe(.success) { _ in
@@ -111,7 +113,7 @@ class VideoShareViewModel: ObservableObject {
 struct ShareVideoView: View {
     
     @ObservedObject private var viewModel = VideoShareViewModel()
-
+    
     @State var videoPlayer: AVPlayer?
     
     var body: some View {
@@ -162,7 +164,7 @@ struct ShareVideoView: View {
             
         }
         .padding()
-        .background(Color.black.edgesIgnoringSafeArea(.all))
+        .background(Color.blackColor.edgesIgnoringSafeArea(.all))
         .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .videos)
         .onChange(of: viewModel.selectedItem) {
             Task {
@@ -222,7 +224,7 @@ struct ShareVideoView: View {
             
             Spacer()
         }
-        .padding(.bottom, 4)
+        .padding(.bottom, 2)
     }
     
     private func bottomView() -> some View {
@@ -270,7 +272,7 @@ struct ShareVideoView: View {
             Spacer()
             
             // Social Media Row
-            VStack {
+            VStack(spacing: 0) {
                 socialMediaRow(iconName: "instagram_icon", platformName: "Instagram")
                 socialMediaRow(iconName: "x_icon", platformName: "X")
                 socialMediaRow(iconName: "tiktok_icon", platformName: "TikTok")
