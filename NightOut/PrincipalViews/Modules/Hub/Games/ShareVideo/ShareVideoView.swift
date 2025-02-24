@@ -1,0 +1,219 @@
+import SwiftUI
+import AVKit
+import Combine
+import PhotosUI
+
+struct ShareVideoView: View {
+    
+    private let shareVideoPublisher = PassthroughSubject<Void, Never>()
+    private let openPickerPublisher = PassthroughSubject<Void, Never>()
+    
+    @ObservedObject private var viewModel: VideoShareViewModel
+    
+    @State var videoPlayer: AVPlayer?
+    
+//    uploadTask.observe(.progress) { snapshot in
+//        let percentComplete = Double(snapshot.progress?.completedUnitCount ?? 0) / Double(snapshot.progress?.totalUnitCount ?? 1)
+//        DispatchQueue.main.async {
+//            self.uploadProgress = percentComplete
+//        }
+//    }
+    
+    let presenter: ShareVideoPresenter
+
+    init(presenter: ShareVideoPresenter) {
+        self.presenter = presenter
+        self.viewModel = presenter.viewModel
+        bindViewModel()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            
+            shareTitle()
+            
+            Spacer()
+            
+            ZStack {
+                Rectangle()
+                    .stroke(style: StrokeStyle(lineWidth: 3, dash: [12]))
+                    .foregroundStyle(Color.grayColor)
+                    .frame(height: 350)
+                    .cornerRadius(8)
+                
+                if let player = videoPlayer {
+                    VideoPlayer(player: player)
+                        .frame(height: 350)
+                        .cornerRadius(8)
+                } else {
+                    if viewModel.loadingVideo {
+                        ProgressView()
+                    } else {
+                        Button(action: {
+                            openPickerPublisher.send()
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .stroke(lineWidth: 2)
+                                    .foregroundStyle(.white)
+                                    .frame(width: 45, height: 45)
+                                    .shadow(radius: 4)
+                                
+                                Image(systemName: "plus")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 25, height: 25)
+                                    .foregroundColor(.white)
+                            }
+                        }
+                    }
+                    
+                }
+            }
+            
+            bottomView()
+            
+        }
+        .padding()
+        .background(Color.blackColor.edgesIgnoringSafeArea(.all))
+        .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .videos)
+        .onChange(of: viewModel.selectedItem) {
+            Task {
+                if let selectedItem = viewModel.selectedItem {
+                    self.viewModel.loadingVideo = true
+                    
+                    if let movie = try await viewModel.selectedItem?.loadTransferable(type: Movie.self) {
+                        self.viewModel.loadingVideo = false
+                        self.viewModel.videoUrl = movie.url
+                        self.videoPlayer = AVPlayer(url: movie.url)
+                        self.videoPlayer?.play()
+                    }
+                }
+            }
+        }
+        .onChange(of: viewModel.shouldResetVideoPlayer) {
+            if viewModel.shouldResetVideoPlayer {
+                self.resetVideoPlayer()
+            }
+        }
+        .alert("Permiso requerido", isPresented: $viewModel.showPermissionAlert) {
+            Button("Abrir Configuración") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("Cancelar", role: .cancel) { }
+        } message: {
+            Text("Esta aplicación necesita acceso a tu galería para seleccionar videos.")
+        }
+        .showToast(
+            error: (
+                type: viewModel.toast,
+                showCloseButton: false,
+                onDismiss: {
+                    viewModel.toast = nil
+                }
+            ),
+            isIdle: false,
+            extraPadding: .none
+        )
+    }
+    
+    private func shareTitle() -> some View {
+        Text("Comparte tu video y podrás salir en nuestras redes sociales.")
+            .font(.system(size: 19, weight: .regular))
+            .foregroundColor(.white)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, 10)
+    }
+    
+    
+    private func socialMediaRow(iconName: String, platformName: String) -> some View {
+        HStack {
+            Image(iconName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 48, height: 48)
+                .foregroundColor(.white)
+            
+            Text(platformName)
+                .foregroundColor(.white)
+                .font(.subheadline)
+            
+            Spacer()
+        }
+        .padding(.bottom, 2)
+    }
+    
+    private func bottomView() -> some View {
+        VStack {
+            
+            Spacer()
+            
+            HStack(spacing: 10) {
+                Spacer()
+                
+                Button(action: {
+                    videoPlayer?.pause()
+                    shareVideoPublisher.send()
+                }) {
+                    Text("Compartir video".uppercased())
+                        .font(.system(size: 18, weight: .bold))
+                        .padding(.vertical, 8)
+                        .padding(.horizontal)
+                        .background(Color.grayColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
+                }
+                .opacity(viewModel.isProgressBarVisible ? 0.5 : 1)
+                .disabled(viewModel.isProgressBarVisible)
+                .overlay {
+                    if viewModel.isProgressBarVisible {
+                        ProgressView()
+                            .padding()
+                    }
+                }
+                
+                Button(action: {
+                    resetVideoPlayer()
+                }) {
+                    Image(systemName: "xmark") // Icono de cerrar estándar
+                        .font(.system(size: 25, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                
+                Spacer()
+            }
+            
+            Spacer()
+            
+            // Social Media Row
+            VStack(spacing: 0) {
+                socialMediaRow(iconName: "instagram_icon", platformName: "Instagram")
+                socialMediaRow(iconName: "x_icon", platformName: "X")
+                socialMediaRow(iconName: "tiktok_icon", platformName: "TikTok")
+            }
+        }
+    }
+    
+    func resetVideoPlayer() {
+        print("resetVideoPlayer")
+        videoPlayer?.pause()
+        viewModel.videoUrl = nil
+        viewModel.selectedItem = nil
+        viewModel.loadingVideo = false
+        videoPlayer = nil
+    }
+}
+
+private extension ShareVideoView {
+    func bindViewModel() {
+        let input = ShareVideoPresenterImpl.ViewInputs(
+            shareVideo: shareVideoPublisher.eraseToAnyPublisher(),
+            openPicker: openPickerPublisher.eraseToAnyPublisher()
+        )
+        presenter.transform(input: input)
+    }
+}
+
