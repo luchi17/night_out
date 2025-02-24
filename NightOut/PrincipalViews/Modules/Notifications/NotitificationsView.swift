@@ -68,7 +68,7 @@ struct NotificationsView: View {
             ),
             isIdle: viewModel.loading
         )
-        .background(Color.black.opacity(0.7))
+        .background(Color.blackColor.opacity(0.7))
         .onAppear {
             viewDidLoadPublisher.send()
         }

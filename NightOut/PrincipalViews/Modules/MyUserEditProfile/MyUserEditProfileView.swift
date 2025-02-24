@@ -104,7 +104,7 @@ struct MyUserEditProfileView: View {
         .padding(.horizontal, 20)
         .padding(.top, 16)
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .sheet(isPresented: $showGenderSheet) {
@@ -377,7 +377,7 @@ struct GenderPicker: View {
         VStack(spacing: 15) {
             Text("Selecciona tu género")
                 .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(.blackColor)
                 .padding(.top, 8)
             
             Button(action: {

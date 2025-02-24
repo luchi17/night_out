@@ -42,7 +42,7 @@ struct FriendsView: View {
             Spacer()
         }
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .applyStates(error: nil, isIdle: viewModel.loading)
@@ -86,7 +86,7 @@ struct FriendRow: View {
             Spacer()
         }
         .padding()
-        .background(Color.black.opacity(0.6)) // Fondo oscuro para cada fila
+        .background(Color.blackColor)
         .cornerRadius(10)
     }
 }

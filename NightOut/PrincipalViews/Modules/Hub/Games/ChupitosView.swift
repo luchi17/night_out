@@ -179,7 +179,7 @@ struct ChupitoWarsView: View {
     }
     
     var chupitoInitIconView: some View {
-        Color.black
+        Color.blackColor
             .opacity(0.8)
             .edgesIgnoringSafeArea(.all)
             .overlay {
@@ -526,7 +526,7 @@ struct ChupitoView: View {
         ZStack {
             // Fondo semi-transparente
             if showChupito {
-                Color.black.opacity(0.3)
+                Color.blackColor.opacity(0.3)
                     .edgesIgnoringSafeArea(.all)
                     .transition(.opacity)
                     .zIndex(1)

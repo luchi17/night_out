@@ -35,7 +35,7 @@ public extension View {
         self
             .navigationBarBackButtonHidden(true)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.black, for: .navigationBar)
+            .toolbarBackground(Color.blackColor, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

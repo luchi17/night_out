@@ -66,7 +66,7 @@ struct ForgotPasswordView: View, Hashable {
         }
         .padding(.horizontal, 20)
         .background(
-            Color.black
+            Color.blackColor
         )
         .showToast(
             error: (

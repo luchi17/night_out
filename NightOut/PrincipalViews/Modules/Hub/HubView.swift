@@ -26,7 +26,8 @@ struct HubView: View {
     var body: some View {
         ZStack {
             
-            Color.black
+            Color.blackColor
+                .edgesIgnoringSafeArea(.all)
             
             if viewModel.selectedGame != nil {
                 

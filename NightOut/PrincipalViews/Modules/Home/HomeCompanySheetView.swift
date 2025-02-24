@@ -41,7 +41,7 @@ struct HomeCompanySheetView: View {
         }
         .padding(.all, 12)
         .background(
-            Color.black
+            Color.blackColor
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         )
     }

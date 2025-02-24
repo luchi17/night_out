@@ -92,7 +92,7 @@ struct LoginView: View, Hashable {
         }
         .padding(.horizontal, 20)
         .background(
-            Color.black
+            Color.blackColor
         )
         .alert(isPresented: $showRegisterAlert) {
             Alert(

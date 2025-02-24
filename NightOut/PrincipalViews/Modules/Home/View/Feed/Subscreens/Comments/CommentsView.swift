@@ -28,7 +28,7 @@ struct CommentsView: View {
                     
                     if viewModel.comments.isEmpty {
                         Spacer()
-                            .background(Color.black.opacity(0.9))
+                            .background(Color.blackColor)
                     }
                     
                     VStack(alignment: .leading) {
@@ -61,7 +61,8 @@ struct CommentsView: View {
             bottomView
             
         }
-        .background(Color.black.opacity(0.9))
+        .padding()
+        .background(Color.blackColor)
         .showToast(
             error: (
                 type: viewModel.toastError,
@@ -91,7 +92,7 @@ struct CommentsView: View {
                 .foregroundColor(.white)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.black))
+                .background(Color.blackColor)
             
             if let postImage = viewModel.postImage {
                 Image(uiImage: postImage)
@@ -142,7 +143,7 @@ struct CommentsView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 10)
                     .frame(height: 40)
-                    .background(Color.black)
+                    .background(Color.blackColor)
                     .cornerRadius(8)
             }
             .padding(.trailing, 10)

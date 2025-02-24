@@ -76,7 +76,7 @@ struct MyUserCompanySettingsView: View {
             .padding(.all, 20)
         }
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .sheet(

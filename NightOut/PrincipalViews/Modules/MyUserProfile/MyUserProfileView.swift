@@ -110,7 +110,7 @@ struct MyUserProfileView: View {
             
         }
         .background(
-            Color.black
+            Color.blackColor
         )
         .sheet(isPresented: $showShareSheet) {
             if let currentId = FirebaseServiceImpl.shared.getCurrentUserUid() {

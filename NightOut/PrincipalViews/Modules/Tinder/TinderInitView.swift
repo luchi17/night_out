@@ -14,7 +14,7 @@ struct TinderInitView: View {
     
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
+            Color.blackColor.edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 20) {
                 
@@ -94,12 +94,12 @@ struct TinderGridItemView: View {
                 Spacer()
             }
             .frame(height: 50)
-            .background(Color.black)
+            .background(Color.blackColor)
             .padding(.horizontal)
             
             Text(text)
                 .font(.system(size: 14))
-                .foregroundColor(.black)
+                .foregroundColor(.blackColor)
                 .multilineTextAlignment(.center)
                 .padding(8)
                 .frame(maxWidth: .infinity, minHeight: 80)

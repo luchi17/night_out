@@ -45,7 +45,7 @@ struct PostDetailView: View {
             
         }
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .onAppear {

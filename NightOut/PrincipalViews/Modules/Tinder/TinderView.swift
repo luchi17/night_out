@@ -24,7 +24,7 @@ struct TinderView: View {
     var body: some View {
         ZStack {
             if showInitSheet || viewModel.showAlert {
-                Color.black
+                Color.blackColor
                     .edgesIgnoringSafeArea(.all)
             } else {
                 
@@ -67,7 +67,7 @@ struct TinderView: View {
             }
         }
         .background(
-            Color.black
+            Color.blackColor
         )
         .if(viewModel.showNoUsersForClub, transform: { view in
             noUsersView
@@ -76,7 +76,7 @@ struct TinderView: View {
             endView
         })
         .if(viewModel.loadingAssistance, transform: { view in
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
                 .overlay {
                     
@@ -191,7 +191,7 @@ struct TinderLoadingUsersView: View {
         if isLoading {
             ZStack {
                 // Fondo semitransparente
-                Color.black.opacity(0.8)
+                Color.blackColor.opacity(0.8)
                     .edgesIgnoringSafeArea(.all)
                 
                 // Imagen de carga

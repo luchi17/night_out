@@ -41,7 +41,7 @@ struct FullScreenImageView: View {
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.blackColor.ignoresSafeArea()
             
             Image(uiImage: imageName.image)
                 .resizable()

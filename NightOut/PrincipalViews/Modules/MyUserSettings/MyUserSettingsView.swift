@@ -105,7 +105,7 @@ struct MyUserSettingsView: View {
             .padding(20)
         }
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .alert(isPresented: $viewModel.showAlertMessage) {

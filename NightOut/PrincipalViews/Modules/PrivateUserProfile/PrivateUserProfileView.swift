@@ -58,7 +58,7 @@ struct PrivateUserProfileView: View {
             
         }
         .padding()
-        .background(Color.black.opacity(0.9))
+        .background(Color.blackColor)
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -82,7 +82,7 @@ struct PrivateUserProfileView: View {
             Text(viewModel.buttonTitle)
                 .font(.system(size: 18))
                 .padding(.all, 12)
-                .background(RoundedRectangle(cornerRadius: 10).fill(Color.black))
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.blackColor))
                 .foregroundColor(.white)
         }
         .padding(.top, 16)

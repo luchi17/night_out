@@ -56,7 +56,7 @@ struct ChatView: View {
             bottomView
             
         }
-        .background(Color.black)
+        .background(Color.blackColor)
         .showCustomNavBar(
             title: viewModel.otherUsername,
             goBack: goBackPublisher.send
@@ -126,7 +126,7 @@ struct MessageBubble: View {
             Text(message.message)
                 .padding(.all, 8)
                 .background(isFromCurrentUser ? Color.blue : Color.white)
-                .foregroundColor(isFromCurrentUser ? Color.white : Color.black)
+                .foregroundColor(isFromCurrentUser ? Color.white : Color.blackColor)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             if !isFromCurrentUser { Spacer() }
         }

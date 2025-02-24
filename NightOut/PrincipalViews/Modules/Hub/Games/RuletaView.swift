@@ -93,7 +93,7 @@ struct RuletaView: View {
     }
     
     var initIconView: some View {
-        Color.black
+        Color.blackColor
             .opacity(0.8)
             .edgesIgnoringSafeArea(.all)
             .overlay {
@@ -137,7 +137,7 @@ struct RuletaSubview: View {
             ZStack {
                 // Círculo de la ruleta
                 Circle()
-                    .fill(Color.black.opacity(0.7))
+                    .fill(Color.blackColor.opacity(0.8))
                     .frame(width: 2 * radius, height: 2 * radius)
                     .overlay(Circle().stroke(Color.white, lineWidth: strokeWidth))
                 

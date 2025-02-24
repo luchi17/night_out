@@ -72,7 +72,7 @@ struct FriendRequestNotificationView: View {
             }
         }
         .padding(.all, 10)
-        .background(Color.black.opacity(0.5))
+        .background(Color.blackColor.opacity(0.5))
         .cornerRadius(10)
     }
 }
@@ -128,7 +128,7 @@ struct DefaultNotificationView: View {
             }
         }
         .padding(.all, 10)
-        .background(Color.black.opacity(0.5)) // Agregar un fondo oscuro para resaltar el contenido
+        .background(Color.blackColor.opacity(0.5)) // Agregar un fondo oscuro para resaltar el contenido
         .cornerRadius(10)
     }
 }

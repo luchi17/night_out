@@ -69,7 +69,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
             }
             .padding()
-            .background(Color(.black))
+            .background(Color.blackColor)
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea(.keyboard, edges: .bottom)

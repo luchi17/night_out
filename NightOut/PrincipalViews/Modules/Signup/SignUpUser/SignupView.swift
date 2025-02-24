@@ -87,7 +87,7 @@ struct SignupView: View {
         }
         .padding(.horizontal, 20)
         .background(
-            Color.black
+            Color.blackColor
         )
         .showToast(
             error: (

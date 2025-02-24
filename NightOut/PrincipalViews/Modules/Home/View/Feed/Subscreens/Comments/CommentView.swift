@@ -49,8 +49,8 @@ struct CommentView: View  {
         }
         .padding(.vertical, 5)
         .cornerRadius(10)
-        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
+        .shadow(color: Color.blackColor.opacity(0.2), radius: 5, x: 0, y: 2)
         .padding(.horizontal, 10)
-        .background(Color.black.opacity(0.9))
+        .background(Color.blackColor)
     }
 }

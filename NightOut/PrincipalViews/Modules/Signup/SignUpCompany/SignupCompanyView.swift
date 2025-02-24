@@ -97,7 +97,7 @@ struct SignupCompanyView: View {
         }
         .padding(.horizontal, 20)
         .background(
-            Color.black
+            Color.blackColor
         )
         .sheet(
             isPresented: $showLocation,

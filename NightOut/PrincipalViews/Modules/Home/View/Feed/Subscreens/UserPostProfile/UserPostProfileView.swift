@@ -24,7 +24,7 @@ struct UserPostProfileView: View {
     
     var body: some View {
         ZStack {
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
             VStack(spacing: 0) {
                 // Imagen de perfil
