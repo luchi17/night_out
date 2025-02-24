@@ -8,7 +8,6 @@ import PhotosUI
 class VideoShareViewModel: ObservableObject {
     
     @Published var videoUrl: URL?
-    @Published var isProgressBarVisible: Bool = false
     @Published var toast: ToastType?
     
     @Published var openPicker: Bool = false
@@ -17,6 +16,9 @@ class VideoShareViewModel: ObservableObject {
     @Published var selectedItem: PhotosPickerItem?
     @Published var loadingVideo: Bool = false
     @Published var shouldResetVideoPlayer: Bool = false
+    
+    @Published var uploadProgress: Double = 0.0
+    @Published var isProgressBarVisible: Bool = false
     
 }
 
@@ -35,7 +37,6 @@ final class ShareVideoPresenterImpl: ShareVideoPresenter {
     var viewModel: VideoShareViewModel
     
     private var cancellables = Set<AnyCancellable>()
-    
     
     private let rrssRef = FirebaseServiceImpl.shared.getRrss()
     
@@ -89,55 +90,101 @@ final class ShareVideoPresenterImpl: ShareVideoPresenter {
     }
     
     private func uploadVideoToFirebase(uri: URL) {
+        
         viewModel.isProgressBarVisible = true
 
-        let storageRef = Storage.storage().reference().child("videos")
-        let videoRef = storageRef.child("\(Int64(Date().timeIntervalSince1970)).mp4")
+        Task {
+            let storageRef = Storage.storage().reference().child("videos")
+            let videoRef = storageRef.child("\(Int64(Date().timeIntervalSince1970)).mp4")
 
-        do {
-            let videoData = try Data(contentsOf: uri) // Convierte el video en Data
-            let uploadTask = videoRef.putData(videoData, metadata: nil)
+            do {
+                // ⚡️ Leer el video en segundo plano para no congelar la UI
+                let videoData = try await loadVideoData(from: uri)
 
-            uploadTask.observe(.success) { [weak self] _ in
+                // 🔄 Subir el video en segundo plano sin afectar la UI
+                try await uploadData(videoRef: videoRef, videoData: videoData)
+
+                // Obtener la URL de descarga
+                let downloadUrl = try await getDownloadURL(videoRef: videoRef)
+
+                // Guardar la URL en Firebase Database
+                let videoUrl = ["videoUrl": downloadUrl.absoluteString]
+
+                try await rrssRef.childByAutoId().setValue(videoUrl)
                 
-                guard let self = self else { return }
-                
-                videoRef.downloadURL { url, error in
-                    guard let downloadUrl = url else {
-                        self.viewModel.toast = .custom(.init(title: "", description: "Error al subir el video.", image: nil))
-                        self.viewModel.isProgressBarVisible = false
-                        self.deleteVideo()
-                        return
-                    }
+                updateUIAfterUpload(success: true)
 
-                    let videoData = ["videoUrl": downloadUrl.absoluteString]
-                    self.rrssRef.childByAutoId().setValue(videoData) { error, _ in
-                        self.viewModel.toast = error == nil ?
-                            .success(.init(title: "", description: "Video subido exitosamente.", image: nil)) :
-                            .custom(.init(title: "", description: "Error al guardar los datos.", image: nil))
-                        
-                        self.viewModel.isProgressBarVisible = false
-                        self.deleteVideo()
-                    }
+            } catch {
+                
+               updateUIAfterUpload(success: false)
+            }
+        }
+    }
+    
+    private func updateUIAfterUpload(success: Bool) {
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.toast = success ?
+                .success(.init(title: "", description: "Video subido exitosamente.", image: nil)) :
+                .custom(.init(title: "", description: "Error al subir el video.", image: nil))
+            
+            self?.deleteVideo()
+        }
+    }
+
+    // 📌 Cargar el video en un hilo de fondo
+    private func loadVideoData(from url: URL) async throws -> Data {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    let data = try Data(contentsOf: url)
+                    continuation.resume(returning: data)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    // MARK: - Función para subir el video con `async/await`
+    private func uploadData(videoRef: StorageReference, videoData: Data) async throws {
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "video/mp4"
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let uploadTask = videoRef.putData(videoData, metadata: metadata) { _, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
                 }
             }
 
-            uploadTask.observe(.failure) { [weak self] _ in
-                self?.viewModel.toast = .custom(.init(title: "", description: "Error al subir el video.", image: nil))
-                self?.viewModel.isProgressBarVisible = false
-                self?.deleteVideo()
+            uploadTask.observe(.progress) { [weak self] snapshot in
+                let percentComplete = Double(snapshot.progress?.completedUnitCount ?? 0) / Double(snapshot.progress?.totalUnitCount ?? 1)
+                
+                self?.viewModel.uploadProgress = percentComplete
+                print("Subida: \(percentComplete)% completado")
             }
+        }
+    }
 
-        } catch {
-            print("Error al leer el video como Data: \(error.localizedDescription)")
-            self.viewModel.toast = .custom(.init(title: "", description: "Error al procesar el video.", image: nil))
-            self.viewModel.isProgressBarVisible = false
-            self.deleteVideo()
+    // MARK: - Función para obtener la URL de descarga con `async/await`
+    private func getDownloadURL(videoRef: StorageReference) async throws -> URL {
+        return try await withCheckedThrowingContinuation { continuation in
+            videoRef.downloadURL { url, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let url = url {
+                    continuation.resume(returning: url)
+                }
+            }
         }
     }
     
     private func deleteVideo() {
         DispatchQueue.main.async { [weak self] in
+            self?.viewModel.isProgressBarVisible = false
             self?.viewModel.selectedItem = nil
             self?.viewModel.videoUrl = nil
             self?.viewModel.shouldResetVideoPlayer = true

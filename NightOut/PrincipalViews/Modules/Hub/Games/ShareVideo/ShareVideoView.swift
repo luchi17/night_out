@@ -12,15 +12,8 @@ struct ShareVideoView: View {
     
     @State var videoPlayer: AVPlayer?
     
-//    uploadTask.observe(.progress) { snapshot in
-//        let percentComplete = Double(snapshot.progress?.completedUnitCount ?? 0) / Double(snapshot.progress?.totalUnitCount ?? 1)
-//        DispatchQueue.main.async {
-//            self.uploadProgress = percentComplete
-//        }
-//    }
-    
     let presenter: ShareVideoPresenter
-
+    
     init(presenter: ShareVideoPresenter) {
         self.presenter = presenter
         self.viewModel = presenter.viewModel
@@ -42,9 +35,22 @@ struct ShareVideoView: View {
                     .cornerRadius(8)
                 
                 if let player = videoPlayer {
-                    VideoPlayer(player: player)
-                        .frame(height: 350)
-                        .cornerRadius(8)
+                    
+                    if viewModel.isProgressBarVisible {
+                        VStack {
+                            ProgressView(value: viewModel.uploadProgress)
+                                .progressViewStyle(LinearProgressViewStyle())
+                                .tint(.yellow)
+                                .padding()
+                            Text("\(Int(viewModel.uploadProgress * 100))% completado")
+                                .foregroundStyle(Color.white)
+                                .font(.caption)
+                        }
+                    } else {
+                        VideoPlayer(player: player)
+                            .frame(height: 350)
+                            .cornerRadius(8)
+                    }
                 } else {
                     if viewModel.loadingVideo {
                         ProgressView()
@@ -67,14 +73,13 @@ struct ShareVideoView: View {
                             }
                         }
                     }
-                    
                 }
             }
             
             bottomView()
             
         }
-        .padding()
+        .padding([.horizontal, .bottom])
         .background(Color.blackColor.edgesIgnoringSafeArea(.all))
         .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .videos)
         .onChange(of: viewModel.selectedItem) {
@@ -82,17 +87,13 @@ struct ShareVideoView: View {
                 if let selectedItem = viewModel.selectedItem {
                     self.viewModel.loadingVideo = true
                     
-                    if let movie = try await viewModel.selectedItem?.loadTransferable(type: Movie.self) {
+                    if let movie = try await selectedItem.loadTransferable(type: Movie.self) {
                         self.viewModel.loadingVideo = false
                         self.viewModel.videoUrl = movie.url
                         self.videoPlayer = AVPlayer(url: movie.url)
                         self.videoPlayer?.play()
                     }
                 }
-//                else {
-//                    print("selectedItem nil")
-//                    resetVideoPlayer()
-//                }
             }
         }
         .onChange(of: viewModel.shouldResetVideoPlayer) {
@@ -119,17 +120,18 @@ struct ShareVideoView: View {
                 }
             ),
             isIdle: false,
-            extraPadding: .none
+            extraPadding: .none,
+            showAnimation: false
         )
     }
     
     private func shareTitle() -> some View {
         Text("Comparte tu video y podrás salir en nuestras redes sociales.")
-            .font(.system(size: 19, weight: .regular))
+            .font(.system(size: 18, weight: .regular))
             .foregroundColor(.white)
             .multilineTextAlignment(.leading)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 10)
+            .padding(.vertical, 10)
     }
     
     
@@ -172,28 +174,22 @@ struct ShareVideoView: View {
                 }
                 .opacity(viewModel.isProgressBarVisible ? 0.5 : 1)
                 .disabled(viewModel.isProgressBarVisible)
-                .overlay {
-                    if viewModel.isProgressBarVisible {
-                        ProgressView()
-                            .padding()
-                    }
-                }
                 
                 Button(action: {
                     videoPlayer?.pause()
                     resetVideoPlayer()
                 }) {
-                    Image(systemName: "xmark") // Icono de cerrar estándar
+                    Image(systemName: "xmark")
                         .font(.system(size: 25, weight: .bold))
                         .foregroundStyle(.white)
                 }
                 
                 Spacer()
             }
+            .padding(.top)
             
             Spacer()
             
-            // Social Media Row
             VStack(spacing: 0) {
                 socialMediaRow(iconName: "instagram_icon", platformName: "Instagram")
                 socialMediaRow(iconName: "x_icon", platformName: "X")
