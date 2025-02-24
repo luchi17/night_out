@@ -196,13 +196,12 @@ final class HomePresenterImpl: HomePresenter {
                 
                 UserDefaults.setIsFirstLoggedIn(false)
                 
-                if presenter.myUserModel?.gender == nil {
-                    presenter.viewModel.showGenderAlert = true
-                }
-                
                 let imUser = FirebaseServiceImpl.shared.getImUser()
                 if imUser {
                     presenter.viewModel.profileImageUrl =  UserDefaults.getUserModel()?.image
+                    if presenter.myUserModel?.gender == nil {
+                        presenter.viewModel.showGenderAlert = true
+                    }
                 } else {
                     presenter.viewModel.profileImageUrl =  UserDefaults.getCompanyUserModel()?.imageUrl
                 }
