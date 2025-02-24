@@ -89,6 +89,10 @@ struct ShareVideoView: View {
                         self.videoPlayer?.play()
                     }
                 }
+//                else {
+//                    print("selectedItem nil")
+//                    resetVideoPlayer()
+//                }
             }
         }
         .onChange(of: viewModel.shouldResetVideoPlayer) {
@@ -176,6 +180,7 @@ struct ShareVideoView: View {
                 }
                 
                 Button(action: {
+                    videoPlayer?.pause()
                     resetVideoPlayer()
                 }) {
                     Image(systemName: "xmark") // Icono de cerrar estándar

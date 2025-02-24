@@ -137,8 +137,10 @@ final class ShareVideoPresenterImpl: ShareVideoPresenter {
     }
     
     private func deleteVideo() {
-        viewModel.selectedItem = nil
-        viewModel.videoUrl = nil
-        viewModel.shouldResetVideoPlayer = true
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.selectedItem = nil
+            self?.viewModel.videoUrl = nil
+            self?.viewModel.shouldResetVideoPlayer = true
+        }
     }
 }
