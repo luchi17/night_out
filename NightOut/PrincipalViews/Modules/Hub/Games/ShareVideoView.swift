@@ -112,9 +112,13 @@ class VideoShareViewModel: ObservableObject {
 
 struct ShareVideoView: View {
     
-    @ObservedObject private var viewModel = VideoShareViewModel()
+    @ObservedObject private var viewModel: VideoShareViewModel
     
     @State var videoPlayer: AVPlayer?
+    
+    init(viewModel: VideoShareViewModel) {
+        self.viewModel = viewModel
+    }
     
     var body: some View {
         VStack(alignment: .leading) {

@@ -9,6 +9,8 @@ struct HubView: View {
     private let openUrlPublisher = PassthroughSubject<String, Never>()
     
     @ObservedObject var viewModel: HubViewModel
+    @ObservedObject var shareVideoModel: VideoShareViewModel
+    
     @ObservedObject private var keyboardObserver = KeyboardObserver()
     
     let presenter: HubPresenter
@@ -20,6 +22,8 @@ struct HubView: View {
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
+        shareVideoModel = VideoShareViewModel()
+        
         bindViewModel()
     }
     
@@ -130,7 +134,7 @@ struct HubView: View {
             } else if viewModel.selectedGame == .ruleta {
                 RuletaView()
             } else if viewModel.selectedGame == .publicamosTuVideo {
-                ShareVideoView()
+                ShareVideoView(viewModel: shareVideoModel)
             }
         }
     }
