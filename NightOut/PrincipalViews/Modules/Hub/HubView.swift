@@ -77,7 +77,6 @@ struct HubView: View {
                     self.dragOffset = value.translation
                 }
                 .onEnded { value in
-                    print(self.dragOffset.height)
                     if self.dragOffset.height > 100 {
                         // Si el usuario desliza suficientemente hacia abajo, volver a la lista
                         self.viewModel.selectedGame = nil
