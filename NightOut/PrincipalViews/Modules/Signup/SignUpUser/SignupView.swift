@@ -25,7 +25,7 @@ struct SignupView: View {
             
             Spacer()
             
-            Image("nightout")
+            Image("n_logo")
                 .resizable()
                 .scaledToFit()
                 .frame(height: 90)
