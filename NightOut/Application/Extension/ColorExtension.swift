@@ -33,6 +33,7 @@ extension Color {
 
     static let blackColor = Color(hex: "#141414")
     static let grayColor = Color(hex: "#414141")
+    static let darkBlueColor = Color(hex: "#011231")
 }
                  
                  
