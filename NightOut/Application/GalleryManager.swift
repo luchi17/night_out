@@ -5,26 +5,30 @@ import PhotosUI
 class GalleryManager: NSObject, ObservableObject {
     
     public static let shared = GalleryManager()
+
+    override init() {
+        super.init()
+    }
     
-    @Published var hasPermission = false // Variable para permisos
-    
-     func checkPermissionsAndOpenPicker() {
+    func checkPermissionsAndOpenPicker(completion: @escaping (Bool) -> ()) {
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         switch status {
         case .authorized, .limited:
-            hasPermission = true
+            completion(true)
         case .notDetermined:
-            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] newStatus in
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { newStatus in
                 DispatchQueue.main.async {
                     if newStatus == .authorized || newStatus == .limited {
-                        self?.hasPermission = true
+                        completion(true)
+                       
                     } else {
-                        self?.hasPermission = false
+                        completion(false)
+                       
                     }
                 }
             }
         case .denied, .restricted:
-            hasPermission = false
+            completion(false)
         @unknown default:
             break
         }

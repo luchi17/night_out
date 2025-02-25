@@ -58,12 +58,9 @@ final class ShareVideoPresenterImpl: ShareVideoPresenter {
             .openPicker
             .withUnretained(self)
             .sink { presenter, _ in
-                GalleryManager.shared.checkPermissionsAndOpenPicker()
-                if GalleryManager.shared.hasPermission {
-                    presenter.viewModel.openPicker = true
-                } else {
-                    presenter.viewModel.openPicker = false
-                    presenter.viewModel.showPermissionAlert = true
+                GalleryManager.shared.checkPermissionsAndOpenPicker() { hasPermission in
+                    presenter.viewModel.openPicker = hasPermission
+                    presenter.viewModel.showPermissionAlert = !hasPermission
                 }
             }
             .store(in: &cancellables)
