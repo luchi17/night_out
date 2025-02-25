@@ -15,6 +15,7 @@
 		187F20402CD93A04005469B5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 187F203F2CD93A04005469B5 /* FirebaseStorage */; };
 		188167DA2D57808F005E7785 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 188167D92D57808F005E7785 /* GoogleService-Info.plist */; };
 		188169392D58E90A005E7785 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 188169382D58E90A005E7785 /* FirebaseMessaging */; };
+		18CBFCC32D6E33C7008C1C5D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18CBFCC22D6E33C7008C1C5D /* LaunchScreen.storyboard */; };
 		18E175F22CB6893E00E3CA07 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F12CB6893E00E3CA07 /* FirebaseDatabase */; };
 		18E175F72CB6991A00E3CA07 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F62CB6991A00E3CA07 /* GoogleSignIn */; };
 		18E175F92CB6991A00E3CA07 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F82CB6991A00E3CA07 /* GoogleSignInSwift */; };
@@ -42,6 +43,7 @@
 		18AE85FA2CA6A900007448F3 /* NightOut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NightOut.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AE860A2CA6A903007448F3 /* NightOutTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AE86142CA6A903007448F3 /* NightOutUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NightOutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		18CBFCC22D6E33C7008C1C5D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -144,6 +146,7 @@
 		18AE85F12CA6A900007448F3 = {
 			isa = PBXGroup;
 			children = (
+				18CBFCC22D6E33C7008C1C5D /* LaunchScreen.storyboard */,
 				188167D92D57808F005E7785 /* GoogleService-Info.plist */,
 				18AE85FC2CA6A900007448F3 /* NightOut */,
 				18AE86272CA6AC23007448F3 /* Tests */,
@@ -293,6 +296,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				188167DA2D57808F005E7785 /* GoogleService-Info.plist in Resources */,
+				18CBFCC32D6E33C7008C1C5D /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -486,9 +490,11 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Se necesita acceso a la cámara para capturar fotos";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show nearby discotecas";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Necesitamos acceso a tu galería.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -528,9 +534,11 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Se necesita acceso a la cámara para capturar fotos";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show nearby discotecas";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Necesitamos acceso a tu galería.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
