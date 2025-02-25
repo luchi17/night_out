@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import PhotosUI
+import SwiftUI
 
 class GalleryManager: NSObject, ObservableObject {
     
@@ -32,5 +33,24 @@ class GalleryManager: NSObject, ObservableObject {
         @unknown default:
             break
         }
+    }
+}
+
+public extension View {
+    
+    @ViewBuilder
+    func showGalleryPermissionAlert(show: Binding<Bool>) -> some View {
+        self
+            .alert("Permiso requerido", isPresented: show) {
+                Button("Abrir Configuración") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("Cancelar", role: .cancel) { }
+            } message: {
+                Text("Esta aplicación necesita acceso a tu galería para seleccionar videos.")
+            }
+        
     }
 }

@@ -12,12 +12,11 @@ struct ImagePickerView<Content: View>: View {
     var body: some View {
         VStack {
             PhotosPicker(
+                "Holi",
                 selection: $selectedItem,
                 matching: .images,
-                photoLibrary: .shared()) {
-                    content()
-                   
-                }
+                photoLibrary: .shared()
+            )
                 .onChange(of: selectedItem) { _, newItem in
                     Task {
                         if let newItem = newItem {
@@ -32,3 +31,4 @@ struct ImagePickerView<Content: View>: View {
         }
     }
 }
+

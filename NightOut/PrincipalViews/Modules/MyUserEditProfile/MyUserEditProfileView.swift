@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import PhotosUI
 
 struct MyUserEditProfileView: View {
     
@@ -16,6 +17,7 @@ struct MyUserEditProfileView: View {
     private let saveInfoPublisher = PassthroughSubject<Void, Never>()
     private let logoutPublisher = PassthroughSubject<Void, Never>()
     private let confirmDeleteAccountPublisher = PassthroughSubject<Void, Never>()
+    private let openPickerPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: MyUserEditProfileViewModel
     let presenter: MyUserEditProfilePresenter
@@ -123,6 +125,19 @@ struct MyUserEditProfileView: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
+        .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .images)
+        .onChange(of: viewModel.selectedItem) { _, newItem in
+            Task {
+                if let newItem = newItem {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        viewModel.imageData = data
+                        viewModel.selectedImage = uiImage
+                    }
+                }
+            }
+        }
+        .showGalleryPermissionAlert(show: $viewModel.showPermissionAlert)
         .alert(isPresented: $viewModel.showAlertMessage) {
             Alert(
                 title: Text("Message"),
@@ -206,13 +221,14 @@ struct MyUserEditProfileView: View {
                     .clipShape(Circle())
             }
             
-            ImagePickerView(imageData: $viewModel.imageData, selectedImage: $viewModel.selectedImage) {
-                Text("Cambiar imagen")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.top, 8)
-            }
-            .padding()
+            Text("Cambiar imagen")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.top, 8)
+                .padding()
+                .onTapGesture {
+                    openPickerPublisher.send()
+                }
         }
         .padding(.top, 30)
     }
@@ -340,7 +356,8 @@ private extension MyUserEditProfileView {
             viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
             saveInfo: saveInfoPublisher.eraseToAnyPublisher(),
             logout: logoutPublisher.eraseToAnyPublisher(),
-            confirmDeleteAccount: confirmDeleteAccountPublisher.eraseToAnyPublisher()
+            confirmDeleteAccount: confirmDeleteAccountPublisher.eraseToAnyPublisher(),
+            openPicker: openPickerPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

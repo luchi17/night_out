@@ -101,16 +101,17 @@ struct ShareVideoView: View {
                 self.resetVideoPlayer()
             }
         }
-        .alert("Permiso requerido", isPresented: $viewModel.showPermissionAlert) {
-            Button("Abrir Configuración") {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
-            }
-            Button("Cancelar", role: .cancel) { }
-        } message: {
-            Text("Esta aplicación necesita acceso a tu galería para seleccionar videos.")
-        }
+        .showGalleryPermissionAlert(show: $viewModel.showPermissionAlert)
+//        .alert("Permiso requerido", isPresented: $viewModel.showPermissionAlert) {
+//            Button("Abrir Configuración") {
+//                if let url = URL(string: UIApplication.openSettingsURLString) {
+//                    UIApplication.shared.open(url)
+//                }
+//            }
+//            Button("Cancelar", role: .cancel) { }
+//        } message: {
+//            Text("Esta aplicación necesita acceso a tu galería para seleccionar videos.")
+//        }
         .showToast(
             error: (
                 type: viewModel.toast,

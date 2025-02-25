@@ -1,6 +1,6 @@
 import SwiftUI
 import Combine
-
+import PhotosUI
 
 final class MyUserEditProfileViewModel: ObservableObject {
     @Published var profileImageUrl: String?
@@ -20,6 +20,9 @@ final class MyUserEditProfileViewModel: ObservableObject {
     @Published var progressMessage: String = ""
     @Published var showProgress: Bool = false
     
+    @Published var openPicker: Bool = false
+    @Published var showPermissionAlert: Bool = false
+    @Published var selectedItem: PhotosPickerItem?
     
     init(profileImageUrl: String?, username: String?, fullname: String?, gender: Gender?, profile: ProfileType?, participate: String? = nil) {
         self.profileImageUrl = profileImageUrl
@@ -58,6 +61,7 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
         let saveInfo: AnyPublisher<Void, Never>
         let logout: AnyPublisher<Void, Never>
         let confirmDeleteAccount: AnyPublisher<Void, Never>
+        let openPicker: AnyPublisher<Void, Never>
     }
     
     var viewModel: MyUserEditProfileViewModel
@@ -84,6 +88,17 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
     }
     
     func transform(input: MyUserEditProfilePresenterImpl.ViewInputs) {
+        
+        input
+            .openPicker
+            .withUnretained(self)
+            .sink { presenter, _ in
+                GalleryManager.shared.checkPermissionsAndOpenPicker() { hasPermission in
+                    presenter.viewModel.openPicker = hasPermission
+                    presenter.viewModel.showPermissionAlert = !hasPermission
+                }
+            }
+            .store(in: &cancellables)
         
         input
             .viewDidLoad

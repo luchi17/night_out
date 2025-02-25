@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 import FirebaseAuth
 import CoreLocation
+import PhotosUI
 
 enum LocationSelectedTag {
     case sportCasual
@@ -59,6 +60,11 @@ final class SignupCompanyViewModel: ObservableObject {
     @Published var toast: ToastType?
     @Published var selectedImage: UIImage?
     
+    @Published var openPicker: Bool = false
+    @Published var showPermissionAlert: Bool = false
+    
+    @Published var selectedItem: PhotosPickerItem?
+    
     var imageUrl: String?
     
     init() {
@@ -95,6 +101,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
     struct ViewInputs {
         let signupCompany: AnyPublisher<Void, Never>
         let login: AnyPublisher<Void, Never>
+        let openPicker: AnyPublisher<Void, Never>
     }
     
     var viewModel: SignupCompanyViewModel
@@ -114,6 +121,17 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
     }
     
     func transform(input: SignupCompanyPresenterImpl.ViewInputs) {
+        
+        input
+            .openPicker
+            .withUnretained(self)
+            .sink { presenter, _ in
+                GalleryManager.shared.checkPermissionsAndOpenPicker() { hasPermission in
+                    presenter.viewModel.openPicker = hasPermission
+                    presenter.viewModel.showPermissionAlert = !hasPermission
+                }
+            }
+            .store(in: &cancellables)
         
         input
             .login

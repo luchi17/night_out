@@ -10,6 +10,7 @@ struct SignupView: View {
     
     private let signupPublisher = PassthroughSubject<Void, Never>()
     private let loginPublisher = PassthroughSubject<Void, Never>()
+    private let openPickerPublisher = PassthroughSubject<Void, Never>()
     
     init(
         presenter: SignupPresenter
@@ -89,6 +90,19 @@ struct SignupView: View {
         .background(
             Color.blackColor
         )
+        .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .images)
+        .onChange(of: viewModel.selectedItem) { _, newItem in
+            Task {
+                if let newItem = newItem {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        viewModel.imageData = data
+                        viewModel.selectedImage = uiImage
+                    }
+                }
+            }
+        }
+        .showGalleryPermissionAlert(show: $viewModel.showPermissionAlert)
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -115,14 +129,12 @@ struct SignupView: View {
     }
     
     private var imagePicker: some View {
-        ImagePickerView(
-            imageData: $viewModel.imageData,
-            selectedImage: $viewModel.selectedImage
-        ) {
+        VStack {
             ZStack {
                 Circle()
-                    .stroke(Color.white, lineWidth: 2) // Borde blanco
-                    .frame(width: 120, height: 120) // Tamaño del círculo
+                    .stroke(Color.white, lineWidth: 2)
+                    .frame(width: 120, height: 120)
+
                 if let selectedImage = viewModel.selectedImage {
                     Image(uiImage: selectedImage)
                         .resizable()
@@ -136,6 +148,9 @@ struct SignupView: View {
                         .frame(width: 120, height: 120)
                         .clipShape(Circle())
                 }
+            }
+            .onTapGesture {
+                openPickerPublisher.send()
             }
         }
     }
@@ -175,7 +190,8 @@ private extension SignupView {
     func bindViewModel() {
         let input = SignupPresenterImpl.ViewInputs(
             signup: signupPublisher.eraseToAnyPublisher(),
-            login: loginPublisher.eraseToAnyPublisher()
+            login: loginPublisher.eraseToAnyPublisher(),
+            openPicker: openPickerPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

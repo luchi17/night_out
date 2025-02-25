@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import FirebaseAuth
+import PhotosUI
 
 final class SignupViewModel: ObservableObject {
     
@@ -14,6 +15,11 @@ final class SignupViewModel: ObservableObject {
     @Published var selectedImage: UIImage?
     @Published var imageData: Data? = nil
     @Published var fcmToken: String = ""
+    
+    @Published var openPicker: Bool = false
+    @Published var showPermissionAlert: Bool = false
+    
+    @Published var selectedItem: PhotosPickerItem?
     
     var imageUrl: String?
     
@@ -42,6 +48,7 @@ final class SignupPresenterImpl: SignupPresenter {
     struct ViewInputs {
         let signup: AnyPublisher<Void, Never>
         let login: AnyPublisher<Void, Never>
+        let openPicker: AnyPublisher<Void, Never>
     }
     
     var viewModel: SignupViewModel
@@ -71,6 +78,17 @@ final class SignupPresenterImpl: SignupPresenter {
             .store(in: &cancellables)
         
         signupListener(input: input)
+        
+        input
+            .openPicker
+            .withUnretained(self)
+            .sink { presenter, _ in
+                GalleryManager.shared.checkPermissionsAndOpenPicker() { hasPermission in
+                    presenter.viewModel.openPicker = hasPermission
+                    presenter.viewModel.showPermissionAlert = !hasPermission
+                }
+            }
+            .store(in: &cancellables)
     }
     
     func signupListener(input: SignupPresenterImpl.ViewInputs) {
