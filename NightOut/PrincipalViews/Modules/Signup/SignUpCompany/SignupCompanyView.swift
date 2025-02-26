@@ -28,74 +28,95 @@ struct SignupCompanyView: View {
     }
     
     var body: some View {
-        VStack(spacing: 10) {
+        
+        ZStack(alignment: .bottom) {
+            
+            VStack(spacing: 0) {
+                ScrollView {
+                    ScrollViewReader { proxy in
+                        
+                        VStack(spacing: 10) {
 
-            Spacer()
-            
-            Image("nightout")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 70)
-                .foregroundStyle(.white)
-            
-            imagePicker
-                .padding(.bottom, 20)
-            
-            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-                .padding(.bottom, 10)
-            
-            locationButton
-            TimeButtonView(
-                title: "APERTURA",
-                selectedTimeString: $viewModel.startTime
-            )
-            TimeButtonView(
-                title: "CIERRE",
-                selectedTimeString: $viewModel.endTime
-            )
-            selectTagButton
-            
-            Spacer()
-            
-            HStack(spacing: 20) {
-                registerButton
-                signInButton
+                            Spacer()
+                            
+                            Image("n_logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 70)
+                                .foregroundStyle(.white)
+                            
+                            imagePicker
+                                .padding(.bottom, 20)
+                            
+                            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                                .padding(.bottom, 10)
+                            
+                            locationButton
+                            TimeButtonView(
+                                title: "APERTURA",
+                                selectedTimeString: $viewModel.startTime
+                            )
+                            TimeButtonView(
+                                title: "CIERRE",
+                                selectedTimeString: $viewModel.endTime
+                            )
+                            selectTagButton
+                            
+                            Spacer()
+                            
+                        }
+                    }
+                }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .scrollDismissesKeyboard(.interactively)
+                .scrollIndicators(.hidden)
+                
+                Spacer()
             }
-            .padding(.bottom, 60)
+            
+            VStack {
+                Spacer()
+                HStack(spacing: 20) {
+                    registerButton
+                    signInButton
+                }
+            }
+            .ignoresSafeArea(.keyboard)
+            
         }
         .padding(.horizontal, 20)
         .background(
