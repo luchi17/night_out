@@ -161,8 +161,10 @@ private extension TabViewCoordinator {
             onOpenMaps: openMaps,
             onOpenAppleMaps: openAppleMaps,
             onShowUserProfile: showPostUserProfileView,
-            onShowCompanyProfile: { _ in },
-            onShowPostComments: onShowPostComments
+            onShowPostComments: onShowPostComments,
+            onOpenCalendar: { [weak self] in
+                self?.tabViewModel.selectedTab = .user
+            }
         )
     }
     

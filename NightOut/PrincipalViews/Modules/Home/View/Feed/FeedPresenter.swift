@@ -37,8 +37,8 @@ final class FeedPresenterImpl: FeedPresenter {
         let onOpenMaps: InputClosure<(Double, Double)>
         let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
         let onShowUserProfile: InputClosure<UserPostProfileInfo>
-        let onShowCompanyProfile: InputClosure<CompanyModel>
         let onShowPostComments: InputClosure<PostCommentsInfo>
+        let onOpenCalendar: VoidClosure
         
     }
     
@@ -52,6 +52,7 @@ final class FeedPresenterImpl: FeedPresenter {
         let openAppleMaps: AnyPublisher<PostModel, Never>
         let showUserOrCompanyProfile: AnyPublisher<PostModel, Never>
         let showCommentsView: AnyPublisher<PostModel, Never>
+        let openCalendar: AnyPublisher<Void, Never>
     }
     
     var viewModel: FeedViewModel
@@ -155,6 +156,15 @@ final class FeedPresenterImpl: FeedPresenter {
     }
     
     func listenToInput(input: FeedPresenterImpl.ViewInputs) {
+        
+        input
+            .openCalendar
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.onOpenCalendar()
+            }
+            .store(in: &cancellables)
+        
         input
             .openMaps
             .withUnretained(self)
