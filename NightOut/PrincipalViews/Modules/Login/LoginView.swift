@@ -35,61 +35,81 @@ struct LoginView: View, Hashable {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            Image("logo_amarillo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 162, height: 157)
-                .padding(.top, 90)
+        
+        ZStack(alignment: .bottom) {
             
-            // Email Input
-            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.yellow))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
-                )
-                .foregroundColor(.yellow)
-                .accentColor(.yellow)
-                .padding(.bottom, 12)
-            
-            // Password Input
-            SecureField("",text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.yellow))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
-                )
-                .foregroundColor(.yellow)
-                .accentColor(.yellow)
-                .padding(.bottom, 20)
-            
-            // Login Button
-            Button(action: {
-                viewModel.loading = true
-                loginPublisher.send()
-            }) {
-                Text("Entrar".uppercased())
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.yellow)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.grayColor.opacity(0.5))
-                    .cornerRadius(25)
-                    .shadow(radius: 4)
-            }
-            .padding(.bottom, 12)
-            
-            googleLoginButton
-            
-            appleLoginButton
-            
-            forgotPasswordButton
+            VStack(spacing: 0) {
+                ScrollView {
+                    ScrollViewReader { proxy in
+                        
+                        VStack {
+                            Image("logo_amarillo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 162, height: 157)
+                                .padding(.top, 90)
+                            
+                            // Email Input
+                            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.yellow))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
+                                )
+                                .foregroundColor(.yellow)
+                                .accentColor(.yellow)
+                                .padding(.bottom, 12)
+                            
+                            // Password Input
+                            SecureField("",text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.yellow))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
+                                )
+                                .foregroundColor(.yellow)
+                                .accentColor(.yellow)
+                                .padding(.bottom, 20)
+                            
+                            // Login Button
+                            Button(action: {
+                                viewModel.loading = true
+                                loginPublisher.send()
+                            }) {
+                                Text("Entrar".uppercased())
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundColor(.yellow)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.grayColor.opacity(0.5))
+                                    .cornerRadius(25)
+                                    .shadow(radius: 4)
+                            }
+                            .padding(.bottom, 12)
+                            
+                            googleLoginButton
+                            
+                            appleLoginButton
+                            
+                            forgotPasswordButton
 
-            Spacer()
+                        }
+                    }
+                    
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .scrollIndicators(.hidden)
+                
+                Spacer()
+                
+            }
             
-            signupButton
-            
+            VStack {
+                Spacer()
+                
+                signupButton
+            }
+            .ignoresSafeArea(.keyboard)
         }
         .padding(.horizontal, 20)
         .background(
@@ -169,7 +189,7 @@ struct LoginView: View, Hashable {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
         }
-        .padding(.bottom, 50)
+        .padding(.bottom)
     }
     
     private var appleLoginButton: some View {
