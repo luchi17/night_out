@@ -179,7 +179,7 @@ public extension View {
         extraPadding: ToastPadding = ToastPadding.none,
         showAnimation: Bool = true
     ) -> some View {
-        VStack(spacing: 0) {
+        VStack {
             if isIdle {
                 ZStack {
                     self

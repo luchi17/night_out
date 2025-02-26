@@ -291,5 +291,6 @@ public struct DefaultIdleView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.blackColor.opacity(0.9))
     }
 }
