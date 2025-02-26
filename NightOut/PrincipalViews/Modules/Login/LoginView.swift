@@ -109,10 +109,10 @@ struct LoginView: View, Hashable {
                 })
             )
         }
-//        .onAppear {
-//            viewModel.email = ""
-//            viewModel.password = ""
-//        }
+        .onAppear {
+            viewModel.email = ""
+            viewModel.password = ""
+        }
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -144,7 +144,6 @@ struct LoginView: View, Hashable {
                 .cornerRadius(25)
                 .shadow(radius: 4)
         }
-        .cornerRadius(25)
     }
     
     private var forgotPasswordButton: some View {
