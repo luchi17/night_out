@@ -125,6 +125,9 @@ struct LoginView: View, Hashable {
             extraPadding: .none
         )
         .navigationBarBackButtonHidden()
+        .onTapGesture {
+            hideKeyboard()
+        }
     }
     
     private var googleLoginButton: some View {
@@ -199,5 +202,9 @@ private extension LoginView {
             openForgotPassword: openForgotPasswordPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
+    }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
