@@ -21,70 +21,90 @@ struct SignupView: View {
     }
     
     var body: some View {
-        VStack(spacing: 10) {
+        
+        ZStack(alignment: .bottom) {
             
-            Spacer()
+            VStack(spacing: 0) {
+                ScrollView {
+                    ScrollViewReader { proxy in
+                        VStack(spacing: 10) {
+                            
+                            Spacer()
+                            
+                            Image("n_logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 90)
+                                .foregroundStyle(.white)
+                            
+                            imagePicker
+                                .padding(.bottom, 20)
+                            
+                            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            // Email Input
+                            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            // Password Input
+                            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                                .padding(.bottom, 10)
+                            
+                            genderView
+                                .padding(.bottom, 10)
+                            
+                            TermsAndConditionsView(isAccepted: $termsAccepted)
+                                .padding(.bottom, 10)
+                            
+                            registerButton
+                            
+                            Spacer()
+                            
+                        }
+                    }
+                }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .scrollDismissesKeyboard(.interactively)
+                .scrollIndicators(.hidden)
+                
+                Spacer()
+            }
             
-            Image("n_logo")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 90)
-                .foregroundStyle(.white)
-            
-            imagePicker
-                .padding(.bottom, 20)
-            
-            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            // Email Input
-            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            // Password Input
-            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-                .padding(.bottom, 10)
-            
-            genderView
-                .padding(.bottom, 10)
-            
-            TermsAndConditionsView(isAccepted: $termsAccepted)
-                .padding(.bottom, 10)
-            
-            registerButton
-            
-            Spacer()
-            
-            alreadyHaveAnAccountButton
-            
+            VStack {
+                Spacer()
+                
+                alreadyHaveAnAccountButton
+            }
+            .ignoresSafeArea(.keyboard)
         }
         .padding(.horizontal, 20)
         .background(
