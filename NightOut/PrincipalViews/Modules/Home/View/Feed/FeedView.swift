@@ -26,7 +26,7 @@ struct FeedView: View {
     
     var body: some View {
         ScrollView {
-            if viewModel.posts.isEmpty && !viewModel.loading {
+            if viewModel.showDiscoverEvents {
                 noPostsView
             } else {
                 VStack(spacing: 20) {
@@ -101,7 +101,7 @@ struct FeedView: View {
                 openCalendarPublisher.send()
             }) {
                 Text("Descubrir eventos".uppercased())
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 16, weight: .bold))
                     .padding(.all, 12)
                     .background(Color.grayColor)
                     .foregroundColor(.white)
