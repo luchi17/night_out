@@ -85,6 +85,7 @@ final class LoginPresenterImpl: LoginPresenter {
             .filter({ [weak self] _ in
                 if (self?.viewModel.password.isEmpty ?? true) || (self?.viewModel.email.isEmpty ?? true) {
                     self?.viewModel.toast = .custom(.init(title: "Error", description: "Por favor, ingresa tu email y contraseña.", image: nil))
+                    self?.viewModel.loading = false
                     return false
                 }
                 
@@ -97,13 +98,13 @@ final class LoginPresenterImpl: LoginPresenter {
                     password: presenter.viewModel.password
                 )
                 .eraseToAnyPublisher()
-            }, loadingClosure: { [weak self] loading in
+            }, loadingClosure: { _ in },
+            onError: { [weak self] error in
                 guard let self = self else { return }
-                self.viewModel.loading = loading
-            }, onError: { [weak self] error in
-                guard let self = self else { return }
+                
                 if error != nil {
                     self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
+                    self.viewModel.loading = false
                 }
             })
             .withUnretained(self)
@@ -121,6 +122,7 @@ final class LoginPresenterImpl: LoginPresenter {
             })
             .withUnretained(self)
             .sink(receiveValue: { [weak self] _ in
+                self?.viewModel.loading = false
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
@@ -152,11 +154,13 @@ final class LoginPresenterImpl: LoginPresenter {
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
                 presenter.useCases.loginUseCase.executeGoogle()
-            }, loadingClosure: { _ in
-            }, onError: { [weak self] error in
+            }, loadingClosure: { _ in },
+               onError: { [weak self] error in
                 guard let self = self else { return }
+                
                 if error != nil {
-                    self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
+                    self.viewModel.toast = .custom(.init(title: "Error", description: "No se pudo completar el inicio de sesión con Google. Inténtalo de nuevo.", image: nil))
+                    self.viewModel.loading = false
                 }
             })
             .withUnretained(self)
@@ -191,7 +195,7 @@ final class LoginPresenterImpl: LoginPresenter {
                 } else {
                     return presenter.useCases.saveUserUseCase.executeTerms()
                 }
-               
+                
             })
             .withUnretained(self)
             .flatMap({ presenter, _ in
@@ -199,6 +203,7 @@ final class LoginPresenterImpl: LoginPresenter {
             })
             .withUnretained(self)
             .sink(receiveValue: { [weak self] _ in
+                self?.viewModel.loading = false
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
@@ -211,7 +216,7 @@ final class LoginPresenterImpl: LoginPresenter {
         //            .withUnretained(self)
         
     }
-
+    
 }
 
 private extension LoginPresenterImpl {

@@ -66,6 +66,7 @@ struct LoginView: View, Hashable {
             
             // Login Button
             Button(action: {
+                viewModel.loading = true
                 loginPublisher.send()
             }) {
                 Text("Entrar".uppercased())
@@ -128,6 +129,7 @@ struct LoginView: View, Hashable {
     
     private var googleLoginButton: some View {
         Button(action: {
+            viewModel.loading = true
             signupGooglePublisher.send()
         }) {
             Text("Iniciar sesión con Google".uppercased())
