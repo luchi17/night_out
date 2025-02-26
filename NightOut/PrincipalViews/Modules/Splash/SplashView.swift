@@ -2,14 +2,17 @@ import SwiftUI
 import Combine
 import AVKit
 
-struct SplashView: View, Hashable {
+struct SplashView: View {
+    
+    @StateObject private var viewModel = VideoPlayerViewModel()
+    
+    @State private var showMessage = ""
     
     private let presenter: SplashPresenter
-    @ObservedObject private var viewModel: SplashViewModel
+    
+    @ObservedObject private var splashModel: SplashViewModel
     
     private let newScreenPublisher = PassthroughSubject<Void, Never>()
-    
-    private let notificationName = Notification.Name.AVPlayerItemDidPlayToEndTime
     
     public let id = UUID()
     
@@ -18,7 +21,13 @@ struct SplashView: View, Hashable {
     }
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id) // Combina el id para el hash
+        hasher.combine(id)
+    }
+    
+    init(presenter: SplashPresenter) {
+        self.presenter = presenter
+        splashModel = presenter.viewModel
+        bindViewModel()
     }
     
     var url: URL? = {
@@ -28,47 +37,46 @@ struct SplashView: View, Hashable {
         return url
     }()
     
-    var player: AVPlayer
-    
-    init(presenter: SplashPresenter) {
-        self.presenter = presenter
-        viewModel = presenter.viewModel
-        player = AVPlayer(url: url!)
-        bindViewModel()
-    }
-    
     var body: some View {
-        ZStack {
-            
-            Color.darkBlueColor
-                .ignoresSafeArea()
-            
-            VStack {
-                Spacer()
+        
+        VStack {
+            ZStack {
                 
-                VideoPlayer(player: player)
-                    .overlay(Rectangle().fill(Color.clear))
-                    .allowsHitTesting(false) // Deshabilita la interacción
-                    .frame(width: 300, height: 300, alignment: .center)
-                    .padding(.horizontal)
+                Color.darkBlueColor
+                    .ignoresSafeArea()
                 
-                Spacer()
+                VStack {
+                    Spacer()
+                    
+                    if viewModel.isReady {
+                        VideoPlayer(player: viewModel.player)
+                            .overlay(Rectangle().fill(Color.clear))
+                            .allowsHitTesting(false) // Deshabilita la interacción
+                            .frame(width: 300, height: 300, alignment: .center)
+                            .padding(.horizontal)
+                    } else {
+                        Image("logo_amarillo") // Reemplaza con el nombre de tu imagen
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                    }
+                    
+                    Spacer()
+                }
+                
             }
             
         }
         .onAppear {
-            player.play()
-            // Observa cuando el video termine
-            NotificationCenter.default.addObserver(
-                forName: notificationName,
-                object: player.currentItem,
-                queue: .main
-            ) { _ in
-                newScreenPublisher.send()
-            }
+            viewModel.configurePlayer(with: url!)
         }
         .onDisappear {
-            NotificationCenter.default.removeObserver(self, name: notificationName, object: player.currentItem)
+            viewModel.removeObservers() // Limpiar observadores al desaparecer la vista
+        }
+        .onChange(of: viewModel.isFinished) {
+            if viewModel.isFinished {
+                newScreenPublisher.send()
+            }
         }
     }
     
@@ -77,5 +85,60 @@ struct SplashView: View, Hashable {
             viewIsLoaded: newScreenPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
+    }
+}
+
+class VideoPlayerViewModel: ObservableObject {
+    var player: AVPlayer?
+    private var playerItem: AVPlayerItem?
+    private var playerObserver: AnyCancellable?
+    
+    @Published var isReady: Bool = false
+    @Published var isFinished: Bool = false
+    
+    func configurePlayer(with url: URL) {
+        // Crea el AVPlayerItem
+        self.playerItem = AVPlayerItem(url: url)
+        
+        // Crea el AVPlayer y asigna el item
+        self.player = AVPlayer(playerItem: playerItem)
+        
+        // Observa cuando el video está listo
+        playerObserver = playerItem?.publisher(for: \.status)
+            .sink { [weak self] status in
+                if status == .readyToPlay {
+                    self?.player?.play()
+                    self?.isReady = true
+                }
+            }
+        
+        // Notificación cuando el video se ha terminado
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(didFinishPlaying),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem
+        )
+    }
+    
+    @objc func didFinishPlaying() {
+        self.isFinished = true
+    }
+    
+    func play() {
+        player?.play()
+    }
+    
+    func pause() {
+        player?.pause()
+    }
+    
+    // Método para remover observadores
+    func removeObservers() {
+        // Eliminar observador de la notificación
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
+        
+        // Cancelar los publishers de Combine
+        playerObserver?.cancel()
     }
 }
