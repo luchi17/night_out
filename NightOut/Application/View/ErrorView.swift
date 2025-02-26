@@ -21,6 +21,8 @@ public extension View {
     func showCustomBackButtonNavBar() -> some View {
         self
             .navigationBarBackButtonHidden(true)
+            .toolbarBackground(Color.blackColor, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     CustomBackButton()
