@@ -51,6 +51,10 @@ struct LoginView: View, Hashable {
                             
                             // Email Input
                             TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.yellow))
+                                .textContentType(.emailAddress)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .keyboardType(.emailAddress)
                                 .textFieldStyle(PlainTextFieldStyle())
                                 .padding(.all, 8)
                                 .background(
@@ -60,8 +64,10 @@ struct LoginView: View, Hashable {
                                 .accentColor(.yellow)
                                 .padding(.bottom, 12)
                             
+                            
                             // Password Input
                             SecureField("",text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.yellow))
+                                .textContentType(.password)
                                 .textFieldStyle(PlainTextFieldStyle())
                                 .padding(.all, 8)
                                 .background(
@@ -97,6 +103,7 @@ struct LoginView: View, Hashable {
                     }
                     
                 }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
                 .scrollDismissesKeyboard(.interactively)
                 .scrollIndicators(.hidden)
                 
