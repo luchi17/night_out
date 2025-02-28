@@ -10,6 +10,7 @@ struct SignupView: View {
     
     private let signupPublisher = PassthroughSubject<Void, Never>()
     private let loginPublisher = PassthroughSubject<Void, Never>()
+    private let openPickerPublisher = PassthroughSubject<Void, Never>()
     
     init(
         presenter: SignupPresenter
@@ -20,75 +21,108 @@ struct SignupView: View {
     }
     
     var body: some View {
-        VStack(spacing: 10) {
+        
+        ZStack(alignment: .bottom) {
             
-            Spacer()
+            VStack(spacing: 0) {
+                ScrollView {
+                    ScrollViewReader { proxy in
+                        VStack(spacing: 10) {
+                            
+                            Spacer()
+                            
+                            Image("n_logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 90)
+                                .foregroundStyle(.white)
+                            
+                            imagePicker
+                                .padding(.bottom, 20)
+                            
+                            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            // Email Input
+                            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            // Password Input
+                            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                                .padding(.bottom, 10)
+                            
+                            genderView
+                                .padding(.bottom, 10)
+                            
+                            TermsAndConditionsView(isAccepted: $termsAccepted)
+                                .padding(.bottom, 10)
+                            
+                            registerButton
+                            
+                            Spacer()
+                            
+                        }
+                    }
+                }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .scrollDismissesKeyboard(.interactively)
+                .scrollIndicators(.hidden)
+                
+                Spacer()
+            }
             
-            Image("nightout")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 90)
-                .foregroundStyle(.white)
-            
-            imagePicker
-                .padding(.bottom, 20)
-            
-            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            // Email Input
-            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            // Password Input
-            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-                .padding(.bottom, 10)
-            
-            genderView
-                .padding(.bottom, 10)
-            
-            TermsAndConditionsView(isAccepted: $termsAccepted)
-                .padding(.bottom, 10)
-            
-            registerButton
-            
-            Spacer()
-            
-            alreadyHaveAnAccountButton
-            
+            VStack {
+                Spacer()
+                
+                alreadyHaveAnAccountButton
+            }
+            .ignoresSafeArea(.keyboard)
         }
         .padding(.horizontal, 20)
         .background(
-            Color.black
+            Color.blackColor
         )
+        .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .images)
+        .onChange(of: viewModel.selectedItem) { _, newItem in
+            Task {
+                if let newItem = newItem {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        viewModel.imageData = data
+                        viewModel.selectedImage = uiImage
+                    }
+                }
+            }
+        }
+        .showGalleryPermissionAlert(show: $viewModel.showPermissionAlert)
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -115,14 +149,12 @@ struct SignupView: View {
     }
     
     private var imagePicker: some View {
-        ImagePickerView(
-            imageData: $viewModel.imageData,
-            selectedImage: $viewModel.selectedImage
-        ) {
+        VStack {
             ZStack {
                 Circle()
-                    .stroke(Color.white, lineWidth: 2) // Borde blanco
-                    .frame(width: 120, height: 120) // Tamaño del círculo
+                    .stroke(Color.white, lineWidth: 2)
+                    .frame(width: 120, height: 120)
+
                 if let selectedImage = viewModel.selectedImage {
                     Image(uiImage: selectedImage)
                         .resizable()
@@ -137,6 +169,9 @@ struct SignupView: View {
                         .clipShape(Circle())
                 }
             }
+            .onTapGesture {
+                openPickerPublisher.send()
+            }
         }
     }
     
@@ -149,7 +184,7 @@ struct SignupView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(!termsAccepted ? Color.gray : Color.yellow)
+                .background(!termsAccepted ? Color.grayColor : Color.yellow)
                 .cornerRadius(25)
         }
         .disabled(!termsAccepted)
@@ -175,7 +210,8 @@ private extension SignupView {
     func bindViewModel() {
         let input = SignupPresenterImpl.ViewInputs(
             signup: signupPublisher.eraseToAnyPublisher(),
-            login: loginPublisher.eraseToAnyPublisher()
+            login: loginPublisher.eraseToAnyPublisher(),
+            openPicker: openPickerPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
@@ -198,12 +234,12 @@ struct GenderCheckbox: View {
                 ZStack {
                     Circle()
                         .stroke(Color.white, lineWidth: 2) // Círculo exterior
-                        .frame(width: 24, height: 24)
+                        .frame(width: 20, height: 20)
                     
                     if selectedGender == gender {
                         Circle()
                             .fill(Color.white)
-                            .frame(width: 20, height: 20) // Círculo interno más pequeño para dejar padding
+                            .frame(width: 16, height: 16) // Círculo interno más pequeño para dejar padding
                     }
                 }
                 

@@ -19,7 +19,7 @@ struct VerdadORetoView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.gray)
+                    .background(Color.grayColor)
                     .cornerRadius(25)
             }
         }

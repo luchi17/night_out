@@ -68,7 +68,7 @@ struct MyUserCompanySettingsView: View {
                         .font(.system(size: 18))
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.gray)
+                        .background(Color.grayColor)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -76,7 +76,7 @@ struct MyUserCompanySettingsView: View {
             .padding(.all, 20)
         }
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .sheet(
@@ -108,7 +108,7 @@ struct MyUserCompanySettingsView: View {
                 .font(.system(size: 18))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }
@@ -132,7 +132,7 @@ struct MyUserCompanySettingsView: View {
                 .font(.system(size: 18))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }
@@ -167,7 +167,7 @@ private struct SettingsTimeButtonView: View {
                 .font(.system(size: 18))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }

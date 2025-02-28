@@ -17,7 +17,7 @@ struct YoNuncaView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.gray)
+                    .background(Color.grayColor)
                     .cornerRadius(25)
             }
             .padding()

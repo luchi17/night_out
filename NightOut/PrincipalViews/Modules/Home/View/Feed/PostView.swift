@@ -45,7 +45,7 @@ struct PostView: View {
             
             bottomView
         }
-        .background(Color.black.opacity(0.7))
+        .background(Color.blackColor)
         
     }
     

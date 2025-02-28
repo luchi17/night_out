@@ -11,6 +11,7 @@ struct FeedView: View {
     private let openAppleMapsPublisher = PassthroughSubject<PostModel, Never>()
     private let showUserProfilePublisher = PassthroughSubject<PostModel, Never>()
     private let showPostCommentsPublisher = PassthroughSubject<PostModel, Never>()
+    private let openCalendarPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: FeedViewModel
     let presenter: FeedPresenter
@@ -25,7 +26,7 @@ struct FeedView: View {
     
     var body: some View {
         ScrollView {
-            if viewModel.posts.isEmpty && !viewModel.loading {
+            if viewModel.showDiscoverEvents {
                 noPostsView
             } else {
                 VStack(spacing: 20) {
@@ -85,20 +86,33 @@ struct FeedView: View {
     }
     
     var noPostsView: some View {
-        EmptyView()
-            .overlay(alignment: .center) {
-                Button {
-                    //TODO
-                } label: {
-                    Text("No sigues a nadie.\nCargar mensajes de ejemplo")
-                        .foregroundStyle(.white)
-                }
-                .background(.yellow)
+        VStack(alignment: .center, spacing: 20) {
+            
+            Spacer()
+            
+            Image("descubrirEventos")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 300, height: 300)
+                .foregroundColor(.white)
+                .padding(.top, 100)
+            
+            Button(action: {
+                openCalendarPublisher.send()
+            }) {
+                Text("Descubrir eventos".uppercased())
+                    .font(.system(size: 16, weight: .bold))
+                    .padding(.all, 12)
+                    .background(Color.grayColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(25)
             }
+            
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
     }
 }
-
-
 
 private extension FeedView {
     
@@ -108,7 +122,8 @@ private extension FeedView {
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
             openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher(),
             showUserOrCompanyProfile: showUserProfilePublisher.eraseToAnyPublisher(),
-            showCommentsView: showPostCommentsPublisher.eraseToAnyPublisher()
+            showCommentsView: showPostCommentsPublisher.eraseToAnyPublisher(),
+            openCalendar: openCalendarPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

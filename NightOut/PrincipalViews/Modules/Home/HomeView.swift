@@ -21,7 +21,7 @@ struct HomeView: View {
     private let openTinderPublisher = PassthroughSubject<Void, Never>()
     private let openHubPublisher = PassthroughSubject<Void, Never>()
     
-
+    
     @State private var updateProfileImage: Bool = false
     
     init(
@@ -58,6 +58,16 @@ struct HomeView: View {
                 FeedView(presenter: feedPresenter)
             }
         }
+        .overlay {
+            if viewModel.showGenderAlert {
+                HomeGenderAlertView(
+                    isPresented: $viewModel.showGenderAlert,
+                    selectedGender: $viewModel.gender
+                )
+                
+                Spacer()
+            }
+        }
         .sheet(isPresented: $viewModel.showMyProfile) {
             MyUserProfileView(
                 presenter: userPresenter,
@@ -67,23 +77,21 @@ struct HomeView: View {
                 friendsPresenter: friendsPresenter,
                 updateProfileImage: $updateProfileImage
             )
-                .presentationDetents([.large])
-                .presentationBackground(.regularMaterial)
-                .presentationDragIndicator(.visible)
+            .presentationDetents([.large])
+            .presentationBackground(.regularMaterial)
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $viewModel.showCompanyFirstAlert) {
             HomeCompanySheetView(close: {
                 viewModel.showCompanyFirstAlert = false
             })
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
         .padding(.top, 20)
         .background(
-            Image("fondo_azul")
-                .resizable()
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
         )
         .alert(isPresented: $viewModel.showNighoutAlert) {
             Alert(
@@ -166,7 +174,7 @@ struct HomeView: View {
                 }
             }
             .frame(width: 90)
-           
+            
         }
         .padding(.top, 30)
         .padding(.horizontal, 16)
@@ -206,5 +214,52 @@ private extension HomeView {
             openTinder: openTinderPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
+    }
+}
+
+
+struct HomeGenderAlertView: View {
+    @Binding var isPresented: Bool
+    @Binding var selectedGender: Gender?
+    
+    var body: some View {
+        
+        Rectangle()
+            .stroke(lineWidth: 1)
+            .foregroundStyle(.blue)
+            .background(Color.blackColor)
+            .overlay {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("¡Vaya! No tenemos registrado tu género.")
+                        .font(.system(size: 16))
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundStyle(.white)
+                    
+                    HStack {
+                        GenderCheckbox(gender: .hombre, selectedGender: $selectedGender)
+                        GenderCheckbox(gender: .mujer, selectedGender: $selectedGender)
+                        
+                        Spacer()
+                    }
+                }
+                .padding()
+            }
+            .transition(.opacity)
+            .shadow(radius: 10)
+            .background(Color.blackColor.opacity(0.7))
+            .frame(width: 300, height: 120)
+            .padding(40)
+            .onChange(of: selectedGender) { oldValue, newValue in
+                dismissWithDelay()
+            }
+    }
+    
+    private func dismissWithDelay() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation {
+                isPresented = false
+            }
+        }
     }
 }

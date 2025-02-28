@@ -217,7 +217,7 @@ struct AddPostView: View {
                 .foregroundColor(.white)
                 .padding(.all, 8)
         }
-        .background(Color.black.opacity(0.5))
+        .background(Color.blackColor.opacity(0.5))
         .clipShape(Circle())
         .padding(.leading, 20)
     }
@@ -248,7 +248,7 @@ struct AddPostView: View {
                 .foregroundColor(.white)
                 .padding(.all, 10)
         }
-        .background(Color.black.opacity(0.5))
+        .background(Color.blackColor.opacity(0.5))
         .cornerRadius(10)
         .padding(.leading, 20)
     }
@@ -273,7 +273,7 @@ struct AddPostView: View {
             Text("📍")
                 .font(.subheadline) // Tamaño del emoji
                 .padding()
-                .background(Color.black.opacity(0.5))
+                .background(Color.blackColor.opacity(0.5))
                 .frame(width: 40, height: 40)
                 .clipShape(Rectangle())
                 .cornerRadius(10)
@@ -290,7 +290,7 @@ struct AddPostView: View {
                 .frame(width: 30, height: 30)
                 .padding()
                 .foregroundColor(.white)
-                .background(Color.black.opacity(0.5))
+                .background(Color.blackColor.opacity(0.5))
                 .frame(width: 40, height: 40)
                 .cornerRadius(10)
         }

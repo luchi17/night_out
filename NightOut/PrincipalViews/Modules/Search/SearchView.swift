@@ -80,7 +80,7 @@ struct SearchView: View {
             Spacer()
         }
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.top)
         )
         .showToast(

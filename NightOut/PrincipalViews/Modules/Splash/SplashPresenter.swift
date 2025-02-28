@@ -61,16 +61,9 @@ final class SplashPresenterImpl: SplashPresenter {
     }
     
     func transform(input: Input) {
-        let timerPublisher =
-        Timer.publish(every: 2.0, on: .main, in: .default)
-            .autoconnect()
-            .first()
-            .map { _ in }
-            .eraseToAnyPublisher()
-        
-        timerPublisher
-            .map { _ in }
-            .combineLatest(input.viewIsLoaded)
+       
+        input.viewIsLoaded
+            .withUnretained(self)
             .sink { [weak self] _ in
                 if FirebaseServiceImpl.shared.getIsLoggedin() {
                     self?.actions.onMainFlow()

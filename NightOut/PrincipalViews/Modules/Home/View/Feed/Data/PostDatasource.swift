@@ -25,20 +25,21 @@ struct PostDatasourceImpl: PostDatasource {
     
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never> {
         
-        let subject = CurrentValueSubject<[String: PostUserModel], Never>([:])
-        
-        let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
-        
-        ref.observe(.value) { snapshot in
-            do {
-                let posts = try snapshot.data(as: [String: PostUserModel].self)
-                subject.send(posts)
-            } catch {
-                print("Error decoding data: \(error.localizedDescription)")
-                subject.send([:])
+        return Future<[String: PostUserModel], Never> { promise in
+            
+            let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
+            
+            ref.getData { error, snapshot in
+                do {
+                    let posts = try snapshot?.data(as: [String: PostUserModel].self)
+                    promise(.success(posts ?? [:]))
+                } catch {
+                    print("Error decoding data: \(error.localizedDescription)")
+                    promise(.success([:]))
+                }
             }
         }
-        return subject.eraseToAnyPublisher()
+        .eraseToAnyPublisher()
     }
     
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never> {

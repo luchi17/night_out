@@ -35,13 +35,13 @@ struct HomeCompanySheetView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.gray)
+                    .background(Color.grayColor)
                     .cornerRadius(25)
             }
         }
         .padding(.all, 12)
         .background(
-            Color.black
+            Color.blackColor
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         )
     }

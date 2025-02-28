@@ -110,7 +110,7 @@ struct MyUserProfileView: View {
             
         }
         .background(
-            Color.black
+            Color.blackColor
         )
         .sheet(isPresented: $showShareSheet) {
             if let currentId = FirebaseServiceImpl.shared.getCurrentUserUid() {
@@ -267,7 +267,7 @@ private struct CompanyMenu: View {
             Spacer()
         }
         .presentationDetents([.fraction(0.25)])
-        .presentationBackground(Color.gray)
+        .presentationBackground(Color.grayColor)
         .presentationDragIndicator(.visible)
     }
 }

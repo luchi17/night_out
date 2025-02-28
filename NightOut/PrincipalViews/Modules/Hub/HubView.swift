@@ -9,9 +9,11 @@ struct HubView: View {
     private let openUrlPublisher = PassthroughSubject<String, Never>()
     
     @ObservedObject var viewModel: HubViewModel
+    
     @ObservedObject private var keyboardObserver = KeyboardObserver()
     
     let presenter: HubPresenter
+    let shareVideoPresenter: ShareVideoPresenter
     
     @State private var dragOffset = CGSize.zero
     
@@ -20,13 +22,14 @@ struct HubView: View {
     ) {
         self.presenter = presenter
         viewModel = presenter.viewModel
-        bindViewModel()
+        shareVideoPresenter = ShareVideoPresenterImpl()
     }
     
     var body: some View {
         ZStack {
             
-            Color.black
+            Color.blackColor
+                .edgesIgnoringSafeArea(.all)
             
             if viewModel.selectedGame != nil {
                 
@@ -39,7 +42,7 @@ struct HubView: View {
                     Spacer()
                     // Agregar gesto de deslizamiento para volver
                     if keyboardObserver.keyboardHeight == 0 {
-                        Text("Desliza hacia abajo para volver a los juegos")
+                        Text(viewModel.selectedGame == .publicamosTuVideo ? "Desliza hacia abajo para volver" : "Desliza hacia abajo para volver a los juegos")
                             .foregroundColor(.white)
                             .padding(.bottom, 15)
                     }
@@ -65,6 +68,10 @@ struct HubView: View {
             }
         }
         .padding(.bottom, 20)
+        .background(
+            Color.blackColor
+            .edgesIgnoringSafeArea(.all)
+        )
         .animation(.easeInOut, value: viewModel.selectedGame)
         .simultaneousGesture(
             DragGesture()
@@ -72,7 +79,6 @@ struct HubView: View {
                     self.dragOffset = value.translation
                 }
                 .onEnded { value in
-                    print(self.dragOffset.height)
                     if self.dragOffset.height > 100 {
                         // Si el usuario desliza suficientemente hacia abajo, volver a la lista
                         self.viewModel.selectedGame = nil
@@ -126,11 +132,10 @@ struct HubView: View {
             } else if viewModel.selectedGame == .ruleta {
                 RuletaView()
             } else if viewModel.selectedGame == .publicamosTuVideo {
-                YoNuncaView()
+                ShareVideoView(presenter: shareVideoPresenter)
             }
         }
     }
-
 }
 
 
@@ -146,7 +151,7 @@ struct GameButton: View {
                 .padding(.horizontal, 15)
                 .padding(.vertical, 9)
                 .foregroundColor(.white)
-                .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.3)))
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.grayColor.opacity(0.3)))
         }
     }
 }

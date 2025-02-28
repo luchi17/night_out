@@ -39,7 +39,7 @@ struct UserProfileView: View {
                 }
             }
         }
-        .background(Color.black)
+        .background(Color.blackColor)
         .showCustomNavBar(
             title: viewModel.username,
             goBack: goBackPublisher.send,
@@ -172,7 +172,7 @@ struct UserProfileView: View {
                 .padding()
                 .frame(maxWidth: .infinity)
                 .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-                .foregroundColor(.black)
+                .foregroundColor(.blackColor)
                 .padding(.horizontal, 10)
                 .padding(.top, 15)
         }

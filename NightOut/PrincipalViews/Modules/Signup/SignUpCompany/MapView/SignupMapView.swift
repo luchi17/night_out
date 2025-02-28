@@ -54,7 +54,7 @@ struct SignupMapView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.black) // Adjust as needed for your button style
+                        .background(Color.blackColor) // Adjust as needed for your button style
                         .cornerRadius(25)
                         .shadow(radius: 4)
                 }

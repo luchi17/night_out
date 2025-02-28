@@ -35,64 +35,92 @@ struct LoginView: View, Hashable {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            Image("logo_amarillo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 162, height: 157)
-                .padding(.top, 90)
+        
+        ZStack(alignment: .bottom) {
             
-            // Email Input
-            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.yellow))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
-                )
-                .foregroundColor(.yellow)
-                .accentColor(.yellow)
-                .padding(.bottom, 12)
-            
-            // Password Input
-            SecureField("",text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.yellow))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
-                )
-                .foregroundColor(.yellow)
-                .accentColor(.yellow)
-                .padding(.bottom, 20)
-            
-            // Login Button
-            Button(action: {
-                loginPublisher.send()
-            }) {
-                Text("Entrar".uppercased())
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.yellow)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.gray.opacity(0.5))
-                    .cornerRadius(25)
-                    .shadow(radius: 4)
-            }
-            .padding(.bottom, 12)
-            
-            googleLoginButton
-            
-            appleLoginButton
-            
-            forgotPasswordButton
+            VStack(spacing: 0) {
+                ScrollView {
+                    ScrollViewReader { proxy in
+                        
+                        VStack {
+                            Image("logo_amarillo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 162, height: 157)
+                                .padding(.top, 90)
+                            
+                            // Email Input
+                            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.yellow))
+                                .textContentType(.emailAddress)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .keyboardType(.emailAddress)
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
+                                )
+                                .foregroundColor(.yellow)
+                                .accentColor(.yellow)
+                                .padding(.bottom, 12)
+                            
+                            
+                            // Password Input
+                            SecureField("",text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.yellow))
+                                .textContentType(.password)
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.yellow, lineWidth: 1)
+                                )
+                                .foregroundColor(.yellow)
+                                .accentColor(.yellow)
+                                .padding(.bottom, 20)
+                            
+                            // Login Button
+                            Button(action: {
+                                viewModel.loading = true
+                                loginPublisher.send()
+                            }) {
+                                Text("Entrar".uppercased())
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundColor(.yellow)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.grayColor.opacity(0.5))
+                                    .cornerRadius(25)
+                                    .shadow(radius: 4)
+                            }
+                            .padding(.bottom, 12)
+                            
+                            googleLoginButton
+                            
+                            appleLoginButton
+                            
+                            forgotPasswordButton
 
-            Spacer()
+                        }
+                    }
+                    
+                }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .scrollDismissesKeyboard(.interactively)
+                .scrollIndicators(.hidden)
+                
+                Spacer()
+                
+            }
             
-            signupButton
-            
+            VStack {
+                Spacer()
+                
+                signupButton
+            }
+            .ignoresSafeArea(.keyboard)
         }
         .padding(.horizontal, 20)
         .background(
-            Color.black
+            Color.blackColor
         )
         .alert(isPresented: $showRegisterAlert) {
             Alert(
@@ -108,10 +136,10 @@ struct LoginView: View, Hashable {
                 })
             )
         }
-//        .onAppear {
-//            viewModel.email = ""
-//            viewModel.password = ""
-//        }
+        .onAppear {
+            viewModel.email = ""
+            viewModel.password = ""
+        }
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -124,10 +152,14 @@ struct LoginView: View, Hashable {
             extraPadding: .none
         )
         .navigationBarBackButtonHidden()
+        .onTapGesture {
+            hideKeyboard()
+        }
     }
     
     private var googleLoginButton: some View {
         Button(action: {
+            viewModel.loading = true
             signupGooglePublisher.send()
         }) {
             Text("Iniciar sesión con Google".uppercased())
@@ -135,11 +167,10 @@ struct LoginView: View, Hashable {
                 .foregroundColor(.yellow)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.5))
+                .background(Color.grayColor.opacity(0.5))
                 .cornerRadius(25)
                 .shadow(radius: 4)
         }
-        .cornerRadius(25)
     }
     
     private var forgotPasswordButton: some View {
@@ -165,7 +196,7 @@ struct LoginView: View, Hashable {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
         }
-        .padding(.bottom, 50)
+        .padding(.bottom)
     }
     
     private var appleLoginButton: some View {
@@ -177,7 +208,7 @@ struct LoginView: View, Hashable {
                 .foregroundColor(Color.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.5))
+                .background(Color.grayColor.opacity(0.5))
                 .cornerRadius(25)
         }
         .padding(.top, 12)
@@ -197,5 +228,9 @@ private extension LoginView {
             openForgotPassword: openForgotPasswordPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
+    }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

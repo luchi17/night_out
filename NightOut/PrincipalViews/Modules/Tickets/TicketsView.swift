@@ -27,7 +27,7 @@ struct TicketsView: View {
                 Text("Logout")
                     .font(.headline)
                     .padding()
-                    .background(Color.black)
+                    .background(Color.blackColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }

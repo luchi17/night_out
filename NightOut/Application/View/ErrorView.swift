@@ -21,6 +21,8 @@ public extension View {
     func showCustomBackButtonNavBar() -> some View {
         self
             .navigationBarBackButtonHidden(true)
+            .toolbarBackground(Color.blackColor, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     CustomBackButton()
@@ -35,7 +37,7 @@ public extension View {
         self
             .navigationBarBackButtonHidden(true)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.black, for: .navigationBar)
+            .toolbarBackground(Color.blackColor, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -189,17 +191,17 @@ public struct ErrorView: View {
             Image(state.error.iconName)
                 .renderingMode(.template)
                 .aspectRatio(contentMode: .fill)
-                .foregroundColor(.gray)
+                .foregroundColor(.grayColor)
                 .padding(.bottom, 8)
             Text(state.error.title)
                 .font(.headline)
-                .foregroundColor(.gray)
+                .foregroundColor(.grayColor)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: 300)
             Text(state.error.description)
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(.grayColor)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 300)
                 .fixedSize(horizontal: false, vertical: true)
@@ -291,5 +293,6 @@ public struct DefaultIdleView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.blackColor.opacity(0.9))
     }
 }

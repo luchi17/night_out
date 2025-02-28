@@ -10,7 +10,7 @@ struct IconsView: View {
         VStack {
             Text("Puntúa en tu liga")
                 .font(.system(size: 16))
-                .foregroundColor(.black)
+                .foregroundColor(.blackColor)
                 .bold()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 20)

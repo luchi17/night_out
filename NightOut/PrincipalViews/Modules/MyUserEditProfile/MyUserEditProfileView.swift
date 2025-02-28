@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import PhotosUI
 
 struct MyUserEditProfileView: View {
     
@@ -16,6 +17,7 @@ struct MyUserEditProfileView: View {
     private let saveInfoPublisher = PassthroughSubject<Void, Never>()
     private let logoutPublisher = PassthroughSubject<Void, Never>()
     private let confirmDeleteAccountPublisher = PassthroughSubject<Void, Never>()
+    private let openPickerPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: MyUserEditProfileViewModel
     let presenter: MyUserEditProfilePresenter
@@ -104,7 +106,7 @@ struct MyUserEditProfileView: View {
         .padding(.horizontal, 20)
         .padding(.top, 16)
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .sheet(isPresented: $showGenderSheet) {
@@ -123,6 +125,19 @@ struct MyUserEditProfileView: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
+        .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .images)
+        .onChange(of: viewModel.selectedItem) { _, newItem in
+            Task {
+                if let newItem = newItem {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        viewModel.imageData = data
+                        viewModel.selectedImage = uiImage
+                    }
+                }
+            }
+        }
+        .showGalleryPermissionAlert(show: $viewModel.showPermissionAlert)
         .alert(isPresented: $viewModel.showAlertMessage) {
             Alert(
                 title: Text("Message"),
@@ -206,13 +221,14 @@ struct MyUserEditProfileView: View {
                     .clipShape(Circle())
             }
             
-            ImagePickerView(imageData: $viewModel.imageData, selectedImage: $viewModel.selectedImage) {
-                Text("Cambiar imagen")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.top, 8)
-            }
-            .padding()
+            Text("Cambiar imagen")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.top, 8)
+                .padding()
+                .onTapGesture {
+                    openPickerPublisher.send()
+                }
         }
         .padding(.top, 30)
     }
@@ -220,23 +236,23 @@ struct MyUserEditProfileView: View {
     var privateView: some View {
         HStack {
             Text("Perfil Privado")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.white)
             Spacer()
             Toggle(isOn: $viewModel.isPrivate) { }
-                .toggleStyle(SwitchToggleStyle(tint: viewModel.isPrivate ? .pink : .gray))
+                .toggleStyle(SwitchToggleStyle(tint: viewModel.isPrivate ? .pink : .grayColor))
         }
     }
     
     var genderView: some View {
         HStack {
             Text("Género")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.white)
             Spacer()
             
             Text(viewModel.genderType?.title ?? "Selecciona")
-                .font(.system(size: 18, weight: .medium))
+                .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.white)
             Button {
                 showGenderSheet.toggle()
@@ -252,7 +268,7 @@ struct MyUserEditProfileView: View {
     var paymentsView: some View {
         HStack(spacing: 8) {
             Text("Métodos de pago")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.white)
             Image(systemName: "creditcard")
                 .foregroundColor(.white)
@@ -263,11 +279,11 @@ struct MyUserEditProfileView: View {
     var participateView: some View {
         HStack {
             Text("Participar en Social NightOut")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.white)
             Spacer()
             Toggle(isOn: $viewModel.participate) { }
-                .toggleStyle(SwitchToggleStyle(tint: viewModel.participate ? .pink : .gray))
+                .toggleStyle(SwitchToggleStyle(tint: viewModel.participate ? .pink : .grayColor))
         }
     }
     
@@ -296,10 +312,10 @@ struct MyUserEditProfileView: View {
             openCompanySettings.toggle()
         }) {
             Text("Editar información de la empresa")
-                .font(.system(size: 18))
+                .font(.system(size: 16))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }
@@ -310,10 +326,10 @@ struct MyUserEditProfileView: View {
             logoutPublisher.send()
         }) {
             Text("Cerrar sesión")
-                .font(.system(size: 18))
+                .font(.system(size: 16))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }
@@ -324,10 +340,10 @@ struct MyUserEditProfileView: View {
             showAlertDeleteUser.toggle()
         }) {
             Text("Borrar cuenta")
-                .font(.system(size: 18))
+                .font(.system(size: 16))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }
@@ -340,7 +356,8 @@ private extension MyUserEditProfileView {
             viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
             saveInfo: saveInfoPublisher.eraseToAnyPublisher(),
             logout: logoutPublisher.eraseToAnyPublisher(),
-            confirmDeleteAccount: confirmDeleteAccountPublisher.eraseToAnyPublisher()
+            confirmDeleteAccount: confirmDeleteAccountPublisher.eraseToAnyPublisher(),
+            openPicker: openPickerPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
@@ -374,43 +391,36 @@ struct GenderPicker: View {
     @Binding var showSheet: Bool
     
     var body: some View {
-        VStack(spacing: 15) {
+        VStack {
             Text("Selecciona tu género")
+                .foregroundStyle(.white)
                 .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.black)
                 .padding(.top, 8)
             
-            Button(action: {
-                selectedGender = .hombre
-                showSheet = false
-            }) {
-                Text("Hombre")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+            Spacer()
+            
+            HStack {
+                Spacer()
+                
+                GenderCheckbox(gender: .hombre, selectedGender: $selectedGender)
+                GenderCheckbox(gender: .mujer, selectedGender: $selectedGender)
+                
+                Spacer()
             }
             
-            Button(action: {
-                selectedGender = .mujer
-                showSheet = false
-            }) {
-                Text("Mujer")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.pink)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            
+            Spacer()
+
             Button("Cancelar") {
                 showSheet = false
             }
             .foregroundColor(.red)
-            .padding(.top, 12)
+            .padding(.bottom, 20)
+            
         }
         .padding()
-        .presentationDetents([.fraction(0.3)]) // Tamaño del BottomSheet
+        .onChange(of: selectedGender) { oldValue, newValue in
+            showSheet = false
+        }
+        .presentationDetents([.fraction(0.22)])
     }
 }

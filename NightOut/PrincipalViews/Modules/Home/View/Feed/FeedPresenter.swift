@@ -11,6 +11,8 @@ final class FeedViewModel: ObservableObject {
     @Published var headerError: ErrorState?
     @Published var followersCount: Int = 0
     
+    @Published var showDiscoverEvents: Bool = false
+    
     private var matchingPosts: [PostsUser] = []
     
     init() {
@@ -37,8 +39,8 @@ final class FeedPresenterImpl: FeedPresenter {
         let onOpenMaps: InputClosure<(Double, Double)>
         let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
         let onShowUserProfile: InputClosure<UserPostProfileInfo>
-        let onShowCompanyProfile: InputClosure<CompanyModel>
         let onShowPostComments: InputClosure<PostCommentsInfo>
+        let onOpenCalendar: VoidClosure
         
     }
     
@@ -52,6 +54,7 @@ final class FeedPresenterImpl: FeedPresenter {
         let openAppleMaps: AnyPublisher<PostModel, Never>
         let showUserOrCompanyProfile: AnyPublisher<PostModel, Never>
         let showCommentsView: AnyPublisher<PostModel, Never>
+        let openCalendar: AnyPublisher<Void, Never>
     }
     
     var viewModel: FeedViewModel
@@ -97,20 +100,20 @@ final class FeedPresenterImpl: FeedPresenter {
                         .eraseToAnyPublisher()
                 }
             }
+            .handleEvents(receiveRequest: { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.viewModel.loading = true
+                }
+            })
             .withUnretained(self)
-            .performRequest(request: { presenter, _ -> AnyPublisher<FollowModel?, Never> in
+            .flatMap { presenter, _ -> AnyPublisher<FollowModel?, Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(nil).eraseToAnyPublisher()
                 }
-                return presenter.useCases.followUseCase.observeFollow(id: uid)
-                
-            }, loadingClosure: { [weak self] loading in
-                guard let self = self else { return }
-                self.viewModel.loading = loading
-            }, onError: { _ in }
-            )
+                return presenter.useCases.followUseCase.fetchFollow(id: uid)
+            }
             .withUnretained(self)
-            .performRequest(request: { presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
+            .flatMap { presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
                 presenter.useCases.postsUseCase.fetchPosts()
                     .map { posts in
                         let matchingPosts = posts.filter { post in
@@ -122,12 +125,12 @@ final class FeedPresenterImpl: FeedPresenter {
                         return Array(matchingPosts)
                     }
                     .eraseToAnyPublisher()
-            })
+            }
             .withUnretained(self)
             .eraseToAnyPublisher()
         
         userPostsPublisher
-            .performRequest(request: { presenter, userPosts -> AnyPublisher<[PostModel], Never> in
+            .flatMap { presenter, userPosts -> AnyPublisher<[PostModel], Never> in
                 let publishers: [AnyPublisher<PostModel, Never>] = userPosts.map { post in
                     
                     if post.isFromUser ?? true {
@@ -141,20 +144,31 @@ final class FeedPresenterImpl: FeedPresenter {
                     .collect()
                     .eraseToAnyPublisher()
                 
-            }, loadingClosure: { [weak self] loading in
-                guard let self = self else { return }
-                self.viewModel.loading = loading
-            }, onError: { _ in }
-            )
+            }
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
-                presenter.viewModel.posts = data
+                presenter.viewModel.loading = false
+                if data.isEmpty {
+                    presenter.viewModel.showDiscoverEvents = true
+                } else {
+                    presenter.viewModel.showDiscoverEvents = false
+                    presenter.viewModel.posts = data
+                }
             })
             .store(in: &cancellables)
         
     }
     
     func listenToInput(input: FeedPresenterImpl.ViewInputs) {
+        
+        input
+            .openCalendar
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.onOpenCalendar()
+            }
+            .store(in: &cancellables)
+        
         input
             .openMaps
             .withUnretained(self)

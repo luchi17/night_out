@@ -1,10 +1,18 @@
 import SwiftUI
 import Combine
+import AVKit
 
-struct SplashView: View, Hashable {
-
+struct SplashView: View {
+    
+    @StateObject private var viewModel = VideoPlayerViewModel()
+    
+    @State private var showMessage = ""
+    
     private let presenter: SplashPresenter
-    @ObservedObject private var viewModel: SplashViewModel
+    
+    @ObservedObject private var splashModel: SplashViewModel
+    
+    private let newScreenPublisher = PassthroughSubject<Void, Never>()
     
     public let id = UUID()
     
@@ -13,36 +21,124 @@ struct SplashView: View, Hashable {
     }
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id) // Combina el id para el hash
+        hasher.combine(id)
     }
     
     init(presenter: SplashPresenter) {
         self.presenter = presenter
-        viewModel = presenter.viewModel
+        splashModel = presenter.viewModel
         bindViewModel()
     }
     
-    private let onAppear = PassthroughSubject<Void, Never>()
+    var url: URL? = {
+        guard let url = Bundle.main.url(forResource: "animacion_copa_fondo_azul", withExtension: "mp4") else {
+            return nil
+        }
+        return url
+    }()
     
     var body: some View {
+        
         VStack {
-            Spacer()
-            Text("Image pending...")
-            Spacer()
+            ZStack {
+                
+                Color.darkBlueColor
+                    .ignoresSafeArea()
+                
+                VStack {
+                    Spacer()
+                    
+                    if viewModel.isReady {
+                        VideoPlayer(player: viewModel.player)
+                            .overlay(Rectangle().fill(Color.clear))
+                            .allowsHitTesting(false) // Deshabilita la interacción
+                            .frame(width: 300, height: 300, alignment: .center)
+                            .padding(.horizontal)
+                    } else {
+                        Image("logo_amarillo") // Reemplaza con el nombre de tu imagen
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                    }
+                    
+                    Spacer()
+                }
+                
+            }
+            
         }
-        .navigationTitle("Splash")
         .onAppear {
-            onAppear.send()
+            viewModel.configurePlayer(with: url!)
         }
+        .onDisappear {
+            viewModel.removeObservers() // Limpiar observadores al desaparecer la vista
+        }
+        .onChange(of: viewModel.isFinished) {
+            if viewModel.isFinished {
+                newScreenPublisher.send()
+            }
+        }
+    }
+    
+    func bindViewModel() {
+        let input = SplashPresenterImpl.Input(
+            viewIsLoaded: newScreenPublisher.eraseToAnyPublisher()
+        )
+        presenter.transform(input: input)
     }
 }
 
-// MARK: - Private methods
-private extension SplashView {
-    func bindViewModel() {
-        let input = SplashPresenterImpl.Input(
-            viewIsLoaded: onAppear.first().eraseToAnyPublisher()
+class VideoPlayerViewModel: ObservableObject {
+    var player: AVPlayer?
+    private var playerItem: AVPlayerItem?
+    private var playerObserver: AnyCancellable?
+    
+    @Published var isReady: Bool = false
+    @Published var isFinished: Bool = false
+    
+    func configurePlayer(with url: URL) {
+        // Crea el AVPlayerItem
+        self.playerItem = AVPlayerItem(url: url)
+        
+        // Crea el AVPlayer y asigna el item
+        self.player = AVPlayer(playerItem: playerItem)
+        
+        // Observa cuando el video está listo
+        playerObserver = playerItem?.publisher(for: \.status)
+            .sink { [weak self] status in
+                if status == .readyToPlay {
+                    self?.player?.play()
+                    self?.isReady = true
+                }
+            }
+        
+        // Notificación cuando el video se ha terminado
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(didFinishPlaying),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem
         )
-        presenter.transform(input: input)
+    }
+    
+    @objc func didFinishPlaying() {
+        self.isFinished = true
+    }
+    
+    func play() {
+        player?.play()
+    }
+    
+    func pause() {
+        player?.pause()
+    }
+    
+    // Método para remover observadores
+    func removeObservers() {
+        // Eliminar observador de la notificación
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
+        
+        // Cancelar los publishers de Combine
+        playerObserver?.cancel()
     }
 }

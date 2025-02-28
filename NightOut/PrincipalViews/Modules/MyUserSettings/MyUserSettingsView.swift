@@ -39,13 +39,13 @@ struct MyUserSettingsView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Política de Privacidad")
                             .font(.system(size: 16))
-                            .foregroundColor(.gray)
+                            .foregroundColor(.grayColor)
                             .onTapGesture {
                                 showPrivacyPolicy.toggle()
                             }
                         Text("Términos y Condiciones")
                             .font(.system(size: 16))
-                            .foregroundColor(.gray)
+                            .foregroundColor(.grayColor)
                             .onTapGesture {
                                 showTermsAndConditions.toggle()
                             }
@@ -54,7 +54,7 @@ struct MyUserSettingsView: View {
                 
                 SectionView(iconName: "envelope", title: "Contáctanos") {
                     Text(AttributedString("corporativo@formatink.com"))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.grayColor)
                         .font(.system(size: 16))
                         .onTapGesture {
                             if let url = URL(string: "mailto:corporativo@formatink.com") {
@@ -98,14 +98,14 @@ struct MyUserSettingsView: View {
                 
                 Text(viewModel.appVersion)
                     .font(.system(size: 14))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.grayColor)
                     .padding(.top, 20)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(20)
         }
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .alert(isPresented: $viewModel.showAlertMessage) {

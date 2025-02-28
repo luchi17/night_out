@@ -42,7 +42,7 @@ struct FriendsView: View {
             Spacer()
         }
         .background(
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
         )
         .applyStates(error: nil, isIdle: viewModel.loading)
@@ -73,7 +73,7 @@ struct FriendRow: View {
                 image.resizable()
             } placeholder: {
                 Circle()
-                    .fill(Color.gray.opacity(0.5)) // Color mientras carga
+                    .fill(Color.grayColor.opacity(0.5)) // Color mientras carga
                     .frame(width: 50, height: 50)
             }
             .frame(width: 50, height: 50)
@@ -86,7 +86,7 @@ struct FriendRow: View {
             Spacer()
         }
         .padding()
-        .background(Color.black.opacity(0.6)) // Fondo oscuro para cada fila
+        .background(Color.blackColor)
         .cornerRadius(10)
     }
 }
@@ -98,7 +98,7 @@ struct ListUserEmptySubView: View {
         HStack(spacing: 10) {
             
             Circle()
-                .fill(Color.gray) // Color mientras carga
+                .fill(Color.grayColor) // Color mientras carga
                 .frame(width: 40, height: 40)
                 .padding(.leading, 5)
             

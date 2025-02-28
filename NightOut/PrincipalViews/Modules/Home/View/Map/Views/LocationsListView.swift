@@ -28,9 +28,9 @@ struct LocationsListView: View {
                     Spacer() // Para empujar el contenido hacia la izquierda
                 }
                 .frame(maxWidth: .infinity) // Ocupa todo el ancho
-                .background(Color.gray.opacity(0.5))
+                .background(Color.grayColor.opacity(0.5))
                 .cornerRadius(10)
-                .shadow(color: .gray.opacity(0.4), radius: 5, x: 0, y: 3)
+                .shadow(color: .grayColor.opacity(0.4), radius: 5, x: 0, y: 3)
                 .onTapGesture {
                     onLocationSelected(location)
                 }

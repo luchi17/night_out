@@ -9,7 +9,7 @@ struct AddPostClubsList: View {
         VStack(alignment: .leading) {
             
             Text("Elige un club")
-                .foregroundColor(.black)
+                .foregroundColor(.blackColor)
                 .font(.system(size: 16))
                 .bold()
                 .padding(.top, 20)
@@ -20,7 +20,7 @@ struct AddPostClubsList: View {
                     HStack(spacing: 12) {
                         Text(location.name)
                             .font(.system(size: 14))
-                            .foregroundColor(.black)
+                            .foregroundColor(.blackColor)
                         
                         Spacer() // Para empujar el contenido hacia la izquierda
                     }
@@ -64,7 +64,7 @@ struct ClubSelectionAlert: View {
                 
                 Text("Localización")
                     .font(.system(size: 16))
-                    .foregroundColor(.black)
+                    .foregroundColor(.blackColor)
                     .bold()
                     .padding(.top, 12)
                 
@@ -74,14 +74,14 @@ struct ClubSelectionAlert: View {
                     
                     Text("Tu ubicación")
                         .font(.system(size: 14))
-                        .foregroundColor(.black)
+                        .foregroundColor(.blackColor)
                 }
                 Button {
                     onTypeSelected(AddPostLocationSelection.clubs)
                 } label: {
                     Text("Clubs")
                         .font(.system(size: 14))
-                        .foregroundColor(.black)
+                        .foregroundColor(.blackColor)
                 }
             }
             

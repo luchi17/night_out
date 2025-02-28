@@ -136,7 +136,7 @@ struct ChupitoWarsView: View {
                     .font(.system(size: 18, weight: .bold))
                     .padding(.vertical, 8)
                     .padding(.horizontal)
-                    .background(Color.gray)
+                    .background(Color.grayColor)
                     .foregroundColor(.white)
                     .cornerRadius(25)
             }
@@ -155,7 +155,7 @@ struct ChupitoWarsView: View {
                     .font(.system(size: 18, weight: .bold))
                     .padding(.vertical, 8)
                     .padding(.horizontal)
-                    .background(gameStarted ? Color.gray : Color.green)
+                    .background(gameStarted ? Color.grayColor : Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(25)
             }
@@ -173,13 +173,13 @@ struct ChupitoWarsView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .padding(.horizontal)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
     }
     
     var chupitoInitIconView: some View {
-        Color.black
+        Color.blackColor
             .opacity(0.8)
             .edgesIgnoringSafeArea(.all)
             .overlay {
@@ -526,7 +526,7 @@ struct ChupitoView: View {
         ZStack {
             // Fondo semi-transparente
             if showChupito {
-                Color.black.opacity(0.3)
+                Color.blackColor.opacity(0.3)
                     .edgesIgnoringSafeArea(.all)
                     .transition(.opacity)
                     .zIndex(1)

@@ -24,7 +24,7 @@ struct UserPostProfileView: View {
     
     var body: some View {
         ZStack {
-            Color.black
+            Color.blackColor
                 .edgesIgnoringSafeArea(.all)
             VStack(spacing: 0) {
                 // Imagen de perfil
@@ -132,7 +132,7 @@ struct CounterView: View {
                 .foregroundColor(.white)
         }
         .frame(width: 100, height: 80)
-        .background(Color.gray)
+        .background(Color.grayColor)
         .cornerRadius(10)
         .padding(.horizontal, 8)
     }

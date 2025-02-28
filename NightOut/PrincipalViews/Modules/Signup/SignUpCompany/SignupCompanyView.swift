@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import CoreLocation
+import PhotosUI
 
 struct SignupCompanyView: View {
     
@@ -16,6 +17,7 @@ struct SignupCompanyView: View {
     
     private let signupCompanyPublisher = PassthroughSubject<Void, Never>()
     private let loginPublisher = PassthroughSubject<Void, Never>()
+    private let openPickerPublisher = PassthroughSubject<Void, Never>()
     
     init(
         presenter: SignupCompanyPresenter
@@ -26,78 +28,99 @@ struct SignupCompanyView: View {
     }
     
     var body: some View {
-        VStack(spacing: 10) {
+        
+        ZStack(alignment: .bottom) {
+            
+            VStack(spacing: 0) {
+                ScrollView {
+                    ScrollViewReader { proxy in
+                        
+                        VStack(spacing: 10) {
 
-            Spacer()
-            
-            Image("nightout")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 70)
-                .foregroundStyle(.white)
-            
-            imagePicker
-                .padding(.bottom, 20)
-            
-            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-            
-            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.all, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.white)
-                .accentColor(.white)
-                .padding(.bottom, 10)
-            
-            locationButton
-            TimeButtonView(
-                title: "APERTURA",
-                selectedTimeString: $viewModel.startTime
-            )
-            TimeButtonView(
-                title: "CIERRE",
-                selectedTimeString: $viewModel.endTime
-            )
-            selectTagButton
-            
-            Spacer()
-            
-            HStack(spacing: 20) {
-                registerButton
-                signInButton
+                            Spacer()
+                            
+                            Image("n_logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 70)
+                                .foregroundStyle(.white)
+                            
+                            imagePicker
+                                .padding(.bottom, 20)
+                            
+                            TextField("", text: $viewModel.fullName, prompt: Text("Nombre...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                            
+                            SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.all, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                                .padding(.bottom, 10)
+                            
+                            locationButton
+                            TimeButtonView(
+                                title: "APERTURA",
+                                selectedTimeString: $viewModel.startTime
+                            )
+                            TimeButtonView(
+                                title: "CIERRE",
+                                selectedTimeString: $viewModel.endTime
+                            )
+                            selectTagButton
+                            
+                            Spacer()
+                            
+                        }
+                    }
+                }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .scrollDismissesKeyboard(.interactively)
+                .scrollIndicators(.hidden)
+                
+                Spacer()
             }
-            .padding(.bottom, 60)
+            
+            VStack {
+                Spacer()
+                HStack(spacing: 20) {
+                    registerButton
+                    signInButton
+                }
+            }
+            .ignoresSafeArea(.keyboard)
+            
         }
         .padding(.horizontal, 20)
         .background(
-            Color.black
+            Color.blackColor
         )
         .sheet(
             isPresented: $showLocation,
@@ -111,6 +134,19 @@ struct SignupCompanyView: View {
                     .presentationDragIndicator(.visible)
             }
         )
+        .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .images)
+        .onChange(of: viewModel.selectedItem) { _, newItem in
+            Task {
+                if let newItem = newItem {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        viewModel.imageData = data
+                        viewModel.selectedImage = uiImage
+                    }
+                }
+            }
+        }
+        .showGalleryPermissionAlert(show: $viewModel.showPermissionAlert)
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -128,14 +164,12 @@ struct SignupCompanyView: View {
     }
     
     private var imagePicker: some View {
-        ImagePickerView(
-            imageData: $viewModel.imageData,
-            selectedImage: $viewModel.selectedImage
-        ) {
+        VStack {
             ZStack {
                 Circle()
-                    .stroke(Color.white, lineWidth: 2) // Borde blanco
-                    .frame(width: 120, height: 120) // Tamaño del círculo
+                    .stroke(Color.white, lineWidth: 2)
+                    .frame(width: 120, height: 120)
+
                 if let selectedImage = viewModel.selectedImage {
                     Image(uiImage: selectedImage)
                         .resizable()
@@ -150,9 +184,11 @@ struct SignupCompanyView: View {
                         .clipShape(Circle())
                 }
             }
+            .onTapGesture {
+                openPickerPublisher.send()
+            }
         }
     }
-    
     
     private var registerButton: some View {
         Button(action: {
@@ -163,7 +199,7 @@ struct SignupCompanyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
     }
@@ -177,7 +213,7 @@ struct SignupCompanyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
     }
@@ -191,7 +227,7 @@ struct SignupCompanyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
     }
@@ -205,7 +241,7 @@ struct SignupCompanyView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.gray)
+                .background(Color.grayColor)
                 .cornerRadius(25)
         }
         .confirmationDialog("Elija vestimenta", isPresented: $showTagSelection) {
@@ -227,7 +263,8 @@ private extension SignupCompanyView {
     func bindViewModel() {
         let input = SignupCompanyPresenterImpl.ViewInputs(
             signupCompany: signupCompanyPublisher.eraseToAnyPublisher(),
-            login: loginPublisher.eraseToAnyPublisher()
+            login: loginPublisher.eraseToAnyPublisher(),
+            openPicker: openPickerPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
