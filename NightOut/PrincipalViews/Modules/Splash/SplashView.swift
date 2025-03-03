@@ -55,7 +55,7 @@ struct SplashView: View {
                             .frame(width: 300, height: 300, alignment: .center)
                             .padding(.horizontal)
                     } else {
-                        Image("logo_amarillo") // Reemplaza con el nombre de tu imagen
+                        Image("logo_amarillo")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 150, height: 150)
@@ -71,7 +71,7 @@ struct SplashView: View {
             viewModel.configurePlayer(with: url!)
         }
         .onDisappear {
-            viewModel.removeObservers() // Limpiar observadores al desaparecer la vista
+            viewModel.removeObservers()
         }
         .onChange(of: viewModel.isFinished) {
             if viewModel.isFinished {
