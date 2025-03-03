@@ -4,7 +4,8 @@ import Combine
 
 struct LeagueView: View {
     
-    @State private var showHelp: Bool = false
+    @State private var showHelpSheet: Bool = false
+    @State private var showCreateLeagueSheet: Bool = false
     @State private var leagueToDelete: League?
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
@@ -43,7 +44,7 @@ struct LeagueView: View {
                     }
                     Spacer()
                     Button(action: {
-                        showHelp = true
+                        showHelpSheet.toggle()
                     }) {
                         Image("help_icon")
                             .resizable()
@@ -114,6 +115,14 @@ struct LeagueView: View {
         } message: {
             Text("¿Estás seguro de eliminar esta liga?")
         }
+        .sheet(isPresented: $showHelpSheet) {
+            LeagueHelpView(close: {
+                showHelpSheet.toggle()
+            })
+            .presentationDetents([.large])
+            .presentationDragIndicator(.hidden)
+        }
+        .preferredColorScheme(.dark)
         .showToast(
             error: (
                 type: viewModel.toast,
