@@ -103,12 +103,14 @@ struct LeagueView: View {
                 .frame(height: 120)
             }
         })
-        .alert("Eliminar Liga", isPresented: $viewModel.showDeleteAlert, presenting: leagueToDelete) { league in
+        .alert("Eliminar Liga", isPresented: $viewModel.showDeleteAlert) {
             Button("Sí", role: .destructive) {
-                deleteLeaguePublisher.send(league)
+                if let leagueToDelete = leagueToDelete {
+                    deleteLeaguePublisher.send(leagueToDelete)
+                }
             }
             Button("Cancelar", role: .cancel) { }
-        } message: { _ in
+        } message: {
             Text("¿Estás seguro de eliminar esta liga?")
         }
         .showToast(
@@ -154,7 +156,8 @@ private extension LeagueView {
         let input = LeaguePresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             deleteLeague: deleteLeaguePublisher.eraseToAnyPublisher(),
-            openCreateLeague: openCreateLeaguePublisher.eraseToAnyPublisher()
+            openCreateLeague: openCreateLeaguePublisher.eraseToAnyPublisher(),
+            openLeagueDetail: openLeaguePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

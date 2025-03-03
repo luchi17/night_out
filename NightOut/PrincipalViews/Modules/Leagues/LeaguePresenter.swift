@@ -18,7 +18,6 @@ final class LeagueViewModel: ObservableObject {
     @Published var remainingSeconds: Int = 0
     
     var totalSeconds: Int = 0
-    //    var timer: Timer?
     
     private var timer: AnyCancellable?
     
@@ -99,12 +98,14 @@ final class LeaguePresenterImpl: LeaguePresenter {
     
     struct Actions {
         //        let goToCreateLeague: VoidClosure
+//        let goToLeagueDetail: InputClosure<League>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let deleteLeague: AnyPublisher<League, Never>
         let openCreateLeague: AnyPublisher<Void, Never>
+        let openLeagueDetail: AnyPublisher<League, Never>
     }
     
     var viewModel: LeagueViewModel
@@ -134,6 +135,22 @@ final class LeaguePresenterImpl: LeaguePresenter {
             .withUnretained(self)
             .sink { presenter, league in
                 presenter.deleteLeague(league)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openCreateLeague
+            .withUnretained(self)
+            .sink { presenter, _ in
+//                presenter.actions.goToCreateLeague()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openLeagueDetail
+            .withUnretained(self)
+            .sink { presenter, _ in
+//                presenter.actions.goToLeagueDetail()
             }
             .store(in: &cancellables)
         
@@ -220,10 +237,6 @@ final class LeaguePresenterImpl: LeaguePresenter {
         }
         
         self.viewModel.loading = false
-    }
-    
-    private func createLeague() {
-        //        actions.goToCreateLeague()
     }
     
     private func deleteLeague(_ league: League) {
