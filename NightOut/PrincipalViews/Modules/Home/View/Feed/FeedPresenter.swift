@@ -100,20 +100,20 @@ final class FeedPresenterImpl: FeedPresenter {
                         .eraseToAnyPublisher()
                 }
             }
-            .handleEvents(receiveRequest: { [weak self] _ in
-                DispatchQueue.main.async {
-                    self?.viewModel.loading = true
-                }
-            })
             .withUnretained(self)
-            .flatMap { presenter, _ -> AnyPublisher<FollowModel?, Never> in
+            .performRequest(request: { presenter, _ -> AnyPublisher<FollowModel?, Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just(nil).eraseToAnyPublisher()
                 }
-                return presenter.useCases.followUseCase.fetchFollow(id: uid)
-            }
+                return presenter.useCases.followUseCase.observeFollow(id: uid)
+                
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in }
+            )
             .withUnretained(self)
-            .flatMap { presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
+            .performRequest(request: { presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
                 presenter.useCases.postsUseCase.fetchPosts()
                     .map { posts in
                         let matchingPosts = posts.filter { post in
@@ -125,12 +125,12 @@ final class FeedPresenterImpl: FeedPresenter {
                         return Array(matchingPosts)
                     }
                     .eraseToAnyPublisher()
-            }
+            })
             .withUnretained(self)
             .eraseToAnyPublisher()
         
         userPostsPublisher
-            .flatMap { presenter, userPosts -> AnyPublisher<[PostModel], Never> in
+            .performRequest(request: { presenter, userPosts -> AnyPublisher<[PostModel], Never> in
                 let publishers: [AnyPublisher<PostModel, Never>] = userPosts.map { post in
                     
                     if post.isFromUser ?? true {
@@ -144,10 +144,13 @@ final class FeedPresenterImpl: FeedPresenter {
                     .collect()
                     .eraseToAnyPublisher()
                 
-            }
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in }
+            )
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
-                presenter.viewModel.loading = false
                 if data.isEmpty {
                     presenter.viewModel.showDiscoverEvents = true
                 } else {
