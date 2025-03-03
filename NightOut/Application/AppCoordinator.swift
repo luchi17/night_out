@@ -57,7 +57,8 @@ final class AppCoordinator: ObservableObject {
             openMessages: openMessages,
             showPrivateProfile: showPrivateProfile,
             openTinder: openTinder,
-            openHub: openHub
+            openHub: openHub,
+            openLeagueDetail: openLeagueDetail
         )
         self.push(tabBarCoordinator)
     }
@@ -161,6 +162,12 @@ final class AppCoordinator: ObservableObject {
         let forgotPasswordCoordinator = ForgotPasswordCoordinator()
         self.push(forgotPasswordCoordinator)
     }
+    
+    private func openLeagueDetail(league: League) {
+        let leagueCoordinator = LeagueDetailCoordinator(actions: .init(), league: league)
+        self.push(leagueCoordinator)
+    }
+    
 }
 
 private extension AppCoordinator {

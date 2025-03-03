@@ -91,14 +91,13 @@ protocol LeaguePresenter {
 final class LeaguePresenterImpl: LeaguePresenter {
     
     struct UseCases {
-        let followUseCase: FollowUseCase
         let userDataUseCase: UserDataUseCase
         let companyDataUseCase: CompanyDataUseCase
     }
     
     struct Actions {
-        //        let goToCreateLeague: VoidClosure
-//        let goToLeagueDetail: InputClosure<League>
+        let goToCreateLeague: VoidClosure
+        let goToLeagueDetail: InputClosure<League>
     }
     
     struct ViewInputs {
@@ -142,15 +141,15 @@ final class LeaguePresenterImpl: LeaguePresenter {
             .openCreateLeague
             .withUnretained(self)
             .sink { presenter, _ in
-//                presenter.actions.goToCreateLeague()
+                presenter.actions.goToCreateLeague()
             }
             .store(in: &cancellables)
         
         input
             .openLeagueDetail
             .withUnretained(self)
-            .sink { presenter, _ in
-//                presenter.actions.goToLeagueDetail()
+            .sink { presenter, league in
+                presenter.actions.goToLeagueDetail(league)
             }
             .store(in: &cancellables)
         

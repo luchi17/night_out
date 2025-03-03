@@ -27,7 +27,7 @@ struct LeagueView: View {
     
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
+            Color.blackColor.edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 16) {
                 HStack {
@@ -92,10 +92,6 @@ struct LeagueView: View {
             .padding(.top, 60)
             .padding(.bottom, 35)
         }
-        .background(
-            Color.black
-                .edgesIgnoringSafeArea(.top)
-        )
         .overlay(content: {
             if viewModel.showNoLeaguesDialog {
                 CreateLeagueDialog(

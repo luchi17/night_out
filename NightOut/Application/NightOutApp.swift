@@ -110,6 +110,11 @@ struct ContentView: View {
                                         .build()
                                 }
                         }
+                        .navigationDestination(for: LeagueDetailCoordinator.self) { coordinator in
+                            coordinator
+                                .build()
+                                .showCustomBackButtonNavBar()
+                        }
                 })
         }
         .environmentObject(appCoordinator)

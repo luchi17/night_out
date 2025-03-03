@@ -2,7 +2,7 @@
 import SwiftUI
 import Combine
 
-class LeagueCoordinator: ObservableObject, Hashable {
+class LeagueDetailCoordinator: ObservableObject, Hashable {
     
     let id = UUID()
     
@@ -10,26 +10,29 @@ class LeagueCoordinator: ObservableObject, Hashable {
         hasher.combine(id)
     }
     
-    static func == (lhs: LeagueCoordinator, rhs: LeagueCoordinator) -> Bool {
+    static func == (lhs: LeagueDetailCoordinator, rhs: LeagueDetailCoordinator) -> Bool {
         return lhs.id == rhs.id
     }
     
-    private let actions: LeaguePresenterImpl.Actions
+    private let actions: LeagueDetailPresenterImpl.Actions
+    private let league: League
     
-    init(actions: LeaguePresenterImpl.Actions) {
+    init(actions: LeagueDetailPresenterImpl.Actions, league: League) {
         self.actions = actions
+        self.league = league
     }
     
     @ViewBuilder
     func build() -> some View {
-        let presenter = LeaguePresenterImpl(
+        let presenter = LeagueDetailPresenterImpl(
             useCases: .init(
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
                 companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
             ),
-            actions: actions
+            actions: actions,
+            league: league
         )
-        LeagueView(presenter: presenter)
+        LeagueDetailView(presenter: presenter)
     }
 }
 
