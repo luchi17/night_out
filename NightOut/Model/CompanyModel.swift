@@ -39,10 +39,10 @@ struct CompanyModel: Codable {
     var uid: String
     var entradas: [String: EntradaModel]?
     var payment: PaymentMethodModel?
-    var ticketsSold:  [String: TicketVendido]? = [:]
+    var ticketsSold:  [String: TicketModel]? = [:]
     var profile: String?
     var fcm_token: String?
-    var misLigas: [String: Bool]?
+//    var misLigas: [String: Bool]?
    
     var profileType: ProfileType {
         if profile == "private" {
@@ -67,7 +67,7 @@ struct CompanyModel: Codable {
             case ticketsSold = "TicketsVendidos"
             case profile = "profile"
             case fcm_token
-            case misLigas
+//            case misLigas
         }
 }
 
@@ -114,33 +114,5 @@ struct DynamicCodingKey: CodingKey {
     init?(intValue: Int) {
         self.intValue = intValue
         self.stringValue = "\(intValue)"
-    }
-}
-
-struct TicketVendido: Codable {
-    let apellido: String
-    let correo: String
-    let descripcion: String?
-    let discoteca: String?
-    let dni: String?
-    let evento: String?
-    let fecha: String?
-    let nombre: String?
-    let numeroTicket: String
-    let precio: String?
-    let qrCodeBase64: String?
-
-    enum CodingKeys: String, CodingKey {
-        case apellido
-        case correo
-        case descripcion
-        case discoteca
-        case dni
-        case evento
-        case fecha
-        case nombre
-        case numeroTicket
-        case precio
-        case qrCodeBase64
     }
 }
