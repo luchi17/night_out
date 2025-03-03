@@ -78,6 +78,7 @@ struct LeagueView: View {
                                     openLeaguePublisher.send(league)
                                 },
                                 onLongPress: {
+                                    leagueToDelete = league
                                     viewModel.showDeleteAlert.toggle()
                                 })
                         }
