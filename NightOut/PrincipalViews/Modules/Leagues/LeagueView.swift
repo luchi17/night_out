@@ -253,7 +253,7 @@ struct LeagueRow: View {
                 Text(league.name)
                     .font(.headline)
                     .foregroundStyle(.white)
-                Image("copa\(Int.random(in: 1...8))")
+                Image(league.imageName)
                     .resizable()
                     .frame(width: 40, height: 40)
                     .clipShape(Circle())

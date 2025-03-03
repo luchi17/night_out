@@ -207,7 +207,13 @@ final class LeaguePresenterImpl: LeaguePresenter {
                 // Evitar duplicados
                 if !self.viewModel.leaguesList.contains(where: { $0.leagueId == leagueId }) {
                     DispatchQueue.main.async {
-                        self.viewModel.leaguesList.append(League(leagueId: leagueId, name: leagueName, drinks: Int(drinks)))
+                        self.viewModel.leaguesList.append(League(
+                            leagueId: leagueId,
+                            name: leagueName,
+                            drinks: Int(drinks),
+                            imageName: "copa\(Int.random(in: 1...8))"
+                        )
+                        )
                     }
                 }
             }
@@ -236,4 +242,5 @@ struct League: Identifiable {
     let leagueId: String
     let name: String
     let drinks: Int
+    let imageName: String
 }
