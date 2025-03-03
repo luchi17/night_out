@@ -16,29 +16,34 @@ final class LeagueViewModel: ObservableObject {
     @Published var progressColor: Color = .green
     
     @Published var remainingSeconds: Int = 0
-    private var totalSeconds: Int = 0
-    private var timer: Timer?
     
+    var totalSeconds: Int = 0
+    //    var timer: Timer?
+    
+    private var timer: AnyCancellable?
     
     deinit {
-        timer?.invalidate()
+        timer?.cancel()
     }
+    
     init() {
         initializeMonthTiming()
         startTimer()
     }
     
     private func startTimer() {
-        timer?.invalidate() // Asegurar que no haya otro temporizador activo
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if self.remainingSeconds > 0 {
-                self.remainingSeconds -= 1
-                self.updateProgress()
-                self.getProgressColor()
-            } else {
-                self.handleRankingEnd()
+        timer = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                if self.remainingSeconds > 0 {
+                    self.remainingSeconds -= 1
+                    self.updateProgress()
+                    self.getProgressColor()
+                } else {
+                    self.handleRankingEnd()
+                }
             }
-        }
     }
     
     
@@ -72,12 +77,11 @@ final class LeagueViewModel: ObservableObject {
         }
     }
     private func handleRankingEnd() {
+        timer?.cancel()
         DispatchQueue.main.async {
             self.progress = 100
         }
     }
-    
-    
 }
 
 protocol LeaguePresenter {

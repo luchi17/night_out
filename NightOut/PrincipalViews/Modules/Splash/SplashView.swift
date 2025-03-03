@@ -109,6 +109,7 @@ class VideoPlayerViewModel: ObservableObject {
                 if status == .readyToPlay {
                     self?.player?.play()
                     self?.isReady = true
+                    print("ready")
                 }
             }
         

@@ -42,6 +42,7 @@ struct CompanyModel: Codable {
     var ticketsSold:  [String: TicketVendido]? = [:]
     var profile: String?
     var fcm_token: String?
+    var misLigas: [String: Bool]?
    
     var profileType: ProfileType {
         if profile == "private" {
@@ -66,6 +67,7 @@ struct CompanyModel: Codable {
             case ticketsSold = "TicketsVendidos"
             case profile = "profile"
             case fcm_token
+            case misLigas
         }
 }
 
