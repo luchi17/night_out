@@ -23,7 +23,11 @@ class LeagueCoordinator: ObservableObject, Hashable {
     @ViewBuilder
     func build() -> some View {
         let presenter = LeaguePresenterImpl(
-            useCases: .init(),
+            useCases: .init(
+                followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
+                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
+            ),
             actions: actions
         )
         LeagueView(presenter: presenter)
