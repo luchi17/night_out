@@ -34,7 +34,7 @@ struct LeagueView: View {
                         openCreateLeaguePublisher.send()
                     }) {
                         Text("Crea una liga".uppercased())
-                            .font(.system(size: 18, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                             .padding(.vertical, 8)
                             .padding(.horizontal, 12)
                             .background(Color.grayColor)
@@ -101,7 +101,7 @@ struct LeagueView: View {
                     createLeague: openCreateLeaguePublisher.send,
                     showSheet: $viewModel.showNoLeaguesDialog
                 )
-                .frame(height: 120)
+                .frame(height: 200)
             }
         })
         .alert("Eliminar Liga", isPresented: $viewModel.showDeleteAlert) {
@@ -187,15 +187,14 @@ struct CreateLeagueDialog: View {
                     .foregroundStyle(.white)
                     .font(.system(size: 18, weight: .bold))
                     .frame(alignment: .center)
-                    .padding(.top, 8)
-                
+                    .padding(.top, 15)
                 
                 Spacer()
                 
                 Text("Parece que no tienes ninguna liga creada.\n¿Quieres crear una nueva?")
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .medium))
-                    .frame(alignment: .center)
+                    .multilineTextAlignment(.center)
                 
                 HStack {
                     Spacer()
@@ -205,43 +204,47 @@ struct CreateLeagueDialog: View {
                         createLeague()
                     }) {
                         Text("Si".uppercased())
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .font(.system(size: 18, weight: .bold))
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 15)
                             .background(Color.grayColor)
                             .foregroundColor(.white)
                             .cornerRadius(25)
                     }
-                    .padding(.top, 10)
+
                     Button(action: {
                         showSheet = false
                     }) {
                         Text("No".uppercased())
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .font(.system(size: 18, weight: .bold))
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 15)
                             .background(Color.grayColor)
                             .foregroundColor(.white)
                             .cornerRadius(25)
                     }
-                    .padding(.top, 15)
                     
                     Spacer()
                 }
+                .frame(height: 45)
+                .padding(.horizontal, 70)
+                .padding(.top, 15)
                 
                 Spacer()
             }
             
-            
-            Image("chupito_dialog_nb")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 60, height: 60)
-                .padding(.leading, 12)
-                .padding(.top, 12)
-            
+            HStack {
+                Image("chupito_dialog_nb")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 45, height: 45)
+                
+                Spacer()
+            }
+            .padding(.leading, 2)
+            .padding(.top, 5)
         }
-        .padding()
+        .background(Color.blackColor)
+        .cornerRadius(12)
+        .padding(.horizontal, 30)
     }
 }
 

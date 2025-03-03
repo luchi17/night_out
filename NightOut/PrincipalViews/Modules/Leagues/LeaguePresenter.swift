@@ -173,6 +173,7 @@ final class LeaguePresenterImpl: LeaguePresenter {
                     let ids = Array(misLigas.keys)
                     presenter.loadLeaguesDetails(leagueIds: ids)
                 } else {
+                    presenter.viewModel.loading = false
                     presenter.viewModel.showNoLeaguesDialog = true
                 }
                 
