@@ -34,7 +34,7 @@ struct PostDatasourceImpl: PostDatasource {
                     let posts = try snapshot?.data(as: [String: PostUserModel].self)
                     promise(.success(posts ?? [:]))
                 } catch {
-                    print("Error decoding data: \(error.localizedDescription)")
+                    print("Error decoding posts data: \(error.localizedDescription)")
                     promise(.success([:]))
                 }
             }
@@ -49,7 +49,7 @@ struct PostDatasourceImpl: PostDatasource {
             
             ref.getData { error, snapshot in
                 guard error == nil else {
-                    print("Error fetching data: \(error!.localizedDescription)")
+                    print("Error fetching follow data: \(error!.localizedDescription)")
                     promise(.success(nil))
                     return
                 }
@@ -61,7 +61,7 @@ struct PostDatasourceImpl: PostDatasource {
                         promise(.success(nil))
                     }
                 } catch {
-                    print("Error decoding data: \(error.localizedDescription)")
+                    print("Error decoding follow data: \(error.localizedDescription)")
                     promise(.success(nil))
                 }
             }
@@ -80,7 +80,7 @@ struct PostDatasourceImpl: PostDatasource {
                 let followModel = try snapshot.data(as: FollowModel.self)
                 subject.send(followModel)
             } catch {
-                print("Error decoding data: \(error.localizedDescription)")
+                print("Error decoding follow data: \(error.localizedDescription)")
                 subject.send(nil)
             }
         }

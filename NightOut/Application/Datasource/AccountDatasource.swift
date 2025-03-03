@@ -214,7 +214,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                         promise(.success(nil))
                     }
                 } catch {
-                    print("Error decoding data: \(error.localizedDescription)")
+                    print("Error decoding user data: \(error.localizedDescription)")
                     promise(.success(nil))
                 }
             }
@@ -257,7 +257,7 @@ struct AccountDatasourceImpl: AccountDatasource {
             
             ref.getData { error, snapshot in
                 guard error == nil else {
-                    print("Error fetching data: \(error!.localizedDescription)")
+                    print("Error fetching company info data: \(error!.localizedDescription)")
                     promise(.success(nil))  // Envía `nil` si hay error
                     return
                 }
@@ -273,7 +273,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                         promise(.success(nil))  // Envía `nil` si no se encuentra el modelo
                     }
                 } catch {
-                    print("Error decoding data: \(error.localizedDescription)")
+                    print("Error decoding company info data: \(error.localizedDescription)")
                     promise(.success(nil))  // Envía `nil` en caso de error
                 }
             }

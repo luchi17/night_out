@@ -35,7 +35,7 @@ struct LocationDatasourceImpl: LocationDatasource {
                     publisher.send(nil)
                 }
             } catch {
-                print("Error decoding data: \(error.localizedDescription)")
+                print("Error decoding company data: \(error.localizedDescription)")
                 publisher.send(nil)
             }
         }
