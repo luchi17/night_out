@@ -36,7 +36,7 @@ struct CreateLeagueView: View {
                     friendsView
                 }
                 
-                if viewModel.isSearching {
+                if !viewModel.searchResults.isEmpty {
                     ScrollView {
                         VStack(spacing: 10) {
                             ForEach(viewModel.searchResults, id: \.uid) { user in
@@ -54,7 +54,11 @@ struct CreateLeagueView: View {
                     .simultaneousGesture(DragGesture().onChanged { _ in
                         hideKeyboard() // Esconde el teclado cuando el usuario hace scroll
                     })
+                } else {
+                    Spacer() // Espaciador para centrar el contenido si no hay resultados
                 }
+                
+                Spacer()
                 
                 Button(action: {
                     createLeaguePublisher.send()
@@ -68,8 +72,8 @@ struct CreateLeagueView: View {
                         .cornerRadius(25)
                         .shadow(radius: 4)
                 }
-                .padding()
             }
+            .padding()
             
         }
         .showToast(
@@ -82,7 +86,6 @@ struct CreateLeagueView: View {
             ),
             isIdle: viewModel.loading
         )
-        .navigationBarBackButtonHidden()
         .onAppear {
             viewDidLoadPublisher.send()
         }
@@ -94,7 +97,7 @@ struct CreateLeagueView: View {
             if isCancelVisible {
                 Button(action: {
                     viewModel.searchText = ""
-                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    hideKeyboard()
                     withAnimation {
                         isCancelVisible = false
                     }
@@ -215,7 +218,7 @@ struct CreateLeagueUser: Codable, Equatable {
         hasher.combine(uid)
     }
     
-    static func == (lhs: User, rhs: User) -> Bool {
+    static func == (lhs: CreateLeagueUser, rhs: CreateLeagueUser) -> Bool {
         return lhs.uid == rhs.uid
     }
 }

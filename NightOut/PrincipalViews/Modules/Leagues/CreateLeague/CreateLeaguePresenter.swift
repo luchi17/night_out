@@ -10,7 +10,6 @@ final class CreateLeagueViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedFriends: [CreateLeagueUser] = []
     @Published var searchResults: [CreateLeagueUser] = []
-    @Published var isSearching: Bool = false
     
     @Published var loading: Bool = true
     @Published var toast: ToastType?
@@ -33,15 +32,14 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
     
     struct Actions {
         let goBack: VoidClosure
-        //        let goToLeagueDetail: InputClosure<League>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let createLeague: AnyPublisher<Void, Never>
-        let removeFriend: AnyPublisher<User, Never>
+        let removeFriend: AnyPublisher<CreateLeagueUser, Never>
         let searchUsers: AnyPublisher<Void, Never>
-        let addFriend: AnyPublisher<User, Never>
+        let addFriend: AnyPublisher<CreateLeagueUser, Never>
     }
     
     var viewModel: CreateLeagueViewModel
