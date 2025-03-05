@@ -167,7 +167,6 @@ final class LeaguePresenterImpl: LeaguePresenter {
             }
             .withUnretained(self)
             .sink { presenter, misLigas in
-                
                 if let misLigas = misLigas, !misLigas.isEmpty {
                     let ids = Array(misLigas.keys)
                     presenter.loadLeaguesDetails(leagueIds: ids)
@@ -178,33 +177,6 @@ final class LeaguePresenterImpl: LeaguePresenter {
                 
             }
             .store(in: &cancellables)
-        
-#warning("TODO: leagues for company")
-        //        input
-        //            .viewDidLoad
-        //            .filter({ !FirebaseServiceImpl.shared.getImUser() })
-        //            .withUnretained(self)
-        //            .flatMap { presenter, _ -> AnyPublisher<[String: Bool]?, Never>in
-        //                guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-        //                    return Just([:]).eraseToAnyPublisher()
-        //                }
-        //                return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: userId)
-        //                    .map({ $0?.misLigas })
-        //                    .eraseToAnyPublisher()
-        //            }
-        //            .withUnretained(self)
-        //            .sink { presenter, misLigas in
-        //
-        //                if let misLigas = misLigas, !misLigas.isEmpty {
-        //                    let ids = Array(misLigas.keys)
-        //                    presenter.fetchLeagues(ids)
-        //                } else {
-        //                    presenter.viewModel.showNoLeaguesDialog = true
-        //                }
-        //
-        //            }
-        //            .store(in: &cancellables)
-        //
     }
     
     
