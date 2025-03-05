@@ -48,30 +48,37 @@ struct SplashView: View {
                 VStack {
                     Spacer()
                     
-                    VideoPlayer(player: viewModel.player)
-                        .allowsHitTesting(false) // Deshabilita la interacción
-                        .frame(width: 300, height: 300, alignment: .center)
-                        .padding(.horizontal)
-                        .overlay {
-                            Group {
-                                if viewModel.isReady {
-                                    Rectangle().fill(Color.clear)
-                                } else {
-                                    
-                                    ZStack {
-                                        Color.darkBlueColor
-                                            .ignoresSafeArea()
+                    if AppState.shared.shouldShowSplashVideo {
+                        VideoPlayer(player: viewModel.player)
+                            .allowsHitTesting(false) // Deshabilita la interacción
+                            .frame(width: 300, height: 300, alignment: .center)
+                            .padding(.horizontal)
+                            .overlay {
+                                Group {
+                                    if viewModel.isReady {
+                                        Rectangle().fill(Color.clear)
+                                    } else {
                                         
-                                        Image("logo_amarillo")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 150, height: 150)
+                                        ZStack {
+                                            Color.darkBlueColor
+                                                .ignoresSafeArea()
+                                            
+                                            Image("logo_amarillo")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 150, height: 150)
+                                        }
+                                        
                                     }
-                                    
                                 }
                             }
-                        }
-                    
+                    } else {
+                        Image("logo_amarillo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                    }
+                   
                     Spacer()
                 }
                 
@@ -79,7 +86,11 @@ struct SplashView: View {
             
         }
         .onAppear {
-            viewModel.configurePlayer(with: url!)
+            if AppState.shared.shouldShowSplashVideo {
+                viewModel.configurePlayer(with: url!)
+            } else {
+                newScreenPublisher.send()
+            }
         }
         .onDisappear {
             viewModel.removeObservers()

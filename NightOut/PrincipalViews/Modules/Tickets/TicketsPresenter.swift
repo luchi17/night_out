@@ -62,7 +62,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
-                AppState.shared.logOut()
+                AppState.shared.shouldShowSplashVideo = false
                 UserDefaults.clearAll()
                 self?.actions.backToLogin()
             })
