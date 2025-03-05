@@ -14,8 +14,6 @@ final class CreateLeagueViewModel: ObservableObject {
     @Published var loading: Bool = false
     @Published var toast: ToastType?
     
-    private var _results: [CreateLeagueUser] = []
-    
 }
 
 protocol CreateLeaguePresenter {
@@ -79,14 +77,42 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
             }
             .store(in: &cancellables)
         
+        input
+            .createLeague
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.createLeague()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .removeFriend
+            .withUnretained(self)
+            .sink { presenter, user in
+                presenter.removeFriend(user)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .addFriend
+            .withUnretained(self)
+            .sink { presenter, user in
+                presenter.addFriend(user)
+            }
+            .store(in: &cancellables)
     }
-    
     
     private func loadCurrentUser() {
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         usersRef.child(currentUserId).observeSingleEvent(of: .value) { [weak self] snapshot in
-            if let user = try? snapshot.data(as: CreateLeagueUser.self) {
-                self?.viewModel.selectedFriends.append(user)
+            
+            if let userModel = try? snapshot.data(as: UserModel.self) {
+                let model = CreateLeagueUser(
+                    uid: userModel.uid,
+                    username: userModel.username,
+                    imageUrl: userModel.image
+                )
+                self?.viewModel.selectedFriends.append(model)
             }
         }
     }
@@ -103,10 +129,6 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
         
         usersQuery?.removeAllObservers()
         
-        let group = DispatchGroup()
-        
-        group.enter()
-        
         usersQuery = FirebaseServiceImpl.shared.getUsers()
                     .queryOrdered(byChild: "username")
                     .queryStarting(atValue: query)
@@ -115,30 +137,30 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
         usersQuery?
             .observeSingleEvent(of: .value) { [weak self] snapshot in
                 guard let self = self else { return }
-                self.viewModel.searchResults = snapshot.children.compactMap { $0 as? DataSnapshot }
-                    .compactMap { try? $0.data(as: CreateLeagueUser.self) }
+                self.viewModel.searchResults =
+                snapshot.children.compactMap { $0 as? DataSnapshot }
+                    .compactMap { try? $0.data(as: UserModel.self) }
+                    .map({ userModel in
+                        return CreateLeagueUser(
+                            uid: userModel.uid,
+                            username: userModel.username,
+                            imageUrl: userModel.image
+                        )
+                    })
                     .filter { user in
                         user.uid != currentUserId &&
                         !self.viewModel.selectedFriends.contains(where: { $0.uid == user.uid })
                     }
             }
-        
-        group.notify(queue: .main) {
-            if self.viewModel._results != self.viewModel.searchResults { // Evitar actualizar vista
-                self.viewModel.searchResults = self.viewModel._results
-                self.viewModel._results = self.viewModel.searchResults // Actualizar variable auxiliar
-                
-            }
-        }
     }
     
-    private func addFriend(_ user: User) {
+    private func addFriend(_ user: CreateLeagueUser) {
         if !viewModel.selectedFriends.contains(where: { $0.uid == user.uid }) {
             viewModel.selectedFriends.append(user)
         }
     }
     
-    private func removeFriend(_ user: User) {
+    private func removeFriend(_ user: CreateLeagueUser) {
         viewModel.selectedFriends.removeAll { $0.uid == user.uid }
     }
     

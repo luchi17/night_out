@@ -87,6 +87,7 @@ struct CreateLeagueView: View {
                 }
             }
             .padding(.horizontal, 20)
+            .padding(.top)
         }
         .showToast(
             error: (
@@ -105,8 +106,8 @@ struct CreateLeagueView: View {
     
     var friendsView: some View {
         ScrollView(.horizontal) {
-            ForEach(viewModel.selectedFriends, id: \.uid) { user in
-                HStack(spacing: 0) {
+            HStack(spacing: 0) {
+                ForEach(viewModel.selectedFriends, id: \.uid) { user in
                     ZStack(alignment: .topTrailing) {
                         CircleImage(
                             imageUrl: user.imageUrl,
@@ -125,19 +126,15 @@ struct CreateLeagueView: View {
                             .offset(x: -3)
                         }
                     }
-//                    
-//                    Spacer()
                 }
-//                .padding(8)
             }
         }
     }
     
     var searchView: some View {
         VStack {
-            
             Text("Buscar amigos")
-                .font(.system(size: 16))
+                .font(.system(size: 18))
                 .fontWeight(.bold)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -147,7 +144,6 @@ struct CreateLeagueView: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.white.opacity(0.8))
                     .frame(width: 24, height: 24)
-//                    .padding(.leading, 8)
                 
                 TextField("", text: $viewModel.searchText, prompt: Text("Buscar...").foregroundColor(.white))
                 .textFieldStyle(PlainTextFieldStyle())
