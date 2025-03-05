@@ -132,7 +132,7 @@ struct AccountDatasourceImpl: AccountDatasource {
             }
             else {
                 print("Registro exitoso.")
-                #warning("TODO: APNS messaging - ver notas mac")
+#warning("TODO: APNS messaging cuando cuenta empresa creada descomentar")
 //                APNS device token not set before retrieving FCM Token for Sender ID '16597384086'.Be sure to re-retrieve the FCM token once the APNS device token is set.
                 publisher.send("")
                 publisher.send(completion: .finished)
@@ -172,7 +172,7 @@ struct AccountDatasourceImpl: AccountDatasource {
             }
             else {
                 print("Registro exitoso de empresa.")
-#warning("TODO: APNS messaging - ver notas mac")
+                #warning("TODO: APNS messaging cuando cuenta empresa creada descomentar")
                 publisher.send("")
                 publisher.send(completion: .finished)
                 
