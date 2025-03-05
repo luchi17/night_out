@@ -30,12 +30,24 @@ struct CreateLeagueView: View {
             
             VStack {
                 
-                topView
+                TextField("", text: $viewModel.leagueName, prompt: Text("Nombre de la liga").foregroundColor(.white))
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding(.all, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.white, lineWidth: 1)
+                            .fill(Color.white.opacity(0.5))
+                    )
+                    .foregroundColor(.white)
+                    .accentColor(.white)
+                    .autocorrectionDisabled()
                 
                 if !viewModel.selectedFriends.isEmpty {
                     friendsView
                 }
                 
+                searchView
+               
                 if !viewModel.searchResults.isEmpty {
                     ScrollView {
                         VStack(spacing: 10) {
@@ -47,6 +59,7 @@ struct CreateLeagueView: View {
                                     Text(user.username)
                                         .font(.system(size: 16, weight: .medium))
                                         .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
                         }
@@ -73,8 +86,7 @@ struct CreateLeagueView: View {
                         .shadow(radius: 4)
                 }
             }
-            .padding()
-            
+            .padding(.horizontal, 20)
         }
         .showToast(
             error: (
@@ -91,39 +103,18 @@ struct CreateLeagueView: View {
         }
     }
     
-    var textfieldOverlay: some View {
-        HStack(spacing: 0) {
-            Spacer()
-            if isCancelVisible {
-                Button(action: {
-                    viewModel.searchText = ""
-                    hideKeyboard()
-                    withAnimation {
-                        isCancelVisible = false
-                    }
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.white.opacity(0.8))
-                        .frame(width: 24, height: 24)
-                }
-                .padding(.trailing, 8)
-            }
-        }
-    }
-    
     var friendsView: some View {
         ScrollView(.horizontal) {
-            HStack {
-                ForEach(viewModel.selectedFriends, id: \.uid) { user in
-                    HStack {
-                        ZStack(alignment: .topTrailing) {
-                            CircleImage(
-                                imageUrl: user.imageUrl,
-                                border: true
-                            )
-                            .frame(width: 80, height: 80)
-                            .shadow(radius: 4)
-                            
+            ForEach(viewModel.selectedFriends, id: \.uid) { user in
+                HStack(spacing: 0) {
+                    ZStack(alignment: .topTrailing) {
+                        CircleImage(
+                            imageUrl: user.imageUrl,
+                            border: false
+                        )
+                        .frame(width: 80, height: 80)
+                        
+                        if user.uid != FirebaseServiceImpl.shared.getCurrentUserUid() {
                             Button(action: {
                                 removeFriendPublisher.send(user)
                             }) {
@@ -131,64 +122,44 @@ struct CreateLeagueView: View {
                                     .foregroundColor(.white)
                                     .frame(width: 24, height: 24)
                             }
+                            .offset(x: -3)
                         }
                     }
-                    .padding(8)
-                    .background(Color.gray.opacity(0.3))
-                    .cornerRadius(10)
+//                    
+//                    Spacer()
                 }
+//                .padding(8)
             }
         }
-        .padding()
     }
     
-    var topView: some View {
-        
+    var searchView: some View {
         VStack {
-            TextField("", text: $viewModel.leagueName, prompt: Text("Nombre de la liga").foregroundColor(.white))
-            textFieldStyle(PlainTextFieldStyle())
-            .padding(.all, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-            )
-            .foregroundColor(.yellow)
-            .accentColor(.yellow)
-            .autocorrectionDisabled()
             
             Text("Buscar amigos")
-                .font(.title)
+                .font(.system(size: 16))
                 .fontWeight(.bold)
                 .foregroundColor(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 12)
             
             HStack(spacing: 0) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.white.opacity(0.8))
                     .frame(width: 24, height: 24)
-                    .padding(.leading, 8)
+//                    .padding(.leading, 8)
                 
-                TextField("Buscar...", text: $viewModel.searchText, onEditingChanged: { isEditing in
-                    isCancelVisible = isEditing || !viewModel.searchText.isEmpty
-                })
-                TextField("", text: $viewModel.leagueName, prompt: Text("Buscar...").foregroundColor(.white))
-                textFieldStyle(PlainTextFieldStyle())
+                TextField("", text: $viewModel.searchText, prompt: Text("Buscar...").foregroundColor(.white))
+                .textFieldStyle(PlainTextFieldStyle())
                 .padding(.all, 8)
+                .background(.clear)
                 .autocorrectionDisabled()
-                .background(
-                    RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
-                )
-                .foregroundColor(.yellow)
-                .accentColor(.yellow)
-                .onChange(of: viewModel.searchText) {
-                    searchUsersPublisher.send()
-                }
-                .overlay(
-                    textfieldOverlay
-                )
+                .foregroundColor(.white)
+                .accentColor(.white)
                 
                 Spacer()
             }
         }
-        .padding()
     }
 }
 
@@ -212,7 +183,13 @@ private extension CreateLeagueView {
 struct CreateLeagueUser: Codable, Equatable {
     let uid: String
     let username: String
-    let imageUrl: String
+    let imageUrl: String?
+    
+    init(uid: String, username: String, imageUrl: String?) {
+        self.uid = uid
+        self.username = username
+        self.imageUrl = imageUrl
+    }
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(uid)
