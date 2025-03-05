@@ -58,7 +58,8 @@ final class AppCoordinator: ObservableObject {
             showPrivateProfile: showPrivateProfile,
             openTinder: openTinder,
             openHub: openHub,
-            openLeagueDetail: openLeagueDetail
+            openLeagueDetail: openLeagueDetail,
+            openCreateLeague: openCreateLeague
         )
         self.push(tabBarCoordinator)
     }
@@ -166,6 +167,13 @@ final class AppCoordinator: ObservableObject {
     private func openLeagueDetail(league: League) {
         let leagueCoordinator = LeagueDetailCoordinator(actions: .init(), league: league)
         self.push(leagueCoordinator)
+    }
+    
+    private func openCreateLeague() {
+        let createLeagueCoordinator = CreateLeagueCoordinator(actions: .init(goBack: { [weak self] in
+            self?.pop()
+        }))
+        self.push(createLeagueCoordinator)
     }
     
 }

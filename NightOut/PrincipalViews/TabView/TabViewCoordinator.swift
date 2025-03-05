@@ -33,6 +33,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let openTinder: VoidClosure
     private let openHub: VoidClosure
     private let openLeagueDetail: InputClosure<League>
+    private let openCreateLeague: VoidClosure
     
     private let locationManager: LocationManager
     private let showMyProfileSubject: PassthroughSubject<Void, Never>
@@ -66,7 +67,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
         showPrivateProfile: @escaping InputClosure<ProfileModel>,
         openTinder: @escaping VoidClosure,
         openHub: @escaping VoidClosure,
-        openLeagueDetail: @escaping InputClosure<League>
+        openLeagueDetail: @escaping InputClosure<League>,
+        openCreateLeague: @escaping VoidClosure
     ) {
         self.path = path
         self.showMyProfileSubject = showMyProfileSubject
@@ -84,6 +86,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
         self.openTinder = openTinder
         self.openHub = openHub
         self.openLeagueDetail = openLeagueDetail
+        self.openCreateLeague = openCreateLeague
     }
     
     @ViewBuilder
@@ -132,7 +135,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     func makeLeaguesFlow() -> AnyView {
         let coordinator = LeagueCoordinator(actions: .init(
-            goToCreateLeague: { },
+            goToCreateLeague: openCreateLeague,
             goToLeagueDetail: openLeagueDetail
         ))
         return AnyView(coordinator.build())
