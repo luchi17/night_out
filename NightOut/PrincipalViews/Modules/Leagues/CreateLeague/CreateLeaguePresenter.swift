@@ -11,7 +11,7 @@ final class CreateLeagueViewModel: ObservableObject {
     @Published var selectedFriends: [CreateLeagueUser] = []
     @Published var searchResults: [CreateLeagueUser] = []
     
-    @Published var loading: Bool = true
+    @Published var loading: Bool = false
     @Published var toast: ToastType?
     
     private var _results: [CreateLeagueUser] = []
@@ -26,8 +26,6 @@ protocol CreateLeaguePresenter {
 final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
     
     struct UseCases {
-        let userDataUseCase: UserDataUseCase
-        let companyDataUseCase: CompanyDataUseCase
     }
     
     struct Actions {
@@ -118,12 +116,11 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
             .observeSingleEvent(of: .value) { [weak self] snapshot in
                 guard let self = self else { return }
                 self.viewModel.searchResults = snapshot.children.compactMap { $0 as? DataSnapshot }
-                    .compactMap { try? $0.data(as: User.self) }
+                    .compactMap { try? $0.data(as: CreateLeagueUser.self) }
                     .filter { user in
                         user.uid != currentUserId &&
                         !self.viewModel.selectedFriends.contains(where: { $0.uid == user.uid })
                     }
-                group.leave()
             }
         
         group.notify(queue: .main) {
