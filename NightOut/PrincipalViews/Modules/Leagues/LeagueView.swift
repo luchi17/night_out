@@ -160,7 +160,7 @@ struct LeagueView: View {
 private extension LeagueView {
     func bindViewModel() {
         let input = LeaguePresenterImpl.ViewInputs(
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
             deleteLeague: deleteLeaguePublisher.eraseToAnyPublisher(),
             openCreateLeague: openCreateLeaguePublisher.eraseToAnyPublisher(),
             openLeagueDetail: openLeaguePublisher.eraseToAnyPublisher()
