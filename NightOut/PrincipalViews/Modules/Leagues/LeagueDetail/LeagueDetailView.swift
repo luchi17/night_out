@@ -25,29 +25,39 @@ struct LeagueDetailView: View {
             Color.blackColor.edgesIgnoringSafeArea(.all)
             
             VStack {
-                List(viewModel.rankingList) { userRanking in
-                    RankingRow(
-                        userRanking: userRanking,
-                        isCurrentUser: userRanking.uid == FirebaseServiceImpl.shared.getCurrentUserUid()
-                    )
-                }
-                .onAppear {
-                    viewDidLoadPublisher.send()
-                }
                 
-                Button(action: {
-                    showMenu.toggle()
-                }) {
-                    Image(systemName: "ellipsis.circle")
-                        .padding()
+                HStack {
+                    Text("¡Ranking!")
+                        .foregroundStyle(.white)
+                        .font(.system(size: 18, weight: .bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.bottom, 30)
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        showMenu.toggle()
+                    }) {
+                        Image(systemName: "ellipsis.circle")
+                            .foregroundStyle(.white)
+                            .padding()
+                    }
+                    .confirmationDialog("Menú", isPresented: $showMenu) {
+                        Button("Salir de la liga", role: .destructive) {
+                            exitLeaguePublisher.send()
+                        }
+                    }
                 }
-                .confirmationDialog("Menú", isPresented: $showMenu) {
-                    Button("Salir de la liga", role: .destructive) {
-                        exitLeaguePublisher.send()
+
+                ScrollView {
+                    VStack(spacing: 8) {
+                        ForEach(viewModel.rankingList, id: \.id) { user in
+                            RankingRow(user: user)
+                        }
                     }
                 }
             }
-           
+            
         }
         .showToast(
             error: (
@@ -59,7 +69,6 @@ struct LeagueDetailView: View {
             ),
             isIdle: viewModel.loading
         )
-        .navigationBarBackButtonHidden()
         .onAppear {
             viewDidLoadPublisher.send()
         }

@@ -8,47 +8,71 @@ struct UserRanking: Identifiable {
     let username: String
     let drinks: Int
     var position: Int = 0
-}
-
-
-struct RankingRow: View {
-    let userRanking: UserRanking
+    var rank: RankingType = .normal
     let isCurrentUser: Bool
-
+    
+    enum RankingType {
+        case gold
+        case silver
+        case bronze
+        case normal
+    }
+}
+struct RankingRow: View {
+    let user: UserRanking
+    
     var body: some View {
         HStack {
-            Text("\(userRanking.position)")
+            Text("\(user.position)")
+                .font(.title)
                 .bold()
-                .foregroundColor(rankColor)
             
-            Text(userRanking.username)
-                .foregroundColor(isCurrentUser ? .red : .black)
+            Text(user.username)
+                .font(.headline)
+                .foregroundColor(textColor)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
-            Spacer()
-            
-            Text("\(userRanking.drinks) Bebidas")
-                .bold()
+            if user.rank == .gold {
+                Text("🏆 \(user.drinks)")
+                    .font(.subheadline)
+            } else {
+                Text("\(user.drinks)")
+                    .font(.subheadline)
+            }
         }
         .padding()
-        .background(rankBackground)
-        .cornerRadius(8)
+        .background(backgroundColor)
+        .cornerRadius(16)
+        .shadow(radius: 3)
+        .padding(.horizontal)
+        .modifier(BounceAnimationModifier(active: user.rank == .gold))
     }
     
-    private var rankColor: Color {
-        switch userRanking.position {
-        case 1: return .yellow
-        case 2: return .gray
-        case 3: return .brown
-        default: return .black
+    var backgroundColor: Color {
+        switch user.rank {
+        case .gold: return Color.yellow.opacity(0.8)
+        case .silver: return Color.gray.opacity(0.8)
+        case .bronze: return Color.brown.opacity(0.8)
+        case .normal: return Color.white
         }
     }
     
-    private var rankBackground: Color {
-        switch userRanking.position {
-        case 1: return Color.yellow.opacity(0.3)
-        case 2: return Color.gray.opacity(0.3)
-        case 3: return Color.brown.opacity(0.3)
-        default: return Color.clear
-        }
+    var textColor: Color {
+        user.isCurrentUser ? .red : .black
     }
 }
+
+struct BounceAnimationModifier: ViewModifier {
+    @State private var bounce = false
+    let active: Bool
+    
+    func body(content: Content) -> some View {
+        content
+            .offset(y: bounce ? -10 : 0)
+            .animation(active ? Animation.easeInOut(duration: 0.6).repeatForever(autoreverses: true) : .default, value: bounce)
+            .onAppear {
+                if active { bounce.toggle() }
+            }
+    }
+}
+

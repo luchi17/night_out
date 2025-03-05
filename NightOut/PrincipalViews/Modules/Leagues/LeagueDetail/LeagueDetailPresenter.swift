@@ -6,10 +6,10 @@ import FirebaseDatabase
 
 final class LeagueDetailViewModel: ObservableObject {
     
-    @Published var loading: Bool = true
+    @Published var loading: Bool = false
     @Published var toast: ToastType?
     @Published var rankingList: [UserRanking] = []
-
+    
 }
 
 protocol LeagueDetailPresenter {
@@ -25,8 +25,6 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
     }
     
     struct Actions {
-        //        let goToCreateLeague: VoidClosure
-        //        let goToLeagueDetail: InputClosure<League>
     }
     
     struct ViewInputs {
@@ -57,7 +55,7 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
     }
     
     func transform(input: LeagueDetailPresenterImpl.ViewInputs) {
-    
+        
         input
             .viewDidLoad
             .withUnretained(self)
@@ -76,24 +74,41 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
     }
     
     private func loadRankingData() {
-        guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
-        
         leaguesRef.child(league.leagueId).child("drinks").observeSingleEvent(of: .value) { snapshot in
             
             var rankings: [UserRanking] = []
+            
+            // Recorrer todos los usuarios en drinks
             for child in snapshot.children {
                 if let childSnapshot = child as? DataSnapshot,
                    let drinksCount = childSnapshot.value as? Int {
                     
                     let userId = childSnapshot.key
                     
+                    // Obtener el username correspondiente
                     FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId).child("username").observeSingleEvent(of: .value) { userSnapshot in
                         if let username = userSnapshot.value as? String {
-                            rankings.append(UserRanking(uid: userId, username: username, drinks: drinksCount))
+                            rankings.append(
+                                UserRanking(
+                                    uid: userId,
+                                    username: username,
+                                    drinks: drinksCount,
+                                    isCurrentUser: userId == FirebaseServiceImpl.shared.getCurrentUserUid()
+                                )
+                            )
                         }
-                        
+                        // Si se han procesado todos los usuarios en drinks, actualizar el adaptador
                         if rankings.count == snapshot.childrenCount {
-                            self.viewModel.rankingList = rankings.sorted(by: { $0.drinks > $1.drinks })
+                            // Ordenar la lista de mayor a menor por la cantidad de bebidas
+                            self.viewModel.rankingList = rankings
+                                .sorted(by: { $0.drinks > $1.drinks })
+                                .enumerated()
+                                .map { index, ranking in
+                                    var updatedRanking = ranking
+                                    updatedRanking.position = index + 1 // Para que empiece en 1 en lugar de 0
+                                    updatedRanking.rank = self.getRankingPosition(position: index + 1)
+                                    return updatedRanking
+                                }
                         }
                     }
                 }
@@ -101,12 +116,25 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
         }
     }
     
+    private func getRankingPosition(position: Int) -> UserRanking.RankingType {
+        if position == 1 {
+            return .gold
+        } else if position == 2 {
+            return .silver
+        } else if position == 3 {
+            return .bronze
+        } else {
+            return .normal
+        }
+    }
+    
+    //TODO
     private func exitLeague() {
         guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         
         let leagueRef = leaguesRef.child(league.leagueId)
         let userRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId).child("misLigas").child(league.leagueId)
-
+        
         leagueRef.child("users").child(userId).removeValue { error, _ in
             guard error == nil else { return }
             
@@ -123,6 +151,5 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
             }
         }
     }
-    
-    
 }
+
