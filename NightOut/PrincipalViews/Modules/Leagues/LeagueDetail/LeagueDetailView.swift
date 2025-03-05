@@ -29,9 +29,8 @@ struct LeagueDetailView: View {
                 HStack {
                     Text("¡Ranking!")
                         .foregroundStyle(.white)
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 20, weight: .bold))
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.bottom, 30)
                     
                     Spacer()
                     
@@ -40,16 +39,21 @@ struct LeagueDetailView: View {
                     }) {
                         Image(systemName: "ellipsis.circle")
                             .foregroundStyle(.white)
-                            .padding()
                     }
                     .confirmationDialog("Menú", isPresented: $showMenu) {
                         Button("Salir de la liga", role: .destructive) {
                             exitLeaguePublisher.send()
                         }
+                        Button("Cancelar", role: .destructive) {
+                            showMenu.toggle()
+                        }
                     }
                 }
 
                 ScrollView {
+                    Spacer()
+                        .frame(height: 20)
+                    
                     VStack(spacing: 8) {
                         ForEach(viewModel.rankingList, id: \.id) { user in
                             RankingRow(user: user)
@@ -57,7 +61,8 @@ struct LeagueDetailView: View {
                     }
                 }
             }
-            
+            .padding(.top)
+            .padding(.horizontal, 20)
         }
         .showToast(
             error: (
