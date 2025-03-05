@@ -92,8 +92,7 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
                                 UserRanking(
                                     uid: userId,
                                     username: username,
-                                    drinks: drinksCount,
-                                    isCurrentUser: userId == FirebaseServiceImpl.shared.getCurrentUserUid()
+                                    drinks: drinksCount
                                 )
                             )
                         }

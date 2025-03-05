@@ -9,7 +9,6 @@ struct UserRanking: Identifiable {
     let drinks: Int
     var position: Int = 0
     var rank: RankingType = .normal
-    let isCurrentUser: Bool
     
     enum RankingType {
         case gold
@@ -29,7 +28,7 @@ struct RankingRow: View {
             
             Text(user.username)
                 .font(.headline)
-                .foregroundColor(textColor)
+                .foregroundColor(Color.blackColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             if user.rank == .gold {
@@ -44,7 +43,6 @@ struct RankingRow: View {
         .background(backgroundColor)
         .cornerRadius(16)
         .shadow(radius: 3)
-        .padding(.horizontal)
         .modifier(BounceAnimationModifier(active: user.rank == .gold))
     }
     
@@ -55,10 +53,6 @@ struct RankingRow: View {
         case .bronze: return Color.brown.opacity(0.8)
         case .normal: return Color.white
         }
-    }
-    
-    var textColor: Color {
-        user.isCurrentUser ? .red : .black
     }
 }
 
