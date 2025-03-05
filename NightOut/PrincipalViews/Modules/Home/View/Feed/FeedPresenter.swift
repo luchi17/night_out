@@ -1,6 +1,10 @@
 import SwiftUI
 import Combine
 import CoreLocation
+import FirebaseMessaging
+import FirebaseAuth
+import FirebaseDatabase
+
 
 final class FeedViewModel: ObservableObject {
     
@@ -151,6 +155,10 @@ final class FeedPresenterImpl: FeedPresenter {
             )
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
+                
+                #warning("TODO: quitar comentario cuando cuenta empresa creada.")
+                // presenter.updateFCMToken()
+                
                 if data.isEmpty {
                     presenter.viewModel.showDiscoverEvents = true
                 } else {
@@ -234,6 +242,26 @@ final class FeedPresenterImpl: FeedPresenter {
 }
 
 private extension FeedPresenterImpl {
+    func updateFCMToken() {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error al obtener el token de FCM: \(error.localizedDescription)")
+            } else if let token = token, let userID = FirebaseServiceImpl.shared.getCurrentUserUid() {
+                let userRef =
+                FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userID)
+                    .child("fcm_token")
+                
+                userRef.setValue(token) { error, _ in
+                    if let error = error {
+                        print("Error al guardar el token de FCM: \(error.localizedDescription)")
+                    } else {
+                        print("Token de FCM actualizado correctamente")
+                    }
+                }
+            }
+        }
+    }
+    
     func getPostFromUserInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
         return useCases.userDataUseCase.getUserInfo(uid: post.publisherId)
             .withUnretained(self)
