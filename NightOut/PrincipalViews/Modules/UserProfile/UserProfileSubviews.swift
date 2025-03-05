@@ -32,7 +32,6 @@ struct UserGoingCell: View {
         VStack(spacing: 10) {
             CircleImage(imageUrl: model.profileImageUrl)
                 .frame(width: 80, height: 80)
-                .clipShape(Circle())
                 .shadow(radius: 4)
             
             Text(model.username)

@@ -38,7 +38,7 @@ struct SearchView: View {
                     .frame(width: 24, height: 24)
                     .padding(.leading, 8)
                 
-                TextField("Search", text: $viewModel.searchText, onEditingChanged: { isEditing in
+                TextField("Buscar...", text: $viewModel.searchText, onEditingChanged: { isEditing in
                     isCancelVisible = isEditing || !viewModel.searchText.isEmpty
                 })
                 .padding(8)
