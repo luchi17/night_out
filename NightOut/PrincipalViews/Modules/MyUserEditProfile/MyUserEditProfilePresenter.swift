@@ -223,7 +223,7 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                 }
             })
             .sink(receiveValue: { [weak self] _ in
-                AppState.shared.logOut()
+                AppState.shared.shouldShowSplashVideo = false
                 UserDefaults.clearAll()
                 self?.viewModel.shouldCloseSheet = true
             })
