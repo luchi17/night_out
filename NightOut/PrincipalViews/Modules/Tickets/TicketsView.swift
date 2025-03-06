@@ -49,9 +49,8 @@ struct TicketsView: View {
             } else {
                 ScrollView(.vertical) {
                     VStack {
-                        ForEach(viewModel.filteredResults, id: \.0.uid) { event in
-                            EventRow(event: event)
-                        }
+                        ForEach(viewModel.filteredResults, id: \.0.uid) { result in
+                            EventRow(company: result)                        }
                     }
                 }
             }
