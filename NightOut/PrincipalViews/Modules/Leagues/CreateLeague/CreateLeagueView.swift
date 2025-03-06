@@ -145,7 +145,7 @@ struct CreateLeagueView: View {
             
             HStack(spacing: 0) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white)
                     .frame(width: 24, height: 24)
                 
                 TextField("", text: $viewModel.searchText, prompt: Text("Buscar...").foregroundColor(.white))
