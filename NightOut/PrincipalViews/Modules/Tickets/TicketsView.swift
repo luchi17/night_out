@@ -40,7 +40,7 @@ struct TicketsView: View {
                     .resizable()
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 300, height: 300)
+                    .frame(width: 400, height: 300)
                     .foregroundColor(.white)
                     .padding(.top, 50)
                 
@@ -53,6 +53,7 @@ struct TicketsView: View {
                             EventRow(company: result)                        }
                     }
                 }
+                .padding(.top, 20)
             }
         }
         .padding(.horizontal, 20)
@@ -181,7 +182,8 @@ struct TicketsView: View {
                             .font(.system(size: 16, weight: .bold))
                     }
                 }
-                .padding()
+                .frame(minHeight: 40)
+                .padding(.horizontal, 8)
                 .background(viewModel.selectedDateFilter != nil ? Color.yellow : Color.white)
                 .cornerRadius(20)
                 .overlay(
@@ -213,7 +215,8 @@ struct TicketsView: View {
                             .foregroundColor(.black)
                     }
                 }
-                .padding()
+                .frame(minHeight: 40)
+                .padding(.horizontal, 8)
                 .background(viewModel.selectedMusicGenre != nil ? Color.yellow : Color.white)
                 .cornerRadius(20)
                 .overlay(
@@ -224,7 +227,6 @@ struct TicketsView: View {
             
             Spacer()
         }
-        .frame(height: 40)
     }
 }
 
@@ -239,7 +241,7 @@ private extension TicketsView {
     }
     
     private func formattedDate(_ date: Date) -> String {
-        var calendar = Calendar.current
+        let calendar = Calendar.current
         
         let day = String(format: "%02d", calendar.component(.day, from: date))
         let month = String(format: "%02d", calendar.component(.month, from: date))

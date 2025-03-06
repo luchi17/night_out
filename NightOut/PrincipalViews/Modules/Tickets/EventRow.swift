@@ -23,20 +23,22 @@ struct EventRow: View {
                 
             }
             
-            ScrollView(.horizontal) {
-                
-                HStack(spacing: 30) {
-                    ForEach(company.1, id: \.id) { fiesta in
-                        EventCardRow(
-                            company: company.0,
-                            fiesta: fiesta
-                        )
-                        .frame(width: 300, height: 250)
+            if !company.1.isEmpty {
+                ScrollView(.horizontal) {
+                    
+                    HStack(spacing: 30) {
+                        ForEach(company.1, id: \.id) { fiesta in
+                            EventCardRow(
+                                company: company.0,
+                                fiesta: fiesta
+                            )
+                            .frame(width: 300, height: 250)
+                        }
                     }
+                    .padding(.vertical, 12)
                 }
-                .padding(.vertical, 12)
+                .scrollIndicators(.hidden)
             }
-            .scrollIndicators(.hidden)
         }
         .background(Color.blackColor.opacity(0.2))
         .cornerRadius(10)
