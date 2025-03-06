@@ -8,6 +8,7 @@ struct LeagueDetailView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let exitLeaguePublisher = PassthroughSubject<Void, Never>()
+    private let goBackPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: LeagueDetailViewModel
     let presenter: LeagueDetailPresenter
@@ -44,9 +45,6 @@ struct LeagueDetailView: View {
                         Button("Salir de la liga", role: .destructive) {
                             exitLeaguePublisher.send()
                         }
-                        Button("Cancelar", role: .destructive) {
-                            showMenu.toggle()
-                        }
                     }
                 }
 
@@ -69,6 +67,9 @@ struct LeagueDetailView: View {
                 type: viewModel.toast,
                 showCloseButton: false,
                 onDismiss: {
+                    if case .success = viewModel.toast {
+                        goBackPublisher.send()
+                    }
                     viewModel.toast = nil
                 }
             ),
@@ -85,7 +86,8 @@ private extension LeagueDetailView {
     func bindViewModel() {
         let input = LeagueDetailPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            exit: exitLeaguePublisher.eraseToAnyPublisher()
+            exit: exitLeaguePublisher.eraseToAnyPublisher(),
+            onDismissToast: goBackPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

@@ -36,6 +36,7 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
         let removeFriend: AnyPublisher<CreateLeagueUser, Never>
         let searchUsers: AnyPublisher<Void, Never>
         let addFriend: AnyPublisher<CreateLeagueUser, Never>
+        let onDismissToast: AnyPublisher<Void, Never>
     }
     
     var viewModel: CreateLeagueViewModel
@@ -98,6 +99,14 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
             .withUnretained(self)
             .sink { presenter, user in
                 presenter.addFriend(user)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .onDismissToast
+            .withUnretained(self)
+            .sink { presenter, user in
+                presenter.actions.goBack()
             }
             .store(in: &cancellables)
     }
@@ -216,7 +225,6 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
                         self.viewModel.toast = .custom(.init(title: "", description: "Error al actualizar mis ligas: \(error.localizedDescription)", image: nil))
                     } else {
                         self.viewModel.toast = .success(.init(title: "", description: "Liga creada exitosamente!", image: nil))
-                        self.actions.goBack()
                     }
                 }
             }

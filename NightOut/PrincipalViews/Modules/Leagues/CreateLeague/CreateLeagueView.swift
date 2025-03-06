@@ -9,7 +9,7 @@ struct CreateLeagueView: View {
     private let createLeaguePublisher = PassthroughSubject<Void, Never>()
     private let removeFriendPublisher = PassthroughSubject<CreateLeagueUser, Never>()
     private let addFriendPublisher = PassthroughSubject<CreateLeagueUser, Never>()
-    
+    private let goBackPublisher = PassthroughSubject<Void, Never>()
     
     @State private var isCancelVisible: Bool = false
     
@@ -94,6 +94,9 @@ struct CreateLeagueView: View {
                 type: viewModel.toast,
                 showCloseButton: false,
                 onDismiss: {
+                    if case .success = viewModel.toast {
+                        goBackPublisher.send()
+                    }
                     viewModel.toast = nil
                 }
             ),
@@ -166,7 +169,8 @@ private extension CreateLeagueView {
             createLeague: createLeaguePublisher.eraseToAnyPublisher(),
             removeFriend: removeFriendPublisher.eraseToAnyPublisher(),
             searchUsers: searchUsersPublisher.eraseToAnyPublisher(),
-            addFriend: addFriendPublisher.eraseToAnyPublisher()
+            addFriend: addFriendPublisher.eraseToAnyPublisher(),
+            onDismissToast: goBackPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

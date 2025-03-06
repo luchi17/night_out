@@ -25,11 +25,13 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
     }
     
     struct Actions {
+        let goBack: VoidClosure
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let exit: AnyPublisher<Void, Never>
+        let onDismissToast: AnyPublisher<Void, Never>
     }
     
     var viewModel: LeagueDetailViewModel
@@ -71,6 +73,15 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
                 presenter.exitLeague()
             }
             .store(in: &cancellables)
+        
+        input
+            .onDismissToast
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.goBack()
+            }
+            .store(in: &cancellables)
+        
     }
     
     private func loadRankingData() {
@@ -127,25 +138,39 @@ final class LeagueDetailPresenterImpl: LeagueDetailPresenter {
         }
     }
     
-    //TODO
     private func exitLeague() {
         guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         
         let leagueRef = leaguesRef.child(league.leagueId)
         let userRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId).child("misLigas").child(league.leagueId)
         
-        leagueRef.child("users").child(userId).removeValue { error, _ in
-            guard error == nil else { return }
+        // Primero, eliminamos al usuario de la liga
+        leagueRef.child("users").child(userId).removeValue {  [weak self] error, _ in
+            if error != nil {
+                self?.viewModel.toast = .custom(.init(title: "", description: "Error al eliminar de la liga.", image: nil))
+                return
+            }
             
-            leagueRef.child("drinks").child(userId).removeValue { error, _ in
-                guard error == nil else { return }
+            // Luego, eliminamos al usuario de drinks (si existe)
+            leagueRef.child("drinks").child(userId).removeValue { [weak self] error, _ in
+                if error != nil {
+                    self?.viewModel.toast = .custom(.init(title: "", description: "Error al eliminar del nodo drinks.", image: nil))
+                    return
+                }
                 
-                userRef.removeValue { error, _ in
-                    guard error == nil else { return }
-                    
-                    DispatchQueue.main.async {
-                        // Aquí podrías cerrar la vista, dependiendo de la navegación
+                // Luego, eliminamos la liga de las ligas del usuario
+                userRef.removeValue { [weak self] error, _ in
+                    if error != nil {
+                        self?.viewModel.toast = .custom(.init(title: "", description: "Error al eliminar de mis ligas.", image: nil))
+                        return
                     }
+                    
+                    self?.viewModel.rankingList.removeAll(where: { $0.uid == FirebaseServiceImpl.shared.getCurrentUserUid() })
+                    self?.viewModel.toast = .success(.init(title: "", description: "Has salido de la liga.", image: nil))
+                   
+//                    DispatchQueue.main.async {
+//                        
+//                    }
                 }
             }
         }
