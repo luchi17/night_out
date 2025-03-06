@@ -88,20 +88,14 @@ struct DefaultNotificationView: View {
 
             CircleImage(imageUrl: notification.profileImage)
             
-            VStack(alignment: .leading, spacing: 4) {
-                Text(notification.userName)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text(notification.text)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .padding(.vertical, 5)
-            .onTapGesture {
-                goToProfile(notification)
-            }
+            Text(notification.text)
+                .fontWeight(.medium)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 5)
+                .onTapGesture {
+                    goToProfile(notification)
+                }
             
             Spacer()
             

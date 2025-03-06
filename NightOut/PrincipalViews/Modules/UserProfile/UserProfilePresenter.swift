@@ -184,7 +184,6 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             }
             .eraseToAnyPublisher()
         
-        //Post when
         input
             .viewDidLoad
             .filter({ [weak self] _ in  self?.model.isCompanyProfile ?? false })
@@ -347,7 +346,7 @@ private extension UserProfilePresenterImpl {
         let model = NotificationModel(
             ispost: false,
             postid: "",
-            text: "\(GlobalStrings.shared.startFollowUserText)",
+            text: "\(self.viewModel.myUserModel?.username ?? "Desconocido") \(GlobalStrings.shared.startFollowUserText)",
             userid: myUid
         )
         
@@ -406,7 +405,7 @@ private extension UserProfilePresenterImpl {
             .sink(receiveValue: { presenter, notifications in
                 
                 let matchingNotification = notifications.first { notificationDict in
-                    notificationDict.value.userid == presenter.myUid && notificationDict.value.text == "\(GlobalStrings.shared.startFollowUserText)"
+                    notificationDict.value.userid == presenter.myUid && notificationDict.value.text.contains("\(GlobalStrings.shared.startFollowUserText)")
                 }
                 
                 guard let matchingNotification = matchingNotification else {
@@ -478,7 +477,10 @@ private extension UserProfilePresenterImpl {
                 .withUnretained(self)
                 .sink { presenter, ok in
                     if ok {
-                        presenter.useCases.noficationsUsecase.sendNotificationToFollowers(clubName: presenter.model.fullname ?? "Sitio desconocido")
+                        presenter.useCases.noficationsUsecase.sendNotificationToFollowers(
+                            myName: presenter.viewModel.myUserModel?.username ?? "Desconocido",
+                            clubName: presenter.model.fullname ?? "Sitio desconocido"
+                        )
                     } else {
                         presenter.viewModel.toast = .custom(.init(
                             title: "Error",

@@ -11,8 +11,7 @@ protocol NotificationsDatasource {
     func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
     func removeNotificationFromFirebase(userId: String, notificationId: String)
-    func sendNotificationToFollowers(clubName: String)
-    func addNotificationClub(followerId: String, clubName: String)
+    func sendNotificationToFollowers(myName: String, clubName: String)
 }
 
 struct NotificationsDatasourceImpl: NotificationsDatasource {
@@ -78,7 +77,7 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
         ref.removeValue()
     }
     
-    func sendNotificationToFollowers(clubName: String) {
+    func sendNotificationToFollowers(myName: String, clubName: String) {
         
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         
@@ -91,7 +90,7 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
                 if let followerSnapshot = child as? DataSnapshot {
                     let followerId = followerSnapshot.key
                     
-                    self.addNotificationClub(followerId: followerId, clubName: clubName)
+                    self.addNotificationClub(myName: myName, followerId: followerId, clubName: clubName)
                 }
             }
         } withCancel: { error in
@@ -100,7 +99,7 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
     }
     
     // Enviar notificación a cada seguidor mio con el nombre del club
-    func addNotificationClub(followerId: String, clubName: String) {
+    private func addNotificationClub(myName: String, followerId: String, clubName: String) {
 
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         
@@ -112,7 +111,7 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
         let notificationModel = NotificationModel(
             ispost: false,
             postid: "",
-            text: "Ha confirmado su asistencia a \(clubName)",
+            text: "\(myName) asistirá a \(clubName)",
             userid: currentUserId
         )
         let notificationData = structToDictionary(notificationModel)

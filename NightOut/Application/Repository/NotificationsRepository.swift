@@ -6,7 +6,7 @@ protocol NotificationsRepository {
     func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>
     func removeNotificationFromFirebase(userId: String, notificationId: String)
-    func sendNotificationToFollowers(clubName: String)
+    func sendNotificationToFollowers(myName: String, clubName: String)
 }
 
 struct NotificationsRepositoryImpl: NotificationsRepository {
@@ -43,9 +43,9 @@ struct NotificationsRepositoryImpl: NotificationsRepository {
             .removeNotificationFromFirebase(userId: userId, notificationId: notificationId)
     }
     
-    func sendNotificationToFollowers(clubName: String) {
+    func sendNotificationToFollowers(myName: String, clubName: String) {
         network
-            .sendNotificationToFollowers(clubName: clubName)
+            .sendNotificationToFollowers(myName: myName, clubName: clubName)
     }
 
     
