@@ -26,18 +26,42 @@ struct UserProfileView: View {
     }
     
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
+        GeometryReader { geometry in
             
-            VStack(spacing: 0) {
+            ScrollView(.vertical, showsIndicators: false) {
                 
-                profileInfo
-                
-                followButton
-                
-                if viewModel.isCompanyProfile {
-                    clubContent
+                VStack(spacing: 0) {
+                    
+                    ZStack(alignment: .bottomLeading) {
+                        if let profileImage = viewModel.profileImageUrl {
+                            AsyncImage(url: URL(string: profileImage)) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: geometry.size.width, height: 350)
+                                    .clipped()
+                            } placeholder: {
+                                Color.grayColor
+                                    .frame(width: geometry.size.width, height: 350)
+                            }
+                        } else {
+                            Image("profile")
+                                .resizable()
+                                .scaledToFill()
+                                .clipped()
+                        }
+                        
+                        overlay
+                    }
+                    
+                    followButton
+                    
+                    if viewModel.isCompanyProfile {
+                        clubContent
+                    }
                 }
             }
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .background(Color.blackColor)
         .showCustomNavBar(
@@ -78,41 +102,24 @@ struct UserProfileView: View {
         }
     }
     
-    var profileInfo: some View {
-        ZStack(alignment: .bottomLeading) {
-            if let profileImage = viewModel.profileImageUrl {
-                AsyncImage(url: URL(string: profileImage)) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(height: 350)
-                        .clipped()
-                } placeholder: {
-                    ProgressView()
-                }
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-            }
-            HStack {
-                Text(viewModel.fullname)
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
-                
-                Spacer()
-                
-                if viewModel.isCompanyProfile && FirebaseServiceImpl.shared.getImUser() {
-                    Button(action: {
-                        whiskyTappedPublisher.send()
-                    }) {
-                        viewModel.imGoingToClub.whiskyImage
-                    }
+    var overlay: some View {
+        HStack {
+            Text(viewModel.fullname)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.white)
+            
+            Spacer()
+            
+            if viewModel.isCompanyProfile && FirebaseServiceImpl.shared.getImUser() {
+                Button(action: {
+                    whiskyTappedPublisher.send()
+                }) {
+                    viewModel.imGoingToClub.whiskyImage
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.bottom, 20)
         }
+        .padding(.horizontal, 12)
+        .padding(.bottom, 20)
     }
     
     //In case showing a club profile
