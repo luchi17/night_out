@@ -7,11 +7,11 @@ enum TabType: Equatable {
     case search
     case publish
     case leagues
-    case user
+    case calendar
     
     public static func == (lhs: TabType, rhs: TabType) -> Bool {
         switch(lhs, rhs) {
-        case (.home, .home), (.search, .search), (.publish, .publish), (.leagues, .leagues), (.user, .user):
+        case (.home, .home), (.search, .search), (.publish, .publish), (.leagues, .leagues), (.calendar, .calendar):
             return true
         default:
             return false
@@ -102,8 +102,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
                 return self.makePublishFlow()
             case .leagues:
                 return self.makeLeaguesFlow()
-            case .user:
-                return self.makeUserFlow()
+            case .calendar:
+                return self.makeCalendarFlow()
             }
         }
         TabViewScreen(presenter: presenter)
@@ -141,10 +141,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
         return AnyView(coordinator.build())
     }
     
-    func makeUserFlow() -> AnyView {
-        let coordinator = TicketsCoordinator(actions: .init(backToLogin: { [weak self] in
-            self?.goToLogin()
-        }))
+    func makeCalendarFlow() -> AnyView {
+        let coordinator = TicketsCoordinator(actions: .init())
         return AnyView(coordinator.build())
     }
 }
@@ -173,7 +171,7 @@ private extension TabViewCoordinator {
             onShowUserProfile: showPostUserProfileView,
             onShowPostComments: onShowPostComments,
             onOpenCalendar: { [weak self] in
-                self?.tabViewModel.selectedTab = .user
+                self?.tabViewModel.selectedTab = .calendar
             }
         )
     }

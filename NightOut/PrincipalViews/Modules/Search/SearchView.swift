@@ -60,7 +60,12 @@ struct SearchView: View {
                 Spacer()
             }
             .frame(height: 40)
-            .background(Color.grayColor.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+//            .background(Color.grayColor.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
+            .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.grayColor.opacity(0.5))
+                                .stroke(Color.white, lineWidth: 2)
+            )
             .shadow(radius: 5)
             .padding(.horizontal, 12)
             

@@ -63,7 +63,7 @@ struct TabViewScreen: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    viewModel.selectedTab = .user
+                    viewModel.selectedTab = .calendar
                 }) {
                     VStack {
                         Image(systemName: "person.fill")

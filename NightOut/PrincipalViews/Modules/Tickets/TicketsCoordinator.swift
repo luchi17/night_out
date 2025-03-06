@@ -14,7 +14,7 @@ struct TicketsCoordinator {
     func build() -> some View {
         TicketsView(presenter: TicketsPresenterImpl(
             actions: actions,
-            useCases: .init(signOutUseCase: SignOutUseCaseImpl(repository: AccountRepositoryImpl.shared))
+            useCases: .init()
         ))
     }
 }
