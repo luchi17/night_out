@@ -165,7 +165,9 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func openLeagueDetail(league: League) {
-        let leagueCoordinator = LeagueDetailCoordinator(actions: .init(), league: league)
+        let leagueCoordinator = LeagueDetailCoordinator(actions: .init(goBack: { [weak self] in
+            self?.pop()
+        }), league: league)
         self.push(leagueCoordinator)
     }
     
