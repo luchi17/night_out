@@ -48,6 +48,7 @@ struct UserProfileView: View {
                             Image("profile")
                                 .resizable()
                                 .scaledToFill()
+                                .frame(width: geometry.size.width, height: 350)
                                 .clipped()
                         }
                         
