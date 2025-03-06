@@ -20,11 +20,10 @@ class TicketsViewModel: ObservableObject {
     @Published var isFirstTime: Bool = true
     
     @Published var searchText: String = ""
-
+    
     @Published var filteredResults:  [(CompanyModel, [Fiesta])] = []
     @Published var selectedMusicGenre: TicketGenreType?
     
-    @Published var selectedDate: Date?
     @Published var selectedDateFilter: TicketDateFilterType?
     
     @Published var companies: [(CompanyModel, [Fiesta])] = []
@@ -76,30 +75,30 @@ final class TicketsPresenterImpl: TicketsPresenter {
             }
             .store(in: &cancellables)
         
-        viewModel.$selectedMusicGenre
+        viewModel
+            .$selectedMusicGenre
+            .removeDuplicates()
             .map({ _ in })
-            .merge(with: viewModel.$selectedDate.map({ _ in }), viewModel.$searchText.map({ _ in }))
+            .merge(
+                with: viewModel.$selectedDateFilter.removeDuplicates().map({ _ in }),
+                viewModel.$searchText.debounce(for: .milliseconds(100), scheduler: DispatchQueue.main).removeDuplicates().map({ _ in })
+            )
             .withUnretained(self)
             .sink { presenter, _ in
-                presenter.viewModel.isFirstTime = presenter.viewModel.isFirstTime && presenter.viewModel.selectedDate == nil && presenter.viewModel.selectedMusicGenre == nil
+                presenter.viewModel.isFirstTime = presenter.viewModel.isFirstTime &&
+                                                    presenter.viewModel.selectedDateFilter == nil &&
+                                                    presenter.viewModel.selectedMusicGenre == nil &&
+                                                    presenter.viewModel.searchText.isEmpty
+                
                 presenter.filterList()
+                
             }
             .store(in: &cancellables)
     }
     
-//    func filterEvents() {
-//        if viewModel.selectedDate == nil && viewModel.selectedMusicGenre == nil {
-//            return
-//        }
-//        
-//        print("Filtrando discos por \(viewModel.selectedMusicGenre?.title) y fecha \(viewModel.selectedDate)")
-//        
-//        viewModel.events = viewModel.events.filter { event in
-//            let matchesDate = viewModel.selectedDate == nil || formattedDate(viewModel.selectedDate!) == event.fecha
-//            let matchesGenre = viewModel.selectedMusicGenre == nil || event.musicGenre == viewModel.selectedMusicGenre?.title.lowercased()
-//            return matchesDate && matchesGenre
-//        }
-//    }
+    private func reset() {
+        self.viewModel.filteredResults.removeAll()
+    }
     
     private func filterList() {
         let query = viewModel.searchText.lowercased()
@@ -111,7 +110,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
             
             let filteredFiestas = fiestas.filter { fiesta in
                 //
-                var matchesDate: Bool = {
+                let matchesDate: Bool = {
                     
                     if let dateFilter = viewModel.selectedDateFilter {
                         switch dateFilter {
@@ -146,7 +145,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
                     }
                 }()
                 
-                var matchesMusic: Bool = {
+                let matchesMusic: Bool = {
                     if let genre = viewModel.selectedMusicGenre {
                         fiesta.musicGenre.caseInsensitiveCompare(genre.title) == .orderedSame
                     } else {
