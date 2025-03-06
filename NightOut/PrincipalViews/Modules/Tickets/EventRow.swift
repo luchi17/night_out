@@ -17,22 +17,27 @@ struct EventRow: View {
                     .foregroundColor(.white)
                 
                 Spacer()
+                
+                Text(">")
+                    .foregroundColor(.white)
+                
             }
             
             ScrollView(.horizontal) {
                 
-                HStack {
+                HStack(spacing: 30) {
                     ForEach(company.1, id: \.id) { fiesta in
                         EventCardRow(
                             company: company.0,
                             fiesta: fiesta
                         )
-                        .frame(width: 150, height: 150)
+                        .frame(width: 300, height: 250)
                     }
                 }
+                .padding(.vertical, 12)
             }
+            .scrollIndicators(.hidden)
         }
-        .padding()
         .background(Color.blackColor.opacity(0.2))
         .cornerRadius(10)
     }
@@ -45,23 +50,43 @@ struct EventCardRow: View {
     var body: some View {
         
         HStack {
-            VStack {
-                Text(fiesta.fecha)
+            VStack(spacing: 8) {
+                Text(formatDate(fiesta.fecha) ?? "Fecha")
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(.blue)
-                    .bold()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Text(fiesta.name.capitalized)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
                 Spacer()
                 
-                Text("Hora:")
-                Text(fiesta.startTime)
-                Text(fiesta.endTime)
-                
-                Text("Música: \(fiesta.musicGenre)")
+                HStack(alignment: .top) {
+                    Text("⏰ Hora: ")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("\(fiesta.startTime) - \n\((fiesta.endTime))")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                Text("🎵 Música: \(fiesta.musicGenre)")
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding(.vertical, 8)
+            
+            Spacer()
             
             AsyncImage(url: URL(string: fiesta.imageUrl)) { image in
                 image
                     .resizable()
                     .scaledToFill()
+                    .frame(width: 150, height: 250)
                     .clipped()
             } placeholder: {
                 Color.grayColor
@@ -69,6 +94,22 @@ struct EventCardRow: View {
                     .clipped()
             }
         }
+        .cornerRadius(10)
+    }
+    
+    func formatDate(_ dateString: String) -> String? {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "dd-MM-yyyy"
+        inputFormatter.locale = Locale(identifier: "es_ES")
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "d 'de' MMMM"
+        outputFormatter.locale = Locale(identifier: "es_ES")
+
+        if let date = inputFormatter.date(from: dateString) {
+            return outputFormatter.string(from: date)
+        }
+        return nil
     }
 }
 
