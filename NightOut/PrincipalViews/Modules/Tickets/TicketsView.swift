@@ -49,7 +49,7 @@ struct TicketsView: View {
             } else {
                 ScrollView(.vertical) {
                     VStack {
-                        ForEach(viewModel.events, id: \.id) { event in
+                        ForEach(viewModel.filteredResults, id: \.0.uid) { event in
                             EventRow(event: event)
                         }
                     }
@@ -68,7 +68,9 @@ struct TicketsView: View {
             .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: $isCalendarVisible) {
-            CalendarPicker(selectedDate: $viewModel.selectedDate)
+            CalendarPicker(
+                selectedDateFilter: $viewModel.selectedDateFilter
+            )
                 .presentationDetents([.large])
                 .presentationDragIndicator(.hidden)
         }
@@ -142,19 +144,33 @@ struct TicketsView: View {
     var buttonsView: some View {
         HStack {
             Button(action: {
-                print("selectedDate2")
-                print(viewModel.selectedDate)
-                if let music = viewModel.selectedDate {
-                    viewModel.selectedDate = nil
+                if viewModel.selectedDateFilter != nil {
+                    viewModel.selectedDateFilter = nil
                 } else {
                     isCalendarVisible.toggle()
                 }
             }) {
                 HStack(spacing: 3) {
-                    if let date = viewModel.selectedDate {
-                        Text(formattedDate(viewModel.selectedDate!))
-                            .foregroundColor(.white)
-                            .font(.system(size: 16, weight: .bold))
+                    if let date = viewModel.selectedDateFilter {
+                        switch date {
+                        case .day(let dateString):
+                            Text(dateString)
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .bold))
+                        case .week:
+                            Text("ESTA SEMANA")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .bold))
+                        case .today:
+                            Text("HOY")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .bold))
+                        case .tomorrow:
+                            Text("MAÑANA")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .bold))
+                        }
+                    
                         Image("borrar")
                             .resizable()
                             .scaledToFit()
@@ -162,22 +178,21 @@ struct TicketsView: View {
                             .foregroundColor(.black)
                     } else {
                         Text("Fecha".uppercased())
-                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.black)
+                            .font(.system(size: 16, weight: .bold))
                     }
                 }
-                .padding(.all, 6)
-                .background(viewModel.selectedDate != nil ? Color.yellow : Color.white)
+                .padding()
+                .background(viewModel.selectedDateFilter != nil ? Color.yellow : Color.white)
                 .cornerRadius(20)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(viewModel.selectedDate != nil ? Color.black : Color.yellow, lineWidth: 2)
+                        .stroke(viewModel.selectedDateFilter != nil ? Color.black : Color.yellow, lineWidth: 2)
                 )
             }
             
             Button(action: {
-                
-              if let music = viewModel.selectedMusicGenre {
+              if viewModel.selectedMusicGenre != nil {
                 viewModel.selectedMusicGenre = nil
               } else {
                   isGenreVisible.toggle()
@@ -199,7 +214,7 @@ struct TicketsView: View {
                             .foregroundColor(.black)
                     }
                 }
-                .padding(.all, 8)
+                .padding()
                 .background(viewModel.selectedMusicGenre != nil ? Color.yellow : Color.white)
                 .cornerRadius(20)
                 .overlay(
@@ -210,6 +225,7 @@ struct TicketsView: View {
             
             Spacer()
         }
+        .frame(height: 40)
     }
 }
 
@@ -223,77 +239,15 @@ private extension TicketsView {
         presenter.transform(input: input)
     }
     
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date).uppercased()
+    private func formattedDate(_ date: Date) -> String {
+        var calendar = Calendar.current
+        
+        let day = String(format: "%02d", calendar.component(.day, from: date))
+        let month = String(format: "%02d", calendar.component(.month, from: date))
+        let year = calendar.component(.year, from: date)
+        return "\(day)-\(month)-\(year)"
     }
     
-}
-
-struct CalendarPicker: View {
-    @Binding var selectedDate: Date?
-    @Environment(\.dismiss) var dismiss
-    
-    var body: some View {
-        VStack {
-            Picker("Opciones de fecha", selection:  Binding {
-                selectedDate ?? Date()
-            } set: { newValue in
-                selectedDate = newValue
-            }) {
-                Text("Hoy").tag(Calendar.current.startOfDay(for: Date()))
-                Text("Mañana").tag(Calendar.current.date(byAdding: .day, value: 1, to: Date())!)
-                Text("Esta semana").tag(Calendar.current.date(byAdding: .day, value: 7, to: Date())!)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding()
-            
-            DatePicker("Selecciona una fecha", selection:  Binding {
-                return selectedDate ?? Date()
-            } set: { newValue in
-                selectedDate = newValue
-            }, displayedComponents: [.date])
-            .datePickerStyle(GraphicalDatePickerStyle())
-            .padding()
-            
-            Button(action: {
-                if selectedDate == nil {
-                    selectedDate = Date()
-                }
-                print("selectedDate1")
-                print(selectedDate)
-                dismiss()
-            }) {
-                Text("Escoger fecha".uppercased())
-                    .foregroundStyle(.white)
-            }
-            .padding()
-            
-            Button("Cerrar") {
-                dismiss()
-            }
-            .padding()
-        }
-    }
-}
-
-
-struct EventRow: View {
-    let event: Fiesta
-    
-    var body: some View {
-        HStack {
-            Text(event.name)
-                .foregroundColor(.white)
-            Spacer()
-            Text(event.fecha)
-                .foregroundColor(Color.grayColor)
-        }
-        .padding()
-        .background(Color.grayColor.opacity(0.2))
-        .cornerRadius(10)
-    }
 }
 
 struct GenreSheetView: View {
@@ -420,5 +374,34 @@ enum TicketGenreType {
         else {
             self = .latina
         }
+    }
+}
+
+
+enum TicketDateFilterType: Hashable {
+    case day(String)
+    case week
+    case today
+    case tomorrow
+    
+    var title: String {
+        switch self {
+        case .day(let string):
+            return string.uppercased()
+        case .week:
+            return "ESTA SEMANA"
+        case .today:
+            return "HOY"
+        case .tomorrow:
+            return "MAÑANA"
+        }
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(title)
+    }
+    
+    static func == (lhs: TicketDateFilterType, rhs: TicketDateFilterType) -> Bool {
+        return lhs.title == rhs.title
     }
 }

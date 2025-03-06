@@ -20,10 +20,14 @@ class TicketsViewModel: ObservableObject {
     @Published var isFirstTime: Bool = true
     
     @Published var searchText: String = ""
-    @Published var events: [Fiesta] = []
+
+    @Published var filteredResults:  [(CompanyModel, [Fiesta])] = []
     @Published var selectedMusicGenre: TicketGenreType?
     
     @Published var selectedDate: Date?
+    @Published var selectedDateFilter: TicketDateFilterType?
+    
+    @Published var companies: [(CompanyModel, [Fiesta])] = []
     
     init() {
         
@@ -74,39 +78,126 @@ final class TicketsPresenterImpl: TicketsPresenter {
         
         viewModel.$selectedMusicGenre
             .map({ _ in })
-            .merge(with: viewModel.$selectedDate.map({ _ in }))
+            .merge(with: viewModel.$selectedDate.map({ _ in }), viewModel.$searchText.map({ _ in }))
             .withUnretained(self)
             .sink { presenter, _ in
                 presenter.viewModel.isFirstTime = presenter.viewModel.isFirstTime && presenter.viewModel.selectedDate == nil && presenter.viewModel.selectedMusicGenre == nil
-                presenter.filterEvents()
+                presenter.filterList()
             }
             .store(in: &cancellables)
     }
     
-    func filterEvents() {
-        if viewModel.selectedDate == nil && viewModel.selectedMusicGenre == nil {
-            return
-        }
+//    func filterEvents() {
+//        if viewModel.selectedDate == nil && viewModel.selectedMusicGenre == nil {
+//            return
+//        }
+//        
+//        print("Filtrando discos por \(viewModel.selectedMusicGenre?.title) y fecha \(viewModel.selectedDate)")
+//        
+//        viewModel.events = viewModel.events.filter { event in
+//            let matchesDate = viewModel.selectedDate == nil || formattedDate(viewModel.selectedDate!) == event.fecha
+//            let matchesGenre = viewModel.selectedMusicGenre == nil || event.musicGenre == viewModel.selectedMusicGenre?.title.lowercased()
+//            return matchesDate && matchesGenre
+//        }
+//    }
+    
+    private func filterList() {
+        let query = viewModel.searchText.lowercased()
         
-        print("Filtrando discos por \(viewModel.selectedMusicGenre?.title) y fecha \(viewModel.selectedDate)")
-        
-        viewModel.events = viewModel.events.filter { event in
-            let matchesDate = viewModel.selectedDate == nil || formattedDate(viewModel.selectedDate!) == event.fecha
-            let matchesGenre = viewModel.selectedMusicGenre == nil || event.musicGenre == viewModel.selectedMusicGenre?.title.lowercased()
-            return matchesDate && matchesGenre
+        let filteredResults = viewModel.companies.map { data -> (CompanyModel, [Fiesta]) in
+            
+            let company = data.0
+            let fiestas = data.1
+            
+            let filteredFiestas = fiestas.filter { fiesta in
+                //
+                var matchesDate: Bool = {
+                    
+                    if let dateFilter = viewModel.selectedDateFilter {
+                        switch dateFilter {
+                        case .week:
+                            let today = Calendar.current.startOfDay(for: Date()).timeIntervalSince1970
+                            let endOfWeek = Calendar.current.date(byAdding: .day, value: 7, to: Date())?.timeIntervalSince1970 ?? today
+                            
+                            let dateParts = fiesta.fecha.split(separator: "-").compactMap { Int($0) }
+                            if dateParts.count == 3,
+                               let day = dateParts.first,
+                               let month = dateParts.dropFirst().first,
+                               let year = dateParts.last {
+                                
+                                var fiestaDateComponents = DateComponents()
+                                fiestaDateComponents.year = year
+                                fiestaDateComponents.month = month
+                                fiestaDateComponents.day = day
+                                
+                                if let fiestaDate = Calendar.current.date(from: fiestaDateComponents)?.timeIntervalSince1970 {
+                                    return fiestaDate >= today && fiestaDate <= endOfWeek
+                                }
+                            }
+                            return false
+                        case .day(let dateString):
+                            return fiesta.fecha == dateString
+                        default:
+                            return fiesta.fecha == self.formattedDate(Date())
+                        }
+                        
+                    } else {
+                        return true
+                    }
+                }()
+                
+                var matchesMusic: Bool = {
+                    if let genre = viewModel.selectedMusicGenre {
+                        fiesta.musicGenre.caseInsensitiveCompare(genre.title) == .orderedSame
+                    } else {
+                        true // Si no hay filtro de música, cualquier género es válido
+                    }
+                }()
+                
+                return matchesDate && matchesMusic
+            }
+            
+            return (company, filteredFiestas)
+            
         }
+        .filter({ data in
+                let company = data.0
+                let fiestas = data.1
+                
+                let matchesSearch = company.username?.range(of: query, options: .caseInsensitive) != nil
+                let hasValidFiestas = viewModel.selectedDate != nil || viewModel.selectedMusicGenre != nil
+                
+                if hasValidFiestas {
+                    return fiestas.isEmpty == false && matchesSearch
+                } else {
+                    return matchesSearch
+                }
+                
+        })
+        
+        self.viewModel.filteredResults = filteredResults
+        
+        //        filteredCompanies.removeAll()
+        //        filteredCompanies.append(contentsOf: filteredResults)
     }
+    
     
     func loadEvents() {
         
         let today = Calendar.current.startOfDay(for: Date()).timeIntervalSince1970 * 1000 // Timestamp de hoy a las 00:00h
         
-        FirebaseServiceImpl.shared.getCompanies().observeSingleEvent(of: .value) { snapshot in
-            var tempEvents: [Fiesta] = []
+        FirebaseServiceImpl.shared.getCompanies().observeSingleEvent(of: .value) { [weak self] snapshot in
+            
+            guard let self = self else { return }
+            
+            self.viewModel.companies.removeAll()
             
             for companySnapshot in snapshot.children {
                 
-                guard let companyData = companySnapshot as? DataSnapshot else {
+                var tempEvents: [Fiesta] = []
+                
+                guard let companyData = companySnapshot as? DataSnapshot,
+                      let company = try? companyData.data(as: CompanyModel.self) else {
                     continue
                 }
                 
@@ -158,23 +249,21 @@ final class TicketsPresenterImpl: TicketsPresenter {
                     } else {
                         print("⏳ Evento descartado (fecha pasada): \(fecha)")
                     }
-                    
-                    DispatchQueue.main.async {
-                        self.viewModel.events = tempEvents
-                    }
-                    
                 }
                 
+                print("🏢 \(company.username) - Total fiestas cargadas: \(tempEvents.count)")
+                self.viewModel.companies.append((company, tempEvents)) // ✅ Asignamos solo las fiestas futuras a la discoteca
             }
+            
         }
+    }
+    
+    private func formattedDate(_ date: Date) -> String {
+        var calendar = Calendar.current
         
+        let day = String(format: "%02d", calendar.component(.day, from: date))
+        let month = String(format: "%02d", calendar.component(.month, from: date))
+        let year = calendar.component(.year, from: date)
+        return "\(day)-\(month)-\(year)"
     }
-    
-    
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
-    }
-    
 }
