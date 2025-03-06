@@ -9,6 +9,8 @@ struct SearchView: View {
     private let searchPublisher = PassthroughSubject<Void, Never>()
     private let goToProfilePublisher = PassthroughSubject<ProfileModel, Never>()
     
+    @FocusState private var isTextFieldFocused: Bool
+    
     @ObservedObject var viewModel: SearchViewModel
     let presenter: SearchPresenter
     
@@ -34,25 +36,31 @@ struct SearchView: View {
             // Barra de búsqueda
             HStack(spacing: 0) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white)
                     .frame(width: 24, height: 24)
                     .padding(.leading, 8)
                 
-                TextField("Buscar...", text: $viewModel.searchText, onEditingChanged: { isEditing in
-                    isCancelVisible = isEditing || !viewModel.searchText.isEmpty
-                })
+                TextField("", text: $viewModel.searchText, prompt: Text("Buscar...").foregroundColor(.white))
                 .padding(8)
                 .textFieldStyle(PlainTextFieldStyle())
                 .autocorrectionDisabled()
                 .foregroundColor(.white)
+                .accentColor(.white)
                 .overlay(
                     textfieldOverlay
                 )
+                .focused($isTextFieldFocused)
+                .onChange(of: isTextFieldFocused) { oldValue, newValue in
+                                    isCancelVisible = newValue || !viewModel.searchText.isEmpty
+                 }
+                .onChange(of: viewModel.searchText) { oldValue, newValue in
+                   isCancelVisible = isTextFieldFocused || !newValue.isEmpty
+                }
                 
                 Spacer()
             }
             .frame(height: 40)
-            .background(Color.white.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+            .background(Color.grayColor.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
             .shadow(radius: 5)
             .padding(.horizontal, 12)
             
