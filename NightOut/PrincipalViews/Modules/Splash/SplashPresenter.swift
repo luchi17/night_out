@@ -1,5 +1,6 @@
 import Combine
 import SwiftUI
+import FirebaseMessaging
 
 class SplashViewModel: ObservableObject {
     
@@ -66,11 +67,33 @@ final class SplashPresenterImpl: SplashPresenter {
             .withUnretained(self)
             .sink { [weak self] _ in
                 if FirebaseServiceImpl.shared.getIsLoggedin() {
+                    #warning("TODO: quitar comentario cuando cuenta empresa creada.")
+                    // self?.updateFCMToken()
                     self?.actions.onMainFlow()
                 } else {
                     self?.actions.onLogin()
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    func updateFCMToken() {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error al obtener el token de FCM: \(error.localizedDescription)")
+            } else if let token = token, let userID = FirebaseServiceImpl.shared.getCurrentUserUid() {
+                let userRef =
+                FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userID)
+                    .child("fcm_token")
+                
+                userRef.setValue(token) { error, _ in
+                    if let error = error {
+                        print("Error al guardar el token de FCM: \(error.localizedDescription)")
+                    } else {
+                        print("Token de FCM actualizado correctamente")
+                    }
+                }
+            }
+        }
     }
 }
