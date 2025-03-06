@@ -163,7 +163,11 @@ final class FeedPresenterImpl: FeedPresenter {
                     presenter.viewModel.showDiscoverEvents = true
                 } else {
                     presenter.viewModel.showDiscoverEvents = false
-                    presenter.viewModel.posts = data
+                    
+                    //Update view only when posts have changed
+                    if data.count != presenter.viewModel.posts.count {
+                        presenter.viewModel.posts = data
+                    }
                 }
             })
             .store(in: &cancellables)
