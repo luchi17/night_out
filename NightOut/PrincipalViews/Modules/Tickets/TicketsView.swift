@@ -5,6 +5,7 @@ struct TicketsView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let logoutPublisher = PassthroughSubject<Void, Never>()
+    private let filterPublisher = PassthroughSubject<Void, Never>()
     
     @State private var isCalendarVisible = false
     @State private var isGenreVisible = false
@@ -54,6 +55,7 @@ struct TicketsView: View {
                     }
                 }
                 .padding(.top, 20)
+                .scrollIndicators(.hidden)
             }
         }
         .padding(.horizontal, 20)
@@ -63,11 +65,14 @@ struct TicketsView: View {
         .sheet(isPresented: $isGenreVisible) {
             GenreSheetView(genre: $viewModel.selectedMusicGenre) {
                 isGenreVisible = false
+                filterPublisher.send()
             }
             .presentationDetents([.medium])
             .presentationDragIndicator(.hidden)
         }
-        .sheet(isPresented: $isCalendarVisible) {
+        .sheet(isPresented: $isCalendarVisible, onDismiss: {
+            filterPublisher.send()
+        }) {
             CalendarPicker(
                 selectedDateFilter: $viewModel.selectedDateFilter
             )
@@ -146,6 +151,7 @@ struct TicketsView: View {
             Button(action: {
                 if viewModel.selectedDateFilter != nil {
                     viewModel.selectedDateFilter = nil
+                    filterPublisher.send()
                 } else {
                     isCalendarVisible.toggle()
                 }
@@ -194,7 +200,8 @@ struct TicketsView: View {
             
             Button(action: {
               if viewModel.selectedMusicGenre != nil {
-                viewModel.selectedMusicGenre = nil
+                  viewModel.selectedMusicGenre = nil
+                  filterPublisher.send()
               } else {
                   isGenreVisible.toggle()
               }
@@ -235,7 +242,8 @@ private extension TicketsView {
     
     func bindViewModel() {
         let input = TicketsPresenterImpl.Input(
-            viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher()
+            viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
+            filter: filterPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

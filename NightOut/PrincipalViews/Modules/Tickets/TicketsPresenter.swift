@@ -43,6 +43,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
     
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
+        let filter: AnyPublisher<Void, Never>
     }
     
     struct UseCases {
@@ -76,24 +77,23 @@ final class TicketsPresenterImpl: TicketsPresenter {
             .store(in: &cancellables)
         
         viewModel
-            .$selectedMusicGenre
+            .$searchText
+            .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
             .removeDuplicates()
             .map({ _ in })
-            .merge(
-                with: viewModel.$selectedDateFilter.removeDuplicates().map({ _ in }),
-                viewModel.$searchText.debounce(for: .milliseconds(100), scheduler: DispatchQueue.main).removeDuplicates().map({ _ in })
-            )
+            .merge(with: input.filter)
             .withUnretained(self)
             .sink { presenter, _ in
+                
                 presenter.viewModel.isFirstTime = presenter.viewModel.isFirstTime &&
                                                     presenter.viewModel.selectedDateFilter == nil &&
                                                     presenter.viewModel.selectedMusicGenre == nil &&
                                                     presenter.viewModel.searchText.isEmpty
                 
                 presenter.filterList()
-                
             }
             .store(in: &cancellables)
+        
     }
     
     private func reset() {
@@ -147,9 +147,9 @@ final class TicketsPresenterImpl: TicketsPresenter {
                 
                 let matchesMusic: Bool = {
                     if let genre = viewModel.selectedMusicGenre {
-                        fiesta.musicGenre.caseInsensitiveCompare(genre.title) == .orderedSame
+                        return areStringsEqualIgnoringDiacritics(fiesta.musicGenre.lowercased(), genre.title.lowercased())
                     } else {
-                        true // Si no hay filtro de música, cualquier género es válido
+                        return true // Si no hay filtro de música, cualquier género es válido
                     }
                 }()
                 
@@ -160,26 +160,37 @@ final class TicketsPresenterImpl: TicketsPresenter {
             
         }
         .filter({ data in
-                let company = data.0
-                let fiestas = data.1
-                
-                let matchesSearch = company.username?.range(of: query, options: .caseInsensitive) != nil
-                let hasValidFiestas = viewModel.selectedDate != nil || viewModel.selectedMusicGenre != nil
-                
-                if hasValidFiestas {
-                    return fiestas.isEmpty == false && matchesSearch
+            let company = data.0
+            let fiestas = data.1
+            let matchesSearch = company.username?.range(of: query, options: .caseInsensitive) != nil
+            let filtersApplied = viewModel.selectedDateFilter != nil || viewModel.selectedMusicGenre != nil
+            
+            //Si hay algun filtro aplicado
+            if filtersApplied {
+                //tener en cuenta la discoteca cuando tiene fiestas y coincide la query
+                if query.isEmpty {
+                    return !fiestas.isEmpty
                 } else {
-                    return matchesSearch
+                    return !fiestas.isEmpty && matchesSearch
                 }
-                
+            } else {
+                //Si no hay algun filtro aplicado tener en cuenta la discoteca
+                if query.isEmpty {
+                    return true //siempre en el caso de que no haya query
+                } else {
+                    return matchesSearch //solo cuando coincide la query
+                }
+            }
         })
         
-        self.viewModel.filteredResults = filteredResults
+        DispatchQueue.main.async {
+            self.viewModel.filteredResults = filteredResults
         
-        //        filteredCompanies.removeAll()
-        //        filteredCompanies.append(contentsOf: filteredResults)
+            for filteredResult in self.viewModel.filteredResults {
+                print("🏢 \(filteredResult.0.username) - Total fiestas cargadas: \(filteredResult.1.map { $0.name })")
+            }
+        }
     }
-    
     
     func loadEvents() {
         
@@ -208,7 +219,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
                     
                     let fecha = dateData.key
                     
-                    print("📅 Fecha en Firebase: \(fecha)")
+//                    print("📅 Fecha en Firebase: \(fecha)")
                     
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "dd-MM-yyyy"
@@ -242,27 +253,31 @@ final class TicketsPresenterImpl: TicketsPresenter {
                             
                             tempEvents.append(fiesta)
                             
-                            print("🎉 Fiesta agregada: \(fiesta.name) - Fecha: \(fiesta.fecha)")
+//                            print("🎉 Fiesta agregada: \(fiesta.name) - Fecha: \(fiesta.fecha)")
                         }
                         
                     } else {
-                        print("⏳ Evento descartado (fecha pasada): \(fecha)")
+//                        print("⏳ Evento descartado (fecha pasada): \(fecha)")
                     }
                 }
                 
-                print("🏢 \(company.username) - Total fiestas cargadas: \(tempEvents.count)")
+//                print("🏢 \(company.username) - Total fiestas cargadas: \(tempEvents.count)")
                 self.viewModel.companies.append((company, tempEvents)) // ✅ Asignamos solo las fiestas futuras a la discoteca
             }
             
         }
     }
     
+    func areStringsEqualIgnoringDiacritics(_ string1: String, _ string2: String) -> Bool {
+        let normalizedString1 = string1.folding(options: .diacriticInsensitive, locale: .current).lowercased()
+        let normalizedString2 = string2.folding(options: .diacriticInsensitive, locale: .current).lowercased()
+        return normalizedString1 == normalizedString2
+    }
+    
     private func formattedDate(_ date: Date) -> String {
-        var calendar = Calendar.current
-        
-        let day = String(format: "%02d", calendar.component(.day, from: date))
-        let month = String(format: "%02d", calendar.component(.month, from: date))
-        let year = calendar.component(.year, from: date)
+        let day = String(format: "%02d", Calendar.current.component(.day, from: date))
+        let month = String(format: "%02d", Calendar.current.component(.month, from: date))
+        let year = Calendar.current.component(.year, from: date)
         return "\(day)-\(month)-\(year)"
     }
 }
