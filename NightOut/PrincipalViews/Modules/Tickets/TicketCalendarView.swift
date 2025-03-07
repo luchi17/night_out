@@ -26,21 +26,24 @@ struct CalendarPicker: View {
 
         return (startOfWeek, endOfWeek)
     }
-
     
     var body: some View {
         VStack {
             Picker("Opciones de fecha", selection: Binding<Date> (
                 get: { selectedDate ?? Date() },
                 set: { newValue in
-                    selectedDate = newValue
+//                    selectedDate = newValue
+                    
+                    let startOfNewValue = Calendar.current.startOfDay(for: newValue)
+                    selectedDate = startOfNewValue
+                    
                     let (inicioSemana, finSemana) = obtenerRangoSemanaActual()
                     
-                    if newValue == Calendar.current.startOfDay(for: Date()) {
+                    if Calendar.current.isDate(startOfNewValue, inSameDayAs: Date()) {
                         selectedDateFilter = .today
-                    } else if newValue == Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
+                    } else if Calendar.current.isDate(startOfNewValue, inSameDayAs: Calendar.current.date(byAdding: .day, value: 1, to: Date())!) {
                         selectedDateFilter = .tomorrow
-                    } else if newValue >= inicioSemana && newValue <= finSemana {
+                    } else if startOfNewValue >= inicioSemana && startOfNewValue <= finSemana {
                         selectedDateFilter = .week
                     } else {
                         selectedDateFilter = .day(formattedDate(newValue))
@@ -48,7 +51,7 @@ struct CalendarPicker: View {
                 })
             ) {
                 Text("Hoy".uppercased()).tag(Calendar.current.startOfDay(for: Date()))
-                Text("Mañana".uppercased()).tag(Calendar.current.date(byAdding: .day, value: 1, to: Date())!)
+                Text("Mañana".uppercased()).tag(Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: 1, to: Date())!))
                 Text("Esta semana".uppercased()).tag(obtenerRangoSemanaActual().inicio)
             }
             .pickerStyle(SegmentedPickerStyle())
@@ -57,11 +60,14 @@ struct CalendarPicker: View {
             DatePicker("Selecciona una fecha", selection: Binding<Date> (
                 get: { selectedDate ?? Date() },
                 set: { newValue in
-                    selectedDate = newValue
-                    let (inicioSemana, finSemana) = obtenerRangoSemanaActual()
                     
-                    if newValue >= inicioSemana && newValue <= finSemana {
-                        selectedDateFilter = .week
+                    let startOfNewValue = Calendar.current.startOfDay(for: newValue)
+                    selectedDate = startOfNewValue
+                    
+                    if Calendar.current.isDate(startOfNewValue, inSameDayAs: Date()) {
+                        selectedDateFilter = .today
+                    } else if Calendar.current.isDate(startOfNewValue, inSameDayAs: Calendar.current.date(byAdding: .day, value: 1, to: Date())!) {
+                        selectedDateFilter = .tomorrow
                     } else {
                         selectedDateFilter = .day(formattedDate(newValue))
                     }
@@ -71,7 +77,7 @@ struct CalendarPicker: View {
             .datePickerStyle(GraphicalDatePickerStyle())
             .padding()
 
-            Button("Escoger fecha") {
+            Button("Escoger fecha".uppercased()) {
                 if selectedDate == nil {
                     selectedDateFilter = .today
                 }

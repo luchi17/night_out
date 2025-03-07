@@ -90,6 +90,9 @@ struct TicketsView: View {
             ),
             isIdle: viewModel.loading
         )
+        .onTapGesture {
+            hideKeyboard()
+        }
         .onAppear(perform: viewDidLoadPublisher.send)
     }
     
@@ -114,7 +117,6 @@ struct TicketsView: View {
                         .frame(width: 45, height: 45)
                         .foregroundColor(.white)
                 }
-                .padding(.trailing, 20)
             }
         }
         .frame(height: 50)
@@ -129,6 +131,9 @@ struct TicketsView: View {
                 .padding(.leading, 8)
             
             TextField("", text: $viewModel.searchText, prompt: Text("Busca tu discoteca o fiesta").foregroundColor(.white))
+                .onSubmit {
+                    hideKeyboard()
+                }
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.all, 8)
                 .foregroundColor(.white)
@@ -255,6 +260,10 @@ private extension TicketsView {
         let month = String(format: "%02d", calendar.component(.month, from: date))
         let year = calendar.component(.year, from: date)
         return "\(day)-\(month)-\(year)"
+    }
+    
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
 }

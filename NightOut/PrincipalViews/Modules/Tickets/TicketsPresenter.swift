@@ -109,7 +109,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
             let fiestas = data.1
             
             let filteredFiestas = fiestas.filter { fiesta in
-                //
+                
                 let matchesDate: Bool = {
                     
                     if let dateFilter = viewModel.selectedDateFilter {
@@ -167,10 +167,11 @@ final class TicketsPresenterImpl: TicketsPresenter {
             
             //Si hay algun filtro aplicado
             if filtersApplied {
-                //tener en cuenta la discoteca cuando tiene fiestas y coincide la query
+                //tener en cuenta la discoteca cuando tiene fiestas
                 if query.isEmpty {
                     return !fiestas.isEmpty
                 } else {
+                   // y coincide la query
                     return !fiestas.isEmpty && matchesSearch
                 }
             } else {
