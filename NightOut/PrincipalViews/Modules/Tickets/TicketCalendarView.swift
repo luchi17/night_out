@@ -8,11 +8,9 @@ struct CalendarPicker: View {
     @Environment(\.dismiss) var dismiss
     
     private func formattedDate(_ date: Date) -> String {
-        var calendar = Calendar.current
-        
-        let day = String(format: "%02d", calendar.component(.day, from: date))
-        let month = String(format: "%02d", calendar.component(.month, from: date))
-        let year = calendar.component(.year, from: date)
+        let day = String(format: "%02d", Calendar.current.component(.day, from: date))
+        let month = String(format: "%02d", Calendar.current.component(.month, from: date))
+        let year = Calendar.current.component(.year, from: date)
         return "\(day)-\(month)-\(year)"
     }
     
@@ -73,22 +71,20 @@ struct CalendarPicker: View {
             .datePickerStyle(GraphicalDatePickerStyle())
             .padding()
 
-            Button(action: {
+            Button("Escoger fecha") {
                 if selectedDate == nil {
-                    selectedDate = Date()
                     selectedDateFilter = .today
                 }
                 dismiss()
-            }) {
-                Text("Escoger fecha".uppercased())
-                    .foregroundStyle(.white)
             }
             .padding()
             
-            Button("Cerrar") {
-                selectedDate = nil
+            Button(action: {
                 selectedDateFilter = nil
                 dismiss()
+            }) {
+                Text("Cerrar")
+                    .foregroundStyle(.white)
             }
             .padding()
         }
