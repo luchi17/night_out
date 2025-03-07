@@ -23,6 +23,9 @@ struct TabViewScreen: View {
                 }) {
                     VStack {
                         Image(systemName: "house.fill")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 20, height: 20)
                             .foregroundColor(.white)
                     }
                 }
@@ -33,6 +36,9 @@ struct TabViewScreen: View {
                 }) {
                     VStack {
                         Image(systemName: "magnifyingglass")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 20, height: 20)
                             .foregroundColor(.white)
                     }
                 }
@@ -42,7 +48,10 @@ struct TabViewScreen: View {
                     viewModel.selectedTab = .publish
                 }) {
                     VStack {
-                        Image(systemName: "plus")
+                        Image("camara")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 20, height: 20)
                             .foregroundColor(.white)
                     }
                 }
@@ -52,10 +61,10 @@ struct TabViewScreen: View {
                     viewModel.selectedTab = .leagues
                 }) {
                     VStack {
-                        Image("leaguesIcon")
+                        Image("whisky_empty")
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 25, height: 25)
+                            .frame(width: 20, height: 20)
                             .foregroundColor(.white)
                             
                     }
@@ -66,7 +75,10 @@ struct TabViewScreen: View {
                     viewModel.selectedTab = .calendar
                 }) {
                     VStack {
-                        Image(systemName: "person.fill")
+                        Image("post_clicked")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 20, height: 20)
                             .foregroundColor(.white)
                     }
                 }
