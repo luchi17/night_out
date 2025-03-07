@@ -59,7 +59,8 @@ final class AppCoordinator: ObservableObject {
             openTinder: openTinder,
             openHub: openHub,
             openLeagueDetail: openLeagueDetail,
-            openCreateLeague: openCreateLeague
+            openCreateLeague: openCreateLeague,
+            openDiscotecaDetail: openDiscotecaDetail
         )
         self.push(tabBarCoordinator)
     }
@@ -178,6 +179,13 @@ final class AppCoordinator: ObservableObject {
         self.push(createLeagueCoordinator)
     }
     
+    private func openDiscotecaDetail(model: (CompanyModel, [Fiesta])) {
+        let discotecaDetailCoordinator = DiscotecaDetailCoordinator(
+            actions: .init(),
+            model: model
+        )
+        self.push(discotecaDetailCoordinator)
+    }
 }
 
 private extension AppCoordinator {

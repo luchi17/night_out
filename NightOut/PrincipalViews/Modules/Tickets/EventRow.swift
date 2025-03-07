@@ -2,6 +2,7 @@ import SwiftUI
 
 struct EventRow: View {
     let company: (CompanyModel, [Fiesta])
+    let goToCompany: InputClosure<(CompanyModel, [Fiesta])>
     
     var body: some View {
         VStack {
@@ -22,24 +23,21 @@ struct EventRow: View {
                     .foregroundColor(.white)
                 
             }
+            .onTapGesture {
+                goToCompany(company)
+            }
             
             if !company.1.isEmpty {
                 ScrollView(.horizontal) {
-                    HStack(spacing: 30) {
+                    HStack(spacing: 20) {
                         if company.1.count == 1 {
                             Spacer() // Centra el único elemento
-                            EventCardRow(
-                                company: company.0,
-                                fiesta: company.1.first!
-                            )
-                            .frame(width: 300, height: 250)
+                            EventCardRow(fiesta: company.1.first!)
+                                .frame(width: 300, height: 250)
                             Spacer()
                         } else {
                             ForEach(company.1, id: \.id) { fiesta in
-                                EventCardRow(
-                                    company: company.0,
-                                    fiesta: fiesta
-                                )
+                                EventCardRow(fiesta: fiesta)
                                 .frame(width: 300, height: 250)
                             }
                         }
@@ -55,7 +53,6 @@ struct EventRow: View {
 }
 
 struct EventCardRow: View {
-    let company: CompanyModel
     let fiesta: Fiesta
     
     var body: some View {
@@ -90,6 +87,7 @@ struct EventCardRow: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 8)
+            .padding(.leading, 8)
             
             Spacer()
             
@@ -105,6 +103,7 @@ struct EventCardRow: View {
                     .clipped()
             }
         }
+        .background(Color.grayColor.opacity(0.2))
         .cornerRadius(10)
     }
     

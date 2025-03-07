@@ -1,20 +1,33 @@
-
 import SwiftUI
 import Combine
 
-struct TicketsCoordinator {
+class DiscotecaDetailCoordinator: ObservableObject, Hashable {
     
-    private let actions: TicketsPresenterImpl.Actions
+    let id = UUID()
     
-    init(actions: TicketsPresenterImpl.Actions) {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: DiscotecaDetailCoordinator, rhs: DiscotecaDetailCoordinator) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    private let actions: DiscotecaDetailPresenterImpl.Actions
+    private let model: (CompanyModel, [Fiesta])
+    
+    init(actions: DiscotecaDetailPresenterImpl.Actions, model: (CompanyModel, [Fiesta])) {
         self.actions = actions
+        self.model = model
     }
     
     @ViewBuilder
     func build() -> some View {
-        TicketsView(presenter: TicketsPresenterImpl(
+        DiscotecaDetailView(presenter: DiscotecaDetailPresenterImpl(
             actions: actions,
-            useCases: .init()
+            useCases: .init(followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared)),
+            companyModel: model.0,
+            fiestas: model.1
         ))
     }
 }

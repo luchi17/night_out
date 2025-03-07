@@ -6,6 +6,7 @@ struct TicketsView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let logoutPublisher = PassthroughSubject<Void, Never>()
     private let filterPublisher = PassthroughSubject<Void, Never>()
+    private let goToCompanyPublisher = PassthroughSubject<(CompanyModel, [Fiesta]), Never>()
     
     @State private var isCalendarVisible = false
     @State private var isGenreVisible = false
@@ -51,7 +52,11 @@ struct TicketsView: View {
                 ScrollView(.vertical) {
                     VStack {
                         ForEach(viewModel.filteredResults, id: \.0.uid) { result in
-                            EventRow(company: result)                        }
+                            EventRow(
+                                company: result,
+                                goToCompany: goToCompanyPublisher.send
+                            )
+                        }
                     }
                 }
                 .padding(.top, 20)
@@ -248,7 +253,8 @@ private extension TicketsView {
     func bindViewModel() {
         let input = TicketsPresenterImpl.Input(
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
-            filter: filterPublisher.eraseToAnyPublisher()
+            filter: filterPublisher.eraseToAnyPublisher(),
+            goToCompany: goToCompanyPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

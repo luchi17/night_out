@@ -120,6 +120,11 @@ struct ContentView: View {
                                 .build()
                                 .showCustomBackButtonNavBar()
                         }
+                        .navigationDestination(for: DiscotecaDetailCoordinator.self) { coordinator in
+                            coordinator
+                                .build()
+//                                .showCustomBackButtonNavBar()
+                        }
                 })
         }
         .environmentObject(appCoordinator)
