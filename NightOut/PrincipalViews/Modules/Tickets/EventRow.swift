@@ -25,17 +25,26 @@ struct EventRow: View {
             
             if !company.1.isEmpty {
                 ScrollView(.horizontal) {
-                    
                     HStack(spacing: 30) {
-                        ForEach(company.1, id: \.id) { fiesta in
+                        if company.1.count == 1 {
+                            Spacer() // Centra el único elemento
                             EventCardRow(
                                 company: company.0,
-                                fiesta: fiesta
+                                fiesta: company.1.first!
                             )
                             .frame(width: 300, height: 250)
+                            Spacer()
+                        } else {
+                            ForEach(company.1, id: \.id) { fiesta in
+                                EventCardRow(
+                                    company: company.0,
+                                    fiesta: fiesta
+                                )
+                                .frame(width: 300, height: 250)
+                            }
                         }
                     }
-                    .padding(.vertical, 12)
+                    .padding(.all, 12)
                 }
                 .scrollIndicators(.hidden)
             }
