@@ -38,7 +38,7 @@ struct DiscotecaDetailView: View {
                 
                 topBarView
                     .padding(.top, 60)
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, 20)
                 
             } else {
                 ScrollView {
@@ -46,16 +46,16 @@ struct DiscotecaDetailView: View {
                         CollapsingHeader(imageUrl: $viewModel.companyModel.imageUrl)
                         
                         clubInfoView
-                            .padding([.horizontal, .top], 12)
+                            .padding(.horizontal, 20)
                         EventsSection(fiestas: $viewModel.fiestas)
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, 20)
                     }
                 }
                 .scrollIndicators(.hidden)
                 
                 topBarView
                     .padding(.top, 60)
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, 20)
                 
             }
         }
@@ -82,7 +82,7 @@ struct DiscotecaDetailView: View {
     }
     
     var topBarView: some View {
-        HStack {
+        HStack(spacing: 10) {
             Button(action: {
                 goBackPublisher.send()
             }) {
@@ -106,8 +106,10 @@ struct DiscotecaDetailView: View {
             Button(action: {
                 self.showShareSheet.toggle()
             }) {
-                Image("share")
+                Image(systemName: "square.and.arrow.up")
+//                Image("share")
                     .resizable()
+                    .scaledToFit()
                     .frame(width: 25, height: 25)
                     .foregroundColor(Color.darkBlueColor)
             }

@@ -14,7 +14,7 @@ struct EventRow: View {
                     border: false
                 )
                 
-                Text(company.0.username ?? "")
+                Text(company.0.username?.capitalized ?? "")
                     .foregroundColor(.white)
                 
                 Spacer()
@@ -109,6 +109,7 @@ struct EventCardRow: View {
             } placeholder: {
                 Color.grayColor
                     .scaledToFill()
+                    .frame(width: imageWidth)
                     .clipped()
             }
         }

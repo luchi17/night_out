@@ -107,6 +107,7 @@ final class DiscotecaDetailPresenterImpl: DiscotecaDetailPresenter {
             .sink { presenter, followOk in
                 if followOk {
                     print("started following \(presenter.viewModel.companyModel.uid)")
+                    presenter.viewModel.following = .following
                 } else {
                     print("Error: started following \(presenter.viewModel.companyModel.uid)")
                 }
@@ -123,14 +124,12 @@ final class DiscotecaDetailPresenterImpl: DiscotecaDetailPresenter {
             .sink { presenter, unfollowOk in
                 if unfollowOk {
                     print("remove following \(presenter.viewModel.companyModel.uid)")
+                    presenter.viewModel.following = .follow
                 } else {
                     print("Error: removing following \(presenter.viewModel.companyModel.uid)")
                 }
             }
             .store(in: &cancellables)
-            
-        default:
-            break
         }
     }
 }
