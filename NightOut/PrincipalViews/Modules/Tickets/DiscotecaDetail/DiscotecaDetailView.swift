@@ -5,6 +5,7 @@ struct DiscotecaDetailView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let followTappedPublisher = PassthroughSubject<Void, Never>()
+    private let goBackPublisher = PassthroughSubject<Void, Never>()
 
     @State private var showShareSheet = false
     
@@ -36,6 +37,8 @@ struct DiscotecaDetailView: View {
                 }
                 
                 topBarView
+                    .padding(.top, 60)
+                    .padding(.horizontal, 12)
                 
             } else {
                 ScrollView {
@@ -43,7 +46,7 @@ struct DiscotecaDetailView: View {
                         CollapsingHeader(imageUrl: $viewModel.companyModel.imageUrl)
                         
                         clubInfoView
-                            .padding(.horizontal, 12)
+                            .padding([.horizontal, .top], 12)
                         EventsSection(fiestas: $viewModel.fiestas)
                             .padding(.horizontal, 12)
                     }
@@ -51,7 +54,8 @@ struct DiscotecaDetailView: View {
                 .scrollIndicators(.hidden)
                 
                 topBarView
-                    .padding(.top, 40)
+                    .padding(.top, 60)
+                    .padding(.horizontal, 12)
                 
             }
         }
@@ -80,33 +84,32 @@ struct DiscotecaDetailView: View {
     var topBarView: some View {
         HStack {
             Button(action: {
-                print("Back")
+                goBackPublisher.send()
             }) {
                 Image("back")
                     .resizable()
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
+                    .foregroundStyle(Color.darkBlueColor)
+                    .frame(width: 25, height: 25)
             }
             Spacer()
             Button(action: {
-                print("Follow")
                 followTappedPublisher.send()
             }) {
                 Text(viewModel.following.title)
                     .font(.system(size: 18))
+                    .bold()
                     .foregroundColor(.white)
-                    .frame(width: 90, height: 30)
+                    .frame(width: 95, height: 35)
                     .background(Color.darkBlueColor)
-                    .cornerRadius(8)
+                    .cornerRadius(16)
             }
             Button(action: {
-                print("Share")
                 self.showShareSheet.toggle()
             }) {
                 Image("share")
                     .resizable()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(.white)
+                    .frame(width: 25, height: 25)
+                    .foregroundColor(Color.darkBlueColor)
             }
         }
         .background(Color.clear)
@@ -114,8 +117,8 @@ struct DiscotecaDetailView: View {
     
     var clubInfoView: some View {
         HStack(spacing: 8) {
-            Text(viewModel.companyModel.username ?? "Nombre desconocido")
-                .font(.system(size: 22))
+            Text(viewModel.companyModel.username?.capitalized ?? "Nombre desconocido")
+                .font(.system(size: 24))
                 .bold()
                 .foregroundColor(.white)
             Image("verified_profile_icon")
@@ -131,7 +134,8 @@ private extension DiscotecaDetailView {
     func bindViewModel() {
         let input = DiscotecaDetailPresenterImpl.Input(
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
-            followTapped: followTappedPublisher.eraseToAnyPublisher()
+            followTapped: followTappedPublisher.eraseToAnyPublisher(),
+            goBack: goBackPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
@@ -176,17 +180,20 @@ struct EventsSection: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text("Próximos eventos")
-                .font(.system(size: 18))
+                .font(.system(size: 22))
                 .bold()
                 .foregroundColor(.white)
                 .padding(.top, 10)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             ForEach(fiestas, id: \.id) { fiesta in
-                EventCardRow(fiesta: fiesta)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 300)
-                    .padding(.bottom)
+                EventCardRow(
+                    fiesta: fiesta,
+                    imageWidth: (UIScreen.main.bounds.width / 2)
+                )
+                .frame(maxWidth: .infinity)
+                .frame(height: 250)
+                .padding(.bottom)
             }
         }
     }

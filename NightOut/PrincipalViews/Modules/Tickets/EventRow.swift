@@ -32,13 +32,19 @@ struct EventRow: View {
                     HStack(spacing: 20) {
                         if company.1.count == 1 {
                             Spacer() // Centra el único elemento
-                            EventCardRow(fiesta: company.1.first!)
-                                .frame(width: 300, height: 250)
+                            EventCardRow(
+                                fiesta: company.1.first!,
+                                imageWidth: 160
+                            )
+                            .frame(width: 325, height: 250)
                             Spacer()
                         } else {
                             ForEach(company.1, id: \.id) { fiesta in
-                                EventCardRow(fiesta: fiesta)
-                                .frame(width: 300, height: 250)
+                                EventCardRow(
+                                    fiesta: fiesta,
+                                    imageWidth: 160
+                                )
+                                .frame(width: 325, height: 250)
                             }
                         }
                     }
@@ -54,10 +60,11 @@ struct EventRow: View {
 
 struct EventCardRow: View {
     let fiesta: Fiesta
+    let imageWidth: CGFloat
     
     var body: some View {
         
-        HStack {
+        HStack(spacing: 0) {
             VStack(spacing: 8) {
                 Text(formatDate(fiesta.fecha) ?? "Fecha")
                     .font(.system(size: 18, weight: .bold))
@@ -71,7 +78,7 @@ struct EventCardRow: View {
                 
                 Spacer()
                 
-                HStack(alignment: .top) {
+                HStack(alignment: .top, spacing: 3) {
                     Text("⏰ Hora: ")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundStyle(.white)
@@ -80,6 +87,8 @@ struct EventCardRow: View {
                         .font(.system(size: 16, weight: .regular))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Spacer()
                 }
                 Text("🎵 Música: \(fiesta.musicGenre)")
                     .font(.system(size: 16, weight: .regular))
@@ -95,7 +104,7 @@ struct EventCardRow: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 150, height: 250)
+                    .frame(width: imageWidth)
                     .clipped()
             } placeholder: {
                 Color.grayColor

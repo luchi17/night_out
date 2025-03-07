@@ -28,6 +28,7 @@ final class DiscotecaDetailPresenterImpl: DiscotecaDetailPresenter {
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
         let followTapped: AnyPublisher<Void, Never>
+        let goBack: AnyPublisher<Void, Never>
     }
     
     struct UseCases {
@@ -35,7 +36,7 @@ final class DiscotecaDetailPresenterImpl: DiscotecaDetailPresenter {
     }
     
     struct Actions {
-        //        let backToLogin: VoidClosure
+        let goBack: VoidClosure
     }
     
     // MARK: - Stored Properties
@@ -81,7 +82,13 @@ final class DiscotecaDetailPresenterImpl: DiscotecaDetailPresenter {
             }
             .store(in: &cancellables)
 
-        
+        input
+            .goBack
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.goBack()
+            }
+            .store(in: &cancellables)
     }
     
     private func followButtonTapped() {
