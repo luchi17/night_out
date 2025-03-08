@@ -8,8 +8,10 @@ struct TicketDetailView: View {
     private let goBackPublisher = PassthroughSubject<Void, Never>()
     private let openMapsPublisher = PassthroughSubject<Void, Never>()
     private let openAppleMapsPublisher = PassthroughSubject<Void, Never>()
+    private let pagarPublisher = PassthroughSubject<Void, Never>()
     
     @State private var showNavigationAlert = false
+    @State private var isSheetPresented = false
     
     @ObservedObject var viewModel: TicketDetailViewModel
     let presenter: TicketDetailPresenter
@@ -64,6 +66,10 @@ struct TicketDetailView: View {
                                 ForEach($viewModel.entradas, id: \.id) { entrada in
                                     VStack {
                                         EntradasView(entrada: entrada)
+                                            .onTapGesture {
+                                                viewModel.entradaTapped = entrada.wrappedValue
+                                                isSheetPresented.toggle()
+                                            }
                                         Spacer()
                                             .frame(height: 20)
                                     }
@@ -97,6 +103,18 @@ struct TicketDetailView: View {
             } message: {
                 Text("Elige una app para abrir la localización.")
             }
+            .sheet(isPresented: $isSheetPresented) {
+                BuyTicketBottomSheet(
+                    quantity: $viewModel.quantity,
+                    precio: $viewModel.finalPrice,
+                    precioInicial: viewModel.entradaTapped?.price ?? 0.0,
+                    pagar: pagarPublisher.send
+                )
+                .presentationDetents([.height(250)])
+            }
+            .onChange(of: viewModel.entradaTapped, { oldValue, newValue in
+                viewModel.finalPrice = newValue?.price ?? 0.0
+            })
             .showToast(
                 error: (
                     type: viewModel.toast,
@@ -221,7 +239,8 @@ private extension TicketDetailView {
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
             goBack: goBackPublisher.eraseToAnyPublisher(),
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
-            openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher()
+            openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher(),
+            pagar: pagarPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
