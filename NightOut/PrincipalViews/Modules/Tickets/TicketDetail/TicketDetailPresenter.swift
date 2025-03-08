@@ -3,18 +3,26 @@ import SwiftUI
 import Firebase
 import CoreLocation
 
-struct Entrada: Identifiable {
+struct Entrada: Identifiable, Equatable {
     let id = UUID()
     let type: String
-    let price: String
+    let price: Double
     let description: String
     let capacity: String
     
-    init(type: String, price: String, description: String, capacity: String) {
+    init(type: String, price: Double, description: String, capacity: String) {
         self.type = type
         self.price = price
         self.description = description
         self.capacity = capacity
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Entrada, rhs: Entrada) -> Bool {
+        return lhs.id == rhs.id
     }
 }
 
@@ -26,6 +34,11 @@ class TicketDetailViewModel: ObservableObject {
     @Published var companyModel: CompanyModel
     @Published var fiesta: Fiesta
     @Published var entradas: [Entrada] = []
+    
+    @Published var entradaTapped: Entrada?
+    @Published var quantity = 1
+    
+    @Published var finalPrice: Double = 0.0
     
     init(companyModel: CompanyModel, fiesta: Fiesta) {
         self.companyModel = companyModel
@@ -46,6 +59,7 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
         let goBack: AnyPublisher<Void, Never>
         let openMaps: AnyPublisher<Void, Never>
         let openAppleMaps: AnyPublisher<Void, Never>
+        let pagar: AnyPublisher<Void, Never>
     }
     
     struct UseCases {
@@ -89,6 +103,14 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 presenter.actions.goBack()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .pagar
+            .withUnretained(self)
+            .sink { presenter, _ in
+//                presenter.actions.openTicketInfoPay()
             }
             .store(in: &cancellables)
         
@@ -147,15 +169,32 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
                 let typeName = typeData.key
                 let eventInfo = typeData.value as? [String: Any] ?? [:]
                 
-                let price = eventInfo["price"] as? String ?? "Desconocido"
+                let formattedPrice: Double = {
+//                    if let priceString = eventInfo["price"] as? String,
+//                        let priceDouble = Double(priceString) {
+//                       
+//                        let priceWithTwoDecimals = Double(String(format: "%.2f", priceDouble)) ?? 0.0
+//                        
+//                        return priceWithTwoDecimals
+//                    }
+//                    return 0.0
+                    
+                    if let priceString = eventInfo["price"] as? String {
+                        
+                        return self.formatPrice(priceString) ?? 0.0
+                    }
+                    
+                    return 0.0
+                }()
+               
                 let description = eventInfo["description"] as? String ?? "Sin descripción"
                 let capacity = eventInfo["capacity"] as? String ?? "0"
 
-                print("🎟 Entrada encontrada: $\(typeName) | 💰 Precio: $\(price) | 🎟 Capacidad: \(capacity)")
+                print("🎟 Entrada encontrada: $\(typeName) | 💰 Precio: $\(formattedPrice) | 🎟 Capacidad: \(capacity)")
                 
                 let entrada = Entrada(
                     type: typeName,
-                    price: price,
+                    price: formattedPrice,
                     description: description,
                     capacity: capacity
                 )
@@ -166,5 +205,17 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
                 self.viewModel.loading = false
             }
         }
+    }
+    
+    func formatPrice(_ priceString: String) -> Double? {
+        if let priceDouble = Double(priceString) {
+            // Verificamos si el número tiene decimales distintos de 0
+            if priceDouble.truncatingRemainder(dividingBy: 1) == 0 {
+                return Double(Int(priceDouble)) // Devuelve un Int convertido a Double (sin decimales)
+            } else {
+                return Double(String(format: "%.2f", priceDouble)) ?? priceDouble // Devuelve con 2 decimales
+            }
+        }
+        return nil // Si la conversión falla, retorna nil
     }
 }
