@@ -53,7 +53,7 @@ struct BuyTicketBottomSheet: View {
                 Button(action: {
                     if quantity > 1 {
                         quantity -= 1
-                        precio = precio / Double(quantity)
+                        precio = (Double(quantity) * precio) / Double(quantity + 1)
                     } else {
                         precio = precioInicial
                     }
@@ -62,11 +62,10 @@ struct BuyTicketBottomSheet: View {
                         .font(.title)
                         .frame(width: 50, height: 50)
                         .background(Color.white)
-                        .foregroundColor(quantity > 1 ? Color.blackColor : .gray)
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.blackColor, lineWidth: 2))
+                        .foregroundColor(quantity == 1 ? Color.gray : Color.blackColor)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(quantity == 1 ? Color.gray : Color.blackColor, lineWidth: 2))
                 }
                 .disabled(quantity == 1)
-                
                 
                 ZStack {
                     Image(systemName: "trophy.fill")
@@ -85,7 +84,7 @@ struct BuyTicketBottomSheet: View {
                 
                 Button(action: {
                     quantity += 1
-                    precio = precio * Double(quantity)
+                    precio = precioInicial * Double(quantity)
                 }) {
                     Text("+")
                         .font(.title)

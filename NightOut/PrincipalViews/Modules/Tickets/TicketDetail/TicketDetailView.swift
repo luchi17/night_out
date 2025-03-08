@@ -103,7 +103,10 @@ struct TicketDetailView: View {
             } message: {
                 Text("Elige una app para abrir la localización.")
             }
-            .sheet(isPresented: $isSheetPresented) {
+            .sheet(isPresented: $isSheetPresented, onDismiss: {
+                viewModel.entradaTapped = nil
+                viewModel.finalPrice = 0.0
+            }) {
                 BuyTicketBottomSheet(
                     quantity: $viewModel.quantity,
                     precio: $viewModel.finalPrice,
