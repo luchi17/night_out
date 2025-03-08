@@ -119,16 +119,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0FDFDE21-A63E-426C-9E9D-F6EB9DAEA684"
-            shouldBeEnabled = "Yes"
+            uuid = "C609F3D8-BA70-4B3B-AD05-9C753EC849AB"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "NightOut/PrincipalViews/Modules/Tickets/TicketsPresenter.swift"
+            filePath = "NightOut/PrincipalViews/Modules/Tickets/TicketDetail/TicketDetailPresenter.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "163"
-            endingLineNumber = "163"
-            landmarkName = "filterList()"
+            startingLineNumber = "17"
+            endingLineNumber = "17"
+            landmarkName = "init(type:price:description:capacity:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

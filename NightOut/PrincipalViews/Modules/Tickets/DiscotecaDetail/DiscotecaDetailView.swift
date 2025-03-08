@@ -190,7 +190,7 @@ struct EventsSection: View {
                         EventCardRow(
                             fiesta: fiesta,
                             imageWidth: (UIScreen.main.bounds.width / 2),
-                            imageHeight: 250
+                            imageHeight: 250 - 16
                         )
                         .frame(maxWidth: .infinity)
                         

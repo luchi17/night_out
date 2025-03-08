@@ -6,6 +6,10 @@ struct TicketDetailView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let followTappedPublisher = PassthroughSubject<Void, Never>()
     private let goBackPublisher = PassthroughSubject<Void, Never>()
+    private let openMapsPublisher = PassthroughSubject<Void, Never>()
+    private let openAppleMapsPublisher = PassthroughSubject<Void, Never>()
+    
+    @State private var showNavigationAlert = false
     
     @ObservedObject var viewModel: TicketDetailViewModel
     let presenter: TicketDetailPresenter
@@ -30,12 +34,13 @@ struct TicketDetailView: View {
                         VStack(alignment: .leading) {
                             
                             topView
-                                .padding(.bottom, 20)
+                                .padding(.bottom, 10)
                             
-                            Spacer()
+                            Rectangle()
                                 .frame(height: 1)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.white.opacity(0.3))
                                 .frame(maxWidth: .infinity)
+                                .padding(.bottom, 20)
                             
                             clubInfoView
                                 .padding(.bottom, 20)
@@ -43,7 +48,7 @@ struct TicketDetailView: View {
                             Text("Entradas")
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundStyle(.white)
-                                .padding(.top)
+                                .padding(.bottom, 20)
                             
                             if viewModel.loading {
                               
@@ -57,7 +62,11 @@ struct TicketDetailView: View {
                                 
                             } else {
                                 ForEach($viewModel.entradas, id: \.id) { entrada in
-                                    EntradasView(entrada: entrada)
+                                    VStack {
+                                        EntradasView(entrada: entrada)
+                                        Spacer()
+                                            .frame(height: 20)
+                                    }
                                 }
                                 
                                 Spacer()
@@ -73,6 +82,21 @@ struct TicketDetailView: View {
                 Color.blackColor.ignoresSafeArea()
             )
             .preferredColorScheme(.dark)
+            .alert("Abrir localización", isPresented: $showNavigationAlert) {
+                Button("Apple Maps") {
+                    openAppleMapsPublisher.send()
+                    showNavigationAlert = false
+                }
+                Button("Google Maps") {
+                    openMapsPublisher.send()
+                    showNavigationAlert = false
+                }
+                Button("Cerrar", role: .cancel) {
+                    showNavigationAlert = false
+                }
+            } message: {
+                Text("Elige una app para abrir la localización.")
+            }
             .showToast(
                 error: (
                     type: viewModel.toast,
@@ -93,12 +117,12 @@ struct TicketDetailView: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: UIScreen.main.bounds.width / 2, height: 200)
+                    .frame(width: (UIScreen.main.bounds.width / 2) - 45, height: 200)
                     .clipped()
                 
             } placeholder: {
                 Color.grayColor
-                    .frame(width: UIScreen.main.bounds.width / 2, height: 200)
+                    .frame(width: (UIScreen.main.bounds.width / 2) - 45, height: 200)
             }
             
             VStack(spacing: 10) {
@@ -107,12 +131,14 @@ struct TicketDetailView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text("Fecha: \(viewModel.fiesta.fecha)")
+                Text("\(Utils.formatDate(viewModel.fiesta.fecha) ?? "Fecha")")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.yellow)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Button(action: openMaps) {
+                Button(action: {
+                    showNavigationAlert = true
+                }) {
                     HStack(spacing: 0) {
                         Image("localizacion")
                             .resizable()
@@ -193,17 +219,11 @@ private extension TicketDetailView {
     func bindViewModel() {
         let input = TicketDetailPresenterImpl.Input(
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
-            goBack: goBackPublisher.eraseToAnyPublisher()
+            goBack: goBackPublisher.eraseToAnyPublisher(),
+            openMaps: openMapsPublisher.eraseToAnyPublisher(),
+            openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
-    
-    func openMaps() {
-        if let location = viewModel.companyModel.location?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-               let url = URL(string: "https://www.google.com/maps/search/?api=1&query=\(location)") {
-                UIApplication.shared.open(url)
-            }
-        }
-    
 }
 

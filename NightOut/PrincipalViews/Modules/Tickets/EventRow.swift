@@ -3,6 +3,7 @@ import SwiftUI
 struct EventRow: View {
     let company: (CompanyModel, [Fiesta])
     let goToCompany: InputClosure<(CompanyModel, [Fiesta])>
+    let goToEvent: InputClosure<(CompanyModel, Fiesta)>
     
     var body: some View {
         VStack {
@@ -35,9 +36,12 @@ struct EventRow: View {
                                 EventCardRow(
                                     fiesta: fiesta,
                                     imageWidth: 160,
-                                    imageHeight: 250
+                                    imageHeight: 250 - 16
                                 )
                                 .frame(width: 325, height: 250)
+                                .onTapGesture {
+                                    goToEvent((company.0, fiesta))
+                                }
                                 
                                 Spacer()
                                     .frame(width: 14)
@@ -63,7 +67,7 @@ struct EventCardRow: View {
         
         HStack(spacing: 0) {
             VStack(spacing: 8) {
-                Text(formatDate(fiesta.fecha) ?? "Fecha")
+                Text(Utils.formatDate(fiesta.fecha) ?? "Fecha")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(.blue)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -109,25 +113,11 @@ struct EventCardRow: View {
                     .frame(width: imageWidth, height: imageHeight)
                     .clipped()
             }
+            .padding([.vertical, .trailing], 8)
         }
         .background(Color.grayColor.opacity(0.2))
-        .cornerRadius(10)
+        .cornerRadius(8)
         .clipped()
-    }
-    
-    func formatDate(_ dateString: String) -> String? {
-        let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "dd-MM-yyyy"
-        inputFormatter.locale = Locale(identifier: "es_ES")
-
-        let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "d 'de' MMMM"
-        outputFormatter.locale = Locale(identifier: "es_ES")
-
-        if let date = inputFormatter.date(from: dateString) {
-            return outputFormatter.string(from: date)
-        }
-        return nil
     }
 }
 

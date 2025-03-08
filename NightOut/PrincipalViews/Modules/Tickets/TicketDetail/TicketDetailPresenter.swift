@@ -1,6 +1,7 @@
 import Combine
 import SwiftUI
 import Firebase
+import CoreLocation
 
 struct Entrada: Identifiable {
     let id = UUID()
@@ -43,6 +44,8 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
         let goBack: AnyPublisher<Void, Never>
+        let openMaps: AnyPublisher<Void, Never>
+        let openAppleMaps: AnyPublisher<Void, Never>
     }
     
     struct UseCases {
@@ -50,6 +53,8 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
     
     struct Actions {
         let goBack: VoidClosure
+        let onOpenMaps: InputClosure<(Double, Double)>
+        let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
     }
     
     // MARK: - Stored Properties
@@ -84,6 +89,32 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 presenter.actions.goBack()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openMaps
+            .withUnretained(self)
+            .sink { presenter, _ in
+
+                if let location = presenter.viewModel.companyModel.location,
+                   let coordinate = LocationManager.shared.getCoordinatesFromString(location) {
+                    
+                    presenter.actions.onOpenMaps((coordinate.latitude, coordinate.longitude))
+                }
+            }
+            .store(in: &cancellables)
+        
+        input
+            .openAppleMaps
+            .withUnretained(self)
+            .sink { presenter, _ in
+                
+                if let location = presenter.viewModel.companyModel.location,
+                   let coordinate = LocationManager.shared.getCoordinatesFromString(location) {
+                    
+                    presenter.actions.onOpenAppleMaps((coordinate: coordinate, placeName: presenter.viewModel.companyModel.username))
+                }
             }
             .store(in: &cancellables)
     }

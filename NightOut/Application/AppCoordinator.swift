@@ -191,12 +191,19 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func openTicketDetail(model: (CompanyModel, Fiesta)) {
-        let ticketDetailCoordinator = TicketDetailCoordinator(
-            actions: .init(goBack: { [weak self] in
+        let ticketDetailCoordinator = TicketDetailCoordinator(actions: .init(
+            goBack: { [weak self] in
                 self?.pop()
-            }),
-            model: model
-        )
+            },
+            onOpenMaps: { [weak self] data in
+                self?.openGoogleMaps(latitude: data.0, longitude: data.1)
+            },
+            onOpenAppleMaps: { [weak self] data in
+                self?.openAppleMaps(coordinate: data.0, placeName: data.1)
+            }
+        ),
+        model: model)
+        
         self.push(ticketDetailCoordinator)
     }
 }

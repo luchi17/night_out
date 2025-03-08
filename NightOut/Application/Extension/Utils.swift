@@ -11,4 +11,19 @@ class Utils {
             return ascending ? date1 < date2 : date1 > date2
         }
     }
+    
+    static func formatDate(_ dateString: String) -> String? {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "dd-MM-yyyy"
+        inputFormatter.locale = Locale(identifier: "es_ES")
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "d 'de' MMMM"
+        outputFormatter.locale = Locale(identifier: "es_ES")
+
+        if let date = inputFormatter.date(from: dateString) {
+            return outputFormatter.string(from: date).capitalized
+        }
+        return nil
+    }
 }
