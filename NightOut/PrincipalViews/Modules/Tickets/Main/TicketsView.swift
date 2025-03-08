@@ -37,9 +37,8 @@ struct TicketsView: View {
             
             Spacer()
             // Lista de eventos
-#warning("Change image")
             if viewModel.isFirstTime {
-                Image("descubrirEventos")
+                Image("icono_calendar")
                     .resizable()
                     .resizable()
                     .scaledToFit()
