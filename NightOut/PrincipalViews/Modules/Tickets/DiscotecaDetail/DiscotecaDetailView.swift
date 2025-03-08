@@ -23,41 +23,21 @@ struct DiscotecaDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             
-            if viewModel.fiestas.isEmpty {
-                
-                VStack {
-                    Spacer()
+            ScrollView {
+                VStack(spacing: 0) {
+                    CollapsingHeader(imageUrl: $viewModel.companyModel.imageUrl)
                     
-                    Text("No hay eventos para esta discoteca.")
-                        .font(.title)
-                        .bold()
-                        .foregroundColor(.white)
-                    
-                    Spacer()
+                    clubInfoView
+                        .padding([.horizontal, .top], 20)
+                    EventsSection(fiestas: $viewModel.fiestas)
+                        .padding(.horizontal, 20)
                 }
-                
-                topBarView
-                    .padding(.top, 60)
-                    .padding(.horizontal, 20)
-                
-            } else {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        CollapsingHeader(imageUrl: $viewModel.companyModel.imageUrl)
-                        
-                        clubInfoView
-                            .padding(.horizontal, 20)
-                        EventsSection(fiestas: $viewModel.fiestas)
-                            .padding(.horizontal, 20)
-                    }
-                }
-                .scrollIndicators(.hidden)
-                
-                topBarView
-                    .padding(.top, 60)
-                    .padding(.horizontal, 20)
-                
             }
+            .scrollIndicators(.hidden)
+            
+            topBarView
+                .padding(.top, 60)
+                .padding(.horizontal, 20)
         }
         .edgesIgnoringSafeArea(.all)
         .navigationBarBackButtonHidden()
@@ -89,7 +69,7 @@ struct DiscotecaDetailView: View {
                 Image("back")
                     .resizable()
                     .foregroundStyle(Color.darkBlueColor)
-                    .frame(width: 25, height: 25)
+                    .frame(width: 35, height: 35)
             }
             Spacer()
             Button(action: {
@@ -107,10 +87,9 @@ struct DiscotecaDetailView: View {
                 self.showShareSheet.toggle()
             }) {
                 Image(systemName: "square.and.arrow.up")
-//                Image("share")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 25, height: 25)
+                    .frame(width: 35, height: 35)
                     .foregroundColor(Color.darkBlueColor)
             }
         }
@@ -181,21 +160,35 @@ struct EventsSection: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Próximos eventos")
-                .font(.system(size: 22))
-                .bold()
-                .foregroundColor(.white)
-                .padding(.top, 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
             
-            ForEach(fiestas, id: \.id) { fiesta in
-                EventCardRow(
-                    fiesta: fiesta,
-                    imageWidth: (UIScreen.main.bounds.width / 2)
-                )
-                .frame(maxWidth: .infinity)
-                .frame(height: 250)
-                .padding(.bottom)
+            if fiestas.isEmpty {
+                VStack {
+                    Spacer()
+                    
+                    Text("No hay eventos para esta discoteca.")
+                        .font(.title)
+                        .bold()
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                }
+            } else {
+                Text("Próximos eventos")
+                    .font(.system(size: 22))
+                    .bold()
+                    .foregroundColor(.white)
+                    .padding(.top, 10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                ForEach(fiestas, id: \.id) { fiesta in
+                    EventCardRow(
+                        fiesta: fiesta,
+                        imageWidth: (UIScreen.main.bounds.width / 2)
+                    )
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 250)
+                    .padding(.bottom)
+                }
             }
         }
     }
