@@ -123,7 +123,10 @@ struct ContentView: View {
                         .navigationDestination(for: DiscotecaDetailCoordinator.self) { coordinator in
                             coordinator
                                 .build()
-//                                .showCustomBackButtonNavBar()
+                        }
+                        .navigationDestination(for: TicketDetailCoordinator.self) { coordinator in
+                            coordinator
+                                .build()
                         }
                 })
         }

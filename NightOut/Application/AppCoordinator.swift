@@ -60,7 +60,8 @@ final class AppCoordinator: ObservableObject {
             openHub: openHub,
             openLeagueDetail: openLeagueDetail,
             openCreateLeague: openCreateLeague,
-            openDiscotecaDetail: openDiscotecaDetail
+            openDiscotecaDetail: openDiscotecaDetail,
+            openTicketDetail: openTicketDetail
         )
         self.push(tabBarCoordinator)
     }
@@ -187,6 +188,16 @@ final class AppCoordinator: ObservableObject {
             model: model
         )
         self.push(discotecaDetailCoordinator)
+    }
+    
+    private func openTicketDetail(model: (CompanyModel, Fiesta)) {
+        let ticketDetailCoordinator = TicketDetailCoordinator(
+            actions: .init(goBack: { [weak self] in
+                self?.pop()
+            }),
+            model: model
+        )
+        self.push(ticketDetailCoordinator)
     }
 }
 

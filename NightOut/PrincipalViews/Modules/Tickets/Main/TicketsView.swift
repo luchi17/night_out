@@ -7,6 +7,7 @@ struct TicketsView: View {
     private let logoutPublisher = PassthroughSubject<Void, Never>()
     private let filterPublisher = PassthroughSubject<Void, Never>()
     private let goToCompanyPublisher = PassthroughSubject<(CompanyModel, [Fiesta]), Never>()
+    private let goToEventPublisher = PassthroughSubject<(CompanyModel, Fiesta), Never>()
     
     @State private var isCalendarVisible = false
     @State private var isGenreVisible = false
@@ -54,7 +55,8 @@ struct TicketsView: View {
                         ForEach(viewModel.filteredResults, id: \.0.uid) { result in
                             EventRow(
                                 company: result,
-                                goToCompany: goToCompanyPublisher.send
+                                goToCompany: goToCompanyPublisher.send,
+                                goToEvent: goToEventPublisher.send
                             )
                         }
                     }
@@ -254,7 +256,8 @@ private extension TicketsView {
         let input = TicketsPresenterImpl.Input(
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
             filter: filterPublisher.eraseToAnyPublisher(),
-            goToCompany: goToCompanyPublisher.eraseToAnyPublisher()
+            goToCompany: goToCompanyPublisher.eraseToAnyPublisher(),
+            goToEvent: goToEventPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

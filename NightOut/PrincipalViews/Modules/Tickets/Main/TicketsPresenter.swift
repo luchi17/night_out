@@ -45,6 +45,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
         let viewIsLoaded: AnyPublisher<Void, Never>
         let filter: AnyPublisher<Void, Never>
         let goToCompany: AnyPublisher<(CompanyModel, [Fiesta]), Never>
+        let goToEvent: AnyPublisher<(CompanyModel, Fiesta), Never>
     }
     
     struct UseCases {
@@ -53,6 +54,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
     
     struct Actions {
         let goToCompany: InputClosure<(CompanyModel, [Fiesta])>
+        let goToEvent: InputClosure<(CompanyModel, Fiesta)>
     }
     
     // MARK: - Stored Properties
@@ -82,6 +84,14 @@ final class TicketsPresenterImpl: TicketsPresenter {
             .withUnretained(self)
             .sink { presenter, company in
                 presenter.actions.goToCompany(company)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goToEvent
+            .withUnretained(self)
+            .sink { presenter, event in
+                presenter.actions.goToEvent(event)
             }
             .store(in: &cancellables)
         
