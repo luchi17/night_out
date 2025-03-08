@@ -23,14 +23,15 @@ struct DiscotecaDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             
-            ScrollView {
+            ScrollView(.vertical) {
                 VStack(spacing: 0) {
                     CollapsingHeader(imageUrl: $viewModel.companyModel.imageUrl)
                     
                     clubInfoView
                         .padding([.horizontal, .top], 20)
                     EventsSection(fiestas: $viewModel.fiestas)
-                        .padding(.horizontal, 20)
+                        .padding([.horizontal, .top], 20)
+                        .padding(.bottom, 50)
                 }
             }
             .scrollIndicators(.hidden)
@@ -68,29 +69,33 @@ struct DiscotecaDetailView: View {
             }) {
                 Image("back")
                     .resizable()
-                    .foregroundStyle(Color.darkBlueColor)
+                    .foregroundColor(Color.white)
                     .frame(width: 35, height: 35)
             }
             Spacer()
-            Button(action: {
-                followTappedPublisher.send()
-            }) {
-                Text(viewModel.following.title)
-                    .font(.system(size: 18))
-                    .bold()
-                    .foregroundColor(.white)
-                    .frame(width: 95, height: 35)
-                    .background(Color.darkBlueColor)
-                    .cornerRadius(16)
-            }
-            Button(action: {
-                self.showShareSheet.toggle()
-            }) {
-                Image(systemName: "square.and.arrow.up")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 35, height: 35)
-                    .foregroundColor(Color.darkBlueColor)
+            
+            HStack(alignment: .bottom) {
+                Button(action: {
+                    followTappedPublisher.send()
+                }) {
+                    Text(viewModel.following.title)
+                        .font(.system(size: 18))
+                        .bold()
+                        .foregroundColor(.white)
+                        .frame(width: 95, height: 35)
+                        .background(Color.darkBlueColor)
+                        .cornerRadius(16)
+                }
+                Button(action: {
+                    self.showShareSheet.toggle()
+                }) {
+                    Image(systemName: "square.and.arrow.up")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 35, height: 35)
+                        .foregroundColor(Color.white)
+                        .bold()
+                }
             }
         }
         .background(Color.clear)
@@ -181,13 +186,17 @@ struct EventsSection: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 ForEach(fiestas, id: \.id) { fiesta in
-                    EventCardRow(
-                        fiesta: fiesta,
-                        imageWidth: (UIScreen.main.bounds.width / 2)
-                    )
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 250)
-                    .padding(.bottom)
+                    VStack {
+                        EventCardRow(
+                            fiesta: fiesta,
+                            imageWidth: (UIScreen.main.bounds.width / 2),
+                            imageHeight: 250
+                        )
+                        .frame(maxWidth: .infinity)
+                        
+                        Spacer()
+                            .frame(height: 20)
+                    }
                 }
             }
         }

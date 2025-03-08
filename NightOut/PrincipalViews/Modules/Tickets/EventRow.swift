@@ -34,16 +34,17 @@ struct EventRow: View {
                             HStack {
                                 EventCardRow(
                                     fiesta: fiesta,
-                                    imageWidth: 160
+                                    imageWidth: 160,
+                                    imageHeight: 250
                                 )
                                 .frame(width: 325, height: 250)
                                 
                                 Spacer()
-                                    .frame(width: 20)
+                                    .frame(width: 14)
                             }
                         }
                     }
-                    .padding([.vertical, .leading], 20)
+                    .padding([.vertical, .leading], 14)
                 }
                 .scrollIndicators(.hidden)
             }
@@ -56,6 +57,7 @@ struct EventRow: View {
 struct EventCardRow: View {
     let fiesta: Fiesta
     let imageWidth: CGFloat
+    let imageHeight: CGFloat
     
     var body: some View {
         
@@ -99,17 +101,18 @@ struct EventCardRow: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: imageWidth)
+                    .frame(width: imageWidth, height: imageHeight)
                     .clipped()
             } placeholder: {
                 Color.grayColor
                     .scaledToFill()
-                    .frame(width: imageWidth)
+                    .frame(width: imageWidth, height: imageHeight)
                     .clipped()
             }
         }
         .background(Color.grayColor.opacity(0.2))
         .cornerRadius(10)
+        .clipped()
     }
     
     func formatDate(_ dateString: String) -> String? {
