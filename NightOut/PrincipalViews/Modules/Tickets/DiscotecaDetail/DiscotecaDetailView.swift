@@ -189,7 +189,7 @@ struct EventsSection: View {
                     VStack {
                         EventCardRow(
                             fiesta: fiesta,
-                            imageWidth: (UIScreen.main.bounds.width / 2),
+                            imageWidth: (UIScreen.main.bounds.width / 2) - 30,
                             imageHeight: 250 - 16
                         )
                         .frame(maxWidth: .infinity)
