@@ -30,7 +30,7 @@ struct PayDetailView: View {
                 
                 VStack {
                     topView
-                        .padding(.top, 60)
+                        .padding(.top, 20)
                     
                     Text(viewModel.countdownText)
                         .font(.headline)
@@ -80,14 +80,9 @@ struct PayDetailView: View {
                 }
         }
         .edgesIgnoringSafeArea(.bottom)
-        .navigationBarBackButtonHidden()
         .background(
             Color.blackColor.ignoresSafeArea()
         )
-        .overlay(alignment: .top, content: {
-            backButton
-                .padding(.leading, 20)
-        })
         .sheet(isPresented: $showDatePicker, onDismiss: {
             if let index = selectedUserIndex {
                 if let selectedDate = selectedDate {
@@ -147,22 +142,7 @@ struct PayDetailView: View {
         .background(Color.grayColor)
         .cornerRadius(20)
     }
-    
-    
-    var backButton: some View {
-        HStack(spacing: 10) {
-            Button(action: {
-                goBackPublisher.send()
-            }) {
-                Image("back")
-                    .resizable()
-                    .foregroundColor(Color.white)
-                    .frame(width: 30, height: 30)
-            }
-            Spacer()
-        }
-    }
-    
+
     var secondView: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
@@ -241,7 +221,7 @@ private extension PayDetailView {
     func formatDateString(_ input: String) -> String? {
         // Crear un DateFormatter para analizar la fecha en el formato "12 de Febrero"
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "d 'de' MMMM"
+        dateFormatter.dateFormat = "dd-MM-yyyy"
         
         // Analizar la cadena de entrada a un objeto Date
         guard let date = dateFormatter.date(from: input.lowercased()) else { return nil }

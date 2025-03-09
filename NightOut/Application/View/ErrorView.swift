@@ -8,8 +8,10 @@ struct CustomBackButton: View {
             dismiss()
         }) {
             HStack {
-                Image(systemName: "arrow.backward")
-                    .foregroundStyle(.white)
+                Image("back")
+                    .resizable()
+                    .foregroundColor(Color.white)
+                    .frame(width: 30, height: 30)
             }
         }
     }
@@ -44,8 +46,10 @@ public extension View {
                     Button(action: {
                         goBack()
                     }) {
-                        Image(systemName: "arrow.backward")
-                            .foregroundStyle(.white)
+                        Image("back")
+                            .resizable()
+                            .foregroundColor(Color.white)
+                            .frame(width: 30, height: 30)
                     }
                 }
                 

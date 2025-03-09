@@ -26,21 +26,20 @@ struct TicketDetailView: View {
     var body: some View {
             VStack {
                 
-                backButton
-                    .padding(.top, 50)
-                    .padding(.bottom, 20)
-                
                 if !viewModel.loading {
-                    ScrollView {
+                    
+                    ScrollView(.vertical) {
+                        
                         VStack(alignment: .leading) {
                             
                             topView
-                                .padding(.bottom, 10)
-                            
+                                .padding(.top, 20)
+                                
                             Rectangle()
                                 .frame(height: 1)
                                 .foregroundStyle(.white.opacity(0.3))
                                 .frame(maxWidth: .infinity)
+                                .padding(.top, 10)
                                 .padding(.bottom, 20)
                             
                             clubInfoView
@@ -81,8 +80,7 @@ struct TicketDetailView: View {
                 }
             }
             .padding(.horizontal, 20)
-            .edgesIgnoringSafeArea(.all)
-            .navigationBarBackButtonHidden()
+            .edgesIgnoringSafeArea(.bottom)
             .background(
                 Color.blackColor.ignoresSafeArea()
             )

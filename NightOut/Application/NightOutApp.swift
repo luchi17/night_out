@@ -127,9 +127,11 @@ struct ContentView: View {
                         .navigationDestination(for: TicketDetailCoordinator.self) { coordinator in
                             coordinator
                                 .build()
+                                .showCustomBackButtonNavBar()
                                 .navigationDestination(for: PayDetailCoordinator.self) { coordinator in
                                     coordinator
                                         .build()
+                                        .showCustomBackButtonNavBar()
                                 }
                         }
                 })
