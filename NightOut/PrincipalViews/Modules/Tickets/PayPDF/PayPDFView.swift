@@ -11,7 +11,6 @@ struct PayPDFView: View {
     
     @State private var mailResult: MFMailComposeResult?
     @State private var showPDF: Bool = false
-    @State private var pdfToShow: URL?
     
     @ObservedObject var viewModel: PayPDFViewModel
     let presenter: PayPDFPresenter
@@ -41,8 +40,7 @@ struct PayPDFView: View {
                     ForEach($viewModel.ticketsList, id: \.self) { ticket in
                         PDFTicketRow(
                             ticket: ticket,
-                            showPDF: $showPDF,
-                            pdfToShow: $pdfToShow
+                            pdfToShow: $viewModel.pdfToShow
                         )
                     }
                 }
@@ -50,6 +48,7 @@ struct PayPDFView: View {
             
             Spacer()
         }
+        .padding(.top, 30)
         .background(
             Color.blackColor
         )
@@ -57,9 +56,19 @@ struct PayPDFView: View {
             title: "Entradas",
             goBack: goBackPublisher.send
         )
-        .sheet(isPresented: $showPDF) {
-            PDFKitView(url: viewModel.pdfString!)
-                .scaledToFill()
+        .onChange(of: viewModel.pdfToShow) { oldValue, newValue in
+            if newValue != nil {
+                showPDF = true
+            }
+        }
+        .sheet(isPresented: $showPDF, onDismiss: {
+            viewModel.pdfToShow = nil
+            showPDF = false
+        }) {
+            if let pdfToShow = viewModel.pdfToShow {
+                PDFKitView(url: pdfToShow)
+                    .scaledToFill()
+            }
         }
         .sheet(isPresented: $viewModel.isShowingMailComposer) {
             MailComposerView(
@@ -116,8 +125,6 @@ private extension PayPDFView {
 struct PDFTicketRow: View {
     
     @Binding var ticket: TicketPDFModel
-    
-    @Binding var showPDF: Bool
     @Binding var pdfToShow: URL?
    
     var body: some View {
@@ -131,6 +138,7 @@ struct PDFTicketRow: View {
             
             Text("Entrada - \(ticket.name)")
                 .font(.headline)
+                .foregroundStyle(Color.blackColor)
             
             Spacer()
             
@@ -138,25 +146,27 @@ struct PDFTicketRow: View {
                 .resizable()
                 .scaledToFill()
                 .frame(width: 35, height: 35)
+                .onTapGesture {
+                    pdfToShow = ticket.pdf
+                }
             
             ZStack(alignment: .bottom) {
                 Image(systemName: "arrow.down") //.circle.fill
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 35, height: 35)
+                    .frame(width: 30, height: 30)
+                    .foregroundStyle(Color.blackColor)
                 
-                Rectangle()
-                    .frame(width: 35, height: 3)
-                    .foregroundColor(Color.blackColor)
-            }
-            .onTapGesture {
-                pdfToShow = ticket.pdf
-                showPDF = true
+                VStack {
+                    Spacer()
+                        .frame(height: 3)
+                    Rectangle()
+                        .frame(width: 30, height: 3)
+                        .foregroundColor(Color.blackColor)
+                }
             }
         }
         .padding(12)
         .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 2)
     }
 }
