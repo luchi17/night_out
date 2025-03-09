@@ -74,6 +74,8 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
     
     struct Actions {
         let goBack: VoidClosure
+        let openPDFPay: InputClosure<PDFModel>
+        let navigateToHome: VoidClosure
     }
     
     // MARK: - Stored Properties
@@ -234,9 +236,12 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                     print("❌ No hay entradas reservadas para restaurar")
                 }
                 
-                return .success(withValue: currentData)
                 print("Capacidad restaurada")
-                self.navigateToHomeFragment()
+                print("IR A HOME")
+                self.actions.navigateToHome()
+                
+                return .success(withValue: currentData)
+                
             }
         } catch {
             print("❌ Error en la transacción: \(error.localizedDescription)")
@@ -332,6 +337,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                 }
                 print(personDataList)
                 print("ABRIR PDF")
+                self.actions.openPDFPay(pdfModel)
             }
             
             else {
@@ -343,15 +349,6 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
             print("Error durante la transacción: \(error.localizedDescription)")
             self.viewModel.toast = .custom(.init(title: "", description: "Error al confirmar la compra.", image: nil))
         }
-    }
-
-    
-    private func navigateToPDFEntry() {
-        // Navigation to PDF Entry screen
-    }
-    
-    private func navigateToHomeFragment() {
-        // Navigate to home screen
     }
     
     private func formatFecha(eventDate: String, startTime: String) -> String {
@@ -408,21 +405,5 @@ struct PersonTicketData {
         self.name = name
         self.email = email
         self.birthDate = birthDate
-    }
-}
-
-struct PDFModel {
-    let nameEvent: String
-    let date: String
-    let companyuid: String
-    let quantity: Int
-    let personDataList: [PersonTicketData]
-    
-    init(nameEvent: String, date: String, companyuid: String, quantity: Int, personDataList: [PersonTicketData]) {
-        self.nameEvent = nameEvent
-        self.date = date
-        self.companyuid = companyuid
-        self.quantity = quantity
-        self.personDataList = personDataList
     }
 }
