@@ -1,17 +1,15 @@
 {
   "images" : [
     {
-      "filename" : "copa6.png",
+      "filename" : "calendario.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "copa6@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "copa6@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

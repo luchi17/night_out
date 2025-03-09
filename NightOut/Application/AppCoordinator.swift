@@ -200,11 +200,21 @@ final class AppCoordinator: ObservableObject {
             },
             onOpenAppleMaps: { [weak self] data in
                 self?.openAppleMaps(coordinate: data.0, placeName: data.1)
-            }
+            },
+            openTicketInfoPay: openPayTicket
         ),
         model: model)
         
         self.push(ticketDetailCoordinator)
+    }
+    
+    private func openPayTicket(model: PayDetailModel) {
+        let ticketPayCoordinator = PayDetailCoordinator(actions: .init(goBack: { [weak self] in
+            self?.pop()
+        }),
+         model: model
+        )
+        self.push(ticketPayCoordinator)
     }
 }
 

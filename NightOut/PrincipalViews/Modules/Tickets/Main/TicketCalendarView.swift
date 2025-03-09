@@ -32,8 +32,7 @@ struct CalendarPicker: View {
             Picker("Opciones de fecha", selection: Binding<Date> (
                 get: { selectedDate ?? Date() },
                 set: { newValue in
-//                    selectedDate = newValue
-                    
+
                     let startOfNewValue = Calendar.current.startOfDay(for: newValue)
                     selectedDate = startOfNewValue
                     

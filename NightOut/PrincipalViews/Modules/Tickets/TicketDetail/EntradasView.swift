@@ -68,7 +68,7 @@ struct BuyTicketBottomSheet: View {
                 .disabled(quantity == 1)
                 
                 ZStack {
-                    Image(systemName: "trophy.fill")
+                    Image("copanegra")
                         .resizable()
                         .scaledToFit()
                         .foregroundStyle(Color.blackColor)
@@ -79,7 +79,7 @@ struct BuyTicketBottomSheet: View {
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
-                        .offset(y: -15) // Mueve el número arriba de la imagen
+                        .offset(y: -5) // Mueve el número arriba de la imagen
                 }
                 
                 Button(action: {
@@ -113,44 +113,5 @@ struct BuyTicketBottomSheet: View {
         .padding(.top, 20)
         .frame(maxWidth: .infinity)
         .background(Color.white)
-    }
-}
-
-
-struct WineGlassIcon: View {
-    var body: some View {
-        ZStack {
-            // Base de la copa
-            Path { path in
-                path.move(to: CGPoint(x: 7, y: 21))
-                path.addLine(to: CGPoint(x: 17, y: 21))
-                path.addLine(to: CGPoint(x: 17, y: 23))
-                path.addLine(to: CGPoint(x: 7, y: 23))
-                path.closeSubpath()
-            }
-            .fill(Color.black)
-
-            // Tallo de la copa
-            Path { path in
-                path.move(to: CGPoint(x: 11, y: 14))
-                path.addLine(to: CGPoint(x: 11, y: 21))
-                path.addLine(to: CGPoint(x: 13, y: 21))
-                path.addLine(to: CGPoint(x: 13, y: 14))
-                path.closeSubpath()
-            }
-            .fill(Color.black)
-
-            // Cuerpo de la copa
-            Path { path in
-                path.move(to: CGPoint(x: 4, y: 3))
-                path.addLine(to: CGPoint(x: 20, y: 3))
-                path.addCurve(to: CGPoint(x: 15, y: 15), control1: CGPoint(x: 18, y: 7), control2: CGPoint(x: 15, y: 11))
-                path.addCurve(to: CGPoint(x: 9, y: 15), control1: CGPoint(x: 15, y: 13), control2: CGPoint(x: 11, y: 13))
-                path.addCurve(to: CGPoint(x: 4, y: 3), control1: CGPoint(x: 7, y: 11), control2: CGPoint(x: 4, y: 7))
-                path.closeSubpath()
-            }
-            .fill(Color.black)
-        }
-        .frame(width: 50, height: 50)
     }
 }

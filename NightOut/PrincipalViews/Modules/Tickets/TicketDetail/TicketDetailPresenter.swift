@@ -69,6 +69,7 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
         let goBack: VoidClosure
         let onOpenMaps: InputClosure<(Double, Double)>
         let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
+        let openTicketInfoPay: InputClosure<PayDetailModel>
     }
     
     // MARK: - Stored Properties
@@ -110,7 +111,15 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
             .pagar
             .withUnretained(self)
             .sink { presenter, _ in
-//                presenter.actions.openTicketInfoPay()
+                guard let entradaTapped = presenter.viewModel.entradaTapped else { return }
+                let model = PayDetailModel(
+                    fiesta: presenter.viewModel.fiesta,
+                    quantity: presenter.viewModel.quantity,
+                    price: presenter.viewModel.finalPrice,
+                    entrada: entradaTapped,
+                    companyUid: presenter.viewModel.companyModel.uid
+                )
+                presenter.actions.openTicketInfoPay(model)
             }
             .store(in: &cancellables)
         

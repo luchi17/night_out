@@ -4,7 +4,6 @@ import Combine
 struct TicketDetailView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
-    private let followTappedPublisher = PassthroughSubject<Void, Never>()
     private let goBackPublisher = PassthroughSubject<Void, Never>()
     private let openMapsPublisher = PassthroughSubject<Void, Never>()
     private let openAppleMapsPublisher = PassthroughSubject<Void, Never>()
@@ -104,14 +103,19 @@ struct TicketDetailView: View {
                 Text("Elige una app para abrir la localización.")
             }
             .sheet(isPresented: $isSheetPresented, onDismiss: {
+                // Reset values
                 viewModel.entradaTapped = nil
                 viewModel.finalPrice = 0.0
+                viewModel.quantity = 1
             }) {
                 BuyTicketBottomSheet(
                     quantity: $viewModel.quantity,
                     precio: $viewModel.finalPrice,
                     precioInicial: viewModel.entradaTapped?.price ?? 0.0,
-                    pagar: pagarPublisher.send
+                    pagar: {
+                        isSheetPresented = false
+                        pagarPublisher.send()
+                    }
                 )
                 .presentationDetents([.height(250)])
             }

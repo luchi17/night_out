@@ -5,7 +5,7 @@ struct AdvertisementView: View {
     @Binding var imageList: [String]
     @Binding var currentIndex: Int
     
-    let defaultImageName = "logo_amarillo"
+    let defaultImageName = "publicidad_error"
     
     var openUrl: InputClosure<String>
     
