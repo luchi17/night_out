@@ -159,6 +159,9 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
             guard let self = self else { return }
             
             if !snapshot.exists() {
+                DispatchQueue.main.async {
+                    self.viewModel.loading = false
+                }
                 self.viewModel.toast = .custom(.init(title: "Error", description: "No se encontraron entradas para este evento.", image: nil))
                 return
             }

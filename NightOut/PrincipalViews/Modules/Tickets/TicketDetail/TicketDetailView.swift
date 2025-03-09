@@ -241,7 +241,7 @@ private extension TicketDetailView {
     
     func bindViewModel() {
         let input = TicketDetailPresenterImpl.Input(
-            viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
+            viewIsLoaded: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             goBack: goBackPublisher.eraseToAnyPublisher(),
             openMaps: openMapsPublisher.eraseToAnyPublisher(),
             openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher(),
