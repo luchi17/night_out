@@ -26,62 +26,54 @@ struct PayDetailView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             
-            ScrollView(.vertical) {
-                
-                VStack {
-                    topView
-                        .padding(.top, 20)
+            VStack(spacing: 0) {
+                ScrollView(.vertical) {
                     
-                    Text(viewModel.countdownText)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding(.vertical, 15)
-                    
-                    secondView
-                    
-                    ForEach(0..<viewModel.users.count, id: \.self) { index in
+                    ScrollViewReader { proxy in
                         
-                        PayUserCardView(
-                            user: $viewModel.users[index],
-                            showDatePicker: $showDatePicker,
-                            selectedUserIndex: $selectedUserIndex,
-                            index: index
-                        )
-                        .padding(.bottom, 15)
+                        VStack(spacing: 0) {
+                            
+                            topView
+                                .padding(.top, 20)
+                            
+                            Text(viewModel.countdownText)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.vertical, 15)
+                            
+                            secondView
+                            
+                            ForEach(0..<viewModel.users.count, id: \.self) { index in
+                                
+                                PayUserCardView(
+                                    user: $viewModel.users[index],
+                                    showDatePicker: $showDatePicker,
+                                    selectedUserIndex: $selectedUserIndex,
+                                    index: index
+                                )
+                                .padding(.bottom, 15)
+                            }
+                            .padding(.top, 15)
+                            
+                            Spacer()
+                                .frame(minHeight: 200)
+                        }
+                        
                     }
-                    .padding(.top, 15)
-                    
-                    Spacer()
-                        .frame(height: 200)
                 }
-                .padding(.horizontal, 20)
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .scrollIndicators(.hidden)
+                .scrollDismissesKeyboard(.interactively)
                 
+                Spacer()
             }
-            .scrollIndicators(.hidden)
+            .padding(.horizontal, 20)
             
-            Rectangle()
-                .foregroundStyle(Color.blackColor)
-                .frame(maxWidth: .infinity)
-                .frame(height: 100)
-                .overlay {
-                    Button(action: {
-                        pagarPublisher.send()
-                    }) {
-                        Text("PAGAR: \(String(describing: Double(String(format: "%.2f", viewModel.finalPrice)) ?? 0.0 ))€")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.yellow)
-                            .foregroundColor(Color.blackColor)
-                            .cornerRadius(20)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
-                }
+            payButton
+                .ignoresSafeArea(.keyboard)
         }
-        .edgesIgnoringSafeArea(.bottom)
         .background(
-            Color.blackColor.ignoresSafeArea()
+            Color.blackColor
         )
         .sheet(isPresented: $showDatePicker, onDismiss: {
             if let index = selectedUserIndex {
@@ -107,6 +99,32 @@ struct PayDetailView: View {
             isIdle: viewModel.loading
         )
         .onAppear(perform: viewDidLoadPublisher.send)
+    }
+    
+    var payButton : some View {
+        
+        VStack {
+            Spacer()
+            Rectangle()
+                .foregroundStyle(Color.blackColor)
+                .frame(maxWidth: .infinity)
+                .frame(height: 100)
+                .overlay {
+                    Button(action: {
+                        pagarPublisher.send()
+                    }) {
+                        Text("PAGAR: \(String(describing: Double(String(format: "%.2f", viewModel.finalPrice)) ?? 0.0 ))€")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.yellow)
+                            .foregroundColor(Color.blackColor)
+                            .cornerRadius(20)
+                    }
+                    .padding(.horizontal, 20)
+                }
+        }
+        
     }
     
     var topView: some View {

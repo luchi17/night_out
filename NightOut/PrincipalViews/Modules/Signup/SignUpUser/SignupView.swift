@@ -12,6 +12,12 @@ struct SignupView: View {
     private let loginPublisher = PassthroughSubject<Void, Never>()
     private let openPickerPublisher = PassthroughSubject<Void, Never>()
     
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Int, Hashable {
+        case fullname, username, email, password
+    }
+    
     init(
         presenter: SignupPresenter
     ) {
@@ -48,6 +54,10 @@ struct SignupView: View {
                                 )
                                 .foregroundColor(.white)
                                 .accentColor(.white)
+                                .focused($focusedField, equals: .fullname)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
                                 .textFieldStyle(PlainTextFieldStyle())
@@ -57,6 +67,10 @@ struct SignupView: View {
                                 )
                                 .foregroundColor(.white)
                                 .accentColor(.white)
+                                .focused($focusedField, equals: .username)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             // Email Input
                             TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
@@ -67,6 +81,10 @@ struct SignupView: View {
                                 )
                                 .foregroundColor(.white)
                                 .accentColor(.white)
+                                .focused($focusedField, equals: .email)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             // Password Input
                             SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
@@ -78,6 +96,10 @@ struct SignupView: View {
                                 .foregroundColor(.white)
                                 .accentColor(.white)
                                 .padding(.bottom, 10)
+                                .focused($focusedField, equals: .password)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             genderView
                                 .padding(.bottom, 10)

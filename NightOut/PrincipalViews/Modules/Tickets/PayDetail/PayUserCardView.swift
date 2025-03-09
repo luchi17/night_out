@@ -7,6 +7,12 @@ struct PayUserCardView: View {
     @Binding var selectedUserIndex: Int?
     var index: Int
     
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Int, Hashable {
+        case name, birthDate, email, confirmemail
+    }
+    
     var overlay: some View {
         Rectangle()
             .frame(height: 2)
@@ -28,11 +34,16 @@ struct PayUserCardView: View {
                     .foregroundStyle(.white)
                 
                 TextField("", text: $user.name, prompt: Text("Nombre y Apellido").foregroundColor(.white))
+                    .focused($focusedField, equals: .name)
                     .foregroundColor(.white) // Color del texto
                     .accentColor(.white)
                     .overlay(alignment: .bottom, content: {
                         overlay
                     })
+                    .focused($focusedField, equals: .name)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
             }
             
             HStack {
@@ -50,9 +61,13 @@ struct PayUserCardView: View {
                     .foregroundColor(.white) // Color del texto
                     .accentColor(.white)
                     .disabled(true) // Deshabilita la escritura
+                    .focused($focusedField, equals: .birthDate)
                     .overlay(alignment: .bottom, content: {
                         overlay
                     })
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
             }
             .onTapGesture {
                selectedUserIndex = index
@@ -69,9 +84,13 @@ struct PayUserCardView: View {
                 TextField("", text: $user.email, prompt: Text("Correo Electrónico").foregroundColor(.white))
                     .foregroundColor(.white) // Color del texto
                     .accentColor(.white)
+                    .focused($focusedField, equals: .email)
                     .overlay(alignment: .bottom, content: {
                         overlay
                     })
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
                 
             }
             
@@ -85,9 +104,13 @@ struct PayUserCardView: View {
                 TextField("", text: $user.confirmEmail, prompt: Text("Confirmar Correo").foregroundColor(.white))
                     .foregroundColor(.white) // Color del texto
                     .accentColor(.white)
+                    .focused($focusedField, equals: .confirmemail)
                     .overlay(alignment: .bottom, content: {
                         overlay
                     })
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
             }
             .padding(.bottom, 10)
         }
@@ -132,4 +155,16 @@ struct UserBirthDatePickerView: View {
             .padding()
         }
     }
+}
+
+extension View {
+    
+    func focusNextField<F: RawRepresentable>(_ field: FocusState<F?>.Binding) where F.RawValue == Int {
+            guard let currentValue = field.wrappedValue else { return }
+            let nextValue = currentValue.rawValue + 1
+            if let newValue = F.init(rawValue: nextValue) {
+                field.wrappedValue = newValue
+            }
+        }
+    
 }

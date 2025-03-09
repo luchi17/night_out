@@ -19,6 +19,12 @@ struct SignupCompanyView: View {
     private let loginPublisher = PassthroughSubject<Void, Never>()
     private let openPickerPublisher = PassthroughSubject<Void, Never>()
     
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Int, Hashable {
+        case fullname, username, email, password
+    }
+    
     init(
         presenter: SignupCompanyPresenter
     ) {
@@ -56,6 +62,10 @@ struct SignupCompanyView: View {
                                 )
                                 .foregroundColor(.white)
                                 .accentColor(.white)
+                                .focused($focusedField, equals: .fullname)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
                                 .textFieldStyle(PlainTextFieldStyle())
@@ -65,6 +75,10 @@ struct SignupCompanyView: View {
                                 )
                                 .foregroundColor(.white)
                                 .accentColor(.white)
+                                .focused($focusedField, equals: .username)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             TextField("", text: $viewModel.email, prompt: Text("Email...").foregroundColor(.white))
                                 .textFieldStyle(PlainTextFieldStyle())
@@ -74,7 +88,11 @@ struct SignupCompanyView: View {
                                 )
                                 .foregroundColor(.white)
                                 .accentColor(.white)
-                            
+                                .focused($focusedField, equals: .email)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
+                                
                             SecureField("", text: $viewModel.password, prompt: Text("Contraseña...").foregroundColor(.white))
                                 .textFieldStyle(PlainTextFieldStyle())
                                 .padding(.all, 8)
@@ -84,6 +102,10 @@ struct SignupCompanyView: View {
                                 .foregroundColor(.white)
                                 .accentColor(.white)
                                 .padding(.bottom, 10)
+                                .focused($focusedField, equals: .password)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             locationButton
                             TimeButtonView(

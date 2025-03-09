@@ -23,6 +23,11 @@ struct LoginView: View, Hashable {
     private let signupApplePublisher = PassthroughSubject<Void, Never>()
     private let openForgotPasswordPublisher = PassthroughSubject<Void, Never>()
     
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Int, Hashable {
+        case email, password
+    }
     
     @State private var showRegisterAlert = false
     
@@ -63,6 +68,10 @@ struct LoginView: View, Hashable {
                                 .foregroundColor(.yellow)
                                 .accentColor(.yellow)
                                 .padding(.bottom, 12)
+                                .focused($focusedField, equals: .email)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             
                             // Password Input
@@ -76,6 +85,10 @@ struct LoginView: View, Hashable {
                                 .foregroundColor(.yellow)
                                 .accentColor(.yellow)
                                 .padding(.bottom, 20)
+                                .focused($focusedField, equals: .password)
+                                .onSubmit {
+                                    self.focusNextField($focusedField)
+                                }
                             
                             // Login Button
                             Button(action: {
