@@ -252,13 +252,15 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
         // Accede al parent de reservationRef
         do {
             // Ejecutamos la transacción usando async/await
+            
             try await reservationRef.parent?.runTransactionBlock { (currentData) -> TransactionResult in
+                
                 guard var eventData = currentData.value as? [String: Any] else {
-                    return .abort()
+                    return .success(withValue: currentData) // Si no hay valor, no se hace nada
                 }
                 
                 guard let currentCapacity = eventData["capacity"] as? Int else {
-                    return .abort()
+                    return .success(withValue: currentData)
                 }
                 
                 let reservations = eventData["Reservations"] as? [String: Any]
@@ -267,8 +269,8 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                 
                 
                 if reserved > 0 && currentCapacity >= reserved {
-                    eventData["capacity"] = currentCapacity // La reducción ya se hizo al reservar
-                    userReservation = nil // Eliminar reserva
+                    eventData["capacity"] = currentCapacity // ✅ La reducción ya se hizo al reservar
+                    userReservation = nil // ✅ Eliminar reserva
                     
                     currentData.value = eventData
                     return .success(withValue: currentData)
@@ -284,13 +286,13 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
             for (index, user) in viewModel.users.enumerated() {
                 
                 if user.name.isEmpty || user.email.isEmpty || user.confirmEmail.isEmpty || user.birthDate.isEmpty {
-                    showToast("Completa todos los campos de Persona \(index + 1)")
+                    self.viewModel.toast = .custom(.init(title: "", description: "Completa todos los campos de Persona \(index + 1)", image: nil))
                     hasErrors = true
                     break
                 }
                 
                 if user.email != user.confirmEmail {
-                    showToast("El correo y la confirmación no coinciden en Persona \(index + 1)")
+                    self.viewModel.toast = .custom(.init(title: "", description: "El correo y la confirmación no coinciden en Persona \(index + 1)", image: nil))
                     hasErrors = true
                     break
                 }
@@ -299,84 +301,50 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                 
             }
             
-            //            if !hasErrors && personDataList.count == self.viewModel.model.quantity {
-            //                let intent = ActivityPDFEntry()
-            //                intent.nameEvent = self.viewModel.model.fiesta.name
-            //                intent.date = self.viewModel.model.fiesta.fecha
-            //                intent.companyUID = self.viewModel.model.companyUid
-            //                intent.ticketQuantity = self.viewModel.model.quantity
-            //                intent.personDataList = personDataList
-            //
-            // Ejecutamos la transacción en el evento
-            //                try await eventRef.runTransactionBlock { currentData -> TransactionResult in
-            //                    var eventData = currentData.value as? [String: Any] ?? [:]
-            //                    eventData["Reservations"]?[userUID] = nil // Eliminar solo la reserva
-            //                    currentData.value = eventData
-            //                    print("✅ Transacción completada correctamente")
-            //                    return .success(withValue: currentData)
-            //                }
+            if !hasErrors && personDataList.count == self.viewModel.model.quantity {
+                
+                let pdfModel = PDFModel(
+                    nameEvent: self.viewModel.model.fiesta.name,
+                    date: self.viewModel.model.fiesta.fecha,
+                    companyuid: self.viewModel.model.companyUid,
+                    quantity: self.viewModel.model.quantity,
+                    personDataList: personDataList
+                )
+                
+                print("🔄 Iniciando restauración de capacidad en Firebase")
+                print("🔄 \(self.viewModel.model.fiesta.fecha)/////////////\(self.viewModel.model.fiesta.name)////////////\(self.viewModel.model.entrada.type)")
+                
+                do {
+                    try await eventRef.runTransactionBlock { currentData -> TransactionResult in
+                        
+                        var eventData = currentData.value as? [String: Any] ?? [:]
+                        
+                        var reservation = eventData["Reservations"] as? [String: Any]
+                        reservation?[userUID] = nil // Eliminar solo la reserva
+                        currentData.value = eventData
+                        print("✅ Transacción completada correctamente: Nodo de usuario eliminado en Reservations")
+                        
+                        return .success(withValue: currentData)
+                    }
+                } catch {
+                    print("❌ Error en la transacción: \(error.localizedDescription)")
+                    
+                }
+                print(personDataList)
+                print("ABRIR PDF")
+            }
             
-            //                self.present(intent, animated: true, completion: nil)
-            //            } else {
-            //                print("Error: No se han completado correctamente todos los datos")
-            //            }
+            else {
+                print("Error: No se han completado correctamente todos los datos")
+            }
             
             
-            
-            //            if (!hasErrors && personDataList.size == ticketQuantity) {
-            //                                    val intent = Intent(this@CompraEntradaActivity, ActivityPDFEntry::class.java).apply {
-            //                                        putExtra("nameEvent", eventName)
-            //                                        putExtra("fecha", eventDate)
-            //                                        putExtra("companyUid", companyUid)
-            //                                        putExtra("ticket_quantity", ticketQuantity)
-            //                                        putParcelableArrayListExtra("personDataList", ArrayList(personDataList))
-            //                                    }
-            //
-            //
-            //
-            //                                    val eventRef = FirebaseDatabase.getInstance().getReference("Company_Users")
-            //                                        .child(companyUid!!)
-            //                                        .child("Entradas")
-            //                                        .child(eventDate!!)
-            //                                        .child(eventName!!)
-            //                                        .child("types")
-            //                                        .child(ticketType!!)
-            //
-            //                                    Log.d("CompraEntradaActivity", "🔄 Iniciando restauración de capacidad en Firebase")
-            //                                    Log.d("CompraEntradaActivity", "🔄 $eventDate/////////////$eventName////////////$ticketType")
-            //
-            //                                    eventRef.runTransaction(object : Transaction.Handler {
-            //                                        override fun doTransaction(mutableData: MutableData): Transaction.Result {
-            //                                            // ✅ Elimina únicamente la reserva del usuario sin modificar la capacidad
-            //                                            mutableData.child("Reservations").child(userUID!!).setValue(null)
-            //                                            Log.d("CompraEntradaActivity", "✅ Reserva eliminada para el usuario: $userUID")
-            //
-            //                                            return Transaction.success(mutableData)
-            //                                        }
-            //
-            //                                        override fun onComplete(databaseError: DatabaseError?, committed: Boolean, dataSnapshot: DataSnapshot?) {
-            //                                            if (committed) {
-            //                                                Log.d("CompraEntradaActivity", "✅ Transacción completada correctamente: Nodo de usuario eliminado en Reservations")
-            //                                            } else {
-            //                                                Log.e("CompraEntradaActivity", "❌ Error en la transacción: ${databaseError?.message}")
-            //                                            }
-            //                                        }
-            //                                    })
-            //
-            //                                    startActivity(intent)
-            //                                } else {
-            //                                    Log.e("CompraEntradaActivity", "Error: No se han completado correctamente todos los datos")
-            //                                }
         } catch let error {
             print("Error durante la transacción: \(error.localizedDescription)")
-            showToast("Error al confirmar la compra.")
+            self.viewModel.toast = .custom(.init(title: "", description: "Error al confirmar la compra.", image: nil))
         }
     }
-    
-    
-    func showToast(_ message: String) {
-    }
-    
+
     
     private func navigateToPDFEntry() {
         // Navigation to PDF Entry screen
@@ -440,5 +408,21 @@ struct PersonTicketData {
         self.name = name
         self.email = email
         self.birthDate = birthDate
+    }
+}
+
+struct PDFModel {
+    let nameEvent: String
+    let date: String
+    let companyuid: String
+    let quantity: Int
+    let personDataList: [PersonTicketData]
+    
+    init(nameEvent: String, date: String, companyuid: String, quantity: Int, personDataList: [PersonTicketData]) {
+        self.nameEvent = nameEvent
+        self.date = date
+        self.companyuid = companyuid
+        self.quantity = quantity
+        self.personDataList = personDataList
     }
 }
