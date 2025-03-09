@@ -179,15 +179,6 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
                 let eventInfo = typeData.value as? [String: Any] ?? [:]
                 
                 let formattedPrice: Double = {
-//                    if let priceString = eventInfo["price"] as? String,
-//                        let priceDouble = Double(priceString) {
-//                       
-//                        let priceWithTwoDecimals = Double(String(format: "%.2f", priceDouble)) ?? 0.0
-//                        
-//                        return priceWithTwoDecimals
-//                    }
-//                    return 0.0
-                    
                     if let priceString = eventInfo["price"] as? String {
                         
                         return self.formatPrice(priceString) ?? 0.0
