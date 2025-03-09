@@ -5,6 +5,7 @@ struct PayDetailView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let goBackPublisher = PassthroughSubject<Void, Never>()
+    private let goBackFromExpiredPublisher = PassthroughSubject<Void, Never>()
     private let pagarPublisher = PassthroughSubject<Void, Never>()
     
     @State private var showDatePicker = false
@@ -75,6 +76,14 @@ struct PayDetailView: View {
         .background(
             Color.blackColor
         )
+        .navigationBarBackButtonHidden(true)
+        .toolbarBackground(Color.blackColor, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                CustomBackButton(doOnDismiss: goBackPublisher.send)
+            }
+        }
         .sheet(isPresented: $showDatePicker, onDismiss: {
             if let index = selectedUserIndex {
                 if let selectedDate = selectedDate {
@@ -93,6 +102,10 @@ struct PayDetailView: View {
                 type: viewModel.toast,
                 showCloseButton: false,
                 onDismiss: {
+                    
+                    if case .custom = viewModel.toast {
+                        goBackFromExpiredPublisher.send()
+                    }
                     viewModel.toast = nil
                 }
             ),
@@ -223,6 +236,7 @@ private extension PayDetailView {
         let input = PayDetailPresenterImpl.Input(
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
             goBack: goBackPublisher.eraseToAnyPublisher(),
+            goBackFromExpired: goBackFromExpiredPublisher.eraseToAnyPublisher(),
             pagar: pagarPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)

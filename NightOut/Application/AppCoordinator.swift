@@ -213,7 +213,8 @@ final class AppCoordinator: ObservableObject {
         let ticketPayCoordinator = PayDetailCoordinator(actions: .init(goBack: { [weak self] in
             self?.pop()
         },openPDFPay: openPDFPay, navigateToHome: { [weak self] in
-            self?.tabViewModel.selectedTab = .home
+            self?.pop()
+            self?.pop()
         }),
          model: model
         )

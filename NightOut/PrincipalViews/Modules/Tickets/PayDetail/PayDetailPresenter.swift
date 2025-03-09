@@ -65,6 +65,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
         let goBack: AnyPublisher<Void, Never>
+        let goBackFromExpired: AnyPublisher<Void, Never>
         let pagar: AnyPublisher<Void, Never>
     }
     
@@ -125,10 +126,26 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
             .store(in: &cancellables)
         
         input
+            .goBackFromExpired
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.navigateToHome()
+            }
+            .store(in: &cancellables)
+        
+        input
             .goBack
             .withUnretained(self)
             .sink { presenter, _ in
-                presenter.actions.goBack()
+                
+                if presenter.viewModel.timerIsRunning {
+                    Task {
+                        await presenter.restoreCapacity()
+                    }
+                    print("stopping timer")
+                    presenter.stopTimer()
+                    
+                }
             }
             .store(in: &cancellables)
         
@@ -161,11 +178,15 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                     self.stopTimer()
                     
                     print( "❌ Tiempo expirado. Cancelando reserva y restaurando aforo en Firebase.")
-                    
+
+                   
                     Task {
                         await self.restoreCapacity()
                     }
                     
+                    DispatchQueue.main.async {
+                        self.viewModel.toast = .custom(.init(title: "El tiempo ha expirado.", description: "Vuelve atrás para empezar la reserva de entradas.", image: nil))
+                    }
                 }
             }
         }
@@ -221,10 +242,6 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                 } else {
                     print("❌ No hay entradas reservadas para restaurar")
                 }
-                
-                print("Capacidad restaurada")
-                print("IR A HOME")
-                self.actions.navigateToHome()
                 
                 return .success(withValue: currentData)
                 

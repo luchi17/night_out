@@ -2,9 +2,11 @@ import SwiftUI
 
 struct CustomBackButton: View {
     @Environment(\.dismiss) var dismiss // Para retroceder en la pila de navegación
+    var doOnDismiss: VoidClosure? = nil
     
     var body: some View {
         Button(action: {
+            doOnDismiss?()
             dismiss()
         }) {
             HStack {
