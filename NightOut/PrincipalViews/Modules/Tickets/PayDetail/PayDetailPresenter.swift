@@ -83,10 +83,8 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
     
-    private let totalTime: TimeInterval = 5 * 60 // 5 minutos en segundos
     var countDownTimer: Timer?
-    
-    private let reservationRef: DatabaseReference
+
     private let eventRef: DatabaseReference
     
     // MARK: - Lifecycle
@@ -95,18 +93,6 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
         self.viewModel = PayDetailViewModel(model: model)
         self.actions = actions
         self.useCases = useCases
-        
-        self.reservationRef =
-        FirebaseServiceImpl.shared
-            .getCompanies()
-            .child(viewModel.model.companyUid)
-            .child("Entradas")
-            .child(viewModel.model.fiesta.fecha)
-            .child(viewModel.model.fiesta.name)
-            .child("types")
-            .child(viewModel.model.entrada.type)
-            .child("Reservations")
-            .child(FirebaseServiceImpl.shared.getCurrentUserUid()!)
         
         self.eventRef = FirebaseServiceImpl.shared
             .getCompanies()
