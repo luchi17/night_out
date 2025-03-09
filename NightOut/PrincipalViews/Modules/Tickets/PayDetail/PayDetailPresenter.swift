@@ -37,9 +37,11 @@ class PayDetailViewModel: ObservableObject {
     @Published var gastosGestion: Double = 0.0
     @Published var finalPrice: Double = 0.0
     
-    @State var countDownTimer: Timer?
-    
     @Published var countdownText: String = ""
+    
+    @Published var timeRemaining = 300 // 5 minutos en segundos
+    @Published var timerIsRunning = false
+    
     
     @Published var users: [UserViewTicketModel] = []
     
@@ -80,6 +82,8 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
     private var cancellables = Set<AnyCancellable>()
     
     private let totalTime: TimeInterval = 5 * 60 // 5 minutos en segundos
+    var countDownTimer: Timer?
+    
     private let reservationRef: DatabaseReference
     private let eventRef: DatabaseReference
     
@@ -110,16 +114,17 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
             .child(viewModel.model.fiesta.name)
             .child("types")
             .child(viewModel.model.entrada.type)
+        
+        self.startTimer()
     }
     
     func transform(input: Input) {
-      
+        
         input
             .viewIsLoaded
             .withUnretained(self)
             .sink { presenter, _ in
                 
-                presenter.startLocalCountdown()
                 //Adding personal cards
                 for _ in 0..<presenter.viewModel.model.quantity {
                     presenter.viewModel.users.append(UserViewTicketModel.empty())
@@ -152,22 +157,44 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
         
     }
     
-    private func startLocalCountdown() {
-        viewModel.countDownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
-            guard let self = self else { return }
-            let minutes = Int(self.totalTime / 60)
-            let seconds = Int(self.totalTime.truncatingRemainder(dividingBy: 60))
-            
-            self.viewModel.countdownText = "Tiempo restante: \(String(format: "%02d:%02d", minutes, seconds))"
-            
-            if self.totalTime <= 0 {
-                self.viewModel.countDownTimer?.invalidate()
-                Task {
-                    await self.restoreCapacity()
+    // Inicia el temporizador
+    func startTimer() {
+        if !viewModel.timerIsRunning {
+            viewModel.timerIsRunning = true
+            countDownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+                guard let self = self else { return }
+                if self.viewModel.timeRemaining > 0 {
+                    
+                    self.viewModel.timeRemaining -= 1
+                    
+                    self.viewModel.countdownText = "Tiempo restante: \(timeFormatted(self.viewModel.timeRemaining))"
+                    
+                } else {
+                    self.stopTimer()
+                    
+                    print( "❌ Tiempo expirado. Cancelando reserva y restaurando aforo en Firebase.")
+                    
+                    Task {
+                        await self.restoreCapacity()
+                    }
+                    
                 }
             }
         }
     }
+    
+    // Detiene el temporizador
+    func stopTimer() {
+        countDownTimer?.invalidate()
+        viewModel.timerIsRunning = false
+    }
+    
+    func timeFormatted(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        return String(format: "%02d:%02d", minutes, remainingSeconds)
+    }
+    
     
     private func restoreCapacity() async {
         
@@ -184,8 +211,8 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                     return .abort()
                 }
                 
-                guard var currentCapacityStr = eventData["capacity"] as? String,
-                      var currentCapacity = Int(currentCapacityStr) else {
+                guard let currentCapacityStr = eventData["capacity"] as? String,
+                      let currentCapacity = Int(currentCapacityStr) else {
                     print("No se puedo obtener la capacidad")
                     return .abort()
                 }
@@ -219,7 +246,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
     @MainActor
     func confirmPurchase() async {
         
-        viewModel.countDownTimer?.invalidate() // Detiene el temporizador
+        countDownTimer?.invalidate() // Detiene el temporizador
         
         guard let userUID = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
         // Accede al parent de reservationRef
@@ -296,50 +323,50 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
             
             
             
-//            if (!hasErrors && personDataList.size == ticketQuantity) {
-//                                    val intent = Intent(this@CompraEntradaActivity, ActivityPDFEntry::class.java).apply {
-//                                        putExtra("nameEvent", eventName)
-//                                        putExtra("fecha", eventDate)
-//                                        putExtra("companyUid", companyUid)
-//                                        putExtra("ticket_quantity", ticketQuantity)
-//                                        putParcelableArrayListExtra("personDataList", ArrayList(personDataList))
-//                                    }
-//
-//
-//
-//                                    val eventRef = FirebaseDatabase.getInstance().getReference("Company_Users")
-//                                        .child(companyUid!!)
-//                                        .child("Entradas")
-//                                        .child(eventDate!!)
-//                                        .child(eventName!!)
-//                                        .child("types")
-//                                        .child(ticketType!!)
-//
-//                                    Log.d("CompraEntradaActivity", "🔄 Iniciando restauración de capacidad en Firebase")
-//                                    Log.d("CompraEntradaActivity", "🔄 $eventDate/////////////$eventName////////////$ticketType")
-//
-//                                    eventRef.runTransaction(object : Transaction.Handler {
-//                                        override fun doTransaction(mutableData: MutableData): Transaction.Result {
-//                                            // ✅ Elimina únicamente la reserva del usuario sin modificar la capacidad
-//                                            mutableData.child("Reservations").child(userUID!!).setValue(null)
-//                                            Log.d("CompraEntradaActivity", "✅ Reserva eliminada para el usuario: $userUID")
-//
-//                                            return Transaction.success(mutableData)
-//                                        }
-//
-//                                        override fun onComplete(databaseError: DatabaseError?, committed: Boolean, dataSnapshot: DataSnapshot?) {
-//                                            if (committed) {
-//                                                Log.d("CompraEntradaActivity", "✅ Transacción completada correctamente: Nodo de usuario eliminado en Reservations")
-//                                            } else {
-//                                                Log.e("CompraEntradaActivity", "❌ Error en la transacción: ${databaseError?.message}")
-//                                            }
-//                                        }
-//                                    })
-//
-//                                    startActivity(intent)
-//                                } else {
-//                                    Log.e("CompraEntradaActivity", "Error: No se han completado correctamente todos los datos")
-//                                }
+            //            if (!hasErrors && personDataList.size == ticketQuantity) {
+            //                                    val intent = Intent(this@CompraEntradaActivity, ActivityPDFEntry::class.java).apply {
+            //                                        putExtra("nameEvent", eventName)
+            //                                        putExtra("fecha", eventDate)
+            //                                        putExtra("companyUid", companyUid)
+            //                                        putExtra("ticket_quantity", ticketQuantity)
+            //                                        putParcelableArrayListExtra("personDataList", ArrayList(personDataList))
+            //                                    }
+            //
+            //
+            //
+            //                                    val eventRef = FirebaseDatabase.getInstance().getReference("Company_Users")
+            //                                        .child(companyUid!!)
+            //                                        .child("Entradas")
+            //                                        .child(eventDate!!)
+            //                                        .child(eventName!!)
+            //                                        .child("types")
+            //                                        .child(ticketType!!)
+            //
+            //                                    Log.d("CompraEntradaActivity", "🔄 Iniciando restauración de capacidad en Firebase")
+            //                                    Log.d("CompraEntradaActivity", "🔄 $eventDate/////////////$eventName////////////$ticketType")
+            //
+            //                                    eventRef.runTransaction(object : Transaction.Handler {
+            //                                        override fun doTransaction(mutableData: MutableData): Transaction.Result {
+            //                                            // ✅ Elimina únicamente la reserva del usuario sin modificar la capacidad
+            //                                            mutableData.child("Reservations").child(userUID!!).setValue(null)
+            //                                            Log.d("CompraEntradaActivity", "✅ Reserva eliminada para el usuario: $userUID")
+            //
+            //                                            return Transaction.success(mutableData)
+            //                                        }
+            //
+            //                                        override fun onComplete(databaseError: DatabaseError?, committed: Boolean, dataSnapshot: DataSnapshot?) {
+            //                                            if (committed) {
+            //                                                Log.d("CompraEntradaActivity", "✅ Transacción completada correctamente: Nodo de usuario eliminado en Reservations")
+            //                                            } else {
+            //                                                Log.e("CompraEntradaActivity", "❌ Error en la transacción: ${databaseError?.message}")
+            //                                            }
+            //                                        }
+            //                                    })
+            //
+            //                                    startActivity(intent)
+            //                                } else {
+            //                                    Log.e("CompraEntradaActivity", "Error: No se han completado correctamente todos los datos")
+            //                                }
         } catch let error {
             print("Error durante la transacción: \(error.localizedDescription)")
             showToast("Error al confirmar la compra.")
