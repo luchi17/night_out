@@ -251,6 +251,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
     @MainActor
     func confirmPurchase() async {
         
+        print("confirmPurchase")
         countDownTimer?.invalidate() // Detiene el temporizador
         
         guard let userUID = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
@@ -258,13 +259,14 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
         do {
             // Ejecutamos la transacción usando async/await
             
-            try await reservationRef.parent?.runTransactionBlock { (currentData) -> TransactionResult in
+            try await eventRef.runTransactionBlock { (currentData) -> TransactionResult in
                 
                 guard var eventData = currentData.value as? [String: Any] else {
                     return .success(withValue: currentData) // Si no hay valor, no se hace nada
                 }
                 
-                guard let currentCapacity = eventData["capacity"] as? Int else {
+                guard let currentCapacityStr = eventData["capacity"] as? String,
+                      let currentCapacity = Int(currentCapacityStr) else {
                     return .success(withValue: currentData)
                 }
                 
@@ -275,7 +277,19 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                 
                 if reserved > 0 && currentCapacity >= reserved {
                     eventData["capacity"] = currentCapacity // ✅ La reducción ya se hizo al reservar
-                    userReservation = nil // ✅ Eliminar reserva
+                    // ✅ Eliminar reserva
+                    
+                    if var reservations = eventData["Reservations"] as? [String: Any] {
+                        
+                        reservations[userUID] = nil
+                        
+                        // Si después de eliminar no quedan reservas, eliminamos toda la clave "Reservations"
+                            if reservations.isEmpty {
+                                eventData["Reservations"] = nil
+                            } else {
+                                eventData["Reservations"] = reservations
+                            }
+                    }
                     
                     currentData.value = eventData
                     return .success(withValue: currentData)

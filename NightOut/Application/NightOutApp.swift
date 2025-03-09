@@ -131,7 +131,6 @@ struct ContentView: View {
                                 .navigationDestination(for: PayDetailCoordinator.self) { coordinator in
                                     coordinator
                                         .build()
-                                        .showCustomBackButtonNavBar()
                                         .navigationDestination(for: PayPDFCoordinator.self) { coordinator in
                                             coordinator
                                                 .build()

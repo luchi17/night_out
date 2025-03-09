@@ -273,7 +273,7 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
                     }
                     
                     
-                    print("tempEventData")
+                    print("add reservation info")
                     print(tempEventData)
                     currentData.value = tempEventData
 
@@ -295,7 +295,6 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
                     self.actions.openTicketInfoPay(model)
                 }
                
-                
                 return .success(withValue: currentData)
                 
             }
