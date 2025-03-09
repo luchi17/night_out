@@ -103,7 +103,7 @@ struct PayDetailView: View {
                 showCloseButton: false,
                 onDismiss: {
                     
-                    if case .custom = viewModel.toast {
+                    if case .custom = viewModel.toast, viewModel.showingToastExpired {
                         goBackFromExpiredPublisher.send()
                     }
                     viewModel.toast = nil

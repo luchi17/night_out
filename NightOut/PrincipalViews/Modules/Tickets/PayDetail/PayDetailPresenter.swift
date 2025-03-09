@@ -41,6 +41,7 @@ class PayDetailViewModel: ObservableObject {
     
     @Published var timeRemaining = 300 // 5 minutos en segundos
     @Published var timerIsRunning = false
+    @Published var showingToastExpired = false
     
     
     @Published var users: [UserViewTicketModel] = []
@@ -185,6 +186,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                     }
                     
                     DispatchQueue.main.async {
+                        self.viewModel.showingToastExpired = true
                         self.viewModel.toast = .custom(.init(title: "El tiempo ha expirado.", description: "Vuelve atrás para empezar la reserva de entradas.", image: nil))
                     }
                 }
