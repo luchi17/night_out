@@ -207,6 +207,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
     
     private func restoreCapacity() async {
         
+        print("restoreCapacity")
         print("🔄 Iniciando restauración de capacidad en Firebase")
         print("🔄 \(viewModel.model.fiesta.fecha)/////////////\(viewModel.model.fiesta.name)////////////\(viewModel.model.entrada.type)")
         
@@ -214,16 +215,18 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
         
         do {
             
-            try await eventRef.runTransactionBlock { (currentData) -> TransactionResult in
+            try await eventRef.runTransactionBlock { [weak self] (currentData) -> TransactionResult in
+                
+                guard let self = self else { return .success(withValue: currentData) }
                 
                 guard var eventData = currentData.value as? [String: Any] else {
-                    return .abort()
+                    return .success(withValue: currentData)
                 }
                 
                 guard let currentCapacityStr = eventData["capacity"] as? String,
                       let currentCapacity = Int(currentCapacityStr) else {
                     print("No se puedo obtener la capacidad")
-                    return .abort()
+                    return .success(withValue: currentData)
                 }
                 
                 let reservedTickets = self.viewModel.model.quantity
@@ -232,13 +235,26 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                     let newCapacity = currentCapacity + reservedTickets
                     eventData["capacity"] = "\(newCapacity)" // Guardar como String
                     
-                    var reservations = eventData["Reservations"] as? [String: Any]
-                    reservations?[userUID] = nil // Elimina correctamente
+                    if var reservations = eventData["Reservations"] as? [String: Any] {
+                        
+                        reservations[userUID] = nil
+                        
+                        // Si después de eliminar no quedan reservas, eliminamos toda la clave "Reservations"
+                            if reservations.isEmpty {
+                                eventData["Reservations"] = nil
+                            } else {
+                                eventData["Reservations"] = reservations
+                            }
+                        
+                    }
                     
                     currentData.value = eventData
                     
+                    print("remove reservation info")
+                    print(eventData)
+                    
                     print("✅ Capacidad = \(currentCapacity)")
-                    print("✅ Capacidad restaurada: Nueva capacidad = \(currentCapacityStr) \(newCapacity)")
+                    print("✅ Antigua capacidad: \(currentCapacityStr); Nueva capacidad = \(newCapacity)")
                 } else {
                     print("❌ No hay entradas reservadas para restaurar")
                 }
@@ -258,7 +274,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
         countDownTimer?.invalidate() // Detiene el temporizador
         
         guard let userUID = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
-        // Accede al parent de reservationRef
+  
         do {
             // Ejecutamos la transacción usando async/await
             
@@ -279,7 +295,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                 
                 
                 if reserved > 0 && currentCapacity >= reserved {
-                    eventData["capacity"] = currentCapacity // ✅ La reducción ya se hizo al reservar
+                    eventData["capacity"] = currentCapacityStr // ✅ La reducción ya se hizo al reservar
                     // ✅ Eliminar reserva
                     
                     if var reservations = eventData["Reservations"] as? [String: Any] {
