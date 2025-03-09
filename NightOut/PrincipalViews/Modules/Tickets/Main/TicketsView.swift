@@ -44,7 +44,7 @@ struct TicketsView: View {
                     .scaledToFit()
                     .frame(width: 400, height: 300)
                     .foregroundColor(.white)
-                    .padding(.top, 50)
+                    .padding(.top, 20)
                 
                 Spacer()
                 

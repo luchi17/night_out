@@ -9,7 +9,7 @@ struct HomeCompanySheetView: View {
         
         VStack(spacing: 20) {
             
-            Image("logo_inicio_app")
+            Image("logo_amarillo")
                 .resizable()
                 .scaledToFill()
                 .frame(width: 50, height: 50)

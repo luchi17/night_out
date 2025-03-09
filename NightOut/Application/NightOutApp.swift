@@ -134,7 +134,6 @@ struct ContentView: View {
                                         .navigationDestination(for: PayPDFCoordinator.self) { coordinator in
                                             coordinator
                                                 .build()
-                                                .showCustomBackButtonNavBar()
                                         }
                                 }
                         }

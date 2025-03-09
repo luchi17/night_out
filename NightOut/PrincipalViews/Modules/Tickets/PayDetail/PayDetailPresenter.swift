@@ -290,7 +290,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                 }
                 
                 let reservations = eventData["Reservations"] as? [String: Any]
-                var userReservation = reservations?[userUID] as?  [String: Any]
+                let userReservation = reservations?[userUID] as?  [String: Any]
                 let reserved = userReservation?["reserved"] as? Int ?? 0
                 
                 
@@ -346,7 +346,9 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                     date: self.viewModel.model.fiesta.fecha,
                     companyuid: self.viewModel.model.companyUid,
                     quantity: self.viewModel.model.quantity,
-                    personDataList: personDataList
+                    personDataList: personDataList,
+                    price: self.viewModel.model.entrada.price,
+                    type: self.viewModel.model.entrada.type
                 )
                 
                 print("🔄 Iniciando restauración de capacidad en Firebase")
@@ -355,7 +357,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                 do {
                     try await eventRef.runTransactionBlock { currentData -> TransactionResult in
                         
-                        var eventData = currentData.value as? [String: Any] ?? [:]
+                        let eventData = currentData.value as? [String: Any] ?? [:]
                         
                         var reservation = eventData["Reservations"] as? [String: Any]
                         reservation?[userUID] = nil // Eliminar solo la reserva
@@ -368,8 +370,6 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                     print("❌ Error en la transacción: \(error.localizedDescription)")
                     
                 }
-                print(personDataList)
-                print("ABRIR PDF")
                 self.actions.openPDFPay(pdfModel)
             }
             
@@ -429,14 +429,23 @@ struct UserViewTicketModel: Equatable {
     }
 }
 
-struct PersonTicketData {
+struct PersonTicketData: Hashable {
     let name: String
     let email: String
     let birthDate: String
+    let id = UUID()
     
     init(name: String, email: String, birthDate: String) {
         self.name = name
         self.email = email
         self.birthDate = birthDate
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: PersonTicketData, rhs: PersonTicketData) -> Bool {
+        return lhs.id == rhs.id
     }
 }

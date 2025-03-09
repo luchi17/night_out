@@ -49,7 +49,7 @@ struct PrivateUserProfileView: View {
             HStack {
                 Spacer()
                 
-                Image("logo_inicio_app")
+                Image("logo_amarillo")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 40, height: 40)
