@@ -61,7 +61,8 @@ final class AppCoordinator: ObservableObject {
             openLeagueDetail: openLeagueDetail,
             openCreateLeague: openCreateLeague,
             openDiscotecaDetail: openDiscotecaDetail,
-            openTicketDetail: openTicketDetail
+            openTicketDetail: openTicketDetail,
+            openPDFPay: openPDFPay
         )
         self.push(tabBarCoordinator)
     }
@@ -211,10 +212,17 @@ final class AppCoordinator: ObservableObject {
     private func openPayTicket(model: PayDetailModel) {
         let ticketPayCoordinator = PayDetailCoordinator(actions: .init(goBack: { [weak self] in
             self?.pop()
+        },openPDFPay: openPDFPay, navigateToHome: { [weak self] in
+            self?.tabViewModel.selectedTab = .home
         }),
          model: model
         )
         self.push(ticketPayCoordinator)
+    }
+    
+    private func openPDFPay(model: PDFModel) {
+        let payPDFCoordinator = PayPDFCoordinator(actions: .init(), model: model)
+        self.push(payPDFCoordinator)
     }
 }
 

@@ -36,6 +36,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let openCreateLeague: VoidClosure
     private let openDiscotecaDetail: InputClosure<(CompanyModel, [Fiesta])>
     private let openTicketDetail: InputClosure<(CompanyModel, Fiesta)>
+    private let openPDFPay: InputClosure<PDFModel>
     
     private let locationManager: LocationManager
     private let showMyProfileSubject: PassthroughSubject<Void, Never>
@@ -72,7 +73,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
         openLeagueDetail: @escaping InputClosure<League>,
         openCreateLeague: @escaping VoidClosure,
         openDiscotecaDetail: @escaping InputClosure<(CompanyModel, [Fiesta])>,
-        openTicketDetail: @escaping InputClosure<(CompanyModel, Fiesta)>
+        openTicketDetail: @escaping InputClosure<(CompanyModel, Fiesta)>,
+        openPDFPay: @escaping InputClosure<PDFModel>
     ) {
         self.path = path
         self.showMyProfileSubject = showMyProfileSubject
@@ -93,6 +95,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
         self.openCreateLeague = openCreateLeague
         self.openDiscotecaDetail = openDiscotecaDetail
         self.openTicketDetail = openTicketDetail
+        self.openPDFPay = openPDFPay
     }
     
     @ViewBuilder
