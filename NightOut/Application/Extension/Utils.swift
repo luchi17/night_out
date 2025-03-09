@@ -22,8 +22,17 @@ class Utils {
         outputFormatter.locale = Locale(identifier: "es_ES")
 
         if let date = inputFormatter.date(from: dateString) {
-            return outputFormatter.string(from: date).capitalized
-        }
-        return nil
+                let formattedDate = outputFormatter.string(from: date)
+                // Convertir el mes a mayúsculas
+                let components = formattedDate.split(separator: " ")
+                if components.count == 3 {
+                    // Crear una nueva lista de componentes con el mes en mayúsculas
+                    var result = components.map { String($0) }
+                    result[2] = result[2].capitalized
+                    return result.joined(separator: " ")
+                }
+                return formattedDate
+            }
+            return nil
     }
 }
