@@ -112,14 +112,10 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 guard let entradaTapped = presenter.viewModel.entradaTapped else { return }
-                let model = PayDetailModel(
-                    fiesta: presenter.viewModel.fiesta,
-                    quantity: presenter.viewModel.quantity,
-                    price: presenter.viewModel.finalPrice,
-                    entrada: entradaTapped,
-                    companyUid: presenter.viewModel.companyModel.uid
-                )
-                presenter.actions.openTicketInfoPay(model)
+                
+                Task {
+                    await presenter.doReservation(entrada: entradaTapped)
+                }
             }
             .store(in: &cancellables)
         
@@ -217,5 +213,94 @@ final class TicketDetailPresenterImpl: TicketDetailPresenter {
             }
         }
         return nil // Si la conversión falla, retorna nil
+    }
+    
+    private func doReservation(entrada: Entrada) async {
+        
+        guard let userUID = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        
+        let eventRef = FirebaseServiceImpl.shared
+            .getCompanies()
+            .child(viewModel.companyModel.uid)
+            .child("Entradas")
+            .child(viewModel.fiesta.fecha)
+            .child(viewModel.fiesta.name)
+            .child("types")
+            .child(entrada.type)
+        
+        print("🔄 Iniciando la reserva de capacidad en Firebase")
+        print("🔄 \(viewModel.fiesta.fecha)/////////////\(viewModel.fiesta.name)////////////\(entrada.type)")
+        
+        do {
+            
+            try await eventRef.runTransactionBlock { [weak self] (currentData) -> TransactionResult in
+                
+                guard let self = self else { return .success(withValue: currentData) }
+                
+                guard var eventData = currentData.value as? [String: Any] else {
+                    return .success(withValue: currentData)
+                }
+                
+                guard let currentCapacityStr = eventData["capacity"] as? String,
+                      let currentCapacity = Int(currentCapacityStr) else {
+                    print("No se puedo obtener la capacidad")
+                    return .abort()
+                }
+                
+                let reservedTickets = self.viewModel.quantity
+                
+                if currentCapacity >= reservedTickets {
+                    let newCapacity = currentCapacity - reservedTickets
+                    eventData["capacity"] = "\(newCapacity)" // Guardar como String
+                    
+                    // Crear variable temporal
+                    var tempEventData = eventData
+                    
+                    // Verifica si "Reservations" existe, si no, créalo
+                    if var reservations = tempEventData["Reservations"] as? [String: Any] {
+                        // Verifica si el usuario ya tiene datos en "Reservations"
+                        if var userReservations = reservations[userUID] as? [String: Any] {
+                            userReservations["reserved"] = reservedTickets
+                            reservations[userUID] = userReservations
+                        } else {
+                            // Si no existe, crea la estructura para el usuario
+                            reservations[userUID] = ["reserved": reservedTickets]
+                        }
+                        tempEventData["Reservations"] = reservations
+                    } else {
+                        // Si "Reservations" no existe, crea toda la estructura
+                        tempEventData["Reservations"] = [userUID: ["reserved": reservedTickets]]
+                    }
+                    
+                    
+                    print("tempEventData")
+                    print(tempEventData)
+                    currentData.value = tempEventData
+
+                    print("✅ Capacidad = \(currentCapacity)")
+                    print("✅ Antigua capacidad: \(currentCapacityStr); Nueva capacidad = \(newCapacity)")
+                } else {
+                    print("❌ No hay entradas reservadas para restaurar")
+                }
+                
+                print("IR A DETALLE")
+                let model = PayDetailModel(
+                    fiesta: self.viewModel.fiesta,
+                    quantity: self.viewModel.quantity,
+                    price: self.viewModel.finalPrice,
+                    entrada: entrada,
+                    companyUid: self.viewModel.companyModel.uid
+                )
+                DispatchQueue.main.async {
+                    self.actions.openTicketInfoPay(model)
+                }
+               
+                
+                return .success(withValue: currentData)
+                
+            }
+        } catch {
+            print("❌ Error en la transacción: \(error.localizedDescription)")
+        }
     }
 }
