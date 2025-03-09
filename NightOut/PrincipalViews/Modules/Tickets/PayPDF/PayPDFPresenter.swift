@@ -123,48 +123,28 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         
         
     }
-    
-    func generateQrCode(text: String) -> UIImage? {
-        // Crear un filtro de tipo QR Code usando CoreImage
-        let data = text.data(using: .utf8)
-        guard let filter = CIFilter(name: "CIQRCodeGenerator") else {
-            return nil
+
+    // Función para generar el código QR
+    func generateQRCode(string: String) -> UIImage? {
+        // Crear un objeto CIImage con el texto dado
+        let data = string.data(using: .utf8)
+        if let filter = CIFilter(name: "CIQRCodeGenerator") {
+            filter.setValue(data, forKey: "inputMessage")
+            filter.setValue("Q", forKey: "inputCorrectionLevel")
+            
+            // Obtener la imagen resultante
+            if let qrCodeImage = filter.outputImage {
+                // Escalar la imagen para que sea más legible
+                let scaleX = 150 / qrCodeImage.extent.size.width
+                let scaleY = 150 / qrCodeImage.extent.size.height
+                let transformedImage = qrCodeImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
+                
+                // Convertir CIImage a UIImage
+                return UIImage(ciImage: transformedImage)
+            }
         }
-        
-        filter.setValue(data, forKey: "inputMessage")
-        filter.setValue("Q", forKey: "inputCorrectionLevel") // El nivel de corrección de error (opcional)
-        
-        // Obtener la imagen resultante del filtro
-        guard let outputImage = filter.outputImage else {
-            return nil
-        }
-        
-        // Para mejorar la resolución, podemos convertir la imagen CIImage a UIImage con un tamaño mayor
-        let context = CIContext()
-        let cgImage = context.createCGImage(outputImage, from: outputImage.extent)
-        let qrCodeImage = UIImage(cgImage: cgImage!)
-        
-        return qrCodeImage
+        return nil
     }
-    
-    
-    //    func generateQrCode(text: String) -> UIImage? {
-    //        let data = text.data(using: .utf8)
-    //
-    //        guard let filter = CIFilter(name: "CIQRCodeGenerator") else {
-    //            return nil
-    //        }
-    //        filter.setValue(data, forKey: "inputMessage")
-    //        filter.setValue("Q", forKey: "inputCorrectionLevel")
-    //
-    //        guard let outputImage = filter.outputImage else { return nil }
-    //
-    //        let scaleX = CGFloat(200) / outputImage.extent.size.width
-    //        let scaleY = CGFloat(200) / outputImage.extent.size.height
-    //        let transformedImage = outputImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
-    //
-    //        return UIImage(ciImage: transformedImage)
-    //    }
     
     func bitmapToByteArray(bitmap: UIImage) -> Data? {
         guard let imageData = bitmap.pngData() else { return nil }
@@ -206,7 +186,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             //            lastTicketNumberRef.setValue(newTicketNumber)
             
             // Generate the QR Code
-            guard let qrCodeBitmap = self.generateQrCode(text: numeroTicket) else {
+            guard let qrCodeBitmap = self.generateQRCode(string: numeroTicket) else {
                 print("No se pudo crear el qrCodeBitmap".uppercased())
                 return
             }
@@ -272,60 +252,85 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         
         let pdfFilename = pdfFolder.appendingPathComponent("ticket_\(person.name)_\(numeroTicket).pdf")
         
-        // Crear el PDF context
-        UIGraphicsBeginPDFContextToFile(pdfFilename.path, .zero, nil)
-        
-        // Comienza una nueva página
-        UIGraphicsBeginPDFPage()
-        
-        // Obtén el tamaño de la página del PDF
-        guard let context = UIGraphicsGetCurrentContext() else { return }
-        
-        let pageSize = context.boundingBoxOfClipPath.size
-        
         // Dibuja la imagen de fondo
         guard let backgroundImage = UIImage(named: "pdf_view") else {
             print("no backgroundImage")
             return
         }
         
-        // Calcular las dimensiones escaladas de la imagen manteniendo la proporción
+        // Obtener las dimensiones de la imagen para usar como tamaño de página
         let imageSize = backgroundImage.size
-        let imageAspect = imageSize.width / imageSize.height
-        var scaledSize = CGSize(width: pageSize.width, height: pageSize.width / imageAspect)
         
-        // Si la altura escalada es mayor que la altura de la página, ajustamos la altura
-        if scaledSize.height > pageSize.height {
-            scaledSize = CGSize(width: pageSize.height * imageAspect, height: pageSize.height)
+        // Crear el PDF context
+        UIGraphicsBeginPDFContextToFile(pdfFilename.path, .zero, nil)
+        
+        // Comienza una nueva página con el tamaño de la imagen
+        let pageRect = CGRect(origin: .zero, size: imageSize)
+        UIGraphicsBeginPDFPageWithInfo(pageRect, nil)
+        
+        // Obtener el contexto de gráficos
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+            
+        // Dibujar la imagen en el contexto con las dimensiones exactas de la página
+        backgroundImage.draw(in: pageRect)
+        
+        
+        // Generate the QR Code
+        guard let qrCodeImage = self.generateQRCode(string: numeroTicket) else {
+            print("No se pudo crear el qrCodeBitmap".uppercased())
+            return
         }
+        // FIREBASE
+//        let qrCodeBase64 = self.encodeToBase64(bitmap: qrCodeBitmap)
         
-        // Calcular la posición para centrar la imagen en la página
-        let x = (pageSize.width - scaledSize.width) / 2
-        let y = (pageSize.height - scaledSize.height) / 2
+        let qrSizeHeight = (imageSize.height / 2)
         
+        let qrRect = CGRect(
+                    x: (pageRect.width - qrSizeHeight) / 2,  // Centrado horizontalmente
+                    y: (pageRect.height - qrSizeHeight) / 2, // Centrado verticalmente
+                    width: qrSizeHeight,
+                    height: qrSizeHeight
+        )
+                
+        // Dibujar el QR
+        qrCodeImage.draw(in: qrRect)
         
-        // Dibujar la imagen escalada en el contexto
-        backgroundImage.draw(in: CGRect(x: x, y: y, width: scaledSize.width, height: scaledSize.height))
+        let boldFont = UIFont.boldSystemFont(ofSize: 10)
+        let normalFont = UIFont.systemFont(ofSize: 10)
+        let footerFont = UIFont.italicSystemFont(ofSize: 4)
+        let eventTitleFont = UIFont.boldSystemFont(ofSize: 10)
         
-        let boldFont = UIFont.boldSystemFont(ofSize: 12)
-        let normalFont = UIFont.systemFont(ofSize: 12)
-        let footerFont = UIFont.italicSystemFont(ofSize: 10)
-        
-        func addText(label: String, at point: CGPoint, font: UIFont) {
+        func addText(label: String, at point: CGPoint, font: UIFont, color: UIColor) {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
-                .foregroundColor: UIColor.black
+                .foregroundColor: color
             ]
             let attributedText = NSAttributedString(string: label, attributes: attributes)
             attributedText.draw(at: point)
         }
         
         let headerText = "EVENTO: \(self.viewModel.model.nameEvent)   DISCOTECA: \(companyUsername)"
-        let titleYPosition: CGFloat = backgroundImage.size.height - 80
+        addText(label: headerText, at: CGPoint(x: 10, y: 10), font: eventTitleFont, color: .darkBlue)
         
-        //        let text = "Tu texto sobre la imagen"
-        //            text.draw(at: CGPoint(x: 100, y: 100), withAttributes: textAttributes)
-        addText(label: headerText, at: CGPoint(x: 50, y: titleYPosition), font: boldFont)
+        // Dibujar el texto en el pie de página
+            let footerAttributes: [NSAttributedString.Key: Any] = [
+                .font: footerFont,
+                .foregroundColor: UIColor.gray
+            ]
+        
+        
+            
+        
+        let footerText = "Condiciones del Ticket: Este ticket es personal e intransferible. Modificaciones no permitidas."
+        
+        // Calcular el ancho del texto para centrarlo
+            let footerTextSize = footerText.size(withAttributes: footerAttributes)
+            let footerX = (pageRect.width - footerTextSize.width) / 2
+            let footerY = pageRect.height - footerTextSize.height - 10
+        
+        // Dibujar el texto en el footer (centrado)
+        addText(label: footerText, at: CGPoint(x: footerX, y: footerY), font: eventTitleFont, color: .gray)
+        
         
         // Finalizar el contexto del PDF
         UIGraphicsEndPDFContext()
@@ -333,8 +338,6 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         print("PDF guardado en: \(pdfFilename.path)")
         callback(pdfFilename)
     }
-    
-    
     
     
     func encodeToBase64(bitmap: UIImage) -> String {
@@ -351,16 +354,6 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         
         let attributedString = NSAttributedString(string: text, attributes: attributes)
         attributedString.draw(at: point)
-    }
-    
-    func drawImage(in context: CGContext, image: UIImage, at point: CGPoint) {
-        guard let cgImage = image.cgImage else { return }
-        
-        // Establece un rectángulo para la imagen usando su posición y tamaño
-        let rect = CGRect(origin: point, size: image.size)
-        
-        // Dibuja la imagen en el contexto
-        context.draw(cgImage, in: rect)
     }
     
     // Compartir el archivo (con la app "Archivos")
