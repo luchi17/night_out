@@ -30,11 +30,12 @@ struct PayDetailView: View {
                 
                 VStack {
                     topView
+                        .padding(.top, 60)
                     
                     Text(viewModel.countdownText)
                         .font(.headline)
                         .foregroundColor(.white)
-                        .padding(.vertical, 20)
+                        .padding(.vertical, 15)
                     
                     secondView
                     
@@ -45,10 +46,13 @@ struct PayDetailView: View {
                             showDatePicker: $showDatePicker,
                             index: index
                         )
-                        .padding(.vertical, 20)
+                        .padding(.bottom, 15)
                     }
+                    .padding(.top, 15)
+                    
+                    Spacer()
+                        .frame(height: 200)
                 }
-                .padding(.top, 40)
                 .padding(.horizontal, 20)
                 
             }
@@ -80,7 +84,6 @@ struct PayDetailView: View {
         )
         .overlay(alignment: .top, content: {
             backButton
-                .padding(.top, 20)
                 .padding(.leading, 20)
         })
         .sheet(isPresented: $showDatePicker) {
@@ -147,7 +150,7 @@ struct PayDetailView: View {
                 Image("back")
                     .resizable()
                     .foregroundColor(Color.white)
-                    .frame(width: 35, height: 35)
+                    .frame(width: 30, height: 30)
             }
             Spacer()
         }

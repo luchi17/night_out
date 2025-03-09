@@ -192,7 +192,7 @@ struct TicketDetailView: View {
                 Image("back")
                     .resizable()
                     .foregroundColor(Color.white)
-                    .frame(width: 35, height: 35)
+                    .frame(width: 30, height: 30)
             }
             Spacer()
         }

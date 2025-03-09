@@ -82,6 +82,7 @@ struct PayUserCardView: View {
                         overlay
                     })
             }
+            .padding(.bottom, 10)
         }
         .padding(16)
         .background(Color.grayColor)
