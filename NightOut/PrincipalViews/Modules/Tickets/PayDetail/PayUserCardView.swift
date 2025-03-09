@@ -4,6 +4,7 @@ struct PayUserCardView: View {
     @Binding var user: UserViewTicketModel
     @Binding var showDatePicker: Bool
     
+    @Binding var selectedUserIndex: Int?
     var index: Int
     
     var overlay: some View {
@@ -41,15 +42,21 @@ struct PayUserCardView: View {
                     .frame(width: 24, height: 24)
                     .foregroundStyle(.white)
                 
-                TextField("", text: $user.birthDate, prompt: Text("Fecha de Nacimiento").foregroundColor(.white))
+                TextField("", text: Binding(
+                    get: { user.birthDate },
+                    set: { _ in } // No hace nada al escribir
+                ),
+                          prompt: Text("Fecha de Nacimiento").foregroundColor(.white))
                     .foregroundColor(.white) // Color del texto
                     .accentColor(.white)
+                    .disabled(true) // Deshabilita la escritura
                     .overlay(alignment: .bottom, content: {
                         overlay
                     })
-                    .onTapGesture {
-                       showDatePicker = true
-                    }
+            }
+            .onTapGesture {
+               selectedUserIndex = index
+               showDatePicker = true
             }
             
             HStack {
@@ -92,23 +99,37 @@ struct PayUserCardView: View {
 
 
 struct UserBirthDatePickerView: View {
-    @Binding var selectedDate: Date
+    @Binding var selectedDate: Date?
+    
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack {
-            DatePicker("Selecciona una fecha", selection: $selectedDate, displayedComponents: .date)
-                            .datePickerStyle(GraphicalDatePickerStyle()) // Estilo gráfico de calendario
-                            .padding()
-            
-            Button("Cerrar") {
-                // Close the date picker
-              
+            DatePicker("Selecciona una fecha", selection: Binding<Date> (
+                get: { selectedDate ?? Date() },
+                set: { newValue in
+                    selectedDate = newValue
+                }),
+                displayedComponents: [.date]
+            )
+            .datePickerStyle(GraphicalDatePickerStyle())
+            .padding()
+
+            Button("Escoger fecha".uppercased()) {
+                dismiss()
             }
             .padding()
             .background(Color.blue)
             .foregroundColor(.white)
             .cornerRadius(10)
+            
+            Button(action: {
+                dismiss()
+            }) {
+                Text("Cerrar")
+                    .foregroundStyle(.white)
+            }
+            .padding()
         }
-        .padding()
     }
 }

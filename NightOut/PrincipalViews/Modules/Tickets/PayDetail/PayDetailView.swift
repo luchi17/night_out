@@ -10,7 +10,7 @@ struct PayDetailView: View {
     @State private var showDatePicker = false
     
     @State private var selectedUserIndex: Int?
-    @State private var selectedDate = Date()
+    @State private var selectedDate: Date?
     
     @ObservedObject var viewModel: PayDetailViewModel
     let presenter: PayDetailPresenter
@@ -44,6 +44,7 @@ struct PayDetailView: View {
                         PayUserCardView(
                             user: $viewModel.users[index],
                             showDatePicker: $showDatePicker,
+                            selectedUserIndex: $selectedUserIndex,
                             index: index
                         )
                         .padding(.bottom, 15)
@@ -75,9 +76,10 @@ struct PayDetailView: View {
                             .cornerRadius(20)
                     }
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
                 }
         }
-        .edgesIgnoringSafeArea(.vertical)
+        .edgesIgnoringSafeArea(.bottom)
         .navigationBarBackButtonHidden()
         .background(
             Color.blackColor.ignoresSafeArea()
@@ -86,14 +88,19 @@ struct PayDetailView: View {
             backButton
                 .padding(.leading, 20)
         })
-        .sheet(isPresented: $showDatePicker) {
-                    UserBirthDatePickerView(selectedDate: $selectedDate)
-                        .onDisappear {
-                            if let index = selectedUserIndex {
-                                viewModel.users[index].birthDate = formatDate(selectedDate)
-                            }
-                        }
+        .sheet(isPresented: $showDatePicker, onDismiss: {
+            if let index = selectedUserIndex {
+                if let selectedDate = selectedDate {
+                    viewModel.users[index].birthDate = formatBirthDate(selectedDate)
+                } else {
+                    viewModel.users[index].birthDate = ""
                 }
+            }
+        }) {
+            UserBirthDatePickerView(selectedDate: $selectedDate)
+                .presentationDetents([.large])
+            
+        }
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -128,7 +135,7 @@ struct PayDetailView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text("\(Utils.formatDate(viewModel.model.fiesta.fecha) ?? "Fecha"), \(viewModel.model.fiesta.startTime)")
+                Text("\(formatDateString(viewModel.model.fiesta.fecha) ?? "Fecha"), \(viewModel.model.fiesta.startTime)")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.yellow)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -163,7 +170,7 @@ struct PayDetailView: View {
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
-
+                
                 Spacer()
                 
                 Text("\(String(describing: Double(String(format: "%.2f", viewModel.model.entrada.price)) ?? 0.0 ))€")
@@ -225,9 +232,25 @@ private extension PayDetailView {
     
     
     // Función para formatear la fecha al estilo "DD/MM/YYYY"
-        private func formatDate(_ date: Date) -> String {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "dd/MM/yyyy"
-            return dateFormatter.string(from: date)
-        }
+    private func formatBirthDate(_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yyyy"
+        return dateFormatter.string(from: date)
+    }
+    
+    func formatDateString(_ input: String) -> String? {
+        // Crear un DateFormatter para analizar la fecha en el formato "12 de Febrero"
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "d 'de' MMMM"
+        
+        // Analizar la cadena de entrada a un objeto Date
+        guard let date = dateFormatter.date(from: input.lowercased()) else { return nil }
+        
+        // Crear un nuevo DateFormatter para el formato "12 Feb"
+        dateFormatter.dateFormat = "d MMM"
+        
+        // Convertir la fecha a la cadena formateada
+        return dateFormatter.string(from: date)
+    }
+    
 }

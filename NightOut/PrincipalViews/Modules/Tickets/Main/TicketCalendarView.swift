@@ -83,6 +83,9 @@ struct CalendarPicker: View {
                 dismiss()
             }
             .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
             
             Button(action: {
                 selectedDateFilter = nil
