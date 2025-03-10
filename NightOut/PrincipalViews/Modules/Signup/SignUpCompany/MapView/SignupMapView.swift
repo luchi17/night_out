@@ -2,7 +2,6 @@ import SwiftUI
 import MapKit
 import Combine
 
-
 struct SignupMapView: View {
     @State private var searchQuery = ""
     @StateObject private var locationManager = LocationManager.shared
@@ -54,7 +53,7 @@ struct SignupMapView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blackColor) // Adjust as needed for your button style
+                        .background(Color.grayColor)
                         .cornerRadius(25)
                         .shadow(radius: 4)
                 }
