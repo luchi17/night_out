@@ -68,8 +68,7 @@ final class SignupCompanyViewModel: ObservableObject {
     var imageUrl: String?
     
     init() {
-        self.startTime = timeString(from: Date())
-        self.endTime = timeString(from: Date())
+        
     }
     
     // Formatear la fecha en una cadena de hora:minuto
@@ -198,6 +197,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     return Just((false, nil))
                         .eraseToAnyPublisher()
                 }
+                
        
                 let model = CompanyModel(
                     email: presenter.viewModel.email.lowercased(),
