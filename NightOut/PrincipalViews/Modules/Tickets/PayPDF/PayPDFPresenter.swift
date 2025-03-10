@@ -95,17 +95,18 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 
                 presenter.viewModel.loading = true
                 
-                presenter.moveUserToNewAssistance {
-                    presenter.addUsersToAssistance(
-                        clubId: presenter.viewModel.model.companyuid,
-                        date: presenter.viewModel.model.date,
-                        personDataList: presenter.viewModel.model.personDataList
-                    )
-                   
-                    presenter.sendNotification(eventText: presenter.viewModel.model.nameEvent)
-
+                if FirebaseServiceImpl.shared.getImUser() {
+                    presenter.moveUserToNewAssistance {
+                        presenter.addUsersToAssistance(
+                            clubId: presenter.viewModel.model.companyuid,
+                            date: presenter.viewModel.model.date,
+                            personDataList: presenter.viewModel.model.personDataList
+                        )
+                       
+                        presenter.sendNotification(eventText: presenter.viewModel.model.nameEvent)
+                    }
                 }
-                
+
                 for user in presenter.viewModel.model.personDataList {
                     print("generando PDF para \(user.name)")
                     
@@ -259,7 +260,6 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                         callback((url, numeroTicket))
                     }
                 )
-                
             }
         }
     }
@@ -296,14 +296,9 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         
         // Comienza una nueva página con el tamaño de la imagen
         let pageRect = CGRect(origin: .zero, size: imageSize)
+        
         UIGraphicsBeginPDFPageWithInfo(pageRect, nil)
-        
-        // Obtener el contexto de gráficos
-        guard let context = UIGraphicsGetCurrentContext() else {
-            callback(nil)
-            return
-        }
-        
+
         // Dibujar la imagen en el contexto con las dimensiones exactas de la página
         backgroundImage.draw(in: pageRect)
         
@@ -524,8 +519,6 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             print("Usuario no autenticado")
             return
         }
-        let
-        databaseRef = Database.database().reference()
 
         // 🔹 Obtener el username del usuario actual
         let userRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId)
