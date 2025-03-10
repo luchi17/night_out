@@ -6,8 +6,6 @@ struct TicketsHistoryView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let goBackPublisher = PassthroughSubject<Void, Never>()
-    private let openPDFPublisher = PassthroughSubject<TicketPDFModel, Never>()
-    private let downloadPDFPublisher = PassthroughSubject<TicketPDFModel, Never>()
     
     @State private var showBottomSheet: Bool = false
     
@@ -40,6 +38,7 @@ struct TicketsHistoryView: View {
             Spacer()
         }
         .padding(.top, 30)
+        .padding(.horizontal, 20)
         .background(
             Color.blackColor
                 .ignoresSafeArea()
@@ -50,9 +49,9 @@ struct TicketsHistoryView: View {
             image: {
                 Image("ticket")
                     .resizable()
-                    .scaledToFill()
-                    .frame(width: 35, height: 35)
-                    .foregroundStyle(Color.blackColor)
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
+                    .foregroundStyle(Color.white)
             }
         )
         .onChange(of: viewModel.ticketNumberToShow) { oldValue, newValue in
@@ -65,10 +64,11 @@ struct TicketsHistoryView: View {
             showBottomSheet = false
         }) {
             if let ticketToShow = viewModel.ticketNumberToShow {
-                HistoryBottomSheet(
+                TicketHistoryBottomSheet(
                     ticketNumberToShow: ticketToShow,
                     isPresented: $showBottomSheet
                 )
+                .presentationDetents([.fraction(0.8)])
             }
         }
         .showToast(
@@ -89,7 +89,8 @@ private extension TicketsHistoryView {
     
     func bindViewModel() {
         let input = TicketsHistoryPresenterImpl.Input(
-            viewIsLoaded: viewDidLoadPublisher.first().eraseToAnyPublisher()
+            viewIsLoaded: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            goBack: goBackPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
@@ -125,6 +126,6 @@ struct TicketHistoryRow: View {
         }
         .padding(12)
         .background(Color.white)
-        .cornerRadius(20)
+        .cornerRadius(12)
     }
 }

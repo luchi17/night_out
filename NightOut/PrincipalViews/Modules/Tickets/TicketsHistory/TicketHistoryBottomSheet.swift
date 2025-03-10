@@ -1,7 +1,7 @@
 import SwiftUI
 import FirebaseDatabase
 
-struct HistoryBottomSheet: View {
+struct TicketHistoryBottomSheet: View {
     
     var ticketNumberToShow: String
     
@@ -68,7 +68,7 @@ struct HistoryBottomSheet: View {
                 }
             }
             
-            Text(nombreEvento)
+            Text(nombreEvento.capitalized)
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.black)
@@ -85,7 +85,7 @@ struct HistoryBottomSheet: View {
                 Image(uiImage: qrImage.image)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 200, height: 200)
+                    .frame(width: 150, height: 150)
                     .padding(.bottom, 10)
                     .onTapGesture {
                         selectedQRImage = qrImage
@@ -96,12 +96,12 @@ struct HistoryBottomSheet: View {
                     .foregroundStyle(.red)
                     .bold()
             }
-            // Línea Separadora
+            
             Divider()
                 .background(Color.gray.opacity(0.6))
                 .padding(.vertical, 10)
             
-            // Sección: Detalles de mi compra
+           
             VStack(alignment: .leading, spacing: 6) {
                 Text("Detalles de mi compra")
                     .font(.headline)
@@ -111,7 +111,7 @@ struct HistoryBottomSheet: View {
                     .font(.subheadline)
                     .foregroundColor(.black)
                 
-                Text("Precio: \(precioEntrada)")
+                Text("Precio: \(precioEntrada)€")
                     .font(.subheadline)
                     .foregroundColor(.black)
             }
@@ -172,19 +172,4 @@ struct HistoryBottomSheet: View {
         }
         return UIImage(data: data)
     }
-    
-    private func mostrarQrCompleto() {
-        
-        // Aquí podrías abrir otra vista en pantalla completa con el QR
-    }
-    
-    
 }
-
-//
-//struct BigQRSheet: View {
-//    
-//    var body: some View {
-//        
-//    }
-//}
