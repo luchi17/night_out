@@ -123,7 +123,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         
         
     }
-
+    
     // Función para generar el código QR
     func generateQRCode(string: String) -> UIImage? {
         // Crear un objeto CIImage con el texto dado
@@ -270,7 +270,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         
         // Obtener el contexto de gráficos
         guard let context = UIGraphicsGetCurrentContext() else { return }
-            
+        
         // Dibujar la imagen en el contexto con las dimensiones exactas de la página
         backgroundImage.draw(in: pageRect)
         
@@ -281,59 +281,111 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             return
         }
         // FIREBASE
-//        let qrCodeBase64 = self.encodeToBase64(bitmap: qrCodeBitmap)
+        //        let qrCodeBase64 = self.encodeToBase64(bitmap: qrCodeBitmap)
         
         let qrSizeHeight = (imageSize.height / 2)
         
         let qrRect = CGRect(
-                    x: (pageRect.width - qrSizeHeight) / 2,  // Centrado horizontalmente
-                    y: (pageRect.height - qrSizeHeight) / 2, // Centrado verticalmente
-                    width: qrSizeHeight,
-                    height: qrSizeHeight
+            x: (pageRect.width - qrSizeHeight) / 2,  // Centrado horizontalmente
+            y: (pageRect.height - qrSizeHeight) / 2, // Centrado verticalmente
+            width: qrSizeHeight,
+            height: qrSizeHeight
         )
-                
+        
         // Dibujar el QR
         qrCodeImage.draw(in: qrRect)
         
-        let boldFont = UIFont.boldSystemFont(ofSize: 10)
-        let normalFont = UIFont.systemFont(ofSize: 10)
-        let footerFont = UIFont.italicSystemFont(ofSize: 4)
-        let eventTitleFont = UIFont.boldSystemFont(ofSize: 10)
+        //ADD TEXT
         
-        func addText(label: String, at point: CGPoint, font: UIFont, color: UIColor) {
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: color
-            ]
-            let attributedText = NSAttributedString(string: label, attributes: attributes)
-            attributedText.draw(at: point)
-        }
+        let xposition = 10
+        var yPosition = 10
         
-        let headerText = "EVENTO: \(self.viewModel.model.nameEvent)   DISCOTECA: \(companyUsername)"
-        addText(label: headerText, at: CGPoint(x: 10, y: 10), font: eventTitleFont, color: .darkBlue)
+        // HEADER
+        let headerText = "EVENTO: \(self.viewModel.model.nameEvent.capitalized)  DISCOTECA: \(companyUsername.capitalized)"
         
-        // Dibujar el texto en el pie de página
-            let footerAttributes: [NSAttributedString.Key: Any] = [
-                .font: footerFont,
-                .foregroundColor: UIColor.gray
-            ]
-   
+        let eventTitleFont = UIFont.boldSystemFont(ofSize: 9)
+        self.addText(label: headerText, value: "", at: CGPoint(x: xposition, y: yPosition), boldFont: eventTitleFont, boldColor: .darkBlue)
+
+        //REST
+        yPosition += 20
+        self.addText(label: "Nombre", value: "\(person.name)", at: CGPoint(x: xposition, y: yPosition))
+        
+        yPosition += 15
+        self.addText(label: "Correo", value: "\(person.email)", at: CGPoint(x: xposition, y: yPosition))
+        
+        yPosition += 15
+        self.addText(label: "Número de Ticket", value: "\(numeroTicket)", at: CGPoint(x: xposition, y: yPosition))
+        
+        yPosition += 15
+        self.addText(label: "Fecha", value: "\(self.viewModel.model.date)", at: CGPoint(x: xposition, y: yPosition))
+        
+        yPosition += 15
+        self.addText(label: "Precio", value: "\(self.viewModel.model.price) euros", at: CGPoint(x: xposition, y: yPosition))
+        
+        yPosition += 15
+        self.addText(label: "Evento", value: "\(self.viewModel.model.nameEvent.capitalized)", at: CGPoint(x: xposition, y: yPosition))
+        
+        yPosition += 15
+        self.addText(label: "Tipo de entrada", value: "\(self.viewModel.model.type)", at: CGPoint(x: xposition, y: yPosition))
+        
+        
+        // FOOTER
+        let footerFont = UIFont.italicSystemFont(ofSize: 7)
+        
+        let footerAttributes: [NSAttributedString.Key: Any] = [
+            .font: footerFont,
+            .foregroundColor: UIColor.gray
+        ]
+        
         let footerText = "Condiciones del Ticket: Este ticket es personal e intransferible. Modificaciones no permitidas."
         
         // Calcular el ancho del texto para centrarlo
-            let footerTextSize = footerText.size(withAttributes: footerAttributes)
-            let footerX = (pageRect.width - footerTextSize.width) / 2
-            let footerY = pageRect.height - footerTextSize.height - 10
+        let footerTextSize = footerText.size(withAttributes: footerAttributes)
+        let footerX = (pageRect.width - footerTextSize.width) / 2
+        let footerY = pageRect.height - footerTextSize.height - 10
         
         // Dibujar el texto en el footer (centrado)
         footerText.draw(at: CGPoint(x: footerX, y: footerY), withAttributes: footerAttributes)
-        
         
         // Finalizar el contexto del PDF
         UIGraphicsEndPDFContext()
         
         print("PDF guardado en: \(pdfFilename.path)")
         callback(pdfFilename)
+    }
+    
+    func addText(
+        label: String,
+        value: String,
+        at point: CGPoint,
+        boldFont: UIFont = UIFont.boldSystemFont(ofSize: 9),
+        boldColor: UIColor = UIColor.black,
+        normalFont: UIFont = UIFont.systemFont(ofSize: 9),
+        normalColor: UIColor = UIColor.darkGray
+    ) {
+        
+        // Crear textos con atributos
+        let boldAttributes: [NSAttributedString.Key: Any] = [
+            .font: boldFont,
+            .foregroundColor: boldColor
+        ]
+        
+        let normalAttributes: [NSAttributedString.Key: Any] = [
+            .font: normalFont,
+            .foregroundColor: normalColor
+        ]
+        
+        // Crear los textos en negrita y normal
+        let boldText = NSAttributedString(string: "\(label): ", attributes: boldAttributes)
+        let normalText = NSAttributedString(string: value, attributes: normalAttributes)
+        
+        // Unir ambos textos
+        let combinedText = NSMutableAttributedString()
+        combinedText.append(boldText)
+        combinedText.append(normalText)
+        
+        // Dibujar el texto en el contexto
+        combinedText.draw(at: point)
     }
     
     
@@ -375,13 +427,3 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
 //addText(label: "Tipo de entrada: \(self.viewModel.model.type)", at: CGPoint(x: 50, y: yPosition), font: normalFont)
 //yPosition -= 30
 //
-//// Agregar texto en el pie de página
-//let footerText = "Condiciones del Ticket: Este ticket es personal e intransferible. Modificaciones no permitidas."
-//addText(label: footerText, at: CGPoint(x: backgroundImage.size.width / 2, y: 30), font: footerFont)
-//
-//
-//// Agregar el código QR
-//let qrCodeXPosition = (backgroundImage.size.width - qrCodeBitmap.size.width) / 2
-//let qrCodeYPosition = (backgroundImage.size.height - qrCodeBitmap.size.height) / 2
-//
-//self.drawImage(in: pdfContext, image: qrCodeBitmap, at: CGPoint(x: qrCodeXPosition, y: qrCodeYPosition))

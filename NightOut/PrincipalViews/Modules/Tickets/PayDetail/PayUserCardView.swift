@@ -22,7 +22,7 @@ struct PayUserCardView: View {
     
     var body: some View {
         
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             Text("Persona \(index + 1)")
                 .foregroundStyle(.white)
             

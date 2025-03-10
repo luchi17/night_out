@@ -34,16 +34,20 @@ struct PayPDFView: View {
             Text("¡Disfruta de tu evento!")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(.white)
+                .padding(.top, 20)
             
-            ScrollView {
-                VStack(spacing: 10) {
-                    ForEach($viewModel.ticketsList, id: \.self) { ticket in
-                        PDFTicketRow(
-                            ticket: ticket,
-                            pdfToShow: $viewModel.pdfToShow
-                        )
+            if !viewModel.ticketsList.isEmpty {
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach($viewModel.ticketsList, id: \.self) { ticket in
+                            PDFTicketRow(
+                                ticket: ticket,
+                                pdfToShow: $viewModel.pdfToShow
+                            )
+                        }
                     }
                 }
+                .padding(.top, 30)
             }
             
             Spacer()
@@ -51,6 +55,7 @@ struct PayPDFView: View {
         .padding(.top, 30)
         .background(
             Color.blackColor
+                .ignoresSafeArea()
         )
         .showCustomNavBar(
             title: "Entradas",
@@ -134,11 +139,12 @@ struct PDFTicketRow: View {
                 .scaledToFill()
                 .frame(width: 35, height: 35)
                 .foregroundStyle(Color.blackColor)
-                .padding()
+                .padding(.trailing)
             
             Text("Entrada - \(ticket.name)")
                 .font(.headline)
                 .foregroundStyle(Color.blackColor)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer()
             
@@ -151,19 +157,17 @@ struct PDFTicketRow: View {
                 }
             
             ZStack(alignment: .bottom) {
-                Image(systemName: "arrow.down") //.circle.fill
+                Image(systemName: "arrow.down")
                     .resizable()
-                    .scaledToFill()
-                    .frame(width: 30, height: 30)
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
                     .foregroundStyle(Color.blackColor)
                 
-                VStack {
-                    Spacer()
-                        .frame(height: 3)
-                    Rectangle()
-                        .frame(width: 30, height: 3)
-                        .foregroundColor(Color.blackColor)
-                }
+                Rectangle()
+                    .frame(width: 20, height: 3)
+                    .foregroundColor(Color.blackColor)
+                    .padding(.bottom, 0)
+                    .offset(y: -3)
             }
         }
         .padding(12)
