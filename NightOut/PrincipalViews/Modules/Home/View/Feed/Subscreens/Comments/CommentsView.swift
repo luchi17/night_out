@@ -25,6 +25,7 @@ struct CommentsView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     topView
+                        .padding()
                     
                     if viewModel.comments.isEmpty {
                         Spacer()
@@ -59,9 +60,9 @@ struct CommentsView: View {
             }
             
             bottomView
+                .padding()
             
         }
-        .padding()
         .background(Color.blackColor)
         .showToast(
             error: (
