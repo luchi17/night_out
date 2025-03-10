@@ -58,7 +58,7 @@ public extension View {
                 ToolbarItem(placement: .principal) {
                     HStack {
                         Text(title)
-                            .font(.headline)
+                            .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(.white)
                         image()
                     }
