@@ -4,7 +4,7 @@ import Firebase
 import PDFKit
 import CoreImage
 import UIKit
-import MessageUI
+import FirebaseDatabase
 
 struct TicketPDFModel: Hashable {
     let name: String
@@ -96,6 +96,17 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 
                 presenter.viewModel.loading = true
                 
+                presenter.moveUserToNewAssistance {
+                    presenter.addUsersToAssistance(
+                        clubId: presenter.viewModel.model.companyuid,
+                        date: presenter.viewModel.model.date,
+                        personDataList: presenter.viewModel.model.personDataList
+                    )
+                   
+                    presenter.sendNotification(eventText: presenter.viewModel.model.nameEvent)
+
+                }
+                
                 for user in presenter.viewModel.model.personDataList {
                     print("generando PDF para \(user.name)")
                     
@@ -159,6 +170,11 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
     
     func generatePdf(person: PersonTicketData, callback: @escaping ((URL?, String)) -> Void) {
         
+        guard let userUID = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            callback((nil, ""))
+            return
+        }
+        
         let pdfFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
             .appendingPathComponent("EventTickets")
         
@@ -189,15 +205,16 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             let numeroTicket = "TICKET-\(newTicketNumber)"
             
             // Update Firebase with the new ticket number
-            //            lastTicketNumberRef.setValue(newTicketNumber)
+            lastTicketNumberRef.setValue(newTicketNumber)
             
             // Generate the QR Code
-            guard let qrCodeBitmap = self.generateQRCode(string: numeroTicket) else {
-                print("No se pudo crear el qrCodeBitmap".uppercased())
+            guard let qrCodeImage = self.generateQRCode(string: numeroTicket) else {
+                print("No se pudo crear el qrCodeBitmap")
+                callback((nil, ""))
                 return
             }
             
-            let qrCodeBase64 = self.encodeToBase64(bitmap: qrCodeBitmap)
+            let qrCodeBase64 = self.encodeToBase64(bitmap: qrCodeImage)
             
             let ticketData: [String: Any] = [
                 "nombre": person.name,
@@ -212,11 +229,11 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 "qrCodeBase64": qrCodeBase64
             ]
             
-            //            let userTicketRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userUID).child("MisEntradas").child(numeroTicket)
-            //            userTicketRef.setValue(ticketData)
-            //
-            //            // Guardar en Firebase en el nodo de la empresa (TicketsVendidos)
-            //            databaseReference.child(numeroTicket).setValue(ticketData)
+            let userTicketRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userUID).child("MisEntradas").child(numeroTicket)
+            userTicketRef.setValue(ticketData)
+            
+            // Guardar en Firebase en el nodo de la empresa (TicketsVendidos)
+            databaseReference.child(numeroTicket).setValue(ticketData)
             
             
             let companyUsersRef = FirebaseServiceImpl.shared
@@ -234,6 +251,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 self?.createPDF(
                     numeroTicket: numeroTicket,
                     person: person,
+                    qrCodeImage: qrCodeImage,
                     companyUsername: companyUsername,
                     callback: { url in
                         callback((url, numeroTicket))
@@ -244,7 +262,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         }
     }
     
-    func createPDF(numeroTicket: String, person: PersonTicketData, companyUsername: String, callback: @escaping (URL?) -> Void) {
+    func createPDF(numeroTicket: String, person: PersonTicketData, qrCodeImage: UIImage, companyUsername: String, callback: @escaping (URL?) -> Void) {
         // Crear el archivo PDF
         
         let pdfFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -254,6 +272,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             do {
                 try FileManager.default.createDirectory(at: pdfFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
+                callback(nil)
                 return
             }
         }
@@ -263,6 +282,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         // Dibuja la imagen de fondo
         guard let backgroundImage = UIImage(named: "pdf_view") else {
             print("no backgroundImage")
+            callback(nil)
             return
         }
         
@@ -277,19 +297,13 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         UIGraphicsBeginPDFPageWithInfo(pageRect, nil)
         
         // Obtener el contexto de gráficos
-        guard let context = UIGraphicsGetCurrentContext() else { return }
+        guard let context = UIGraphicsGetCurrentContext() else {
+            callback(nil)
+            return
+        }
         
         // Dibujar la imagen en el contexto con las dimensiones exactas de la página
         backgroundImage.draw(in: pageRect)
-        
-        
-        // Generate the QR Code
-        guard let qrCodeImage = self.generateQRCode(string: numeroTicket) else {
-            print("No se pudo crear el qrCodeBitmap".uppercased())
-            return
-        }
-        // FIREBASE
-        //        let qrCodeBase64 = self.encodeToBase64(bitmap: qrCodeBitmap)
         
         let qrSizeHeight = (imageSize.height / 2)
         
@@ -313,28 +327,28 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         
         let eventTitleFont = UIFont.boldSystemFont(ofSize: 9)
         self.addText(label: headerText, value: "", at: CGPoint(x: xposition, y: yPosition), boldFont: eventTitleFont, boldColor: .darkBlue)
-
+        
         //REST
         yPosition += 20
-        self.addText(label: "Nombre", value: "\(person.name)", at: CGPoint(x: xposition, y: yPosition))
+        self.addText(label: "Nombre: ", value: "\(person.name)", at: CGPoint(x: xposition, y: yPosition))
         
         yPosition += 15
-        self.addText(label: "Correo", value: "\(person.email)", at: CGPoint(x: xposition, y: yPosition))
+        self.addText(label: "Correo: ", value: "\(person.email)", at: CGPoint(x: xposition, y: yPosition))
         
         yPosition += 15
-        self.addText(label: "Número de Ticket", value: "\(numeroTicket)", at: CGPoint(x: xposition, y: yPosition))
+        self.addText(label: "Número de Ticket: ", value: "\(numeroTicket)", at: CGPoint(x: xposition, y: yPosition))
         
         yPosition += 15
-        self.addText(label: "Fecha", value: "\(self.viewModel.model.date)", at: CGPoint(x: xposition, y: yPosition))
+        self.addText(label: "Fecha: ", value: "\(self.viewModel.model.date)", at: CGPoint(x: xposition, y: yPosition))
         
         yPosition += 15
-        self.addText(label: "Precio", value: "\(self.viewModel.model.price) euros", at: CGPoint(x: xposition, y: yPosition))
+        self.addText(label: "Precio: ", value: "\(self.viewModel.model.price) euros", at: CGPoint(x: xposition, y: yPosition))
         
         yPosition += 15
-        self.addText(label: "Evento", value: "\(self.viewModel.model.nameEvent.capitalized)", at: CGPoint(x: xposition, y: yPosition))
+        self.addText(label: "Evento: ", value: "\(self.viewModel.model.nameEvent.capitalized)", at: CGPoint(x: xposition, y: yPosition))
         
         yPosition += 15
-        self.addText(label: "Tipo de entrada", value: "\(self.viewModel.model.type)", at: CGPoint(x: xposition, y: yPosition))
+        self.addText(label: "Tipo de entrada: ", value: "\(self.viewModel.model.type)", at: CGPoint(x: xposition, y: yPosition))
         
         
         // FOOTER
@@ -384,7 +398,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         ]
         
         // Crear los textos en negrita y normal
-        let boldText = NSAttributedString(string: "\(label): ", attributes: boldAttributes)
+        let boldText = NSAttributedString(string: label, attributes: boldAttributes)
         let normalText = NSAttributedString(string: value, attributes: normalAttributes)
         
         // Unir ambos textos
@@ -402,4 +416,166 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         return imageData.base64EncodedString()
     }
 
+
+    func addUsersToAssistance(clubId: String, date: String, personDataList: [PersonTicketData]) {
+        
+        let dbRef = Database.database().reference()
+        var usersProcessed = 0 // 🔥 Contador de usuarios procesados
+       
+        for person in personDataList {
+
+            let email = person.email.lowercased()
+            
+            dbRef.child("Users")
+                .queryOrdered(byChild: "email")
+                .queryEqual(toValue: email).observeSingleEvent(of: .value) { snapshot in
+                    
+                    print("____________________________")
+                    print(snapshot)
+                    usersProcessed += 1 // 🔥 Contamos cada usuario procesado
+                    
+                    if snapshot.exists(), let userSnapshot = snapshot.children.allObjects.first as? DataSnapshot {
+                        
+                        let userId = userSnapshot.key
+                        let gender = userSnapshot.childSnapshot(forPath: "gender").value as? String ?? "Desconocido"
+                        
+                        let assistanceRef = dbRef.child("Club").child(clubId).child("Assistance").child(date).child(userId)
+                        let attendingClubRef = dbRef.child("Users").child(userId).child("attendingClub")
+
+                        let userMap: [String: Any] = [
+                            "uid": userId,
+                            "gender": gender,
+                            "entry": true // 🔹 Se añade "entry: true"
+                        ]
+
+                        assistanceRef.setValue(userMap) { error, _ in
+                            if let error = error {
+                                print("Error al añadir asistencia para \(person.name): \(error.localizedDescription)")
+                            } else {
+                                attendingClubRef.setValue(clubId)
+                                print("Usuario \(person.name) añadido a la asistencia de \(clubId) en la fecha \(date) con entry=true")
+                            }
+                        }
+                    } else {
+                        print("No se encontró UID para \(person.name) con correo \(email)")
+                    }
+                } withCancel: { error in
+                    print("Error al buscar UID para \(person.name): \(error.localizedDescription)")
+                }
+        }
+    }
+
+    func moveUserToNewAssistance(onComplete: @escaping () -> Void) {
+        guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            print("Usuario no autenticado")
+            onComplete()
+            return
+        }
+
+        let clubsRef = FirebaseServiceImpl.shared.getClub()
+
+        clubsRef.observeSingleEvent(of: .value) { snapshot in
+            
+            for clubSnapshot in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                
+                guard let clubId = clubSnapshot.key as String? else { continue }
+                
+                let assistanceRef = clubSnapshot.childSnapshot(forPath: "Assistance")
+
+                for dateSnapshot in assistanceRef.children.allObjects as? [DataSnapshot] ?? [] {
+                    
+                    guard let date = dateSnapshot.key as String? else { continue }
+                    
+                    let userRef = dateSnapshot.childSnapshot(forPath: userId)
+
+                    if userRef.exists() {
+                        
+                        let entryRef = userRef.childSnapshot(forPath: "entry").value as? Bool
+
+                        if entryRef == true {
+                            print("El usuario tiene entry=true, no se elimina.")
+                            onComplete()
+                            return
+                        }
+
+                        // 🔹 Si "entry" es false o no existe, eliminar al usuario
+                        clubsRef.child(clubId).child("Assistance").child(date).child(userId)
+                            .removeValue { error, _ in
+                                if let error = error {
+                                    print("Error al eliminar asistencia: \(error.localizedDescription)")
+                                } else {
+                                    print("Usuario eliminado de la asistencia de \(clubId) en la fecha \(date) porque entry era false o no existía")
+                                }
+                            }
+
+                        // Solo necesitamos eliminar una vez, así que llamamos a onComplete() y salimos
+                        onComplete()
+                        return
+                    }
+                }
+            }
+            // 🔹 Si el usuario no estaba en ningún club, simplemente llamamos a onComplete()
+            onComplete()
+        } withCancel: { error in
+            print("Error al buscar asistencia previa: \(error.localizedDescription)")
+            onComplete()
+        }
+    }
+
+    func sendNotification(eventText: String) {
+        guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            print("Usuario no autenticado")
+            return
+        }
+        let
+        databaseRef = Database.database().reference()
+
+        // 🔹 Obtener el username del usuario actual
+        let userRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId)
+
+        userRef.getData { error, snapshot in
+            
+            guard error == nil, let snapshot = snapshot, snapshot.exists(),
+                  let username = snapshot.childSnapshot(forPath: "username").value as? String else {
+                print("❌ No se encontró el username del usuario actual.")
+                return
+            }
+
+            // 🔹 Buscar a los seguidores
+            let followersRef = FirebaseServiceImpl.shared.getFollow().child(userId).child("Followers")
+
+            followersRef.observeSingleEvent(of: .value) { snapshot in
+                guard snapshot.exists() else {
+                    print("⚠ El usuario no tiene seguidores. No se enviará ninguna notificación.")
+                    return
+                }
+
+                for followerSnapshot in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                    guard let followerId = followerSnapshot.key as String? else { continue }
+
+                    // 🔹 Subir la notificación con username + texto
+                    let notiRef = FirebaseServiceImpl.shared.getNotifications().child(followerId)
+                    let notiMap: [String: Any] = [
+                        "userid": userId,
+                        "text": "\(username): asistirá a \(eventText)", // 🔥 Añade el username al texto
+                        "postid": "",
+                        "ispost": false
+                    ]
+
+                    notiRef.childByAutoId().setValue(notiMap) { error, _ in
+                        if let error = error {
+                            print("❌ Error al enviar notificación a \(followerId): \(error.localizedDescription)")
+                        } else {
+                            print("✅ Notificación enviada con éxito a \(followerId)")
+                        }
+                    }
+                }
+            } withCancel: { error in
+                print("❌ Error al obtener seguidores: \(error.localizedDescription)")
+            }
+        }
+    }
+
+
+    
 }
