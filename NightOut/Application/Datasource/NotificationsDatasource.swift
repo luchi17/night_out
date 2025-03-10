@@ -111,7 +111,7 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
         let notificationModel = NotificationModel(
             ispost: false,
             postid: "",
-            text: "\(myName) asistirá a \(clubName)",
+            text: "\(myName): asistirá a \(clubName)",
             userid: currentUserId
         )
         let notificationData = structToDictionary(notificationModel)
