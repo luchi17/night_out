@@ -62,14 +62,17 @@ struct FullScreenImageView: View {
                         lastScale = scale
                     }
                 }
+                .padding(.horizontal, 20)
             
             VStack {
                 HStack {
                     Spacer()
                     Button(action: onClose) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.white)
-                            .font(.largeTitle)
+                        Image("borrar")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                            .foregroundStyle(Color.white)
                             .padding()
                     }
                 }
