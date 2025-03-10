@@ -104,8 +104,8 @@ final class LoginPresenterImpl: LoginPresenter {
                 
                 if error != nil {
                     self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
-                    self.viewModel.loading = false
                 }
+                self.viewModel.loading = false
             })
             .withUnretained(self)
             .flatMap({ presenter, _ -> AnyPublisher<Bool, Never> in

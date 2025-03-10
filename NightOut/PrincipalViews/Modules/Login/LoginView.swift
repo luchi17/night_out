@@ -149,10 +149,6 @@ struct LoginView: View, Hashable {
                 })
             )
         }
-        .onAppear {
-            viewModel.email = ""
-            viewModel.password = ""
-        }
         .showToast(
             error: (
                 type: viewModel.toast,
