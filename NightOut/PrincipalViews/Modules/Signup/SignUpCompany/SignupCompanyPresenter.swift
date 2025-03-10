@@ -197,17 +197,19 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     return Just((false, nil))
                         .eraseToAnyPublisher()
                 }
+                let startTime = presenter.viewModel.startTime.isEmpty ? presenter.timeString(from: Date()) : presenter.viewModel.startTime
                 
+                let endTime = presenter.viewModel.endTime.isEmpty ? presenter.timeString(from: Date()) : presenter.viewModel.endTime
        
                 let model = CompanyModel(
                     email: presenter.viewModel.email.lowercased(),
-                    endTime: presenter.viewModel.endTime,
+                    endTime: endTime,
                     selectedTag: presenter.viewModel.selectedTag == .none ? "Etiqueta" : presenter.viewModel.selectedTag.title,
                     fullname: presenter.viewModel.fullName,
                     username: presenter.viewModel.userName.lowercased(),
                     imageUrl: presenter.viewModel.imageUrl,
                     location: presenter.viewModel.locationString,
-                    startTime: presenter.viewModel.startTime,
+                    startTime: startTime,
                     uid: uid,
                     fcm_token: presenter.viewModel.fcmToken
                 )
@@ -241,5 +243,12 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                
             })
             .store(in: &cancellables)
+    }
+    
+    // Formatear la fecha en una cadena de hora:minuto
+    private func timeString(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: date)
     }
 }
