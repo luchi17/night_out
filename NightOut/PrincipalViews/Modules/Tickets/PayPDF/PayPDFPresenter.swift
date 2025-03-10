@@ -317,10 +317,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 .font: footerFont,
                 .foregroundColor: UIColor.gray
             ]
-        
-        
-            
-        
+   
         let footerText = "Condiciones del Ticket: Este ticket es personal e intransferible. Modificaciones no permitidas."
         
         // Calcular el ancho del texto para centrarlo
@@ -329,7 +326,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             let footerY = pageRect.height - footerTextSize.height - 10
         
         // Dibujar el texto en el footer (centrado)
-        addText(label: footerText, at: CGPoint(x: footerX, y: footerY), font: eventTitleFont, color: .gray)
+        footerText.draw(at: CGPoint(x: footerX, y: footerY), withAttributes: footerAttributes)
         
         
         // Finalizar el contexto del PDF
@@ -343,17 +340,6 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
     func encodeToBase64(bitmap: UIImage) -> String {
         guard let imageData = bitmap.pngData() else { return "" }
         return imageData.base64EncodedString()
-    }
-    
-    func drawTextInPDF(context: CGContext, text: String, atPoint point: CGPoint) {
-        let font = UIFont.boldSystemFont(ofSize: 18) // Puedes usar cualquier font aquí
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: UIColor.black
-        ]
-        
-        let attributedString = NSAttributedString(string: text, attributes: attributes)
-        attributedString.draw(at: point)
     }
     
     // Compartir el archivo (con la app "Archivos")
