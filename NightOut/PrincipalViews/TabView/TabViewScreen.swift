@@ -57,19 +57,21 @@ struct TabViewScreen: View {
                 }
                 .frame(maxWidth: .infinity)
                 
-                Button(action: {
-                    viewModel.selectedTab = .leagues
-                }) {
-                    VStack {
-                        Image("whisky_empty")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 20, height: 20)
-                            .foregroundColor(.white)
-                            
+                if FirebaseServiceImpl.shared.getImUser() {
+                    Button(action: {
+                        viewModel.selectedTab = .leagues
+                    }) {
+                        VStack {
+                            Image("whisky_empty")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(.white)
+                                
+                        }
                     }
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
                 
                 Button(action: {
                     viewModel.selectedTab = .calendar
