@@ -17,16 +17,18 @@ struct PDFKitView: UIViewRepresentable {
     }
 }
 
-class PDFDownloader {
-    
-    static func descargarYMostrarPDF(desde url: URL?, name: String, numeroTicket: String) {
+
+class PDFDownloader: NSObject {
+    static let shared = PDFDownloader()
+    private var documentInteractionController: UIDocumentInteractionController?
+
+    func descargarYMostrarPDF(desde url: URL?, name: String, numeroTicket: String) {
         guard let url = url else {
             print("URL inválida")
             return
         }
         
-        // Crear una sesión de descarga
-        let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
+        let task = URLSession.shared.downloadTask(with: url) { localURL, _, error in
             guard let localURL = localURL, error == nil else {
                 print("Error al descargar el PDF: \(error?.localizedDescription ?? "Desconocido")")
                 return
@@ -34,22 +36,19 @@ class PDFDownloader {
             
             // Obtener el directorio de documentos
             let documentosURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("EventTickets")
-            
             let destinoURL = documentosURL.appendingPathComponent("ticket_\(name)_\(numeroTicket).pdf")
-
-            // Mover el archivo descargado a Documentos
+            
             do {
                 if FileManager.default.fileExists(atPath: destinoURL.path) {
                     try FileManager.default.removeItem(at: destinoURL)
                 }
                 try FileManager.default.moveItem(at: localURL, to: destinoURL)
                 
-                // Mostrar el PDF al usuario en el Share Sheet
+                // Abrir el PDF en un visor dentro de la app
+                
                 DispatchQueue.main.async {
-                    let activityVC = UIActivityViewController(activityItems: [destinoURL], applicationActivities: nil)
-                    // Mostrar el controlador de actividad
                     if let topController = UIApplication.shared.keyWindow?.rootViewController {
-                        topController.present(activityVC, animated: true, completion: nil)
+                        self.abrirPDF(en: destinoURL, desde: topController)
                     }
                 }
                 
@@ -58,5 +57,18 @@ class PDFDownloader {
             }
         }
         task.resume()
+    }
+
+    private func abrirPDF(en url: URL, desde viewController: UIViewController) {
+        documentInteractionController = UIDocumentInteractionController(url: url)
+        documentInteractionController?.delegate = self
+        documentInteractionController?.presentPreview(animated: true)
+    }
+}
+
+// Extensión para mostrar el visor
+extension PDFDownloader: UIDocumentInteractionControllerDelegate {
+    func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
+        return UIApplication.shared.keyWindow?.rootViewController ?? UIViewController()
     }
 }

@@ -99,6 +99,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                     print("generando PDF para \(user.name)")
                     
                     presenter.generatePdf(person: user) { data in
+                        
                         presenter.viewModel.loading = false
                         
                         let ticket = TicketPDFModel(
@@ -116,7 +117,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             .downloadPdf
             .withUnretained(self)
             .sink { presenter, ticket in
-                PDFDownloader.descargarYMostrarPDF(
+                PDFDownloader.shared.descargarYMostrarPDF(
                     desde: ticket.pdf,
                     name: ticket.name,
                     numeroTicket: ticket.ticketNumber
