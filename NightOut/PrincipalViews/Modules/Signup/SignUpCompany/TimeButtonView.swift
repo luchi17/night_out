@@ -10,7 +10,6 @@ struct TimeButtonView: View {
     
     var body: some View {
         Button(action: {
-//            firstTime = false
             showTimePicker.toggle()
         }) {
             Text(selectedTimeString.isEmpty ? title: selectedTimeString)
