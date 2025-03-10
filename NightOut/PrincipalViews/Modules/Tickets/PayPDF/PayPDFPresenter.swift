@@ -40,7 +40,6 @@ class PayPDFViewModel: ObservableObject {
     @Published var model: PDFModel
     
     @Published var pdfToShow: URL?
-    @Published var pdfToDownload: URL?
     
     @Published var ticketsList: [TicketPDFModel] = []
     

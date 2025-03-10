@@ -100,22 +100,6 @@ private extension PayPDFView {
         )
         presenter.transform(input: input)
     }
-    
-    func handleMailResult(_ result: MFMailComposeResult) {
-        switch result {
-        case .sent:
-            print("Correo enviado con éxito.")
-        case .failed:
-            print("Error al enviar el correo.")
-        case .cancelled:
-            print("Correo cancelado.")
-        case .saved:
-            print("Correo guardado como borrador.")
-        @unknown default:
-            print("Resultado desconocido.")
-        }
-    }
-    
 }
 
 
