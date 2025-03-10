@@ -93,7 +93,7 @@ private extension PayPDFView {
     
     func bindViewModel() {
         let input = PayPDFPresenterImpl.Input(
-            viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
+            viewIsLoaded: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             goBack: goBackPublisher.eraseToAnyPublisher(),
             openPDf: openPDFPublisher.eraseToAnyPublisher(),
             downloadPdf: downloadPDFPublisher.eraseToAnyPublisher()
