@@ -11,12 +11,12 @@ struct HistoryBottomSheet: View {
     @State private var fechaEvento: String = ""
     @State private var referenciaCompra: String = ""
     @State private var precioEntrada: String = ""
+    
     @State private var qrImage: IdentifiableImage?
+    @State private var selectedQRImage: IdentifiableImage?
     
     @State private var loading: Bool = false
     @State private var toast: ToastType?
-    
-    @State private var showBigQR: Bool = false
     
     var body: some View {
         
@@ -30,18 +30,11 @@ struct HistoryBottomSheet: View {
         .background(
             Color.white.ignoresSafeArea()
         )
-        .fullScreenCover(item: $qrImage) { imageName in
+        .fullScreenCover(item: $selectedQRImage) { imageName in
             FullScreenImageView(imageName: imageName, onClose: {
-                showBigQR = false
+                selectedQRImage = nil
             })
         }
-//        .sheet(isPresented: $showBigQR, onDismiss: {
-//            showBigQR = false
-//        }) {
-//            if let qrImage = qrImage {
-//                BigQRSheet(image: qrImage)
-//            }
-//        }
         .showToast(
             error: (
                 type: toast,
@@ -95,7 +88,7 @@ struct HistoryBottomSheet: View {
                     .frame(width: 200, height: 200)
                     .padding(.bottom, 10)
                     .onTapGesture {
-                        showBigQR = true
+                        selectedQRImage = qrImage
                     }
             } else {
                 Text("QR no encontrado")

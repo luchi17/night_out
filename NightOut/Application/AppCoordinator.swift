@@ -234,7 +234,11 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func openHistoryTickets() {
-        let ticketsHistoryCoordinator = TicketsHistoryCoordinator(actions: .init())
+        let ticketsHistoryCoordinator = TicketsHistoryCoordinator(actions: .init(
+            goBack: { [weak self] in
+                self?.pop()
+            }
+        ))
         self.push(ticketsHistoryCoordinator)
     }
 }

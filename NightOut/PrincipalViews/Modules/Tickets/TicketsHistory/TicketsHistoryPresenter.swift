@@ -28,6 +28,7 @@ final class TicketsHistoryPresenterImpl: TicketsHistoryPresenter {
     
     struct Input {
         let viewIsLoaded: AnyPublisher<Void, Never>
+        let goBack: AnyPublisher<Void, Never>
     }
     
     struct UseCases {
@@ -35,6 +36,7 @@ final class TicketsHistoryPresenterImpl: TicketsHistoryPresenter {
     }
     
     struct Actions {
+        let goBack: VoidClosure
     }
     
     // MARK: - Stored Properties
@@ -67,6 +69,15 @@ final class TicketsHistoryPresenterImpl: TicketsHistoryPresenter {
                 }
             }
             .store(in: &cancellables)
+        
+        input
+            .goBack
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.goBack()
+            }
+            .store(in: &cancellables)
+        
         
     }
     
