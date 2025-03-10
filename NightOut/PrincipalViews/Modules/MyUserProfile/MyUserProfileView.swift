@@ -15,6 +15,7 @@ struct MyUserProfileView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let goToLoginPublisher = PassthroughSubject<Void, Never>()
+    private let openMenuSelectionPublisher = PassthroughSubject<CompanyMenuSelection, Never>()
     
     @ObservedObject var viewModel: MyUserProfileViewModel
     @ObservedObject var levelsViewModel: LevelsViewModel
@@ -168,16 +169,13 @@ struct MyUserProfileView: View {
             Button(action: {
                 showEditSheet.toggle()
             }) {
-                Text("Editar")
+                Text("Editar".uppercased())
                     .font(.system(size: 16))
-                    .foregroundColor(.yellow)
-                    .padding()
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.yellow, lineWidth: 3)
-                    )
-                    .frame(width: 80, height: 60)
+                    .bold()
+                    .foregroundColor(.white)
+                    .padding(.all, 14)
+                    .background(Color.grayColor)
+                    .cornerRadius(25)
             }
             .padding(.trailing, 16)
         }
@@ -188,12 +186,12 @@ struct MyUserProfileView: View {
         Button(action: {
             self.showShareSheet.toggle()
         }) {
-            Text("Compartir perfil")
+            Text("Compartir perfil".uppercased())
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.red)
-                .padding()
-                .background(Color.white)
-                .cornerRadius(20)
+                .foregroundColor(.white)
+                .padding(.all, 14)
+                .background(Color.grayColor)
+                .cornerRadius(25)
         }
         .padding(.top, 16)
     }
