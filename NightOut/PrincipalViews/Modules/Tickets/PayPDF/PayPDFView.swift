@@ -23,40 +23,42 @@ struct PayPDFView: View {
     }
     
     var body: some View {
-        VStack {
+        ZStack {
             
-            Image("logo_amarillo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 50, height: 50)
-            
-            Text("¡Disfruta de tu evento!")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(.white)
-                .padding(.top, 10)
-            
-            if !viewModel.ticketsList.isEmpty {
-                ScrollView {
-                    VStack(spacing: 10) {
-                        ForEach($viewModel.ticketsList, id: \.self) { ticket in
-                            PDFTicketRow(
-                                ticket: ticket,
-                                pdfToShow: $viewModel.pdfToShow,
-                                download: downloadPDFPublisher.send
-                            )
-                        }
-                    }
-                }
-                .padding(.top, 20)
-            }
-            
-            Spacer()
-        }
-        .padding(.top, 30)
-        .background(
             Color.blackColor
                 .ignoresSafeArea()
-        )
+            
+            VStack {
+                
+                Image("logo_amarillo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 50, height: 50)
+                    .padding(.top, 30)
+                
+                Text("¡Disfruta de tu evento!")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.top, 10)
+                
+                if !viewModel.ticketsList.isEmpty {
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            ForEach($viewModel.ticketsList, id: \.self) { ticket in
+                                PDFTicketRow(
+                                    ticket: ticket,
+                                    pdfToShow: $viewModel.pdfToShow,
+                                    download: downloadPDFPublisher.send
+                                )
+                            }
+                        }
+                    }
+                    .padding(.top, 20)
+                }
+                
+                Spacer()
+            }
+        }
         .showCustomNavBar(
             title: "Entradas",
             goBack: goBackPublisher.send

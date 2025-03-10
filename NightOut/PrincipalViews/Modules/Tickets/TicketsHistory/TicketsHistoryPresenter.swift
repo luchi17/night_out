@@ -89,13 +89,25 @@ final class TicketsHistoryPresenterImpl: TicketsHistoryPresenter {
         }
         
         let dbRef = Database.database().reference()
-        let ticketsReference = dbRef.child("Users").child(currentUserUid).child("MisEntradas")
+        var ticketsReference: DatabaseReference
         
+        if FirebaseServiceImpl.shared.getImUser() {
+            ticketsReference = dbRef.child("Users").child(currentUserUid).child("MisEntradas")
+        } else {
+            ticketsReference = dbRef.child("Company_Users").child(currentUserUid).child("MisEntradas")
+        }
+
         ticketsReference.getData { error, snapshot in
             var tickets: [TicketHistoryPDFModel] = []
             
-            guard error == nil, let snapshot = snapshot, snapshot.exists() else {
-                print("Error al cargar los tickets: \(error?.localizedDescription ?? "Desconocido")")
+            if error != nil {
+                DispatchQueue.main.async {
+                    self.viewModel.toast = .custom(.init(title: "", description: "Error al cargar los tickets: \(error?.localizedDescription ?? "Desconocido")", image: nil))
+                }
+                completion([])
+                return
+            }
+            guard let snapshot = snapshot, snapshot.exists() else {
                 completion([])
                 return
             }

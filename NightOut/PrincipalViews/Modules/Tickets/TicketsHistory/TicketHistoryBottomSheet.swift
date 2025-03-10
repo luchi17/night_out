@@ -139,7 +139,13 @@ struct TicketHistoryBottomSheet: View {
             return
         }
         
-        let dbRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: currentUserUid)
+        var dbRef: DatabaseReference
+        
+        if FirebaseServiceImpl.shared.getImUser() {
+            dbRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: currentUserUid)
+        } else {
+            dbRef = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: currentUserUid)
+        }
         
         dbRef.child("MisEntradas").child(ticketNumberToShow)
             .getData { error, snapshot in

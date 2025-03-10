@@ -21,7 +21,10 @@ struct TicketsHistoryView: View {
     }
     
     var body: some View {
-        VStack {
+        ZStack {
+            Color.blackColor
+                .ignoresSafeArea()
+            
             if !viewModel.ticketsList.isEmpty {
                 ScrollView {
                     VStack(spacing: 10) {
@@ -33,16 +36,17 @@ struct TicketsHistoryView: View {
                         }
                     }
                 }
+                .padding(.top, 30)
+                .padding(.horizontal, 20)
+            } else {
+                Spacer()
+                Text("Aún no tienes tickets.")
+                    .foregroundStyle(.white)
+                    .font(.headline)
             }
             
             Spacer()
         }
-        .padding(.top, 30)
-        .padding(.horizontal, 20)
-        .background(
-            Color.blackColor
-                .ignoresSafeArea()
-        )
         .showCustomNavBar(
             title: "Mis tickets",
             goBack: goBackPublisher.send,

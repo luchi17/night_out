@@ -232,12 +232,16 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 "qrCodeBase64": qrCodeBase64
             ]
             
-            let userTicketRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userUID).child("MisEntradas").child(numeroTicket)
-            userTicketRef.setValue(ticketData)
+            if FirebaseServiceImpl.shared.getImUser() {
+                let userTicketRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userUID).child("MisEntradas").child(numeroTicket)
+                userTicketRef.setValue(ticketData)
+            } else {
+                let userTicketRef = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: userUID).child("MisEntradas").child(numeroTicket)
+                userTicketRef.setValue(ticketData)
+            }
             
             // Guardar en Firebase en el nodo de la empresa (TicketsVendidos)
             databaseReference.child(numeroTicket).setValue(ticketData)
-            
             
             let companyUsersRef = FirebaseServiceImpl.shared
                 .getCompanyInDatabaseFrom(uid: self.viewModel.model.companyuid)
