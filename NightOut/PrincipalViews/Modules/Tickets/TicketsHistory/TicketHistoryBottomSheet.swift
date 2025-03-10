@@ -71,12 +71,12 @@ struct TicketHistoryBottomSheet: View {
             Text(nombreEvento.capitalized)
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.black)
+                .foregroundColor(Color.blackColor)
                 .multilineTextAlignment(.center)
             
             Text(fechaEvento)
                 .font(.body)
-                .foregroundColor(.black)
+                .foregroundColor(Color.blackColor)
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 10)
             
@@ -98,22 +98,22 @@ struct TicketHistoryBottomSheet: View {
             }
             
             Divider()
-                .background(Color.gray.opacity(0.6))
+                .background(Color.grayColor.opacity(0.6))
                 .padding(.vertical, 10)
             
            
             VStack(alignment: .leading, spacing: 6) {
                 Text("Detalles de mi compra")
                     .font(.headline)
-                    .foregroundColor(.black)
+                    .foregroundColor(Color.blackColor)
                 
                 Text("Referencia de compra: \(referenciaCompra)")
                     .font(.subheadline)
-                    .foregroundColor(.black)
+                    .foregroundColor(Color.blackColor)
                 
                 Text("Precio: \(precioEntrada)€")
                     .font(.subheadline)
-                    .foregroundColor(.black)
+                    .foregroundColor(Color.blackColor)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             
@@ -121,7 +121,8 @@ struct TicketHistoryBottomSheet: View {
             // Condiciones de compra
             Text("Los términos y condiciones del recinto y/o el promotor del evento también pueden aplicar.")
                 .font(.footnote)
-                .foregroundColor(.black)
+                .foregroundColor(Color.blackColor)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 10)
         }
         .padding(20)
