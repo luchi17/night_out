@@ -44,8 +44,15 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         let userRegion = MKCoordinateRegion(center: location.coordinate,
                                         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        self.userLocation = LocationCoordinate(location: userRegion.center)
-        self.userRegion = userRegion
+        
+        if !self.areCoordinatesEqual(
+            coordinate1: userLocation.location,
+            coordinate2: LocationCoordinate(location: userRegion.center).location,
+            decimalPlaces: 3)
+        {
+            self.userLocation = LocationCoordinate(location: userRegion.center)
+            self.userRegion = userRegion
+        }
     }
     
     func updateRegion(coordinate: CLLocationCoordinate2D) {
