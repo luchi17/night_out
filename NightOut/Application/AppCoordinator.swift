@@ -222,7 +222,13 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func openPDFPay(model: PDFModel) {
-        let payPDFCoordinator = PayPDFCoordinator(actions: .init(), model: model)
+        let payPDFCoordinator = PayPDFCoordinator(actions: .init(
+            goBack: { [weak self] in
+                self?.pop()
+                self?.pop()
+                self?.pop()
+            }
+        ), model: model)
         self.push(payPDFCoordinator)
     }
 }
