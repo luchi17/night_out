@@ -37,6 +37,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let openDiscotecaDetail: InputClosure<(CompanyModel, [Fiesta])>
     private let openTicketDetail: InputClosure<(CompanyModel, Fiesta)>
     private let openPDFPay: InputClosure<PDFModel>
+    private let openHistoryTickets: VoidClosure
     
     private let locationManager: LocationManager
     private let showMyProfileSubject: PassthroughSubject<Void, Never>
@@ -74,7 +75,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
         openCreateLeague: @escaping VoidClosure,
         openDiscotecaDetail: @escaping InputClosure<(CompanyModel, [Fiesta])>,
         openTicketDetail: @escaping InputClosure<(CompanyModel, Fiesta)>,
-        openPDFPay: @escaping InputClosure<PDFModel>
+        openPDFPay: @escaping InputClosure<PDFModel>,
+        openHistoryTickets: @escaping VoidClosure
     ) {
         self.path = path
         self.showMyProfileSubject = showMyProfileSubject
@@ -96,6 +98,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
         self.openDiscotecaDetail = openDiscotecaDetail
         self.openTicketDetail = openTicketDetail
         self.openPDFPay = openPDFPay
+        self.openHistoryTickets = openHistoryTickets
     }
     
     @ViewBuilder
@@ -153,7 +156,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
     func makeCalendarFlow() -> AnyView {
         let coordinator = TicketsCoordinator(actions: .init(
             goToCompany: openDiscotecaDetail,
-            goToEvent: openTicketDetail
+            goToEvent: openTicketDetail,
+            openHistoryTickets: openHistoryTickets
         ))
         return AnyView(coordinator.build())
     }

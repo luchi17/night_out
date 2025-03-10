@@ -115,6 +115,10 @@ struct ContentView: View {
                                 .build()
                                 .showCustomBackButtonNavBar()
                         }
+                        .navigationDestination(for: TicketsHistoryCoordinator.self) { coordinator in
+                            coordinator
+                                .build()
+                        }
                         .navigationDestination(for: CreateLeagueCoordinator.self) { coordinator in
                             coordinator
                                 .build()

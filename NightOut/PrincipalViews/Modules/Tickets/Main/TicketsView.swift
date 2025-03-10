@@ -6,12 +6,12 @@ struct TicketsView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let logoutPublisher = PassthroughSubject<Void, Never>()
     private let filterPublisher = PassthroughSubject<Void, Never>()
+    private let openHistoryTickets = PassthroughSubject<Void, Never>()
     private let goToCompanyPublisher = PassthroughSubject<(CompanyModel, [Fiesta]), Never>()
     private let goToEventPublisher = PassthroughSubject<(CompanyModel, Fiesta), Never>()
     
     @State private var isCalendarVisible = false
     @State private var isGenreVisible = false
-    @State private var isHistoryVisible = false
     
     @ObservedObject var viewModel: TicketsViewModel
     let presenter: TicketsPresenter
@@ -116,7 +116,7 @@ struct TicketsView: View {
                 Spacer()
                     .frame(maxWidth: .infinity)
                 Button(action: {
-                    isHistoryVisible.toggle()
+                    openHistoryTickets.send()
                 }) {
                     Image("ticket")
                         .resizable()
@@ -256,7 +256,8 @@ private extension TicketsView {
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
             filter: filterPublisher.eraseToAnyPublisher(),
             goToCompany: goToCompanyPublisher.eraseToAnyPublisher(),
-            goToEvent: goToEventPublisher.eraseToAnyPublisher()
+            goToEvent: goToEventPublisher.eraseToAnyPublisher(),
+            openHistoryTickets: openHistoryTickets.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

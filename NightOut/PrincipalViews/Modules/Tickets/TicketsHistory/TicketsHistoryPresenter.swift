@@ -1,0 +1,108 @@
+import Combine
+import SwiftUI
+import Firebase
+import PDFKit
+import CoreImage
+import UIKit
+import FirebaseDatabase
+
+
+class TicketsHistoryViewModel: ObservableObject {
+    
+    @Published var loading: Bool = false
+    @Published var toast: ToastType?
+    
+    @Published var ticketsList: [TicketHistoryPDFModel] = []
+    
+    @Published var ticketNumberToShow: String?
+    
+}
+
+protocol TicketsHistoryPresenter {
+    var viewModel: TicketsHistoryViewModel { get }
+    func transform(input: TicketsHistoryPresenterImpl.Input)
+}
+
+final class TicketsHistoryPresenterImpl: TicketsHistoryPresenter {
+    var viewModel: TicketsHistoryViewModel
+    
+    struct Input {
+        let viewIsLoaded: AnyPublisher<Void, Never>
+    }
+    
+    struct UseCases {
+        
+    }
+    
+    struct Actions {
+    }
+    
+    // MARK: - Stored Properties
+    private let actions: Actions
+    private let useCases: UseCases
+    private var cancellables = Set<AnyCancellable>()
+    
+    
+    // MARK: - Lifecycle
+    init(actions: Actions, useCases: UseCases) {
+        
+        self.viewModel = TicketsHistoryViewModel()
+        self.actions = actions
+        self.useCases = useCases
+        
+    }
+    
+    func transform(input: Input) {
+        
+        input
+            .viewIsLoaded
+            .withUnretained(self)
+            .sink { presenter, _ in
+                
+                presenter.viewModel.loading = true
+                
+                presenter.fetchUserTickets { tickets in
+                    presenter.viewModel.loading = false
+                    presenter.viewModel.ticketsList = tickets
+                }
+            }
+            .store(in: &cancellables)
+        
+    }
+    
+    func fetchUserTickets(completion: @escaping ([TicketHistoryPDFModel]) -> Void) {
+        guard let currentUserUid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            print("Usuario no autenticado")
+            completion([])
+            return
+        }
+        
+        let dbRef = Database.database().reference()
+        let ticketsReference = dbRef.child("Users").child(currentUserUid).child("MisEntradas")
+        
+        ticketsReference.getData { error, snapshot in
+            var tickets: [TicketHistoryPDFModel] = []
+            
+            guard error == nil, let snapshot = snapshot, snapshot.exists() else {
+                print("Error al cargar los tickets: \(error?.localizedDescription ?? "Desconocido")")
+                completion([])
+                return
+            }
+            
+            for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                let ticketUid = child.key
+                let fecha = (child.value as? [String: Any])?["fecha"] as? String ?? "Fecha no disponible"
+                
+                let model = TicketHistoryPDFModel(date: fecha, ticketNumber: ticketUid)
+                tickets.append(model)
+            }
+            
+            completion(tickets)
+        }
+    }
+}
+
+struct TicketHistoryPDFModel: Hashable {
+    let date: String
+    let ticketNumber: String
+}

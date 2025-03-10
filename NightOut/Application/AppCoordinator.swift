@@ -62,7 +62,8 @@ final class AppCoordinator: ObservableObject {
             openCreateLeague: openCreateLeague,
             openDiscotecaDetail: openDiscotecaDetail,
             openTicketDetail: openTicketDetail,
-            openPDFPay: openPDFPay
+            openPDFPay: openPDFPay,
+            openHistoryTickets: openHistoryTickets
         )
         self.push(tabBarCoordinator)
     }
@@ -230,6 +231,11 @@ final class AppCoordinator: ObservableObject {
             }
         ), model: model)
         self.push(payPDFCoordinator)
+    }
+    
+    private func openHistoryTickets() {
+        let ticketsHistoryCoordinator = TicketsHistoryCoordinator(actions: .init())
+        self.push(ticketsHistoryCoordinator)
     }
 }
 
