@@ -38,7 +38,7 @@ class PayPDFViewModel: ObservableObject {
     @Published var toast: ToastType?
     
     @Published var model: PDFModel
-   
+    
     @Published var pdfToShow: URL?
     @Published var pdfToDownload: URL?
     
@@ -69,6 +69,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
     }
     
     struct Actions {
+        let goBack: VoidClosure
     }
     
     // MARK: - Stored Properties
@@ -122,6 +123,14 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                     name: ticket.name,
                     numeroTicket: ticket.ticketNumber
                 )
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goBack
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.goBack()
             }
             .store(in: &cancellables)
     }
