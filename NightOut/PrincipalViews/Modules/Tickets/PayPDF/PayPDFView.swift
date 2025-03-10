@@ -132,7 +132,6 @@ struct PDFTicketRow: View {
                 .scaledToFill()
                 .frame(width: 35, height: 35)
                 .foregroundStyle(Color.blackColor)
-                .padding(.trailing)
             
             Text("Entrada - \(ticket.name)")
                 .font(.headline)
