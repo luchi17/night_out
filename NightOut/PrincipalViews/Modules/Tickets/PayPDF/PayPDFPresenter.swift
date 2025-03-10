@@ -223,7 +223,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 "correo": person.email,
                 "evento": self.viewModel.model.nameEvent,
                 "tipo de entrada": self.viewModel.model.type,
-                "precio": self.viewModel.model.price,
+                "precio": String(self.viewModel.model.price),
                 "fecha": self.viewModel.model.date,
                 "discoteca": self.viewModel.model.companyuid,
                 "qrText": numeroTicket,
