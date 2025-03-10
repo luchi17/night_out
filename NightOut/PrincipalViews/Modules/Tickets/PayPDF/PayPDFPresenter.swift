@@ -132,8 +132,11 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 PDFDownloader.shared.descargarYMostrarPDF(
                     desde: ticket.pdf,
                     name: ticket.name,
-                    numeroTicket: ticket.ticketNumber
-                )
+                    numeroTicket: ticket.ticketNumber) { [weak self] toast in
+                        DispatchQueue.main.async {
+                            self?.viewModel.toast = toast
+                        }
+                    }
             }
             .store(in: &cancellables)
         
@@ -420,7 +423,6 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
     func addUsersToAssistance(clubId: String, date: String, personDataList: [PersonTicketData]) {
         
         let dbRef = Database.database().reference()
-        var usersProcessed = 0 // 🔥 Contador de usuarios procesados
        
         for person in personDataList {
 
@@ -429,10 +431,6 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             dbRef.child("Users")
                 .queryOrdered(byChild: "email")
                 .queryEqual(toValue: email).observeSingleEvent(of: .value) { snapshot in
-                    
-                    print("____________________________")
-                    print(snapshot)
-                    usersProcessed += 1 // 🔥 Contamos cada usuario procesado
                     
                     if snapshot.exists(), let userSnapshot = snapshot.children.allObjects.first as? DataSnapshot {
                         

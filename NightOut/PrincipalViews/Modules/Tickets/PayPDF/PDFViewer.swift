@@ -19,18 +19,25 @@ struct PDFKitView: UIViewRepresentable {
 
 
 class PDFDownloader: NSObject {
+    
     static let shared = PDFDownloader()
+    
     private var documentInteractionController: UIDocumentInteractionController?
 
-    func descargarYMostrarPDF(desde url: URL?, name: String, numeroTicket: String) {
+    func descargarYMostrarPDF(desde url: URL?, name: String, numeroTicket: String, completion: ((ToastType) -> ())?) {
+        
+        let errorToast = ToastType.custom(.init(title: "", description: "Error al descargar pdf.", image: nil))
+        
         guard let url = url else {
             print("URL inválida")
+            completion?(errorToast)
             return
         }
         
         let task = URLSession.shared.downloadTask(with: url) { localURL, _, error in
             guard let localURL = localURL, error == nil else {
                 print("Error al descargar el PDF: \(error?.localizedDescription ?? "Desconocido")")
+                completion?(errorToast)
                 return
             }
             
@@ -39,6 +46,9 @@ class PDFDownloader: NSObject {
             let destinoURL = documentosURL.appendingPathComponent("ticket_\(name)_\(numeroTicket).pdf")
             
             do {
+                //Discomment below line to force error to check completion toast
+               // throw NSError(domain: "com.miapp.error", code: 999, userInfo: [NSLocalizedDescriptionKey: "Error forzado"]) // ❌ Error manual
+                
                 if FileManager.default.fileExists(atPath: destinoURL.path) {
                     try FileManager.default.removeItem(at: destinoURL)
                 }
@@ -54,6 +64,8 @@ class PDFDownloader: NSObject {
                 
             } catch {
                 print("Error al guardar el archivo: \(error.localizedDescription)")
+                let toast = ToastType.custom(.init(title: "", description: "Error al descargar pdf.", image: nil))
+                completion?(errorToast)
             }
         }
         task.resume()
