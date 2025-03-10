@@ -9,6 +9,7 @@ import MessageUI
 struct TicketPDFModel: Hashable {
     let name: String
     let pdf: URL?
+    let ticketNumber: String
 }
 
 struct PDFModel {
@@ -37,10 +38,9 @@ class PayPDFViewModel: ObservableObject {
     @Published var toast: ToastType?
     
     @Published var model: PDFModel
-    @Published var isShowingMailComposer: Bool = false
-    @Published var emailPdf: String = ""
-    @Published var pdfString: URL?
+   
     @Published var pdfToShow: URL?
+    @Published var pdfToDownload: URL?
     
     @Published var ticketsList: [TicketPDFModel] = []
     
@@ -98,16 +98,15 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 for user in presenter.viewModel.model.personDataList {
                     print("generando PDF para \(user.name)")
                     
-                    presenter.generatePdf(person: user) { pdfUrl in
+                    presenter.generatePdf(person: user) { data in
                         presenter.viewModel.loading = false
                         
-                        let ticket = TicketPDFModel(name: user.name, pdf: pdfUrl)
+                        let ticket = TicketPDFModel(
+                            name: user.name,
+                            pdf: data.0,
+                            ticketNumber: data.1
+                        )
                         presenter.viewModel.ticketsList.append(ticket)
-                        
-                        //MANDAR EMAIL
-                        
-                        //self.viewModel.emailPdf = user.email
-                        //self.viewModel.pdfString = pdfUrl
                     }
                 }
             }
@@ -116,12 +115,14 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         input
             .downloadPdf
             .withUnretained(self)
-            .sink { presenter, _ in
-                
+            .sink { presenter, ticket in
+                PDFDownloader.descargarYMostrarPDF(
+                    desde: ticket.pdf,
+                    name: ticket.name,
+                    numeroTicket: ticket.ticketNumber
+                )
             }
             .store(in: &cancellables)
-        
-        
     }
     
     // Función para generar el código QR
@@ -146,12 +147,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         return nil
     }
     
-    func bitmapToByteArray(bitmap: UIImage) -> Data? {
-        guard let imageData = bitmap.pngData() else { return nil }
-        return imageData
-    }
-    
-    func generatePdf(person: PersonTicketData, callback: @escaping (URL?) -> Void) {
+    func generatePdf(person: PersonTicketData, callback: @escaping ((URL?, String)) -> Void) {
         
         let pdfFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
             .appendingPathComponent("EventTickets")
@@ -160,7 +156,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
             do {
                 try FileManager.default.createDirectory(at: pdfFolder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                callback(nil)
+                callback((nil, ""))
                 return
             }
         }
@@ -217,7 +213,7 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 .getCompanyInDatabaseFrom(uid: self.viewModel.model.companyuid)
                 .child("username")
             
-            companyUsersRef.getData { (error, snapshot) in
+            companyUsersRef.getData { [weak self] (error, snapshot) in
                 guard error == nil else {
                     print("Error al obtener el username: \(error!.localizedDescription)")
                     return
@@ -225,11 +221,13 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                 
                 let companyUsername = snapshot?.value as? String ?? "Nombre no disponible"
                 
-                self.createPDF(
+                self?.createPDF(
                     numeroTicket: numeroTicket,
                     person: person,
                     companyUsername: companyUsername,
-                    callback: callback
+                    callback: { url in
+                        callback((url, numeroTicket))
+                    }
                 )
                 
             }
@@ -393,37 +391,5 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
         guard let imageData = bitmap.pngData() else { return "" }
         return imageData.base64EncodedString()
     }
-    
-    // Compartir el archivo (con la app "Archivos")
-    func sharePDF() {
-        let pdfFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let pdfFilename = pdfFolder.appendingPathComponent("EventTickets/ticket_Mari_TICKET-18.pdf")
-        
-        // Crea un UIActivityViewController para compartir el archivo
-        let activityViewController = UIActivityViewController(activityItems: [pdfFilename], applicationActivities: nil)
-        activityViewController.excludedActivityTypes = [.addToReadingList, .assignToContact]
-        
-        // Mostrar el controlador de actividad
-        if let topController = UIApplication.shared.keyWindow?.rootViewController {
-            topController.present(activityViewController, animated: true, completion: nil)
-        }
-    }
-}
 
-//var yPosition: CGFloat = backgroundImage.size.height - 180
-//
-//addText(label: "Nombre: \(person.name)", at: CGPoint(x: 50, y: yPosition), font: boldFont)
-//yPosition -= 30
-//addText(label: "Correo: \(person.email)", at: CGPoint(x: 50, y: yPosition), font: normalFont)
-//yPosition -= 30
-//addText(label: "Número de Ticket: \(numeroTicket)", at: CGPoint(x: 50, y: yPosition), font: normalFont)
-//yPosition -= 30
-//addText(label: "Fecha: \(self.viewModel.model.date)", at: CGPoint(x: 50, y: yPosition), font: normalFont)
-//yPosition -= 30
-//addText(label: "Precio: \(self.viewModel.model.price) euros", at: CGPoint(x: 50, y: yPosition), font: normalFont)
-//yPosition -= 30
-//addText(label: "Evento: \(self.viewModel.model.nameEvent) euros", at: CGPoint(x: 50, y: yPosition), font: normalFont)
-//yPosition -= 30
-//addText(label: "Tipo de entrada: \(self.viewModel.model.type)", at: CGPoint(x: 50, y: yPosition), font: normalFont)
-//yPosition -= 30
-//
+}

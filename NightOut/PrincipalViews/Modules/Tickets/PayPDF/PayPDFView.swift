@@ -9,7 +9,6 @@ struct PayPDFView: View {
     private let openPDFPublisher = PassthroughSubject<TicketPDFModel, Never>()
     private let downloadPDFPublisher = PassthroughSubject<TicketPDFModel, Never>()
     
-    @State private var mailResult: MFMailComposeResult?
     @State private var showPDF: Bool = false
     
     @ObservedObject var viewModel: PayPDFViewModel
@@ -34,7 +33,7 @@ struct PayPDFView: View {
             Text("¡Disfruta de tu evento!")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(.white)
-                .padding(.top, 20)
+                .padding(.top, 10)
             
             if !viewModel.ticketsList.isEmpty {
                 ScrollView {
@@ -42,12 +41,13 @@ struct PayPDFView: View {
                         ForEach($viewModel.ticketsList, id: \.self) { ticket in
                             PDFTicketRow(
                                 ticket: ticket,
-                                pdfToShow: $viewModel.pdfToShow
+                                pdfToShow: $viewModel.pdfToShow,
+                                download: downloadPDFPublisher.send
                             )
                         }
                     }
                 }
-                .padding(.top, 30)
+                .padding(.top, 20)
             }
             
             Spacer()
@@ -74,14 +74,6 @@ struct PayPDFView: View {
                 PDFKitView(url: pdfToShow)
                     .scaledToFill()
             }
-        }
-        .sheet(isPresented: $viewModel.isShowingMailComposer) {
-            MailComposerView(
-                destinatario: viewModel.emailPdf,
-                pdfFileURL: viewModel.pdfString!) { result in
-                    mailResult = result
-                    handleMailResult(result)
-                }
         }
         .showToast(
             error: (
@@ -131,6 +123,7 @@ struct PDFTicketRow: View {
     
     @Binding var ticket: TicketPDFModel
     @Binding var pdfToShow: URL?
+    var download: InputClosure<TicketPDFModel>
    
     var body: some View {
         HStack {
@@ -167,7 +160,10 @@ struct PDFTicketRow: View {
                     .frame(width: 20, height: 3)
                     .foregroundColor(Color.blackColor)
                     .padding(.bottom, 0)
-                    .offset(y: -3)
+                    .offset(y: 3)
+            }
+            .onTapGesture {
+                download(ticket)
             }
         }
         .padding(12)
