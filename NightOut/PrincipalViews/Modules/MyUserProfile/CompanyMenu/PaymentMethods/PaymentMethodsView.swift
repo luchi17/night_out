@@ -17,6 +17,7 @@ struct CompanyPaymentMethodsView: View {
     
     @State private var toast: ToastType?
     @State private var loading: Bool = false
+    @State private var lastPadding: Bool = false
     
     let onClose: VoidClosure
     
@@ -102,7 +103,7 @@ struct CompanyPaymentMethodsView: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity)
                     .foregroundColor(.white)
-                    .padding()
+                    .padding(.all, 8)
                     .background(Color.blackColor)
                     .cornerRadius(8)
                     .padding(.bottom, 20)
@@ -184,7 +185,7 @@ struct CompanyPaymentMethodsView: View {
                     .textfieldStyle()
                     .focused($focusedField, equals: .swift)
                     .onSubmit {
-                        self.focusNextField($focusedField)
+                        hideKeyboard()
                     }
                     .onChange(of: swift) { old, newValue in
                         swift = newValue.uppercased()
@@ -202,15 +203,16 @@ struct CompanyPaymentMethodsView: View {
                 
                 Text("Fecha de nacimiento (opcional)")
                     .titleStyle()
-                    .onChange(of: dob) { old, newValue in
-                        dob = formatDate(newValue)
-                    }
                 
                 TextField("", text: $dob, prompt: Text("Ej. 01/01/1990").foregroundColor(Color.grayColor))
                     .textfieldStyle()
                     .focused($focusedField, equals: .fechaNac)
+                    .keyboardType(.numberPad)
                     .onSubmit {
                         self.focusNextField($focusedField)
+                    }
+                    .onChange(of: dob) { old, newValue in
+                        dob = formatDate(newValue)
                     }
                     .id(Field.fechaNac)
                 
@@ -220,10 +222,8 @@ struct CompanyPaymentMethodsView: View {
                 TextField("", text: $taxId, prompt: Text("Ej. NIF/CIF").foregroundColor(Color.grayColor))
                     .textfieldStyle()
                     .focused($focusedField, equals: .nif)
-                    .onSubmit {
-                        self.focusNextField($focusedField)
-                    }
                     .id(Field.nif)
+                    .padding(.bottom, lastPadding ? 260 : 0)
                 
                 Button(action: {
                     handleSubmit()
@@ -243,10 +243,18 @@ struct CompanyPaymentMethodsView: View {
         .clipShape(Rectangle())
         .scrollClipDisabled(false)
         .scrollIndicators(.hidden)
+        .onChange(of: focusedField) { oldValue, newValue in
+            if newValue == .fechaNac || newValue == .nif {
+               lastPadding = true
+            } else {
+                lastPadding = false
+            }
+        }
     }
     
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        focusedField = nil
     }
     
     private func validateInputs() -> Bool {
@@ -255,7 +263,7 @@ struct CompanyPaymentMethodsView: View {
             return false
         }
         
-        let ibanRegex = "^ES\\d{2}\\d{20}$"
+        let ibanRegex = "^ES\\d{22}$"
         if !iban.replacingOccurrences(of: " ", with: "").matches(ibanRegex) {
             self.toast = .custom(.init(title: "Error", description: "IBAN debe comenzar con ES seguido de 2 dígitos y luego 20 números", image: nil))
             return false
@@ -346,7 +354,7 @@ struct CompanyPaymentMethodsView: View {
         
         return formattedIban
     }
-    
+
     private func formatDate(_ date: String) -> String {
         let cleanedDate = date.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
         var formattedDate = ""
@@ -412,7 +420,7 @@ struct PersonalCheckbox: View {
                 
                 Text(accountType)
                     .foregroundColor(Color.blackColor)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 16, weight: .medium))
             }
         }
         .buttonStyle(PlainButtonStyle()) // Evita la animación del botón
