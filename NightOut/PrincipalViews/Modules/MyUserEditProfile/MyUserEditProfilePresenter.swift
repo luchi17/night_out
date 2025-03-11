@@ -182,7 +182,8 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                         Liked: presenter.userModel?.Liked,
                         social: presenter.viewModel.participate ? "participando" : "no participando",
                         misCopas: presenter.userModel?.MisCopas ?? 0,
-                        misEntradas: presenter.userModel?.MisEntradas
+                        misEntradas: presenter.userModel?.MisEntradas,
+                        paymentMethods: presenter.userModel?.PaymentMethods
                     )
                     return presenter.useCases.saveUserUseCase.execute(model: model)
                         .map({ _ in imageUrl })

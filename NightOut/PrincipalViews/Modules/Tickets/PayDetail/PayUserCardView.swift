@@ -47,7 +47,7 @@ struct PayUserCardView: View {
             }
             
             HStack {
-                Image("calendario")
+                Image("calendar")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)

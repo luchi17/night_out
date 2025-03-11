@@ -16,6 +16,7 @@ struct UserModel: Codable {
     var social: String?
     var MisCopas: Int?
     var MisEntradas: [String: EntradaUserModel]?
+    var PaymentMethods: [String: UserPaymentMethod]?
     
     var genderType: Gender? {
         if gender == "Hombre" {
@@ -35,7 +36,7 @@ struct UserModel: Codable {
         }
     }
     
-    init(uid: String, fullname: String, username: String, email: String, gender: String? = nil, image: String? = nil, fcm_token: String? = nil, attendingClub: String? = nil, misLigas: [String : Bool]? = nil, profile: String? = nil, Liked: [String: Bool]? = nil, social: String? = nil, misCopas: Int = 0, misEntradas: [String: EntradaUserModel]? = nil) {
+    init(uid: String, fullname: String, username: String, email: String, gender: String? = nil, image: String? = nil, fcm_token: String? = nil, attendingClub: String? = nil, misLigas: [String : Bool]? = nil, profile: String? = nil, Liked: [String: Bool]? = nil, social: String? = nil, misCopas: Int = 0, misEntradas: [String: EntradaUserModel]? = nil, paymentMethods: [String: UserPaymentMethod]? = nil) {
         self.uid = uid
         self.fullname = fullname
         self.username = username
@@ -50,6 +51,7 @@ struct UserModel: Codable {
         self.social = social
         self.MisCopas = misCopas
         self.MisEntradas = misEntradas
+        self.PaymentMethods = paymentMethods
     }
 }
 
@@ -93,4 +95,12 @@ struct EntradaUserModel: Codable {
     let numeroTicket: String?
     let qrCodeBase64: String?
     let qrText: String?
+}
+
+struct UserPaymentMethod: Codable {
+    let cardHolderName: String
+    let cardNumber: String
+    let cardExpiry: String
+    let cardCvv: String
+    let isDefault: Bool?
 }

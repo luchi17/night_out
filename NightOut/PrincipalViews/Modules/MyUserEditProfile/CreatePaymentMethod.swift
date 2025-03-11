@@ -165,7 +165,8 @@ struct CreatePaymentMethodView: View {
                 "cardHolderName": cardholderName,
                 "cardNumber": encryptedCardNumber,
                 "cardExpiry": cardExpiry,
-                "cardCvv": cardCVV
+                "cardCvv": cardCVV,
+                "isDefault": snapshot?.childrenCount == 0 //First paymentMethod
             ]
             
             FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId).child("PaymentMethods").childByAutoId().setValue(paymentMethod) { error, _ in

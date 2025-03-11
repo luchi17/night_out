@@ -1,6 +1,7 @@
 import SwiftUI
 import Firebase
 import FirebaseAuth
+import CryptoKit
 
 struct PaymentMethod: Identifiable, Codable {
     let id: String
@@ -32,23 +33,24 @@ struct MyPaymentMethodsView: View {
             Text("Tus Métodos de Pago")
                 .font(.system(size: 22))
                 .foregroundColor(.white)
-                .padding(.top, 30)
+                .padding(.vertical, 30)
             
-            List {
-                ForEach($viewModel.paymentMethods) { method in
-                    CardPaymentMethodView(
-                        method: method,
-                        isCVVVisible: $isCVVVisible
-                    )
-                    .padding(.all, 5)
-                    .background(Color.black)
-                    .onLongPressGesture {
-                        selectedPaymentMethod = method.wrappedValue
-                        showMenu = true
-                    }
+            ForEach($viewModel.paymentMethods) { method in
+                CardPaymentMethodView(
+                    method: method,
+                    isCVVVisible: $isCVVVisible
+                )
+                .padding(.all, 8)
+                .background(Color.black)
+                .cornerRadius(8)
+                .frame(height: 75)
+                .onLongPressGesture {
+                    selectedPaymentMethod = method.wrappedValue
+                    showMenu = true
                 }
             }
-            .scrollContentBackground(.hidden)
+            
+            Spacer()
             
             Button(action: {
                 if viewModel.paymentMethods.count < 3 {
@@ -60,13 +62,15 @@ struct MyPaymentMethodsView: View {
                 Image(systemName: "plus")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 20, height: 20)
+                    .frame(width: 22, height: 22)
                     .foregroundColor(.yellow)
-                    .padding(.all, 5)
+                    .padding(.all, 7)
                     .overlay(Circle().stroke(Color.yellow, lineWidth: 1.5))
             }
             .padding(.bottom)
         }
+        .padding(.horizontal, 20)
+        .background(Color.blackColor.ignoresSafeArea())
         .overlay(alignment: .topTrailing, content: {
             HStack {
                 Spacer()
@@ -85,7 +89,6 @@ struct MyPaymentMethodsView: View {
             .padding(.top, 30)
             .padding(.trailing, 25)
         })
-        .background(Color.blackColor.ignoresSafeArea())
         .alert(isPresented: $showAlert) {
             Alert(
                 title: Text("Eliminar Método"),
@@ -99,19 +102,23 @@ struct MyPaymentMethodsView: View {
             )
         }
         .confirmationDialog("Menú", isPresented: $showMenu) {
-            Button("Borrar", role: .cancel) {
-                showMenu.toggle()
-                showAlert.toggle()
-            }
-            Button("Establecer como predeterminado", role: .destructive) {
-                if let selectedPaymentMethod = selectedPaymentMethod {
-                    viewModel.setDefaultPaymentMethod(paymentId: selectedPaymentMethod.id)
+            if let selected = selectedPaymentMethod, !selected.isDefault {
+                Button("Establecer como predeterminado", role: .none) {
+                    if let selectedPaymentMethod = selectedPaymentMethod {
+                        viewModel.setDefaultPaymentMethod(paymentId: selectedPaymentMethod.id)
+                    }
                 }
             }
+           
+            Button("Borrar", role: .destructive) {
+                showMenu.toggle()
+            }
+            Button("Cancelar", role: .cancel) {}
         }
         .sheet(isPresented: $openAddPaymentMethod) {
             CreatePaymentMethodView(onClose: {
                 openAddPaymentMethod = false
+                viewModel.fetchPaymentMethods()
             })
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .presentationDetents([.large])
@@ -135,16 +142,18 @@ struct MyPaymentMethodsView: View {
 class MyPaymentMethodsViewModel: ObservableObject {
     
     @Published var paymentMethods: [PaymentMethod] = []
-    
-    private let db = Database.database().reference()
-    
-    func fetchPaymentMethods() {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        
-        let ref = db.child("Users").child(userId).child("PaymentMethods")
 
-        ref.observe(.value) { snapshot in
+    private let secretKey = "1234567890123456" // Clave AES de 16 caracteres
+
+    func fetchPaymentMethods() {
+        
+        guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        
+        let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId).child("PaymentMethods")
+
+        ref.observe(.value) { [weak self] snapshot in
             
+            guard let self = self else { return }
             var methods: [PaymentMethod] = []
             
             for child in snapshot.children {
@@ -154,10 +163,13 @@ class MyPaymentMethodsViewModel: ObservableObject {
                    let id = snapshot.key as String?,
                    let cardNumber = value["cardNumber"] as? String,
                    let cardExpiry = value["cardExpiry"] as? String,
-                   let cardCvv = value["cardCvv"] as? String,
-                   let isDefault = value["isDefault"] as? Bool {
+                   let cardCvv = value["cardCvv"] as? String {
+                
+                   let isDefault = value["isDefault"] as? Bool ?? false
+                
+                   let decriptedCardNumber = self.decryptCardNumber(encryptedCard: cardNumber) ?? "**** **** **** ****"
                     
-                   let method = PaymentMethod(id: id, cardNumber: cardNumber, cardExpiry: cardExpiry, cardCvv: cardCvv, isDefault: isDefault)
+                   let method = PaymentMethod(id: id, cardNumber: decriptedCardNumber, cardExpiry: cardExpiry, cardCvv: cardCvv, isDefault: isDefault)
                    methods.append(method)
                 }
             }
@@ -166,8 +178,9 @@ class MyPaymentMethodsViewModel: ObservableObject {
     }
 
     func deletePaymentMethod(paymentId: String) {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        let ref = db.child("Users").child(userId).child("PaymentMethods").child(paymentId)
+        guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        
+        let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId).child("PaymentMethods").child(paymentId)
         
         ref.removeValue { error, _ in
             if error == nil {
@@ -179,8 +192,9 @@ class MyPaymentMethodsViewModel: ObservableObject {
     }
 
     func setDefaultPaymentMethod(paymentId: String) {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        let ref = db.child("Users").child(userId).child("PaymentMethods")
+        guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        
+        let ref = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: userId).child("PaymentMethods")
         
         // Primero, establecer el nuevo método como predeterminado
         ref.child(paymentId).child("isDefault").setValue(true)
@@ -198,6 +212,20 @@ class MyPaymentMethodsViewModel: ObservableObject {
             }
         }
     }
+
+    func decryptCardNumber(encryptedCard: String) -> String? {
+        guard let keyData = secretKey.data(using: .utf8),
+              let encryptedData = Data(base64Encoded: encryptedCard),
+              let sealedBox = try? AES.GCM.SealedBox(combined: encryptedData),
+              let decryptedData = try? AES.GCM.open(sealedBox, using: SymmetricKey(data: keyData))
+        else {
+            print("Error: No se pudo desencriptar la tarjeta")
+            return nil
+        }
+        
+        return String(data: decryptedData, encoding: .utf8)
+    }
+
 }
 
 
@@ -207,16 +235,18 @@ struct CardPaymentMethodView: View {
     @Binding var isCVVVisible: Bool
     
     var body: some View {
-        HStack {
+        HStack(spacing: 16) {
             Image("bank_card")
-                .foregroundColor(.white)
+                .resizable()
                 .scaledToFit()
-                .frame(width: 40)
+                .foregroundColor(.white)
+                .frame(width: 50)
             
-            VStack {
-                Text("**** **** **** \(method.cardNumber.suffix(4))")
+            VStack(spacing: 15) {
+                Text("\(method.cardNumber)")
                     .foregroundColor(.white)
                     .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 
                 HStack {
                     Text("\(method.cardExpiry)")
@@ -232,14 +262,11 @@ struct CardPaymentMethodView: View {
                 }
             }
             
+            Spacer()
+            
             VStack {
-                if method.isDefault {
-                    Text("✓")
-                        .font(.system(size: 18))
-                        .foregroundColor(.green)
-                } else {
-                    Spacer()
-                }
+                
+                Spacer()
                 
                 Image(isCVVVisible ? "privacy_eye" : "private_profile")
                     .resizable()
@@ -251,6 +278,14 @@ struct CardPaymentMethodView: View {
                     }
                 
                 Spacer()
+            }
+            .overlay(alignment: .topTrailing) {
+                if method.isDefault {
+                    Text("✓")
+                        .font(.system(size: 18))
+                        .foregroundColor(.green)
+                        .offset(x: 2,y: -5)
+                }
             }
         }
     }
