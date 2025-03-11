@@ -9,22 +9,39 @@ struct PublicidadView: View {
     @State private var selectedImage: UIImage? = nil
     @State private var isUploading = false
     
+    @State private var toast: ToastType?
+    
+    let onClose: () -> Void
+    
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.blackColor.ignoresSafeArea()
             
             VStack(spacing: 16) {
+                
+                HStack {
+                    Spacer()
+                    
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                            .foregroundStyle(Color.white)
+                    }
+                }
+                
                 // Logo
                 Image("logo_inicio_app")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 120, height: 120)
                     .padding(.top, 16)
+                    .foregroundStyle(.yellow)
                 
                 // Título
                 Text("Publicidad NightOutSpain")
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.white)
                 
                 // Dimensiones recomendadas
@@ -45,25 +62,23 @@ struct PublicidadView: View {
                         .frame(height: 100)
                         .clipped()
                         .cornerRadius(8)
-                        .padding(.horizontal, 16)
                 } else {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(Color.clear)
                         .frame(height: 100)
                         .cornerRadius(8)
-                        .padding(.horizontal, 16)
                 }
                 
                 PhotosPicker(selection: $selectedItem, matching: .images) {
-                    Text("Seleccionar Imagen")
-                        .fontWeight(.bold)
+                    Text("Seleccionar Imagen".uppercased())
+                        .font(.system(size: 17, weight: .bold))
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.grayColor)
                         .foregroundColor(.white)
-                        .cornerRadius(8)
+                        .cornerRadius(25)
                 }
-                .padding(.horizontal, 16)
+                
                 .onChange(of: selectedItem) { oldValue, newValue in
                     Task {
                         if let data = try? await newValue?.loadTransferable(type: Data.self) {
@@ -74,32 +89,48 @@ struct PublicidadView: View {
                 
                 // Botón Subir Publicidad
                 Button(action: uploadAdvertisement) {
-                    Text("Subir Publicidad")
-                        .fontWeight(.bold)
+                    Text("Subir Publicidad".uppercased())
+                        .font(.system(size: 17, weight: .bold))
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.green)
+                        .background(Color.grayColor)
                         .foregroundColor(.white)
-                        .cornerRadius(8)
+                        .cornerRadius(25)
                 }
-                .padding(.horizontal, 16)
                 .disabled(isUploading || selectedImage == nil)
-                
-                if isUploading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                .overlay {
+                    Group {
+                        if isUploading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        }
+                    }
                 }
                 
                 // Texto de información adicional
                 Text("La publicidad se mostrará durante un mes en el apartado de HUB.")
                     .font(.footnote)
                     .foregroundColor(Color.gray)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 350)
-                    .padding(.bottom, 16)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 20)
+                    
+                Spacer()
             }
-            .padding()
+            .padding(.top, 30)
+            .padding(.horizontal, 20)
+            
         }
+        .showToast(
+            error: (
+                type: toast,
+                showCloseButton: false,
+                onDismiss: {
+                    toast = nil
+                }
+            ),
+            isIdle: false
+        )
     }
     
     
@@ -110,17 +141,22 @@ struct PublicidadView: View {
         let storageRef = Storage.storage().reference().child("publicidad/\(UUID().uuidString).jpg")
         let databaseRef = Database.database().reference().child("publicidad")
         
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
         guard let imageData = image.jpegData(compressionQuality: 0.8) else { return }
         
-        storageRef.putData(imageData, metadata: nil) { _, error in
+        storageRef.putData(imageData, metadata: metadata) { _, error in
             guard error == nil else {
                 isUploading = false
+                self.toast = .custom(.init(title: "", description: "Error al subir la imagen.", image: nil))
                 return
             }
             
             storageRef.downloadURL { url, error in
                 guard let url = url else {
                     isUploading = false
+                    self.toast = .custom(.init(title: "", description: "Error al subir la imagen.", image: nil))
                     return
                 }
                 
@@ -132,6 +168,7 @@ struct PublicidadView: View {
                 let adData: [String: Any] = ["url": url.absoluteString, "fecha": formattedDate]
                 databaseRef.childByAutoId().setValue(adData) { error, _ in
                     isUploading = false
+                    self.toast = .success(.init(title: "", description: "Publicidad subida con éxito.", image: nil))
                 }
             }
         }

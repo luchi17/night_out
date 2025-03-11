@@ -119,16 +119,15 @@ struct MyUserProfileView: View {
         .background(
             Color.blackColor
         )
-        .overlay(alignment: .topTrailing, content: {
+        .overlay(alignment: .topLeading, content: {
             Group {
                 if showCompanyMenu {
                     CompanyMenu(
                         selection: $viewModel.companyMenuSelection,
                         showSheet: $showCompanyMenu
                     )
-                    .background(Color.grayColor)
-                    .padding(.top, 70)
-                    .padding(.trailing, 25)
+                    .padding(.top, 60)
+                    .padding(.leading, 25)
                 }
             }
         })
@@ -169,7 +168,9 @@ struct MyUserProfileView: View {
             case .gestorEventos:
                 TicketsReaderView()
             case .publicidad:
-                PublicidadView()
+                PublicidadView(onClose: {
+                    viewModel.companyMenuSelection = nil
+                })
             case .metodosDePago:
                 TicketsReaderView()
             case .ventas:
@@ -182,22 +183,6 @@ struct MyUserProfileView: View {
                 dismiss()
             }
         })
-//        .onChange(of: viewModel.companyMenuSelection, { oldValue, newValue in
-//            if let newValue = newValue {
-//                switch newValue {
-//                case .lectorEntradas:
-//                    self.showQRReader.toggle()
-//                case .gestorEventos:
-//                    self.showManagementEvents.toggle()
-//                case .publicidad:
-//                    self.showPubli.toggle()
-//                case .metodosDePago:
-//                    self.showPaymentMethods.toggle()
-//                case .ventas:
-//                    self.showSells.toggle()
-//                }
-//            }
-//        })
         .onAppear {
             viewDidLoadPublisher.send()
             if let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() {

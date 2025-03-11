@@ -7,7 +7,7 @@ struct CompanyMenu: View {
     
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
                 Button(action: {
                     selection = .lectorEntradas
                     showSheet = false
@@ -15,6 +15,7 @@ struct CompanyMenu: View {
                     Text(CompanyMenuSelection.lectorEntradas.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 Button(action: {
@@ -24,6 +25,7 @@ struct CompanyMenu: View {
                     Text(CompanyMenuSelection.ventas.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 Button(action: {
@@ -33,6 +35,7 @@ struct CompanyMenu: View {
                     Text(CompanyMenuSelection.metodosDePago.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 Button(action: {
@@ -42,6 +45,7 @@ struct CompanyMenu: View {
                     Text(CompanyMenuSelection.gestorEventos.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 Button(action: {
@@ -51,13 +55,15 @@ struct CompanyMenu: View {
                     Text(CompanyMenuSelection.publicidad.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            .padding(.leading, 20)
             
             Spacer()
         }
+        .padding(.all, 20)
         .background(Color.grayColor)
+        .frame(maxWidth: 230, alignment: .leading)
     }
 }
 
