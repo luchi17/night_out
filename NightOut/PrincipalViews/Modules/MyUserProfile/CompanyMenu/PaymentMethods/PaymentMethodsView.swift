@@ -329,8 +329,8 @@ struct CompanyPaymentMethodsView: View {
         // Eliminar caracteres no alfanuméricos (como espacios y guiones)
         let cleanedIban = iban.uppercased().filter { $0.isLetter || $0.isNumber }
         
-        // El IBAN debe tener una longitud de 22 caracteres
-        let ibanLength = 22
+        // El IBAN debe tener una longitud de 24 caracteres (contando con ES)
+        let ibanLength = 24
         
         // Limitar la longitud del IBAN al máximo permitido
         let limitedIban = String(cleanedIban.prefix(ibanLength))
@@ -338,7 +338,7 @@ struct CompanyPaymentMethodsView: View {
         // Insertar espacios cada 4 caracteres
         var formattedIban = ""
         for (index, char) in limitedIban.enumerated() {
-            if index > 1 && (index - 2) % 4 == 0 { // Después de las 2 primeras letras y cada 4 dígitos
+            if index > 0 && index % 4 == 0 { // Después de las 2 primeras letras y cada 4 dígitos
                 formattedIban.append(" ")
             }
             formattedIban.append(char)
