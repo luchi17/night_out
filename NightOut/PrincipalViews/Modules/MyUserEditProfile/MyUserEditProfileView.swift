@@ -8,6 +8,7 @@ struct MyUserEditProfileView: View {
     @State private var showGenderSheet = false
     @State private var openSettings = false
     @State private var openCompanySettings = false
+    @State private var openMetodosDePago = false
     
     @Binding private var closeAllSheets: Bool
     
@@ -124,6 +125,12 @@ struct MyUserEditProfileView: View {
             MyUserCompanySettingsView(presenter: companySettingsPresenter)
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $openMetodosDePago) {
+            MyPaymentMethodsView(onClose: {
+                openMetodosDePago = false
+            })
+            .presentationDetents([.large])
         }
         .photosPicker(isPresented: $viewModel.openPicker, selection: $viewModel.selectedItem, matching: .images)
         .onChange(of: viewModel.selectedItem) { _, newItem in
@@ -273,6 +280,9 @@ struct MyUserEditProfileView: View {
             Image(systemName: "creditcard")
                 .foregroundColor(.white)
                 .font(.system(size: 24))
+        }
+        .onTapGesture {
+            openMetodosDePago = true
         }
     }
     

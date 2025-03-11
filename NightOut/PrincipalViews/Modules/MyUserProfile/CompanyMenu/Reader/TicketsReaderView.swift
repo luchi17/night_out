@@ -83,7 +83,6 @@ struct TicketsReaderView: View {
             }
             .padding(.trailing, 25)
         }
-        
         .onAppear {
             // Solo ejecutamos checkTicketInDatabase si el QR ha cambiado
             
