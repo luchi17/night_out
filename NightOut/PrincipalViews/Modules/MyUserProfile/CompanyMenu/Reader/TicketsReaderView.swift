@@ -27,29 +27,33 @@ struct TicketsReaderView: View {
             CameraPreview(session: qrScanner.session)
                 .edgesIgnoringSafeArea(.all)
             
-            // ✅ Icono de éxito
-            if showSuccess {
-                Image("tick_icon")
-                    .resizable()
-                    .frame(width: 100, height: 100)
+            VStack {
+                // ✅ Icono de éxito
+                if showSuccess {
+                    Image("tick_icon")
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                        .transition(.opacity)
+                        .foregroundStyle(.green)
+                }
+                
+                // ❌ Icono de error
+                if showError {
+                    Image("cross_nb")
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                        .transition(.opacity)
+                }
+                
+                // 📌 Mensaje de estado
+                Text(message)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.top, 15)
                     .transition(.opacity)
             }
-            
-            // ❌ Icono de error
-            if showError {
-                Image("cross_nb")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .transition(.opacity)
-            }
-            
-            // 📌 Mensaje de estado
-            Text(message)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .padding(.top, 120)
-                .transition(.opacity)
+            .padding(.top, 100)
             
             // 🔽 Switch y texto en la parte inferior
             VStack {
@@ -77,16 +81,18 @@ struct TicketsReaderView: View {
                     Image(systemName: "xmark")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 20, height: 20)
+                        .frame(width: 25, height: 25)
                         .foregroundStyle(Color.white)
                 }
             }
+            .padding(.top, 30)
             .padding(.trailing, 25)
         }
         .onAppear {
             // Solo ejecutamos checkTicketInDatabase si el QR ha cambiado
-            
             qrScanner.startScanning { result in
+                
+                guard !shouldShowTicketInfo, !showError, !showSuccess else { return }
                 
                 let currentTime = Date().timeIntervalSince1970
                 
@@ -104,12 +110,18 @@ struct TicketsReaderView: View {
                 
             }
         }
-        .sheet(isPresented: $shouldShowTicketInfo) {
+        .sheet(isPresented: $shouldShowTicketInfo, onDismiss: {
+            ticketInfo = nil
+            shouldShowTicketInfo = false
+        }) {
             if let ticket = ticketInfo {
-                TicketInfoBottomSheet(ticket: ticket, isPresented: $showTicketInfo)
+                TicketInfoBottomSheet(
+                    ticket: ticket,
+                    isPresented: $shouldShowTicketInfo
+                )
+                .presentationDetents([.fraction(0.35), .medium])
             }
         }
-        
     }
     
     private func checkTicketInDatabase(qrText: String) {

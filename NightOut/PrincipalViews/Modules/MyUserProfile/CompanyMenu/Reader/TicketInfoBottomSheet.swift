@@ -14,24 +14,43 @@ struct TicketInfoBottomSheet: View {
 
     var body: some View {
         VStack {
-            Text("Información del Ticket")
-                .font(.headline)
-                .padding()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Nombre: \(ticket.nombre)").bold()
-                Text("Tipo de Entrada: \(ticket.tipoEntrada)")
+            HStack {
+                Spacer()
+                Text("Información del Ticket")
+                    .font(.title2)
+                    .bold()
+                    .foregroundStyle(Color.blackColor)
+                Spacer()
+            }
+            .padding(.vertical, 20)
+        
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Nombre: \(ticket.nombre.uppercased())")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.blackColor)
+                
+                Text("Tipo de Entrada: \(ticket.tipoEntrada.uppercased())")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.blackColor)
+                
                 Text("Correo: \(ticket.correo)")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.blackColor)
+                
                 Text("Precio: \(ticket.precio) €")
-                Text("Fecha: \(ticket.fecha)")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.blackColor)
+                
+                Text("Fecha: \(ticket.fecha.uppercased())")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.blackColor)
             }
-            .padding()
-
-            Button("Cerrar") {
-                isPresented = false
-            }
-            .padding()
+            
+            Spacer()
+            
         }
-        .padding()
+        .padding(.all, 20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.7).ignoresSafeArea())
     }
 }
