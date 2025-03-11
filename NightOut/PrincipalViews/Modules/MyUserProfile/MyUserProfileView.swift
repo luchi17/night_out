@@ -164,17 +164,25 @@ struct MyUserProfileView: View {
         .fullScreenCover(item: $viewModel.companyMenuSelection, content: { item in
             switch item {
             case .lectorEntradas:
-                TicketsReaderView()
+                TicketsReaderView(onClose: {
+                    viewModel.companyMenuSelection = nil
+                })
             case .gestorEventos:
-                TicketsReaderView()
+                TicketsReaderView(onClose: {
+                    viewModel.companyMenuSelection = nil
+                })
             case .publicidad:
                 PublicidadView(onClose: {
                     viewModel.companyMenuSelection = nil
                 })
             case .metodosDePago:
-                TicketsReaderView()
+                TicketsReaderView(onClose: {
+                    viewModel.companyMenuSelection = nil
+                })
             case .ventas:
-                TicketsReaderView()
+                TicketsReaderView(onClose: {
+                    viewModel.companyMenuSelection = nil
+                })
             }
         })
         .onChange(of: closeAllSheets, { oldValue, newValue in

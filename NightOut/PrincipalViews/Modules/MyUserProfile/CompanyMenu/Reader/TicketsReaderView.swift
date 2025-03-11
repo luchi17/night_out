@@ -10,7 +10,14 @@ struct TicketsReaderView: View {
     @State private var message: String = ""
     @State private var showTicketInfo = false
     
+    @State private var shouldShowTicketInfo = false
+    
     @State private var ticketInfo: TicketQRReaderInfo?
+    
+    @State private var lastScannedQR: String? = nil
+    @State private var lastScanTime: TimeInterval = 0
+    
+    let onClose: () -> Void
     
     var qrScanner = QRScanner()
     
@@ -33,19 +40,16 @@ struct TicketsReaderView: View {
                 Image("cross_nb")
                     .resizable()
                     .frame(width: 100, height: 100)
-                    .foregroundColor(.red)
                     .transition(.opacity)
             }
             
             // 📌 Mensaje de estado
-            if showSuccess || showError {
-                Text(showSuccess ? "¡Acceso permitido!" : "Error en la entrada")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding(.top, 140)
-                    .transition(.opacity)
-            }
+            Text(message)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .padding(.top, 120)
+                .transition(.opacity)
             
             // 🔽 Switch y texto en la parte inferior
             VStack {
@@ -56,20 +60,52 @@ struct TicketsReaderView: View {
                             .foregroundColor(.white)
                             .font(.system(size: 16))
                     }
-                    .toggleStyle(SwitchToggleStyle(tint: Color.teal))
+                    .toggleStyle(SwitchToggleStyle(tint: Color.green))
                 }
-                .padding()
-                .background(Color.black.opacity(0.6))
-                .cornerRadius(15)
-                .padding(.bottom, 16)
             }
+            .padding(.bottom, 16)
+            .padding(.horizontal, 20)
         }
+        .overlay(alignment: .topTrailing) {
+            HStack {
+                Spacer()
+                
+                Button(action: {
+                    print("onclose")
+                    onClose()
+                }) {
+                    Image(systemName: "xmark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundStyle(Color.white)
+                }
+            }
+            .padding(.trailing, 25)
+        }
+        
         .onAppear {
+            // Solo ejecutamos checkTicketInDatabase si el QR ha cambiado
+            
             qrScanner.startScanning { result in
-                checkTicketInDatabase(qrText: result)
+                
+                let currentTime = Date().timeIntervalSince1970
+                
+                if result != lastScannedQR || currentTime - lastScanTime > 3 {
+                    lastScannedQR = result
+                    lastScanTime = currentTime
+                    
+                    // 🔹 Reseteamos los mensajes antes de validar un nuevo QR
+                    message = ""
+                    showSuccess = false
+                    showError = false
+                    
+                    checkTicketInDatabase(qrText: result)
+                }
+                
             }
         }
-        .sheet(isPresented: $showTicketInfo) {
+        .sheet(isPresented: $shouldShowTicketInfo) {
             if let ticket = ticketInfo {
                 TicketInfoBottomSheet(ticket: ticket, isPresented: $showTicketInfo)
             }
@@ -79,27 +115,42 @@ struct TicketsReaderView: View {
     
     private func checkTicketInDatabase(qrText: String) {
         guard let currentUserUid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-            message = "Usuario no autenticado"
-            showErrorAnimation()
+            showError(message: "Usuario no autenticado")
             return
         }
         
         let dbRef = Database.database().reference()
             .child("Company_Users")
-            .child(currentUserUid)
+            .child("r8DtagpffQUyZVNhSoUGz1Qgwga2")
             .child("TicketsVendidos")
         
         dbRef.getData { error, snapshot in
             guard error == nil, let snapshot = snapshot, snapshot.exists() else {
-                message = "Error al consultar la base de datos"
-                showErrorAnimation()
+                showError(message: "Error al consultar la base de datos")
                 return
             }
             
             var ticketFound = false
-            let currentDate = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd-MM-yyyy"
+         
+            //GOOD CODE
+//           let currentDate = dateFormatter.string(from: Date())
+            
+            var dateComponents = DateComponents()
+            dateComponents.year = 2025
+            dateComponents.month = 3
+            dateComponents.day = 12
+            
+            let date = Calendar.current.date(from: dateComponents)
+            
+            let currentDate = dateFormatter.string(from: date!)
             
             for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                
+                print(child.childSnapshot(forPath: "qrText").value as? String)
+                
                 if let storedQR = child.childSnapshot(forPath: "qrText").value as? String, storedQR == qrText {
                     ticketFound = true
                     
@@ -111,18 +162,15 @@ struct TicketsReaderView: View {
                     let fecha = child.childSnapshot(forPath: "fecha").value as? String ?? "N/A"
                     
                     if fecha != currentDate {
-                        message = "Entrada no válida para hoy (\(fecha))"
-                        showErrorAnimation()
+                        showError(message: "Entrada no válida para hoy (\(fecha))")
                         return
                     }
                     
                     if validado {
-                        message = "Entrada ya validada"
-                        showErrorAnimation()
+                        showError(message: "Entrada ya validada")
                     } else {
                         child.ref.child("validado").setValue(true)
-                        message = "Acceso permitido"
-                        showSuccessAnimation()
+                        showSuccess(message: "¡Acceso permitido!")
                         ticketInfo = TicketQRReaderInfo(
                             nombre: nombre,
                             tipoEntrada: tipoEntrada,
@@ -130,34 +178,27 @@ struct TicketsReaderView: View {
                             precio: precio,
                             fecha: fecha
                         )
-                        showTicketInfo = true
+                        shouldShowTicketInfo = showTicketInfo
                     }
                     return
                 }
             }
             
             if !ticketFound {
-                message = "Entrada no válida"
-                showErrorAnimation()
+                showError(message: "Entrada no válida")
             }
         }
     }
     
-    private func showSuccessAnimation() {
+    private func showSuccess(message: String) {
         showSuccess = true
         showError = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            showSuccess = false
-            message = ""
-        }
+        self.message = message
     }
     
-    private func showErrorAnimation() {
+    private func showError(message: String) {
         showSuccess = false
         showError = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            showError = false
-            message = ""
-        }
+        self.message = message
     }
 }
