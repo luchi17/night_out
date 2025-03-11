@@ -60,10 +60,10 @@ struct MyPaymentMethodsView: View {
                 Image(systemName: "plus")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 30, height: 30)
+                    .frame(width: 20, height: 20)
                     .foregroundColor(.yellow)
-                    .padding()
-                    .background(Circle().fill(Color.blackColor))
+                    .padding(.all, 5)
+                    .overlay(Circle().stroke(Color.yellow, lineWidth: 1.5))
             }
             .padding(.bottom)
         }
@@ -109,12 +109,13 @@ struct MyPaymentMethodsView: View {
                 }
             }
         }
-//        .sheet(isPresented: $openAddPaymentMethod) {
-////            MyUserCompanySettingsView(presenter: companySettingsPresenter)
-////            .presentationDetents([.large])
-////            .presentationDragIndicator(.visible)
-//            print("$openAddPaymentMethod")
-//        }
+        .sheet(isPresented: $openAddPaymentMethod) {
+            CreatePaymentMethodView(onClose: {
+                openAddPaymentMethod = false
+            })
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .presentationDetents([.large])
+        }
         .showToast(
             error: (
                 type: toast,
