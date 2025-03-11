@@ -129,59 +129,56 @@ struct TicketsReaderView: View {
             showError(message: "Usuario no autenticado")
             return
         }
+        //Discomment FOR testing
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+//        
+//        var dateComponents = DateComponents()
+//        dateComponents.year = 2025
+//        dateComponents.month = 3
+//        dateComponents.day = 12
+        
+//        let date = Calendar.current.date(from: dateComponents)
+//        let currentDate = dateFormatter.string(from: date!)
+        
+        let currentDate = dateFormatter.string(from: Date())
         
         let dbRef = Database.database().reference()
             .child("Company_Users")
-            .child("r8DtagpffQUyZVNhSoUGz1Qgwga2")
-            .child("TicketsVendidos")
+            .child(currentUserUid) // "r8DtagpffQUyZVNhSoUGz1Qgwga2" for testing
+            .child("Entradas")
+            .child(currentDate)
         
         dbRef.getData { error, snapshot in
-            guard error == nil, let snapshot = snapshot, snapshot.exists() else {
+            guard error == nil, let snapshot = snapshot else {
                 showError(message: "Error al consultar la base de datos")
                 return
             }
             
-            var ticketFound = false
+            if !snapshot.exists() {
+                showError(message: "No hay eventos hoy")
+                return
+            }
             
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "dd-MM-yyyy"
-         
-            //GOOD CODE
-//           let currentDate = dateFormatter.string(from: Date())
-            
-            var dateComponents = DateComponents()
-            dateComponents.year = 2025
-            dateComponents.month = 3
-            dateComponents.day = 12
-            
-            let date = Calendar.current.date(from: dateComponents)
-            
-            let currentDate = dateFormatter.string(from: date!)
-            
-            for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+            for eventoSnapshot in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
                 
-                print(child.childSnapshot(forPath: "qrText").value as? String)
+                let ticketsVendidosSnapshot = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos")
+                guard ticketsVendidosSnapshot.exists() else { continue }
                 
-                if let storedQR = child.childSnapshot(forPath: "qrText").value as? String, storedQR == qrText {
-                    ticketFound = true
+                for ticketSnapshot in ticketsVendidosSnapshot.children.allObjects as? [DataSnapshot] ?? [] {
                     
-                    let validado = child.childSnapshot(forPath: "validado").value as? Bool ?? false
-                    let nombre = child.childSnapshot(forPath: "nombre").value as? String ?? "Desconocido"
-                    let tipoEntrada = child.childSnapshot(forPath: "tipo de entrada").value as? String ?? "N/A"
-                    let correo = child.childSnapshot(forPath: "correo").value as? String ?? "N/A"
-                    let precio = child.childSnapshot(forPath: "precio").value as? String ?? "N/A"
-                    let fecha = child.childSnapshot(forPath: "fecha").value as? String ?? "N/A"
-                    
-                    if fecha != currentDate {
-                        showError(message: "Entrada no válida para hoy (\(fecha))")
-                        return
-                    }
-                    
-                    if validado {
-                        showError(message: "Entrada ya validada")
-                    } else {
-                        child.ref.child("validado").setValue(true)
-                        showSuccess(message: "¡Acceso permitido!")
+                    if let storedQrText = ticketSnapshot.childSnapshot(forPath: "qrText").value as? String,
+                       
+                        storedQrText.trimmingCharacters(in: .whitespacesAndNewlines) == qrText.trimmingCharacters(in: .whitespacesAndNewlines) {
+                        
+                        let validado = ticketSnapshot.childSnapshot(forPath: "validado").value as? Bool ?? false
+                        
+                        let nombre = ticketSnapshot.childSnapshot(forPath: "nombre").value as? String ?? "Desconocido"
+                        let tipoEntrada = ticketSnapshot.childSnapshot(forPath: "tipo de entrada").value as? String ?? "N/A"
+                        let correo = ticketSnapshot.childSnapshot(forPath: "correo").value as? String ?? "N/A"
+                        let precio = ticketSnapshot.childSnapshot(forPath: "precio").value as? String ?? "N/A"
+                        let fecha = ticketSnapshot.childSnapshot(forPath: "fecha").value as? String ?? "N/A"
+                        
                         ticketInfo = TicketQRReaderInfo(
                             nombre: nombre,
                             tipoEntrada: tipoEntrada,
@@ -189,15 +186,21 @@ struct TicketsReaderView: View {
                             precio: precio,
                             fecha: fecha
                         )
-                        shouldShowTicketInfo = showTicketInfo
+                       
+                        if validado {
+                            showError(message: "Entrada ya validada")
+                            
+                        } else {
+                            ticketSnapshot.ref.child("validado").setValue(true)
+                            showSuccess(message: "Acceso permitido")
+                        }
+                        
+                        return
                     }
-                    return
                 }
             }
             
-            if !ticketFound {
-                showError(message: "Entrada no válida")
-            }
+            showError(message: "Entrada no válida")
         }
     }
     
@@ -205,11 +208,24 @@ struct TicketsReaderView: View {
         showSuccess = true
         showError = false
         self.message = message
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.showSuccess = false
+            self.showError = false
+            self.message = ""
+            self.shouldShowTicketInfo = showTicketInfo && ticketInfo != nil
+        }
     }
     
     private func showError(message: String) {
         showSuccess = false
         showError = true
         self.message = message
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.showSuccess = false
+            self.showError = false
+            self.message = ""
+        }
     }
 }
