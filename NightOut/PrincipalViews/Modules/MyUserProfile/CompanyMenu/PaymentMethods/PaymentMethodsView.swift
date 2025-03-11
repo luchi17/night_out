@@ -35,176 +35,19 @@ struct CompanyPaymentMethodsView: View {
         
         ZStack {
             Color.white
-
-            ScrollView {
+            
+            ScrollViewReader(content: { proxy in
+                scrollview
+                    .onChange(of: focusedField) { oldValue, field in
+                        if let field = field {
+                            withAnimation {
+                                proxy.scrollTo(field, anchor: .center) // Desplaza el `ScrollView` al campo enfocado
+                            }
+                        }
+                    }
                 
-                VStack(alignment: .leading, spacing: 12) {
-                    
-                    HStack {
-                        Spacer()
-                        
-                        Button(action: onClose) {
-                            Image(systemName: "xmark")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20)
-                                .foregroundStyle(Color.blackColor)
-                        }
-                    }
-                    .padding(.trailing, 5)
-                    .padding(.top, 22)
-                    
-                    Image("logo_amarillo")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundStyle(.yellow)
-                        .frame(width: 150, height: 150)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.bottom, 15)
-
-                    Text("INFORMACIÓN:")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.red)
-                        .padding(.bottom, 8)
-                    
-                    Text("Tus datos bancarios son encriptados y almacenados de manera segura.\n\nNi siquiera la aplicación NightOut tiene acceso a esta información.\n\nEsta información solo será desencriptada para realizar el pago con una pasarela segura.")
-                        .font(.system(size: 16))
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.blackColor)
-                        .cornerRadius(8)
-                        .padding(.bottom, 20)
-                    
-                    Text("Nombre completo del titular de la cuenta")
-                        .titleStyle()
-                    
-                    TextField("", text: $accountHolderName, prompt: Text("Ej. Juan Pérez").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .focused($focusedField, equals: .nombre)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                    
-                    Text("País")
-                        .titleStyle()
-                    
-                    TextField("", text: $country, prompt: Text("Ej. España").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .focused($focusedField, equals: .pais)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                    
-                    Text("Dirección")
-                        .titleStyle()
-                    
-                    TextField("", text: $addressLine, prompt: Text("Calle y número").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .focused($focusedField, equals: .dir)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                    
-                    Text("Ciudad")
-                        .titleStyle()
-                    
-                    TextField("", text: $city, prompt: Text("Ej. Madrid").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .focused($focusedField, equals: .ciudad)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                    
-                    Text("Código Postal")
-                        .titleStyle()
-                    
-                    TextField("", text: $postalCode, prompt: Text("Ej. 28001").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .keyboardType(.numberPad)
-                        .focused($focusedField, equals: .cp)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                    
-                    Text("IBAN (En mayúsculas)")
-                        .titleStyle()
-                    
-                    TextField("", text: $iban, prompt: Text("Ej. ES91 2100 0418 4502 0005 1332").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .focused($focusedField, equals: .iban)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                        .onChange(of: iban) { old, newValue in
-                            iban = formatIban(newValue)
-                        }
-                    
-                    Text("SWIFT/BIC")
-                        .titleStyle()
-                    
-                    TextField("", text: $swift, prompt: Text("Ej. BBVAESMMXXX").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .focused($focusedField, equals: .swift)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                        .onChange(of: swift) { old, newValue in
-                            swift = newValue.uppercased()
-                        }
-                    
-                    Text("Tipo de cuenta")
-                        .titleStyle()
-                    
-                    HStack {
-                        PersonalCheckbox(accountType: "Personal", accountTypeSelected: $accountType)
-                        PersonalCheckbox(accountType: "Comercial", accountTypeSelected: $accountType)
-                        Spacer()
-                    }
-                    
-                    Text("Fecha de nacimiento (opcional)")
-                        .titleStyle()
-                        .onChange(of: dob) { old, newValue in
-                            dob = formatDate(newValue)
-                        }
-                    
-                    TextField("", text: $dob, prompt: Text("Ej. 01/01/1990").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .focused($focusedField, equals: .fechaNac)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                    
-                    Text("Número de Identificación Fiscal (opcional)")
-                        .titleStyle()
-                    
-                    TextField("", text: $taxId, prompt: Text("Ej. NIF/CIF").foregroundColor(Color.grayColor))
-                        .textfieldStyle()
-                        .focused($focusedField, equals: .nif)
-                        .onSubmit {
-                            self.focusNextField($focusedField)
-                        }
-                    
-                    Button(action: {
-                        handleSubmit()
-                    }) {
-                        Text("Enviar".uppercased())
-                            .font(.system(size: 16, weight: .bold))
-                            .frame(maxWidth: .infinity)
-                            .foregroundColor(.white)
-                            .padding(.vertical, 12)
-                            .background(Color.grayColor)
-                            .cornerRadius(25)
-                    }
-                    .padding(.bottom, 40)
-                }
-                .padding(.horizontal, 20)
-            }
-//            .padding(.horizontal, 20)
-            .clipShape(Rectangle())
-            .scrollClipDisabled(false)
-            .scrollIndicators(.hidden)
+                
+            })
         }
         .edgesIgnoringSafeArea(.bottom)
         .onTapGesture(perform: {
@@ -220,6 +63,186 @@ struct CompanyPaymentMethodsView: View {
             ),
             isIdle: loading
         )
+    }
+    
+    var scrollview: some View {
+        ScrollView {
+            
+            VStack(alignment: .leading, spacing: 12) {
+                
+                HStack {
+                    Spacer()
+                    
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                            .foregroundStyle(Color.blackColor)
+                    }
+                }
+                .padding(.trailing, 5)
+                .padding(.top, 22)
+                
+                Image("logo_amarillo")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.yellow)
+                    .frame(width: 150, height: 150)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.bottom, 15)
+                
+                Text("INFORMACIÓN:")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.red)
+                    .padding(.bottom, 8)
+                
+                Text("Tus datos bancarios son encriptados y almacenados de manera segura.\n\nNi siquiera la aplicación NightOut tiene acceso a esta información.\n\nEsta información solo será desencriptada para realizar el pago con una pasarela segura.")
+                    .font(.system(size: 16))
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.blackColor)
+                    .cornerRadius(8)
+                    .padding(.bottom, 20)
+                
+                Text("Nombre completo del titular de la cuenta")
+                    .titleStyle()
+                
+                TextField("", text: $accountHolderName, prompt: Text("Ej. Juan Pérez").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .focused($focusedField, equals: .nombre)
+                    .id(Field.nombre)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                
+                Text("País")
+                    .titleStyle()
+                
+                TextField("", text: $country, prompt: Text("Ej. España").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .focused($focusedField, equals: .pais)
+                    .id(Field.pais)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                
+                Text("Dirección")
+                    .titleStyle()
+                
+                TextField("", text: $addressLine, prompt: Text("Calle y número").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .focused($focusedField, equals: .dir)
+                    .id(Field.dir)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                
+                Text("Ciudad")
+                    .titleStyle()
+                
+                TextField("", text: $city, prompt: Text("Ej. Madrid").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .focused($focusedField, equals: .ciudad)
+                    .id(Field.ciudad)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                
+                Text("Código Postal")
+                    .titleStyle()
+                
+                TextField("", text: $postalCode, prompt: Text("Ej. 28001").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .keyboardType(.numberPad)
+                    .focused($focusedField, equals: .cp)
+                    .id(Field.cp)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                
+                Text("IBAN (En mayúsculas)")
+                    .titleStyle()
+                
+                TextField("", text: $iban, prompt: Text("Ej. ES91 2100 0418 4502 0005 1332").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .focused($focusedField, equals: .iban)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                    .id(Field.iban)
+                    .onChange(of: iban) { old, newValue in
+                        iban = formatIban(newValue)
+                    }
+                
+                Text("SWIFT/BIC")
+                    .titleStyle()
+                
+                TextField("", text: $swift, prompt: Text("Ej. BBVAESMMXXX").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .focused($focusedField, equals: .swift)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                    .onChange(of: swift) { old, newValue in
+                        swift = newValue.uppercased()
+                    }
+                    .id(Field.swift)
+                
+                Text("Tipo de cuenta")
+                    .titleStyle()
+                
+                HStack {
+                    PersonalCheckbox(accountType: "Personal", accountTypeSelected: $accountType)
+                    PersonalCheckbox(accountType: "Comercial", accountTypeSelected: $accountType)
+                    Spacer()
+                }
+                
+                Text("Fecha de nacimiento (opcional)")
+                    .titleStyle()
+                    .onChange(of: dob) { old, newValue in
+                        dob = formatDate(newValue)
+                    }
+                
+                TextField("", text: $dob, prompt: Text("Ej. 01/01/1990").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .focused($focusedField, equals: .fechaNac)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                    .id(Field.fechaNac)
+                
+                Text("Número de Identificación Fiscal (opcional)")
+                    .titleStyle()
+                
+                TextField("", text: $taxId, prompt: Text("Ej. NIF/CIF").foregroundColor(Color.grayColor))
+                    .textfieldStyle()
+                    .focused($focusedField, equals: .nif)
+                    .onSubmit {
+                        self.focusNextField($focusedField)
+                    }
+                    .id(Field.nif)
+                
+                Button(action: {
+                    handleSubmit()
+                }) {
+                    Text("Enviar".uppercased())
+                        .font(.system(size: 16, weight: .bold))
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 12)
+                        .background(Color.grayColor)
+                        .cornerRadius(25)
+                }
+                .padding(.bottom, 40)
+            }
+            .padding(.horizontal, 20)
+        }
+        .clipShape(Rectangle())
+        .scrollClipDisabled(false)
+        .scrollIndicators(.hidden)
     }
     
     private func hideKeyboard() {
@@ -314,7 +337,7 @@ struct CompanyPaymentMethodsView: View {
         
         // Insertar espacios cada 4 caracteres
         var formattedIban = ""
-        for (index, char) in cleanedIban.enumerated() {
+        for (index, char) in limitedIban.enumerated() {
             if index > 1 && (index - 2) % 4 == 0 { // Después de las 2 primeras letras y cada 4 dígitos
                 formattedIban.append(" ")
             }
@@ -323,7 +346,7 @@ struct CompanyPaymentMethodsView: View {
         
         return formattedIban
     }
-
+    
     private func formatDate(_ date: String) -> String {
         let cleanedDate = date.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
         var formattedDate = ""
