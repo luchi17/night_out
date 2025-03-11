@@ -48,6 +48,7 @@ struct CreatePaymentMethodView: View {
                     .textFieldStyle(PlainTextFieldStyle())
                     .keyboardType(.numberPad)
                     .foregroundColor(.white)
+                    .accentColor(.white)
             }
             
             // Fecha de Vencimiento y CVV
@@ -63,6 +64,7 @@ struct CreatePaymentMethodView: View {
                         .textFieldStyle(PlainTextFieldStyle())
                         .keyboardType(.numberPad)
                         .foregroundColor(.white)
+                        .accentColor(.white)
                         .onChange(of: cardExpiry) {
                             formatExpiry()
                         }
@@ -74,10 +76,12 @@ struct CreatePaymentMethodView: View {
                     TextField("",text: $cardCVV, prompt: Text("CVV").foregroundColor(.white))
                         .keyboardType(.numberPad)
                         .foregroundColor(.white)
+                        .accentColor(.white)
                 } else {
                     SecureField("",text: $cardCVV, prompt: Text("CVV").foregroundColor(.white))
                         .keyboardType(.numberPad)
                         .foregroundColor(.white)
+                        .accentColor(.white)
                 }
                 Spacer()
                 
@@ -113,7 +117,6 @@ struct CreatePaymentMethodView: View {
                 Spacer()
                 
                 Button(action: {
-                    print("onclose")
                     onClose()
                 }) {
                     Image(systemName: "xmark")
