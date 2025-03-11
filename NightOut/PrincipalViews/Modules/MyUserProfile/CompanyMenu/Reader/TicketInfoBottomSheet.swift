@@ -13,7 +13,7 @@ struct TicketInfoBottomSheet: View {
     @Binding var isPresented: Bool
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             HStack {
                 Spacer()
                 Text("Información del Ticket")
@@ -51,6 +51,6 @@ struct TicketInfoBottomSheet: View {
         }
         .padding(.all, 20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.7).ignoresSafeArea())
+        .background(Color.white.opacity(0.85).ignoresSafeArea())
     }
 }
