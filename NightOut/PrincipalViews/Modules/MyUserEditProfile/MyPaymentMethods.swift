@@ -111,7 +111,8 @@ struct MyPaymentMethodsView: View {
             }
            
             Button("Borrar", role: .destructive) {
-                showMenu.toggle()
+                showMenu = false
+                showAlert.toggle()
             }
             Button("Cancelar", role: .cancel) {}
         }
