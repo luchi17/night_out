@@ -104,8 +104,9 @@ final class LoginPresenterImpl: LoginPresenter {
                 
                 if error != nil {
                     self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
+                    self.viewModel.loading = false
                 }
-                self.viewModel.loading = false
+               
             })
             .withUnretained(self)
             .flatMap({ presenter, _ -> AnyPublisher<Bool, Never> in
@@ -123,6 +124,8 @@ final class LoginPresenterImpl: LoginPresenter {
             .withUnretained(self)
             .sink(receiveValue: { [weak self] _ in
                 self?.viewModel.loading = false
+                self?.viewModel.email = ""
+                self?.viewModel.password = ""
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
@@ -204,6 +207,8 @@ final class LoginPresenterImpl: LoginPresenter {
             .withUnretained(self)
             .sink(receiveValue: { [weak self] _ in
                 self?.viewModel.loading = false
+                self?.viewModel.email = ""
+                self?.viewModel.password = ""
                 self?.actions.goToTabView()
             })
             .store(in: &cancellables)
