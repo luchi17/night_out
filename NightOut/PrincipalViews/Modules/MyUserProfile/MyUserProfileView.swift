@@ -176,7 +176,7 @@ struct MyUserProfileView: View {
                     viewModel.companyMenuSelection = nil
                 })
             case .metodosDePago:
-                TicketsReaderView(onClose: {
+                CompanyPaymentMethodsView(onClose: {
                     viewModel.companyMenuSelection = nil
                 })
             case .ventas:
