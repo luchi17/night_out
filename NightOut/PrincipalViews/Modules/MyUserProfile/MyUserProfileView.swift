@@ -6,7 +6,13 @@ struct MyUserProfileView: View {
     @State private var showShareSheet = false
     @State private var showEditSheet = false
     @State private var showFollowersSheet = false
+    
     @State private var showCompanyMenu = false
+    @State private var showQRReader = false
+    @State private var showManagementEvents = false
+    @State private var showPubli = false
+    @State private var showPaymentMethods = false
+    @State private var showSells = false
     
     @State private var closeAllSheets = false
     @Binding private var updateProfileImage: Bool
@@ -113,6 +119,19 @@ struct MyUserProfileView: View {
         .background(
             Color.blackColor
         )
+        .overlay(alignment: .topTrailing, content: {
+            Group {
+                if showCompanyMenu {
+                    CompanyMenu(
+                        selection: $viewModel.companyMenuSelection,
+                        showSheet: $showCompanyMenu
+                    )
+                    .background(Color.grayColor)
+                    .padding(.top, 70)
+                    .padding(.trailing, 25)
+                }
+            }
+        })
         .sheet(isPresented: $showShareSheet) {
             if let currentId = FirebaseServiceImpl.shared.getCurrentUserUid() {
                 // Presentar el ActivityViewController para compartir
@@ -143,18 +162,42 @@ struct MyUserProfileView: View {
             .presentationDetents([.large])
              .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showCompanyMenu) {
-            CompanyMenu(
-                selection: $viewModel.companyMenuSelection,
-                showSheet: $showCompanyMenu
-            )
-        }
+        .fullScreenCover(item: $viewModel.companyMenuSelection, content: { item in
+            switch item {
+            case .lectorEntradas:
+                TicketsReaderView()
+            case .gestorEventos:
+                TicketsReaderView()
+            case .publicidad:
+                PublicidadView()
+            case .metodosDePago:
+                TicketsReaderView()
+            case .ventas:
+                TicketsReaderView()
+            }
+        })
         .onChange(of: closeAllSheets, { oldValue, newValue in
             if newValue {
                 goToLoginPublisher.send()
                 dismiss()
             }
         })
+//        .onChange(of: viewModel.companyMenuSelection, { oldValue, newValue in
+//            if let newValue = newValue {
+//                switch newValue {
+//                case .lectorEntradas:
+//                    self.showQRReader.toggle()
+//                case .gestorEventos:
+//                    self.showManagementEvents.toggle()
+//                case .publicidad:
+//                    self.showPubli.toggle()
+//                case .metodosDePago:
+//                    self.showPaymentMethods.toggle()
+//                case .ventas:
+//                    self.showSells.toggle()
+//                }
+//            }
+//        })
         .onAppear {
             viewDidLoadPublisher.send()
             if let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() {
@@ -204,91 +247,5 @@ private extension MyUserProfileView {
             goToLogin: goToLoginPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
-    }
-}
-
-private struct CompanyMenu: View {
-    
-    @Binding var selection: CompanyMenuSelection?
-    @Binding var showSheet: Bool
-    
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 12) {
-                Button(action: {
-                    selection = .lectorEntradas
-                    showSheet = false
-                }) {
-                    Text(CompanyMenuSelection.lectorEntradas.title)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                }
-                
-                Button(action: {
-                    selection = .ventas
-                    showSheet = false
-                }) {
-                    Text(CompanyMenuSelection.ventas.title)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                }
-                
-                Button(action: {
-                    selection = .metodosDePago
-                    showSheet = false
-                }) {
-                    Text(CompanyMenuSelection.metodosDePago.title)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                }
-                
-                Button(action: {
-                    selection = .gestorEventos
-                    showSheet = false
-                }) {
-                    Text(CompanyMenuSelection.gestorEventos.title)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                }
-                
-                Button(action: {
-                    selection = .publicidad
-                    showSheet = false
-                }) {
-                    Text(CompanyMenuSelection.publicidad.title)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                }
-            }
-            .padding(.leading, 20)
-            
-            Spacer()
-        }
-        .presentationDetents([.fraction(0.25)])
-        .presentationBackground(Color.grayColor)
-        .presentationDragIndicator(.visible)
-    }
-}
-
-enum CompanyMenuSelection {
-    case lectorEntradas
-    case ventas
-    case metodosDePago
-    case gestorEventos
-    case publicidad
-    
-    var title: String {
-        switch self {
-        case .lectorEntradas:
-            return "Lector de entradas"
-        case .ventas:
-            return "Ventas"
-        case .metodosDePago:
-            return "Métodos de pago"
-        case .gestorEventos:
-            return "Gestor eventos"
-        case .publicidad:
-            return "Publicidad"
-        }
     }
 }

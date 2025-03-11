@@ -132,29 +132,6 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
                 presenter.actions.backToLogin()
             }
             .store(in: &cancellables)
-        
-        viewModel
-            .$companyMenuSelection
-            .removeDuplicates()
-            .withUnretained(self)
-            .sink { presenter, value in
-                #warning("TODO: actions")
-                switch value {
-                case .lectorEntradas:
-                    print("lectorEntradas")
-                case .gestorEventos:
-                    print("gestorEventos")
-                case .publicidad:
-                    print("publicidad")
-                case .metodosDePago:
-                    print("metodosDePago")
-                case .ventas:
-                    print("ventas")
-                default:
-                    break
-                }
-            }
-            .store(in: &cancellables)
     }
 }
 
