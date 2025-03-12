@@ -66,25 +66,11 @@ struct CustomSellsAlertView: View {
                         .foregroundColor(Color.blue)
                 }
             }
-            .padding(.bottom, 40)
+            
         }
+        .padding(.bottom, 40)
         .padding(.horizontal, 20)
         .background(Color.blackColor.ignoresSafeArea())
-//        .sheet(isPresented: $showCompareView, onDismiss: {
-//            showCompareView = false
-//            selectedItems = []
-//            dismiss()
-//        }, content: {
-//            CompareSellsView(
-//                selectedEvents: Array(selectedItems),
-//                onClose: {
-//                    showCompareView = false
-//                    selectedItems = []
-//                    dismiss()
-//                }
-//            )
-//            .presentationDetents([.large])
-//        })
         .presentationDetents([.medium])
     }
 }

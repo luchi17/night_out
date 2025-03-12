@@ -10,11 +10,11 @@ struct CompareSellsView: View {
     @State private var loading: Bool = false
     @State private var toast: ToastType?
     
-    let selectedEvents: [String]
+    @Binding var selectedEvents: [String]
     let onClose: VoidClosure
     
-    init(selectedEvents: [String], onClose: @escaping VoidClosure) {
-        self.selectedEvents = selectedEvents
+    init(selectedEvents: Binding<[String]>, onClose: @escaping VoidClosure) {
+        self._selectedEvents = selectedEvents
         self.onClose = onClose
     }
     
@@ -28,7 +28,7 @@ struct CompareSellsView: View {
                 .padding(.bottom, 15)
             
             if recaudacionPorEvento.values.allSatisfy({ $0 == 0 }) &&
-               entradasPorEvento.values.allSatisfy({ $0 == 0 }) {
+                entradasPorEvento.values.allSatisfy({ $0 == 0 }) && !loading {
                 
                 Spacer()
                 
@@ -49,9 +49,11 @@ struct CompareSellsView: View {
                     }
                     .frame(height: 300)
                     .chartXAxis {
-                        AxisMarks { value in
+                        AxisMarks(position: .bottom) { value in
                             AxisValueLabel()
                                 .foregroundStyle(Color.blackColor) // Etiquetas del eje X en negro
+                            AxisGridLine()
+                                .foregroundStyle(Color.blackColor)
                         }
                     }
                     .chartYAxis {
@@ -89,6 +91,8 @@ struct CompareSellsView: View {
                         AxisMarks { value in
                             AxisValueLabel()
                                 .foregroundStyle(Color.blackColor) // Etiquetas del eje X en negro
+                            AxisGridLine()
+                                .foregroundStyle(Color.blackColor)
                         }
                     }
                     .chartYAxis {
@@ -140,11 +144,11 @@ struct CompareSellsView: View {
             ),
             isIdle: loading
         )
-        .onAppear {
-            loadEventData(selectedEvents: selectedEvents)
-        }
         .edgesIgnoringSafeArea(.all)
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            loadEventData(selectedEvents: self.selectedEvents)
+        }
     }
     
     private func loadEventData(selectedEvents: [String]) {
@@ -155,70 +159,66 @@ struct CompareSellsView: View {
         let database = FirebaseServiceImpl.shared
             .getCompanyInDatabaseFrom(uid: currentUserID)
             .child("Entradas")
+        
+        database.observeSingleEvent(of: .value) { snapshot in
+            var entradasTemp: [String: Int] = [:]
+            var recaudacionTemp: [String: Float] = [:]
             
-            database.observeSingleEvent(of: .value) { snapshot in
-                var entradasTemp: [String: Int] = [:]
-                var recaudacionTemp: [String: Float] = [:]
-                
-                for event in selectedEvents {
-                    entradasTemp[event] = 0
-                    recaudacionTemp[event] = 0.0
-                }
-                
-                for fechaSnapshot in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+            for event in selectedEvents {
+                entradasTemp[event] = 0
+                recaudacionTemp[event] = 0.0
+            }
+            
+            for fechaSnapshot in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                for eventoSnapshot in fechaSnapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                    let evento = eventoSnapshot.key
                     
-                    for eventoSnapshot in fechaSnapshot.children.allObjects as? [DataSnapshot] ?? [] {
+                    if selectedEvents.contains(evento) {
+                        let lastTicketNumber = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos/lastTicketNumber").value as? Int ?? 0
                         
-                        let evento = eventoSnapshot.key
+                        var totalIngresos: Float = 0.0
+                        let ticketsVendidosSnapshot = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos")
                         
-                        if selectedEvents.contains(evento) {
-                            
-                            let lastTicketNumber = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos/lastTicketNumber").value as? Int ?? 0
-                            
-                            entradasTemp[evento] = lastTicketNumber
-                            
-                            var totalIngresos: Float = 0.0
-                            let ticketsVendidosSnapshot = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos")
-                            
-                            guard lastTicketNumber >= 1 else {
-                                self.loading = false
-                                continue
-                            }
-                            
-                            for i in 1...lastTicketNumber {
-                                let ticketSnapshot = ticketsVendidosSnapshot.childSnapshot(forPath: "TICKET-\(i)")
-                                let precioRaw = ticketSnapshot.childSnapshot(forPath: "precio").value
-                                let precio: Float = {
-                                    if let precioStr = precioRaw as? String {
-                                        return Float(precioStr) ?? 0.0
-                                    }
-                                    if let precioNum = precioRaw as? NSNumber {
-                                        return precioNum.floatValue
-                                    }
-                                    return 0.0
-                                }()
-                                
-                                if precio > 0 {
-                                    totalIngresos += precio
-                                }
-                            }
-                            
-                            recaudacionTemp[evento] = totalIngresos
+                        entradasTemp[evento] = lastTicketNumber
+                        
+                        guard lastTicketNumber >= 1 else {
+                            continue
                         }
+                        
+                        for i in 1...lastTicketNumber {
+                            let ticketSnapshot = ticketsVendidosSnapshot.childSnapshot(forPath: "TICKET-\(i)")
+                            let precioRaw = ticketSnapshot.childSnapshot(forPath: "precio").value
+                            
+                            let precio: Float = {
+                                if let precioStr = precioRaw as? String {
+                                    return Float(precioStr) ?? 0.0
+                                }
+                                if let precioNum = precioRaw as? NSNumber {
+                                    return precioNum.floatValue
+                                }
+                                return 0.0
+                            }()
+                            
+                            if precio > 0 {
+                                totalIngresos += precio
+                            }
+                        }
+                        
+                        recaudacionTemp[evento] = totalIngresos
                     }
                 }
-                
-                DispatchQueue.main.async {
-                    self.loading = false
-                    self.entradasPorEvento = entradasTemp
-                    self.recaudacionPorEvento = recaudacionTemp
-                    print(entradasPorEvento)
-                    print(recaudacionPorEvento)
-                }
-            } withCancel: { error in
-           loading = false
-           self.toast = .custom(.init(title: "", description: "Error al cargar datos: \(error.localizedDescription).", image: nil))
-       }
+            }
+            
+            DispatchQueue.main.async {
+                self.loading = false
+                self.entradasPorEvento = entradasTemp
+                self.recaudacionPorEvento = recaudacionTemp
+                print(self.entradasPorEvento)
+                print(self.recaudacionPorEvento)
+            }
+        } withCancel: { error in
+            self.loading = false
+            self.toast = .custom(.init(title: "", description: "Error al cargar datos: \(error.localizedDescription).", image: nil))
+        }
     }
 }
-

@@ -115,7 +115,7 @@ struct GestionEconomicaView: View {
             selectedCompareEvents = []
         }, content: {
             CompareSellsView(
-                selectedEvents: selectedCompareEvents,
+                selectedEvents: $selectedCompareEvents,
                 onClose: {
                     showCompareView = false
                     selectedCompareEvents = []
@@ -389,7 +389,6 @@ struct GestionEconomicaView: View {
                                 let current = tempEntryTypeDetails[entryType, default: (0, 0)]
 
                                 tempEntryTypeDetails[entryType] = (current.totalRevenue + ticketPrice, current.ticketCount + 1)
-                                print(tempEntryTypeDetails)
                             
                             }
                         }
