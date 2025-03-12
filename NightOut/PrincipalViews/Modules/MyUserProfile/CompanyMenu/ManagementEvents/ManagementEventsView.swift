@@ -10,6 +10,7 @@ struct ManagementEventsView: View {
     }
     
     @StateObject private var viewModel = ManagementEventsViewModel()
+    
     @State private var showDatePicker: Bool = false
     
     enum FocusField: Hashable, RawRepresentable {
@@ -286,19 +287,34 @@ struct ManagementEventsView: View {
         }
     }
     
-    @State private var selectedTime = Date()
+    @State private var selectedTime: Date?
     
     private var datePicker: some View {
-        DatePicker("Selecciona una fecha", selection: Binding<Date> (
-            get: { selectedTime },
-            set: { newValue in
-                selectedTime = newValue
-                viewModel.eventDate = formattedDate(newValue)
+        VStack {
+            DatePicker("Selecciona una fecha", selection: Binding<Date> (
+                get: { selectedTime ?? Date()
+                },
+                set: { newValue in
+                    selectedTime = newValue
+                    viewModel.eventDate = formattedDate(newValue)
+                    showDatePicker.toggle()
+                }),
+                       displayedComponents: [.date]
+            )
+            .datePickerStyle(GraphicalDatePickerStyle())
+
+            Button("Escoger fecha".uppercased()) {
+                if selectedTime == nil {
+                    viewModel.eventDate = formattedDate(Date())
+                }
                 showDatePicker.toggle()
-            }),
-                   displayedComponents: [.date]
-        )
-        .datePickerStyle(GraphicalDatePickerStyle())
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(12)
+        }
+       
     }
     
     private func formattedDate(_ date: Date) -> String {
