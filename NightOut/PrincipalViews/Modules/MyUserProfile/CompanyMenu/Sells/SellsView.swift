@@ -223,7 +223,7 @@ struct GestionEconomicaView: View {
         self.loading = true
         
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-            print("Usuario no autenticado")
+            self.toast = .custom(.init(title: "", description: "Usuario no autenticado.", image: nil))
             return
         }
         
@@ -239,15 +239,18 @@ struct GestionEconomicaView: View {
                 }
             }
             self.loading = false
-            self.events = uniqueEvents
+            
+            self.eventNames = Array(uniqueEvents)
+            self.eventNames.insert(defaultSelection, at: 0)
+            
         }
     }
     
     //Get names of events
     func loadEventDetails(_ event: String) {
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-            print("Usuario no autenticado")
-            return
+            self.toast = .custom(.init(title: "", description: "Usuario no autenticado.", image: nil))
+                return
         }
         
         database.child(currentUserId).child("Entradas").observeSingleEvent(of: .value) { snapshot in
@@ -265,6 +268,10 @@ struct GestionEconomicaView: View {
                         let lastTicketNumber = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos/lastTicketNumber").value as? Int ?? 0
                         totalEntradas = lastTicketNumber
                         
+                        guard lastTicketNumber >= 1 else {
+                            self.loading = false
+                            return
+                        }
                         
                         for i in 1...lastTicketNumber {
                             
