@@ -18,10 +18,6 @@ struct GestionEconomicaView: View {
     @State private var toast: ToastType?
     @State private var showCustomAlert: Bool = false
     
-    private var database: DatabaseReference {
-        return Database.database().reference().child("Company_Users")
-    }
-    
     let onClose: VoidClosure
     
     init(onClose: @escaping VoidClosure) {
@@ -226,8 +222,9 @@ struct GestionEconomicaView: View {
             self.toast = .custom(.init(title: "", description: "Usuario no autenticado.", image: nil))
             return
         }
+        let db = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: currentUserId)
         
-        database.child(currentUserId).child("Entradas").observeSingleEvent(of: .value) { snapshot in
+        db.child("Entradas").observeSingleEvent(of: .value) { snapshot in
             var uniqueEvents = Set<String>()
             
             for case let fechaSnapshot as DataSnapshot in snapshot.children {
@@ -253,7 +250,9 @@ struct GestionEconomicaView: View {
                 return
         }
         
-        database.child(currentUserId).child("Entradas").observeSingleEvent(of: .value) { snapshot in
+        let db = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: currentUserId)
+        
+        db.child("Entradas").observeSingleEvent(of: .value) { snapshot in
             var totalIngresos: Float = 0.0
             var totalEntradas = 0
             
@@ -312,27 +311,33 @@ struct GestionEconomicaView: View {
             loading = true
             entryTypeDetails.removeAll()
 
-            let db = Database.database().reference()
-            db.child("Entradas").child(currentUserId).observeSingleEvent(of: .value) { snapshot in
+        let db = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: currentUserId)
+        
+        db.child("Entradas").observeSingleEvent(of: .value) { snapshot in
                 var eventFound = false
                 var tempEntryTypeDetails: [String: (totalRevenue: Float, ticketCount: Int)] = [:]
 
                 for fechaSnapshot in snapshot.children.allObjects as! [DataSnapshot] {
+                    
                     for eventoSnapshot in fechaSnapshot.children.allObjects as! [DataSnapshot] {
                         
                         let eventName = eventoSnapshot.key
                         
                         if eventName == event {
+                            
                             eventFound = true
+                            
                             let ticketsVendidos = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos")
 
                             for ticketSnapshot in ticketsVendidos.children.allObjects as! [DataSnapshot] {
-                                let ticketPrice = ticketSnapshot.childSnapshot(forPath: "precio").value as? Float ?? 0.0
+                                
+                                let ticketPrice = ticketSnapshot.childSnapshot(forPath: "precio").value as? String ?? "0.0"
+                                let ticketPriceFloat = Float(ticketPrice) ?? 0.0
                                 let entryType = ticketSnapshot.childSnapshot(forPath: "tipo de entrada").value as? String ?? ""
 
                                 if !entryType.isEmpty && entryType != "Desconocido" {
                                     let current = tempEntryTypeDetails[entryType, default: (0, 0)]
-                                    tempEntryTypeDetails[entryType] = (current.totalRevenue + ticketPrice, current.ticketCount + 1)
+                                    tempEntryTypeDetails[entryType] = (current.totalRevenue + ticketPriceFloat, current.ticketCount + 1)
                                 }
                             }
                         }
