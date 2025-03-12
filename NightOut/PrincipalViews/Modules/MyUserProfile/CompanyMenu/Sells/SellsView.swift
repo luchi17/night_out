@@ -107,10 +107,8 @@ struct GestionEconomicaView: View {
         })
         .onChange(of: selectedEvent) { oldValue, newValue in
             if selectedEvent != defaultSelection {
-                for event in eventNames {
-                    loadEventDetails(event)
-                    loadEventEntryTypeDetails(event: event)
-                }
+                loadEventDetails(selectedEvent)
+                loadEventEntryTypeDetails(event: selectedEvent)
             }
         }
         .showToast(
@@ -158,14 +156,16 @@ struct GestionEconomicaView: View {
     }
     
     private var tableView: some View {
-        VStack {
+        VStack(spacing: 0) {
             HStack {
                 Text("Entradas")
                     .foregroundStyle(Color.blackColor)
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .font(.system(size: 16, weight: .bold))
                 Text("Ingresos")
                     .foregroundStyle(Color.blackColor)
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .font(.system(size: 16, weight: .bold))
             }
             .padding(.all, 8)
             
@@ -177,37 +177,47 @@ struct GestionEconomicaView: View {
                 Text("\(totalEntradas)")
                     .foregroundStyle(Color.blackColor)
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .font(.system(size: 16, weight: .medium))
                 Text(String(format: "%.2f€", totalIngresos))
                     .foregroundStyle(Color.blackColor)
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .font(.system(size: 16, weight: .medium))
             }
-            .padding([.bottom, .horizontal], 8)
+            .padding(.all, 8)
             
-            Spacer()
+            Rectangle()
                 .frame(height: 15)
+                .foregroundStyle(Color.blackColor)
             
             if !entryTypeDetails.keys.isEmpty {
                 HStack {
                     Text("Tipo entrada")
                         .foregroundStyle(Color.blackColor)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .font(.system(size: 16, weight: .bold))
                     Text("Ventas")
                         .foregroundStyle(Color.blackColor)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .font(.system(size: 16, weight: .bold))
                 }
                 .padding(.all, 8)
                 
+                Divider()
+                    .frame(height: 1)
+                    .foregroundStyle(Color.grayColor)
+                
                 ForEach(entryTypeDetails.keys.sorted(), id: \.self) { entryType in
                     let data = entryTypeDetails[entryType]!
-                    
+            
                     HStack {
                         Text("\(entryType) (\(data.ticketCount))")
                             .foregroundStyle(Color.blackColor)
                             .frame(maxWidth: .infinity, alignment: .center)
-                        Spacer()
+                            .font(.system(size: 16, weight: .medium))
                         Text(String(format: "%.2f€", data.totalRevenue))
                             .foregroundStyle(Color.blackColor)
                             .frame(maxWidth: .infinity, alignment: .center)
+                            .font(.system(size: 16, weight: .medium))
                     }
                     .padding(.all, 8)
                 }
@@ -252,6 +262,9 @@ struct GestionEconomicaView: View {
                 return
         }
         
+        self.totalIngresos = totalIngresos
+        self.totalEntradas = totalEntradas
+        
         let db = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: currentUserId)
         
         db.child("Entradas").observeSingleEvent(of: .value) { snapshot in
@@ -277,6 +290,7 @@ struct GestionEconomicaView: View {
                         for i in 1...lastTicketNumber {
                             
                             let ticketSnapshot = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos/TICKET-\(i)")
+                            
                             let ticketPrecioRaw = ticketSnapshot.childSnapshot(forPath: "precio").value
                             let ticketPrecio: Float
                             
@@ -310,13 +324,15 @@ struct GestionEconomicaView: View {
                 return
             }
 
-            loading = true
-            entryTypeDetails.removeAll()
+        loading = true
+        entryTypeDetails.removeAll()
 
         let db = FirebaseServiceImpl.shared.getCompanyInDatabaseFrom(uid: currentUserId)
         
         db.child("Entradas").observeSingleEvent(of: .value) { snapshot in
+            
                 var eventFound = false
+            
                 var tempEntryTypeDetails: [String: (totalRevenue: Float, ticketCount: Int)] = [:]
 
                 for fechaSnapshot in snapshot.children.allObjects as! [DataSnapshot] {
@@ -325,22 +341,39 @@ struct GestionEconomicaView: View {
                         
                         let eventName = eventoSnapshot.key
                         
-                        if eventName == event {
-                            
-                            eventFound = true
-                            
-                            let ticketsVendidos = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos")
+                        guard eventName == event else {
+                            continue
+                        }
+                        
+                        eventFound = true
+                        
+                        let ticketsVendidos = eventoSnapshot.childSnapshot(forPath: "TicketsVendidos")
 
-                            for ticketSnapshot in ticketsVendidos.children.allObjects as! [DataSnapshot] {
-                                
-                                let ticketPrice = ticketSnapshot.childSnapshot(forPath: "precio").value as? String ?? "0.0"
-                                let ticketPriceFloat = Float(ticketPrice) ?? 0.0
-                                let entryType = ticketSnapshot.childSnapshot(forPath: "tipo de entrada").value as? String ?? ""
+                        for ticketSnapshot in ticketsVendidos.children.allObjects as! [DataSnapshot] {
+                            
+                            let ticketPrecioRaw = ticketSnapshot.childSnapshot(forPath: "precio").value
+                            
+                            let ticketPrice: Float
+                            
+                            if let ticketPrecioRaw = ticketPrecioRaw as? String {
+                                ticketPrice = Float(ticketPrecioRaw) ?? 0
+                            } else if let ticketPrecioRaw = ticketPrecioRaw as? Double {
+                                ticketPrice = Float(ticketPrecioRaw)
+                            } else if let ticketPrecioRaw = ticketPrecioRaw as? Float {
+                                ticketPrice = Float(ticketPrecioRaw)
+                            } else {
+                                ticketPrice = 0
+                            }
+                            
+                            let entryType = ticketSnapshot.childSnapshot(forPath: "tipo de entrada").value as? String ?? ""
+                            
+                            if !entryType.isEmpty && entryType != "Desconocido" {
+                   
+                                let current = tempEntryTypeDetails[entryType, default: (0, 0)]
 
-                                if !entryType.isEmpty && entryType != "Desconocido" {
-                                    let current = tempEntryTypeDetails[entryType, default: (0, 0)]
-                                    tempEntryTypeDetails[entryType] = (current.totalRevenue + ticketPriceFloat, current.ticketCount + 1)
-                                }
+                                tempEntryTypeDetails[entryType] = (current.totalRevenue + ticketPrice, current.ticketCount + 1)
+                                print(tempEntryTypeDetails)
+                            
                             }
                         }
                     }
