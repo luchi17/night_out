@@ -13,26 +13,37 @@ struct CustomSellsAlertView: View {
         VStack {
             
             Text(title)
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: 18, weight: .medium))
                 .foregroundStyle(.white)
+                .padding(.vertical, 30)
             
-            List(options, id: \.self, selection: $selectedItems) { item in
-                HStack {
-                    
-                    SellsCheckbox(isChecked: self.selectedItems.contains(item)) {
-                        if self.selectedItems.contains(item) {
-                            self.selectedItems.remove(item)
-                        } else {
-                            self.selectedItems.insert(item)
+            ScrollView {
+                VStack {
+                    ForEach(options, id: \.self) { item in
+                        HStack(spacing: 15) {
+                            
+                            SellsCheckbox(isChecked: self.selectedItems.contains(item)) {
+                                
+                                if self.selectedItems.contains(item) {
+                                    
+                                    self.selectedItems.remove(item)
+                                } else {
+                                    
+                                    self.selectedItems.insert(item)
+                                }
+                            }
+                            
+                            Text(item)
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(.white)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    
-                    Text(item)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.white)
                 }
             }
-            HStack {
+            .scrollIndicators(.hidden)
+
+            HStack(spacing: 20) {
                 Spacer()
                 
                 Button(action: {
@@ -40,7 +51,7 @@ struct CustomSellsAlertView: View {
                     
                 }) {
                     Text("Cancelar".uppercased())
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundColor(Color.blue)
                 }
                 
@@ -53,6 +64,7 @@ struct CustomSellsAlertView: View {
                         .foregroundColor(Color.blue)
                 }
             }
+            .padding(.bottom, 40)
         }
         .padding(.horizontal, 20)
         .background(Color.blackColor.ignoresSafeArea())
