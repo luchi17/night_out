@@ -266,7 +266,8 @@ struct AccountDatasourceImpl: AccountDatasource {
                     if let companyModel = try snapshot?.data(as: CompanyModel.self) {
                         
                         if uid == FirebaseServiceImpl.shared.getCurrentUserUid() {
-                            _ = self.saveCompany(model: companyModel)
+//                            _ = self.saveCompany(model: companyModel)
+                            UserDefaults.setCompanyUserModel(companyModel)
                         }
                         promise(.success(companyModel))
                     } else {
