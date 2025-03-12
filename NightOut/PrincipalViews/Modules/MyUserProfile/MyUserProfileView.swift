@@ -180,7 +180,7 @@ struct MyUserProfileView: View {
                     viewModel.companyMenuSelection = nil
                 })
             case .ventas:
-                TicketsReaderView(onClose: {
+                GestionEconomicaView(onClose: {
                     viewModel.companyMenuSelection = nil
                 })
             }
