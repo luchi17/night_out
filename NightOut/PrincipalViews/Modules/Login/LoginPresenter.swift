@@ -207,9 +207,9 @@ final class LoginPresenterImpl: LoginPresenter {
             .withUnretained(self)
             .sink(receiveValue: { [weak self] _ in
                 self?.viewModel.loading = false
+                self?.actions.goToTabView()
                 self?.viewModel.email = ""
                 self?.viewModel.password = ""
-                self?.actions.goToTabView()
             })
             .store(in: &cancellables)
         
@@ -265,6 +265,7 @@ private extension LoginPresenterImpl {
             getCompanyInfo()
                 .filter { [weak self] companyModel in
                     if companyModel == nil {
+                        self?.viewModel.loading = false
                         self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))
                         return false
                     }
@@ -279,6 +280,7 @@ private extension LoginPresenterImpl {
             getUserInfo()
                 .filter { [weak self] userModel in
                     if userModel == nil {
+                        self?.viewModel.loading = false
                         self?.viewModel.toast = .custom(.init(title: "Error", description: "Usuario no válido.", image: nil))
                         return false
                     }

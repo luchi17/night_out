@@ -233,6 +233,7 @@ final class SignupCompanyPresenterImpl: SignupCompanyPresenter {
                     .eraseToAnyPublisher()
             })
             .sink(receiveValue: { [weak self] data in
+                self?.viewModel.loading = false
                 if data.0, let model = data.1 {
                     UserDefaults.setIsFirstLoggedIn(true)
                     UserDefaults.setCompanyUserModel(model)
