@@ -167,7 +167,7 @@ struct GestionEconomicaView: View {
                     .foregroundStyle(Color.blackColor)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
-            .padding(.bottom, 5)
+            .padding(.all, 8)
             
             Divider()
                 .frame(height: 1)
@@ -181,35 +181,37 @@ struct GestionEconomicaView: View {
                     .foregroundStyle(Color.blackColor)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
+            .padding([.bottom, .horizontal], 8)
             
             Spacer()
                 .frame(height: 15)
             
-            HStack {
-                Text("Tipo entrada")
-                    .foregroundStyle(Color.blackColor)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                Text("Ventas")
-                    .foregroundStyle(Color.blackColor)
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
-            .padding(.bottom, 5)
-            
-            ForEach(entryTypeDetails.keys.sorted(), id: \.self) { entryType in
-                let data = entryTypeDetails[entryType]!
-                
+            if !entryTypeDetails.keys.isEmpty {
                 HStack {
-                    Text("\(entryType) (\(data.ticketCount))")
+                    Text("Tipo entrada")
                         .foregroundStyle(Color.blackColor)
                         .frame(maxWidth: .infinity, alignment: .center)
-                    Spacer()
-                    Text(String(format: "%.2f€", data.totalRevenue))
+                    Text("Ventas")
                         .foregroundStyle(Color.blackColor)
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
+                .padding(.all, 8)
                 
+                ForEach(entryTypeDetails.keys.sorted(), id: \.self) { entryType in
+                    let data = entryTypeDetails[entryType]!
+                    
+                    HStack {
+                        Text("\(entryType) (\(data.ticketCount))")
+                            .foregroundStyle(Color.blackColor)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        Spacer()
+                        Text(String(format: "%.2f€", data.totalRevenue))
+                            .foregroundStyle(Color.blackColor)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    .padding(.all, 8)
+                }
             }
-           
         }
         .background(Color.white)
     }
