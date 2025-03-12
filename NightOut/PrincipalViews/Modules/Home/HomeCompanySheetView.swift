@@ -38,6 +38,8 @@ struct HomeCompanySheetView: View {
                     .background(Color.grayColor)
                     .cornerRadius(25)
             }
+            
+            Spacer()
         }
         .padding(.all, 12)
         .background(
