@@ -6,13 +6,13 @@ struct GestionEconomicaView: View {
     
     @State private var entryTypeDetails: [String: (totalRevenue: Float, ticketCount: Int)] = [:]
     
-    @State private var detectedEvents = [String]()
-    @State private var events = Set<String>()
+    @State private var selectedCompareEvents = [String]()
+
     @State private var totalEntradas = 0
     @State private var totalIngresos: Float = 0.0
     
-    @State private var selectedEvent: String?
-    @State private var eventNames: [String] = ["No especificado".uppercased()]
+    @State private var selectedEvent: String = ""
+    @State private var eventNames: [String] = []
     
     @State private var loading: Bool = false
     @State private var toast: ToastType?
@@ -26,7 +26,11 @@ struct GestionEconomicaView: View {
     
     init(onClose: @escaping VoidClosure) {
         self.onClose = onClose
+        selectedEvent = defaultSelection
+        eventNames.append(defaultSelection)
     }
+    
+    private let defaultSelection = "Seleccione"
     
     var body: some View {
         ScrollView {
@@ -62,7 +66,7 @@ struct GestionEconomicaView: View {
                 
                 // Tabla de comparaciones de eventos
                 Button(action: {
-                    detectedEvents = events.map { $0 }
+                    selectedCompareEvents = eventNames.map { $0 }
                     showCustomAlert.toggle()
                     
                 }) {
@@ -91,29 +95,25 @@ struct GestionEconomicaView: View {
         .sheet(isPresented: $showCustomAlert, content: {
             CustomSellsAlertView(
                 title: "Selecciona eventos para comparar",
-                options: detectedEvents,
+                options: eventNames.filter({ $0 != defaultSelection }),
                 onSelection: { selected in
                 if !selected.isEmpty {
                     // navigateToCompareEvents(selected)
+                    selectedCompareEvents = selected
                 } else {
                     self.toast = .custom(.init(title: "", description: "Selecciona al menos un evento.", image: nil))
                 }
                 
             },
              dismiss: { showCustomAlert.toggle() })
+            .presentationDetents([.fraction(0.4), .medium, .large])
             
         })
         .onChange(of: selectedEvent) { oldValue, newValue in
-            
-            if let selectedEvent = newValue {
-                if selectedEvent == events.first {
-                    for event in events {
-                        loadEventDetails(event)
-                        loadEventEntryTypeDetails(event: event)
-                    }
-                } else {
-                    loadEventDetails(selectedEvent)
-                    loadEventEntryTypeDetails(event: selectedEvent)
+            if selectedEvent != defaultSelection {
+                for event in eventNames {
+                    loadEventDetails(event)
+                    loadEventEntryTypeDetails(event: event)
                 }
             }
         }
@@ -155,8 +155,8 @@ struct GestionEconomicaView: View {
         )
         .onAppear {
             // Asegúrate de que la primera opción esté seleccionada si no hay ninguna
-            if selectedEvent?.isEmpty ?? true, let first = eventNames.first {
-                selectedEvent = first
+            if selectedEvent.isEmpty {
+                selectedEvent = defaultSelection
             }
         }
     }
@@ -166,10 +166,10 @@ struct GestionEconomicaView: View {
             HStack {
                 Text("Entradas")
                     .foregroundStyle(Color.blackColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 Text("Ingresos")
                     .foregroundStyle(Color.blackColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(.bottom, 5)
             
@@ -180,10 +180,10 @@ struct GestionEconomicaView: View {
             HStack {
                 Text("\(totalEntradas)")
                     .foregroundStyle(Color.blackColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 Text(String(format: "%.2f€", totalIngresos))
                     .foregroundStyle(Color.blackColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
             
             Spacer()
@@ -192,10 +192,10 @@ struct GestionEconomicaView: View {
             HStack {
                 Text("Tipo entrada")
                     .foregroundStyle(Color.blackColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 Text("Ventas")
                     .foregroundStyle(Color.blackColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(.bottom, 5)
             
@@ -205,11 +205,11 @@ struct GestionEconomicaView: View {
                 HStack {
                     Text("\(entryType) (\(data.ticketCount))")
                         .foregroundStyle(Color.blackColor)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .center)
                     Spacer()
                     Text(String(format: "%.2f€", data.totalRevenue))
                         .foregroundStyle(Color.blackColor)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 
             }
