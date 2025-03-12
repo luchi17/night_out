@@ -16,7 +16,10 @@ struct GestionEconomicaView: View {
     
     @State private var loading: Bool = false
     @State private var toast: ToastType?
+    
     @State private var showCustomAlert: Bool = false
+    @State private var showCompareView: Bool = false
+    
     
     let onClose: VoidClosure
     
@@ -63,8 +66,7 @@ struct GestionEconomicaView: View {
                 // Tabla de comparaciones de eventos
                 Button(action: {
                     selectedCompareEvents = eventNames.map { $0 }
-                    showCustomAlert.toggle()
-                    
+                    showCustomAlert = true
                 }) {
                     Text("Comparar eventos".uppercased())
                         .font(.system(size: 16, weight: .bold))
@@ -94,16 +96,31 @@ struct GestionEconomicaView: View {
                 options: eventNames.filter({ $0 != defaultSelection }),
                 onSelection: { selected in
                 if !selected.isEmpty {
-                    // navigateToCompareEvents(selected)
+                    showCustomAlert = false
                     selectedCompareEvents = selected
+                    showCompareView = true
                 } else {
                     self.toast = .custom(.init(title: "", description: "Selecciona al menos un evento.", image: nil))
                 }
-                
             },
-             dismiss: { showCustomAlert.toggle() })
+                dismiss: {
+                    showCustomAlert = false
+                })
             .presentationDetents([.fraction(0.4), .medium, .large])
+            .presentationDragIndicator(.visible)
             
+        })
+        .sheet(isPresented: $showCompareView, onDismiss: {
+            showCompareView = false
+            selectedCompareEvents = []
+        }, content: {
+            CompareSellsView(
+                selectedEvents: selectedCompareEvents,
+                onClose: {
+                    showCompareView = false
+                    selectedCompareEvents = []
+                }
+            )
         })
         .onChange(of: selectedEvent) { oldValue, newValue in
             if selectedEvent != defaultSelection {

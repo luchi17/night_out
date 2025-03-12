@@ -8,6 +8,7 @@ struct CustomSellsAlertView: View {
     var dismiss: VoidClosure
     
     @State private var selectedItems = Set<String>()
+    @State private var showCompareView: Bool = false
     
     var body: some View {
         VStack {
@@ -15,7 +16,8 @@ struct CustomSellsAlertView: View {
             Text(title)
                 .font(.system(size: 18, weight: .medium))
                 .foregroundStyle(.white)
-                .padding(.vertical, 30)
+                .padding(.top, 30)
+                .padding(.bottom, 15)
             
             ScrollView {
                 VStack {
@@ -68,6 +70,21 @@ struct CustomSellsAlertView: View {
         }
         .padding(.horizontal, 20)
         .background(Color.blackColor.ignoresSafeArea())
+//        .sheet(isPresented: $showCompareView, onDismiss: {
+//            showCompareView = false
+//            selectedItems = []
+//            dismiss()
+//        }, content: {
+//            CompareSellsView(
+//                selectedEvents: Array(selectedItems),
+//                onClose: {
+//                    showCompareView = false
+//                    selectedItems = []
+//                    dismiss()
+//                }
+//            )
+//            .presentationDetents([.large])
+//        })
         .presentationDetents([.medium])
     }
 }
