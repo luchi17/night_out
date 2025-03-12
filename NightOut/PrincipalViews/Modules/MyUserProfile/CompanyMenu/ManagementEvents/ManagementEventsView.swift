@@ -11,6 +11,7 @@ struct ManagementEventsView: View {
     
     @StateObject private var viewModel = ManagementEventsViewModel()
     
+    @State private var lastPadding: Bool = false
     @State private var showDatePicker: Bool = false
     
     enum FocusField: Hashable, RawRepresentable {
@@ -52,6 +53,65 @@ struct ManagementEventsView: View {
     @FocusState private var focusedField: FocusField?
     
     var body: some View {
+       
+        ZStack {
+            Color.blackColor
+            
+            ScrollViewReader(content: { proxy in
+                scrollview
+                    .onChange(of: focusedField) { oldValue, field in
+                        if let field = field {
+                            withAnimation {
+                                proxy.scrollTo(field, anchor: .center) // Desplaza el `ScrollView` al campo enfocado
+                            }
+                        }
+                    }
+            })
+        }
+        .edgesIgnoringSafeArea(.bottom)
+        .photosPicker(isPresented: $viewModel.showImagePicker, selection: $viewModel.selectedItem, matching: .images)
+        .onChange(of: viewModel.selectedItem) { _, newItem in
+            Task {
+                if let newItem = newItem {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        viewModel.image = uiImage
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showDatePicker) {
+            datePicker
+                .padding()
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.hidden)
+        }
+        .onTapGesture(perform: {
+            hideKeyboard()
+        })
+        .onChange(of: focusedField) { oldValue, newValue in
+            if newValue == FocusField.description {
+               lastPadding = true
+            } else {
+                lastPadding = false
+            }
+        }
+        .showToast(
+            error: (
+                type: viewModel.toast,
+                showCloseButton: false,
+                onDismiss: {
+                    if case .success = viewModel.toast {
+                        viewModel.toast = nil
+                        onClose()
+                    }
+                }
+            ),
+            isIdle: viewModel.loading
+        )
+    }
+    
+    private var scrollview: some View {
         ScrollView {
             VStack(spacing: 16) {
                 
@@ -86,6 +146,7 @@ struct ManagementEventsView: View {
                 TextField("", text: $viewModel.eventName, prompt: Text("Nombre del Evento").foregroundColor(Color.grayColor))
                     .textfieldStyle()
                     .focused($focusedField, equals: .nombreEvento)
+                    .id(FocusField.nombreEvento)
                     .onSubmit {
                         hideKeyboard()
                     }
@@ -133,6 +194,8 @@ struct ManagementEventsView: View {
                     .onSubmit {
                         hideKeyboard()
                     }
+                    .id(FocusField.description)
+                    .padding(.bottom, lastPadding ? 260 : 0)
                 
                 // Campos adicionales
                 entradasView
@@ -144,43 +207,6 @@ struct ManagementEventsView: View {
         .clipShape(Rectangle())
         .scrollClipDisabled(false)
         .scrollIndicators(.hidden)
-        .edgesIgnoringSafeArea(.bottom)
-        .background(
-            Color.blackColor.edgesIgnoringSafeArea(.all)
-        )
-        .photosPicker(isPresented: $viewModel.showImagePicker, selection: $viewModel.selectedItem, matching: .images)
-        .onChange(of: viewModel.selectedItem) { _, newItem in
-            Task {
-                if let newItem = newItem {
-                    if let data = try? await newItem.loadTransferable(type: Data.self),
-                       let uiImage = UIImage(data: data) {
-                        viewModel.image = uiImage
-                    }
-                }
-            }
-        }
-        .sheet(isPresented: $showDatePicker) {
-            datePicker
-                .padding()
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.hidden)
-        }
-        .onTapGesture(perform: {
-            hideKeyboard()
-        })
-        .showToast(
-            error: (
-                type: viewModel.toast,
-                showCloseButton: false,
-                onDismiss: {
-                    if case .success = viewModel.toast {
-                        viewModel.toast = nil
-                        onClose()
-                    }
-                }
-            ),
-            isIdle: viewModel.loading
-        )
     }
     
     
@@ -241,6 +267,7 @@ struct ManagementEventsView: View {
                     .onSubmit {
                         focusedField = .precio(uuid)  // Pasar foco al siguiente campo
                     }
+                    .id(FocusField.nombre(uuid))
                     .submitLabel(.next)
                 
                 TextField("", text: $viewModel.entradas[index].precio, prompt: Text("Precio").foregroundColor(Color.grayColor))
@@ -249,6 +276,7 @@ struct ManagementEventsView: View {
                     .onSubmit {
                         focusedField = .aforo(uuid)  // Pasar foco al siguiente campo
                     }
+                    .id(FocusField.precio(uuid))
                     .submitLabel(.next)
                 
                 TextField("", text: $viewModel.entradas[index].aforo, prompt: Text("Aforo").foregroundColor(Color.grayColor))
@@ -257,6 +285,7 @@ struct ManagementEventsView: View {
                     .onSubmit {
                         hideKeyboard()
                     }
+                    .id(FocusField.aforo(uuid))
                     .submitLabel(.next)
                     .padding(.bottom, 15)
             }
@@ -373,6 +402,7 @@ struct ManagementEventsView: View {
     
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        lastPadding = false
     }
 }
 

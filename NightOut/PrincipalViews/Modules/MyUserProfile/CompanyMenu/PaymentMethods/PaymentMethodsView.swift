@@ -117,6 +117,7 @@ struct CompanyPaymentMethodsView: View {
                     .onSubmit {
                         self.focusNextField($focusedField)
                     }
+                    .submitLabel(.next)
                 
                 Text("País")
                     .titleStyle()
@@ -128,6 +129,7 @@ struct CompanyPaymentMethodsView: View {
                     .onSubmit {
                         self.focusNextField($focusedField)
                     }
+                    .submitLabel(.next)
                 
                 Text("Dirección")
                     .titleStyle()
@@ -139,6 +141,7 @@ struct CompanyPaymentMethodsView: View {
                     .onSubmit {
                         self.focusNextField($focusedField)
                     }
+                    .submitLabel(.next)
                 
                 Text("Ciudad")
                     .titleStyle()
@@ -150,6 +153,7 @@ struct CompanyPaymentMethodsView: View {
                     .onSubmit {
                         self.focusNextField($focusedField)
                     }
+                    .submitLabel(.next)
                 
                 Text("Código Postal")
                     .titleStyle()
@@ -162,6 +166,7 @@ struct CompanyPaymentMethodsView: View {
                     .onSubmit {
                         self.focusNextField($focusedField)
                     }
+                    .submitLabel(.next)
                 
                 Text("IBAN (En mayúsculas)")
                     .titleStyle()
@@ -173,6 +178,7 @@ struct CompanyPaymentMethodsView: View {
                         self.focusNextField($focusedField)
                     }
                     .id(Field.iban)
+                    .submitLabel(.next)
                     .onChange(of: iban) { old, newValue in
                         iban = formatIban(newValue)
                     }
@@ -210,6 +216,7 @@ struct CompanyPaymentMethodsView: View {
                     .onSubmit {
                         self.focusNextField($focusedField)
                     }
+                    .submitLabel(.next)
                     .onChange(of: dob) { old, newValue in
                         dob = formatDate(newValue)
                     }
