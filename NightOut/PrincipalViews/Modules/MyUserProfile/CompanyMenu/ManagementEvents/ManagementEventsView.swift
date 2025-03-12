@@ -91,7 +91,7 @@ struct ManagementEventsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
                     .background(
-                        RoundedRectangle(cornerRadius: 8).fill(.white)
+                        RoundedRectangle(cornerRadius: 10).fill(.white)
                     )
                     .onTapGesture {
                         showDatePicker.toggle()
@@ -123,7 +123,7 @@ struct ManagementEventsView: View {
                     .frame(maxWidth: .infinity, minHeight: 55, alignment: .top)
                     .padding()
                     .background(
-                        RoundedRectangle(cornerRadius: 8).fill(.white)
+                        RoundedRectangle(cornerRadius: 10).fill(.white)
                     )
                     .focused($focusedField, equals: .description)
                     .onSubmit {
@@ -206,7 +206,7 @@ struct ManagementEventsView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, 10)
             .background(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 10)
                     .fill(.white)
             )
             .onAppear {
@@ -219,7 +219,7 @@ struct ManagementEventsView: View {
     }
     
     private var entradasView: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 2) {
             
             ForEach($viewModel.entradas.indices, id: \.self) { index in
                 
@@ -229,6 +229,7 @@ struct ManagementEventsView: View {
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 10)
                 
                 TextField("", text: $viewModel.entradas[index].nombre, prompt: Text("Nombre").foregroundColor(Color.grayColor))
                     .textFieldEntradaType()
@@ -253,6 +254,7 @@ struct ManagementEventsView: View {
                         hideKeyboard()
                     }
                     .submitLabel(.next)
+                    .padding(.bottom, 15)
             }
         }
     }
@@ -364,9 +366,10 @@ private extension View {
             .foregroundColor(Color.blackColor)
             .accentColor(Color.blackColor)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+            .padding(.leading, 10)
+            .padding(.vertical, 12)
             .background(
-                Rectangle().fill(.gray.opacity(0.1))
+                Rectangle().fill(.white)
             )
     }
     
@@ -380,7 +383,7 @@ private extension View {
             .padding(.leading, 10)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 8).fill(.white)
+                RoundedRectangle(cornerRadius: 10).fill(.white)
             )
     }
     
