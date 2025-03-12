@@ -264,7 +264,7 @@ struct AccountDatasourceImpl: AccountDatasource {
                 
                 do {
                     if let companyModel = try snapshot?.data(as: CompanyModel.self) {
-                        // Asumiendo que deseas crear un PostModel a partir de CompanyModel
+                        
                         if uid == FirebaseServiceImpl.shared.getCurrentUserUid() {
                             _ = self.saveCompany(model: companyModel)
                         }
