@@ -34,7 +34,7 @@ struct TutorialSettingsView: View {
                 Button(action: {
                     close()
                 }) {
-                    Text("Empezar buscando amigos")
+                    Text("Empezar buscando amigos".uppercased())
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
