@@ -8,6 +8,8 @@ struct TimeButtonView: View {
     @State private var firstTime: Bool = true
     @Binding var selectedTimeString: String
     
+    var verticalPadding: CGFloat = 8
+
     var body: some View {
         Button(action: {
             showTimePicker.toggle()
@@ -16,7 +18,7 @@ struct TimeButtonView: View {
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
+                .padding(.vertical, verticalPadding)
                 .background(Color.grayColor)
                 .cornerRadius(25)
         }
@@ -25,13 +27,16 @@ struct TimeButtonView: View {
                 view
                 DatePicker("Seleccione la hora", selection: $selectedTime, displayedComponents: .hourAndMinute)
                     .datePickerStyle(WheelDatePickerStyle())
+                    .frame(width: 150, height: 150)
                     .labelsHidden()
                     .onChange(of: selectedTime, { _ , newValue in
                         selectedTimeString = timeString(from: selectedTime)
                     })
                     .padding()
-                    .background(Color(UIColor.systemBackground))
+                    .background(Color.white.opacity(0.3))
                     .cornerRadius(25)
+                    .shadow(radius: 25)
+                    .transition(.move(edge: .top))
             }
         }
     }

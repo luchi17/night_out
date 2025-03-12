@@ -11,8 +11,6 @@ struct ManagementEventsView: View {
     
     @StateObject private var viewModel = ManagementEventsViewModel()
     @State private var showDatePicker: Bool = false
-    @State private var isPicker1Open = false
-    @State private var isPicker2Open = false
     
     enum FocusField: Hashable, RawRepresentable {
         case nombreEvento
@@ -105,18 +103,15 @@ struct ManagementEventsView: View {
                 // Botones de Apertura y Cierre
                 HStack {
                     TimeButtonView(
-                        title: "APERTURA".uppercased(),
+                        title: "APERTURA",
                         selectedTimeString: $viewModel.startTime,
-                        pickerOpened: { opened in
-                            isPicker2Open = !opened
-                        })
+                        verticalPadding: 12
+                    )
                     
                     TimeButtonView(
-                        title: "CIERRE".uppercased(),
+                        title: "CIERRE",
                         selectedTimeString: $viewModel.endTime,
-                        pickerOpened: { opened in
-                            isPicker1Open = !opened
-                        }
+                        verticalPadding: 12
                     )
                 }
                 
@@ -125,7 +120,7 @@ struct ManagementEventsView: View {
                     .textFieldStyle(PlainTextFieldStyle())
                     .foregroundColor(Color.blackColor)
                     .accentColor(Color.blackColor)
-                    .frame(maxWidth: .infinity, minHeight: 200, alignment: .top)
+                    .frame(maxWidth: .infinity, minHeight: 55, alignment: .top)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 8).fill(.white)
@@ -134,7 +129,6 @@ struct ManagementEventsView: View {
                     .onSubmit {
                         hideKeyboard()
                     }
-                
                 
                 // Campos adicionales
                 entradasView
@@ -352,7 +346,7 @@ struct ManagementEventsView: View {
                 Text("Subir evento".uppercased())
                     .buttonStyle()
             }
-            .padding(.bottom, 40)
+            .padding(.bottom, 25)
         }
     }
     

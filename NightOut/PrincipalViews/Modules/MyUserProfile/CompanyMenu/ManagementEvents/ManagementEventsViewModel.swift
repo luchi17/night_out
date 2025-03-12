@@ -19,8 +19,8 @@ class ManagementEventsViewModel: ObservableObject {
     @Published var eventDate: String = ""
     @Published var eventDescription: String = ""
     @Published var selectedMusicGenre: String = ""
-    @Published var startTime: String = "Apertura"
-    @Published var endTime: String = "Cierre"
+    @Published var startTime: String = ""
+    @Published var endTime: String = ""
     @Published var image: UIImage?
     @Published var entradas: [NewEntrada] = []
     @Published var showImagePicker: Bool = false
