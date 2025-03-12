@@ -1,5 +1,5 @@
 {
-  "originHash" : "a571f8a5764a0157dbe73bd8d6ba2a221ba774eeb22ab5d0a4cf8c0bcfcd2799",
+  "originHash" : "604a557459f232642eb635e7d30fe5cef257bf94f8d58d850cb6d02097dae16d",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "194a6706acbd25e4ef639bcaddea16e8758a3e27",
         "version" : "1.2024011602.0"
+      }
+    },
+    {
+      "identity" : "anycodable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flight-School/AnyCodable.git",
+      "state" : {
+        "revision" : "df9dd8aa523eb51d985b80678214b2733dcf432e",
+        "version" : "0.2.1"
       }
     },
     {

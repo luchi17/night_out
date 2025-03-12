@@ -15,6 +15,7 @@
 		187F20402CD93A04005469B5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 187F203F2CD93A04005469B5 /* FirebaseStorage */; };
 		188167DA2D57808F005E7785 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 188167D92D57808F005E7785 /* GoogleService-Info.plist */; };
 		188169392D58E90A005E7785 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 188169382D58E90A005E7785 /* FirebaseMessaging */; };
+		18A53CDB2D81E90500A126B7 /* AnyCodable in Frameworks */ = {isa = PBXBuildFile; productRef = 18A53CDA2D81E90500A126B7 /* AnyCodable */; };
 		18CBFCC32D6E33C7008C1C5D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18CBFCC22D6E33C7008C1C5D /* LaunchScreen.storyboard */; };
 		18E175F22CB6893E00E3CA07 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F12CB6893E00E3CA07 /* FirebaseDatabase */; };
 		18E175F72CB6991A00E3CA07 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 18E175F62CB6991A00E3CA07 /* GoogleSignIn */; };
@@ -112,6 +113,7 @@
 				181656E92CB57BC1005063A9 /* FirebaseCore in Frameworks */,
 				1839A6562CEBAE330062ED82 /* Kingfisher in Frameworks */,
 				18E175F92CB6991A00E3CA07 /* GoogleSignInSwift in Frameworks */,
+				18A53CDB2D81E90500A126B7 /* AnyCodable in Frameworks */,
 				18E175F22CB6893E00E3CA07 /* FirebaseDatabase in Frameworks */,
 				187F20402CD93A04005469B5 /* FirebaseStorage in Frameworks */,
 				181656E72CB57BC1005063A9 /* FirebaseAuth in Frameworks */,
@@ -196,6 +198,7 @@
 				187F203F2CD93A04005469B5 /* FirebaseStorage */,
 				1839A6552CEBAE330062ED82 /* Kingfisher */,
 				188169382D58E90A005E7785 /* FirebaseMessaging */,
+				18A53CDA2D81E90500A126B7 /* AnyCodable */,
 			);
 			productName = NightOut;
 			productReference = 18AE85FA2CA6A900007448F3 /* NightOut.app */;
@@ -277,6 +280,7 @@
 				181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				18E175F52CB6990400E3CA07 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				1839A6542CEBADB00062ED82 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				18A53CD92D81E81600A126B7 /* XCRemoteSwiftPackageReference "AnyCodable" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 18AE85FB2CA6A900007448F3 /* Products */;
@@ -691,6 +695,14 @@
 				version = 8.1.0;
 			};
 		};
+		18A53CD92D81E81600A126B7 /* XCRemoteSwiftPackageReference "AnyCodable" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Flight-School/AnyCodable.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.2.1;
+			};
+		};
 		18E175F52CB6990400E3CA07 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -736,6 +748,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 181656062CB579C6005063A9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		18A53CDA2D81E90500A126B7 /* AnyCodable */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 18A53CD92D81E81600A126B7 /* XCRemoteSwiftPackageReference "AnyCodable" */;
+			productName = AnyCodable;
 		};
 		18E175F12CB6893E00E3CA07 /* FirebaseDatabase */ = {
 			isa = XCSwiftPackageProductDependency;
