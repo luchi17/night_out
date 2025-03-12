@@ -47,7 +47,10 @@ class ManagementEventsViewModel: ObservableObject {
         self.loading = true
         
         guard !eventName.isEmpty, !eventDate.isEmpty, !eventDescription.isEmpty, selectedMusicGenre != "Selecciona un género", let image = image else {
-            self.toast = .custom(.init(title: "", description: "Por favor, completa todos los campos.", image: nil))
+            DispatchQueue.main.async {
+                self.loading = false
+                self.toast = .custom(.init(title: "", description: "Por favor, completa todos los campos.", image: nil))
+            }
             return
         }
         
@@ -64,30 +67,40 @@ class ManagementEventsViewModel: ObservableObject {
         
         let imageRef = Storage.storage().reference().child("event_images/\(Int64(Date().timeIntervalSince1970 * 1000)).png")
         
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            self.toast = .custom(.init(title: "", description: "Error al subir imagen.", image: nil))
             return
         }
-  
-        imageRef.putData(imageData, metadata: nil) { _, error in
+        
+        imageRef.putData(imageData, metadata: metadata) { [weak self] _, error in
+            
+            guard let self = self else { return }
             
             if let error = error {
-                self.loading = false
-                self.toast = .custom(.init(title: "", description: "Error al subir imagen: \(error.localizedDescription).", image: nil))
+                DispatchQueue.main.async {
+                    self.loading = false
+                    self.toast = .custom(.init(title: "", description: "Error al subir imagen: \(error.localizedDescription).", image: nil))
+                }
                 return
             }
             
             imageRef.downloadURL { url, error in
                 
                 guard let downloadURL = url?.absoluteString else {
-                    self.loading = false
-                    self.toast = .custom(.init(title: "", description: "Error al subir imagen.", image: nil))
+                    DispatchQueue.main.async {
+                        self.loading = false
+                        self.toast = .custom(.init(title: "", description: "Error al subir imagen.", image: nil))
+                    }
                     return
                 }
                 
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-                    self.loading = false
-                    self.toast = .custom(.init(title: "", description: "No estás autenticado. Inicia sesión para continuar.", image: nil))
+                    DispatchQueue.main.async {
+                        self.loading = false
+                        self.toast = .custom(.init(title: "", description: "No estás autenticado. Inicia sesión para continuar.", image: nil))
+                    }
                     return
                 }
                 
@@ -110,12 +123,15 @@ class ManagementEventsViewModel: ObservableObject {
                 ]
                 
                 eventRef.setValue(eventData) { error, _ in
-                    self.loading = false
-                    if let error = error {
-                        self.toast = .custom(.init(title: "", description: "Error al subir evento: \(error.localizedDescription).", image: nil))
-                    } else {
-                        self.toast = .success(.init(title: "", description: "Evento subido exitosamente.", image: nil))
+                    DispatchQueue.main.async {
+                        self.loading = false
+                        if let error = error {
+                            self.toast = .custom(.init(title: "", description: "Error al subir evento: \(error.localizedDescription).", image: nil))
+                        } else {
+                            self.toast = .success(.init(title: "", description: "Evento subido exitosamente.", image: nil))
+                        }
                     }
+                    
                 }
             }
         }

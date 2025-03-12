@@ -86,6 +86,9 @@ struct ManagementEventsView: View {
                 TextField("", text: $viewModel.eventName, prompt: Text("Nombre del Evento").foregroundColor(Color.grayColor))
                     .textfieldStyle()
                     .focused($focusedField, equals: .nombreEvento)
+                    .onSubmit {
+                        hideKeyboard()
+                    }
                 
                 Text(viewModel.eventDate.isEmpty ? "Fecha del Evento" : viewModel.eventDate)
                     .foregroundColor(Color.blackColor)
