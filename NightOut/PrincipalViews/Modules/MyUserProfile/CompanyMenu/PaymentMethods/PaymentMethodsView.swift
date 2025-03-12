@@ -105,7 +105,6 @@ struct CompanyPaymentMethodsView: View {
                     .foregroundColor(.white)
                     .padding(.all, 8)
                     .background(Color.blackColor)
-                    .cornerRadius(8)
                     .padding(.bottom, 20)
                 
                 Text("Nombre completo del titular de la cuenta")

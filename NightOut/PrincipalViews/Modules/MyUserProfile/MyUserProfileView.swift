@@ -168,7 +168,7 @@ struct MyUserProfileView: View {
                     viewModel.companyMenuSelection = nil
                 })
             case .gestorEventos:
-                TicketsReaderView(onClose: {
+                ManagementEventsView(onClose: {
                     viewModel.companyMenuSelection = nil
                 })
             case .publicidad:

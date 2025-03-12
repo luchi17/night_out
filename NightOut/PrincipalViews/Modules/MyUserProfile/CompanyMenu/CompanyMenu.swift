@@ -7,7 +7,7 @@ struct CompanyMenu: View {
     
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 20) {
                 Button(action: {
                     selection = .lectorEntradas
                     showSheet = false
@@ -63,7 +63,7 @@ struct CompanyMenu: View {
         }
         .padding(.all, 20)
         .background(Color.grayColor)
-        .frame(maxWidth: 230, alignment: .leading)
+        .frame(maxWidth: 210, alignment: .leading)
     }
 }
 
