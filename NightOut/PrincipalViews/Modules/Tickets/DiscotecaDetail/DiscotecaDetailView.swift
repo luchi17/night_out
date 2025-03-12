@@ -147,8 +147,7 @@ struct CollapsingHeader: View {
                         .clipped()
                 }
             } else {
-                Image("loading")
-                    .resizable()
+                Color.grayColor
                     .scaledToFill()
                     .frame(width: geometry.size.width, height: max(geometry.size.height, 230))
                     .clipped()
@@ -189,7 +188,7 @@ struct EventsSection: View {
                     VStack {
                         EventCardRow(
                             fiesta: fiesta,
-                            imageWidth: (UIScreen.main.bounds.width / 2) - 30,
+                            imageWidth: (UIScreen.main.bounds.width / 2) - 35,
                             imageHeight: 250 - 16
                         )
                         .frame(maxWidth: .infinity)

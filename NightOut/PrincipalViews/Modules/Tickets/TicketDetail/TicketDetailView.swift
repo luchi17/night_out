@@ -177,7 +177,7 @@ struct TicketDetailView: View {
                 }
             }
             .padding(.vertical)
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 10)
         }
     }
     

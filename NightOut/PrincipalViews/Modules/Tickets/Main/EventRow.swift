@@ -35,7 +35,7 @@ struct EventRow: View {
                             HStack {
                                 EventCardRow(
                                     fiesta: fiesta,
-                                    imageWidth: UIScreen.main.bounds.width / 2 - 30,
+                                    imageWidth: UIScreen.main.bounds.width / 2 - 35,
                                     imageHeight: 250 - 16
                                 )
                                 .frame(width: 325, height: 250)
