@@ -85,16 +85,49 @@ enum ProfileType {
 
 
 struct EntradaUserModel: Codable {
-    let apellido: String?
     let correo: String?
     let discoteca: String?
-    let dni: String?
     let evento: String?
     let fecha: String?
     let nombre: String?
     let numeroTicket: String?
+    let precio: Precio?
     let qrCodeBase64: String?
     let qrText: String?
+    let tipoEntrada: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case correo, discoteca, evento, fecha, nombre, precio, qrText
+        case numeroTicket = "numeroTicket"
+        case qrCodeBase64 = "qrCodeBase64"
+        case tipoEntrada = "tipo de entrada"
+    }
+}
+
+enum Precio: Codable {
+    case double(Double)
+    case string(String)
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let doubleValue = try? container.decode(Double.self) {
+            self = .double(doubleValue)
+        } else if let stringValue = try? container.decode(String.self) {
+            self = .string(stringValue)
+        } else {
+            throw DecodingError.typeMismatch(Precio.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Precio debe ser un String o un Double"))
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .double(let value):
+            try container.encode(value)
+        case .string(let value):
+            try container.encode(value)
+        }
+    }
 }
 
 struct UserPaymentMethod: Codable {

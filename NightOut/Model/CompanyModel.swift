@@ -1,5 +1,5 @@
 import Foundation
-
+import AnyCodable
 
 struct CompanyUsersModel: Codable {
     let users: [String: CompanyModel]  // Un diccionario de usuarios donde la clave es el UID
@@ -27,6 +27,7 @@ struct CompanyUsersModel: Codable {
         }
 }
 
+//Not specifying type of data with AnyCodable as I won´t decode the content of those attributes. Accessing them directly as data[""]
 struct CompanyModel: Codable {
     var email: String? = ""
     var endTime: String? = ""
@@ -37,12 +38,13 @@ struct CompanyModel: Codable {
     var location: String? = ""
     var startTime: String? = ""
     var uid: String
-    var entradas: [String: EntradaModel]?
+    var entradas: AnyCodable?
     var payment: PaymentMethodModel?
-    var ticketsSold:  [String: TicketModel]? = [:]
+    var ticketsSold: AnyCodable?
     var profile: String?
     var fcm_token: String?
-    var MisEntradas: [String: EntradaUserModel]?
+    var MisEntradas: AnyCodable?
+
    
     var profileType: ProfileType {
         if profile == "private" {
@@ -68,26 +70,7 @@ struct CompanyModel: Codable {
             case profile = "profile"
             case fcm_token
             case MisEntradas
-//            case misLigas
         }
-}
-
-struct EntradaModel: Codable {
-    let capacity: String?
-    let description: String?
-    let fecha: String?
-    let imageURL: String?
-    let name: String?
-    let price: String?
-
-    enum CodingKeys: String, CodingKey {
-        case capacity
-        case description
-        case fecha
-        case imageURL = "image_url"
-        case name
-        case price
-    }
 }
 
 struct PaymentMethodModel: Codable {

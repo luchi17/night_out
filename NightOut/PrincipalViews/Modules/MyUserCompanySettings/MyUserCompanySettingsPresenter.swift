@@ -86,7 +86,8 @@ final class MyUserCompanySettingsPresenterImpl: MyUserCompanySettingsPresenter {
                     entradas: companyModel?.entradas,
                     payment: companyModel?.payment,
                     ticketsSold: companyModel?.ticketsSold,
-                    profile: companyModel?.profile
+                    profile: companyModel?.profile,
+                    MisEntradas: companyModel?.MisEntradas
                 )
                 return presenter.useCases.saveCompanyDataUseCase.execute(model: model)
                     .eraseToAnyPublisher()

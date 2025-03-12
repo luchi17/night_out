@@ -162,7 +162,8 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
                         entradas: presenter.companyModel?.entradas,
                         payment: presenter.companyModel?.payment,
                         ticketsSold: presenter.companyModel?.ticketsSold,
-                        profile: presenter.viewModel.isPrivate ? "private" : "public"
+                        profile: presenter.viewModel.isPrivate ? "private" : "public",
+                        MisEntradas: presenter.companyModel?.MisEntradas
                     )
                     return presenter.useCases.saveCompanyUseCase.execute(model: model)
                         .map({ _ in imageUrl })
