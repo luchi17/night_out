@@ -3,16 +3,11 @@ import PhotosUI
 import FirebaseFirestore
 import FirebaseStorage
 
-struct EntradaTipo: Identifiable {
+struct NewEntrada: Identifiable, Equatable {
     let id = UUID()
     var nombre: String
     var precio: String
     var aforo: String
-}
-
-struct NewEntrada: Equatable {
-    let id = UUID()
-    var entradasTipo: [EntradaTipo] = []
     
     public static func == (lhs: NewEntrada, rhs: NewEntrada) -> Bool {
         return lhs.id == rhs.id
@@ -35,10 +30,10 @@ class ManagementEventsViewModel: ObservableObject {
     
     @Published var selectedItem: PhotosPickerItem?
     
-    let musicGenres = ["Selecciona un género", "Rock", "Pop", "Electrónica", "Reggaetón"]
+    let musicGenres = ["Selecciona", "Rock", "Pop", "Electrónica", "Reggaetón"]
     
     func addEntrada() {
-        entradas.append(NewEntrada())
+        entradas.append(NewEntrada(nombre: "", precio: "", aforo: ""))
     }
     
     func removeLastEntrada() {
@@ -58,17 +53,13 @@ class ManagementEventsViewModel: ObservableObject {
         
         var additionalData: [String: [String: String]] = [:]
         
-        for (index, entradasTipo) in entradas.map({ $0.entradasTipo }).enumerated() {
+        for (index, entrada) in entradas.enumerated() {
             
-            for (index, entrada) in entradasTipo.enumerated() {
-                
-                if entrada.nombre.isEmpty || entrada.precio.isEmpty || entrada.aforo.isEmpty {
-                    self.toast = .custom(.init(title: "", description: "Por favor, completa todos los campos para la entrada tipo \(index + 1).", image: nil))
-                    return
-                }
-                additionalData[entrada.nombre] = ["price": entrada.precio, "capacity": entrada.aforo]
+            if entrada.nombre.isEmpty || entrada.precio.isEmpty || entrada.aforo.isEmpty {
+                self.toast = .custom(.init(title: "", description: "Por favor, completa todos los campos para la entrada tipo \(index + 1).", image: nil))
+                return
             }
-            
+            additionalData[entrada.nombre] = ["price": entrada.precio, "capacity": entrada.aforo]
         }
         
         let imageRef = Storage.storage().reference().child("event_images/\(Int64(Date().timeIntervalSince1970 * 1000)).png")
@@ -77,9 +68,7 @@ class ManagementEventsViewModel: ObservableObject {
             self.toast = .custom(.init(title: "", description: "Error al subir imagen.", image: nil))
             return
         }
-        
-        let metadata = StorageMetadata()
-        
+  
         imageRef.putData(imageData, metadata: nil) { _, error in
             
             if let error = error {

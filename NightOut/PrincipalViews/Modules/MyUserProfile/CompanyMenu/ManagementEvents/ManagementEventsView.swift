@@ -11,6 +11,8 @@ struct ManagementEventsView: View {
     
     @StateObject private var viewModel = ManagementEventsViewModel()
     @State private var showDatePicker: Bool = false
+    @State private var isPicker1Open = false
+    @State private var isPicker2Open = false
     
     enum FocusField: Hashable, RawRepresentable {
         case nombreEvento
@@ -65,7 +67,7 @@ struct ManagementEventsView: View {
                             .foregroundStyle(Color.white)
                     }
                 }
-                .padding(.trailing, 5)
+                .padding(.trailing, 15)
                 .padding(.top, 22)
                 
                 // Imagen del evento
@@ -82,48 +84,52 @@ struct ManagementEventsView: View {
                 }
                 
                 // Nombre del evento
-                TextField("Nombre del Evento", text: $viewModel.eventName)
+                TextField("", text: $viewModel.eventName, prompt: Text("Nombre del Evento").foregroundColor(Color.grayColor))
                     .textfieldStyle()
                     .focused($focusedField, equals: .nombreEvento)
                 
-                Text("Fecha del Evento")
-                    .textfieldStyle()
+                Text(viewModel.eventDate.isEmpty ? "Fecha del Evento" : viewModel.eventDate)
+                    .foregroundColor(Color.blackColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 8).fill(.white)
+                    )
                     .onTapGesture {
                         showDatePicker.toggle()
                     }
                 
                 // Tipo de Música
-                HStack {
-                    Text("Música")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    Picker("Tipo de Música", selection: $viewModel.selectedMusicGenre) {
-                        ForEach(viewModel.musicGenres, id: \.self) { type in
-                            Text(type).tag(type)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                    .frame(maxWidth: .infinity)
-                }
+                musicView
                 
                 // Botones de Apertura y Cierre
                 HStack {
                     TimeButtonView(
-                        title: "APERTURA",
-                        selectedTimeString: $viewModel.startTime
-                    )
+                        title: "APERTURA".uppercased(),
+                        selectedTimeString: $viewModel.startTime,
+                        pickerOpened: { opened in
+                            isPicker2Open = !opened
+                        })
+                    
                     TimeButtonView(
-                        title: "CIERRE",
-                        selectedTimeString: $viewModel.endTime
+                        title: "CIERRE".uppercased(),
+                        selectedTimeString: $viewModel.endTime,
+                        pickerOpened: { opened in
+                            isPicker1Open = !opened
+                        }
                     )
                 }
                 
                 // Descripción del evento
                 TextField("", text: $viewModel.eventDescription, prompt: Text("Descripción del Evento").foregroundColor(Color.grayColor), axis: .vertical)
-                    .textfieldStyle()
-                    .frame(minHeight: 100)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .foregroundColor(Color.blackColor)
+                    .accentColor(Color.blackColor)
+                    .frame(maxWidth: .infinity, minHeight: 200, alignment: .top)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 8).fill(.white)
+                    )
                     .focused($focusedField, equals: .description)
                     .onSubmit {
                         hideKeyboard()
@@ -131,46 +137,11 @@ struct ManagementEventsView: View {
                 
                 
                 // Campos adicionales
-                VStack(alignment: .leading) {
-                    ForEach($viewModel.entradas, id: \.id) { $entrada in
-                        ForEach($entrada.entradasTipo.indices, id: \.self) { index in
-                            
-                            let fieldID = entrada.id
-                            
-                            Text("Entrada tipo \(index + 1)")
-                                .foregroundStyle(.white)
-                                .font(.system(size: 16, weight: .bold))
-                            
-                            TextField("", text: $entrada.entradasTipo[index].nombre, prompt: Text("Nombre").foregroundColor(Color.grayColor))
-                                .textFieldEntradaType()
-                                .focused($focusedField, equals: .nombre(fieldID))
-                                .onSubmit {
-                                    focusedField = .precio(fieldID)  // Pasar foco al siguiente campo
-                                }
-                                .submitLabel(.next)
-                            
-                            TextField("", text: $entrada.entradasTipo[index].precio, prompt: Text("Precio").foregroundColor(Color.grayColor))
-                                .textFieldEntradaType()
-                                .focused($focusedField, equals: .precio(fieldID))
-                                .onSubmit {
-                                    focusedField = .aforo(fieldID)
-                                }
-                                .submitLabel(.next)
-                            
-                            TextField("", text: $entrada.entradasTipo[index].aforo, prompt: Text("Aforo").foregroundColor(Color.grayColor))
-                                .textFieldEntradaType()
-                                .focused($focusedField, equals: .aforo(fieldID))
-                                .onSubmit {
-                                    focusedField = nil  // Cierra el teclado al finalizar
-                                }
-                                .submitLabel(.done)
-                        }
-                    }
-                }
+                entradasView
                 
                 belowButtons
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 20)
         }
         .clipShape(Rectangle())
         .scrollClipDisabled(false)
@@ -180,9 +151,20 @@ struct ManagementEventsView: View {
             Color.blackColor.edgesIgnoringSafeArea(.all)
         )
         .photosPicker(isPresented: $viewModel.showImagePicker, selection: $viewModel.selectedItem, matching: .images)
+        .onChange(of: viewModel.selectedItem) { _, newItem in
+            Task {
+                if let newItem = newItem {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        viewModel.image = uiImage
+                    }
+                }
+            }
+        }
         .sheet(isPresented: $showDatePicker) {
             datePicker
-                .presentationDetents([.large])
+                .padding()
+                .presentationDetents([.medium])
                 .presentationDragIndicator(.hidden)
         }
         .onTapGesture(perform: {
@@ -203,13 +185,91 @@ struct ManagementEventsView: View {
         )
     }
     
+    
+    private var musicView: some View {
+        HStack {
+            Text("Música")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, alignment: .center)
+            
+            Picker("Tipo de Música", selection: $viewModel.selectedMusicGenre) {
+                ForEach(viewModel.musicGenres, id: \.self) { type in
+                    Text(type)
+                        .foregroundStyle(Color.blackColor)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                        .italic()
+                        .tag(type)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(MenuPickerStyle())
+            .font(.system(size: 16, weight: .bold))
+            .foregroundStyle(Color.blackColor)
+            .accentColor(Color.blackColor)
+            .italic()
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.white)
+            )
+            .onAppear {
+                // Asegúrate de que la primera opción esté seleccionada si no hay ninguna
+                if viewModel.selectedMusicGenre.isEmpty, let firstGenre = viewModel.musicGenres.first {
+                    viewModel.selectedMusicGenre = firstGenre
+                }
+            }
+        }
+    }
+    
+    private var entradasView: some View {
+        VStack(alignment: .leading) {
+            
+            ForEach($viewModel.entradas.indices, id: \.self) { index in
+                
+                let uuid = $viewModel.entradas[index].id
+                
+                Text("Entrada tipo \(index + 1)")
+                    .foregroundStyle(.white)
+                    .font(.system(size: 16, weight: .bold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                TextField("", text: $viewModel.entradas[index].nombre, prompt: Text("Nombre").foregroundColor(Color.grayColor))
+                    .textFieldEntradaType()
+                    .focused($focusedField, equals: .nombre(uuid))
+                    .onSubmit {
+                        focusedField = .precio(uuid)  // Pasar foco al siguiente campo
+                    }
+                    .submitLabel(.next)
+                
+                TextField("", text: $viewModel.entradas[index].precio, prompt: Text("Precio").foregroundColor(Color.grayColor))
+                    .textFieldEntradaType()
+                    .focused($focusedField, equals: .precio(uuid))
+                    .onSubmit {
+                        focusedField = .aforo(uuid)  // Pasar foco al siguiente campo
+                    }
+                    .submitLabel(.next)
+                
+                TextField("", text: $viewModel.entradas[index].aforo, prompt: Text("Aforo").foregroundColor(Color.grayColor))
+                    .textFieldEntradaType()
+                    .focused($focusedField, equals: .aforo(uuid))
+                    .onSubmit {
+                        hideKeyboard()
+                    }
+                    .submitLabel(.next)
+            }
+        }
+    }
+    
     private var imagePicker: some View {
         VStack {
             ZStack {
                 Circle()
                     .stroke(Color.white, lineWidth: 2)
                     .frame(width: 120, height: 120)
-
+                
                 if let selectedImage = viewModel.image {
                     Image(uiImage: selectedImage)
                         .resizable()
@@ -217,12 +277,11 @@ struct ManagementEventsView: View {
                         .frame(width: 120, height: 120)
                         .clipShape(Circle())
                 } else {
-                    Image("camara")
+                    Image(systemName: "photo")
                         .resizable()
                         .foregroundStyle(.white)
-                        .scaledToFill()
-                        .frame(width: 120, height: 120)
-                        .clipShape(Circle())
+                        .scaledToFit()
+                        .frame(width: 100, height: 100)
                 }
             }
             .onTapGesture {
@@ -231,13 +290,17 @@ struct ManagementEventsView: View {
         }
     }
     
+    @State private var selectedTime = Date()
+    
     private var datePicker: some View {
         DatePicker("Selecciona una fecha", selection: Binding<Date> (
-            get: { Date() },
+            get: { selectedTime },
             set: { newValue in
+                selectedTime = newValue
                 viewModel.eventDate = formattedDate(newValue)
+                showDatePicker.toggle()
             }),
-            displayedComponents: [.date]
+                   displayedComponents: [.date]
         )
         .datePickerStyle(GraphicalDatePickerStyle())
     }
@@ -253,26 +316,34 @@ struct ManagementEventsView: View {
         VStack {
             // Botones + y - para añadir campos
             HStack {
-                Button("+") {
+                // Botón de Subir Evento
+                Button(action: {
                     viewModel.addEntrada()
+                }) {
+                    Text("+".uppercased())
+                        .font(.system(size: 18, weight: .bold))
                 }
                 .frame(width: 40, height: 40)
-                .background(Color.blue)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .clipShape(Circle())
                 
-                Button("-") {
+                Button(action: {
                     viewModel.removeLastEntrada()
+                }) {
+                    Text("-".uppercased())
+                        .font(.system(size: 18, weight: .bold))
                 }
                 .frame(width: 40, height: 40)
-                .background(Color.red)
+                .background(Color.grayColor)
                 .foregroundColor(.white)
                 .clipShape(Circle())
                 
                 Text("Añadir entradas al evento")
                     .foregroundColor(.white)
+                
+                Spacer()
             }
-            .padding()
             
             // Botón de Subir Evento
             Button(action: {
@@ -281,6 +352,7 @@ struct ManagementEventsView: View {
                 Text("Subir evento".uppercased())
                     .buttonStyle()
             }
+            .padding(.bottom, 40)
         }
     }
     
@@ -297,9 +369,10 @@ private extension View {
             .textFieldStyle(PlainTextFieldStyle())
             .foregroundColor(Color.blackColor)
             .accentColor(Color.blackColor)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .background(
-                Rectangle().fill(.white)
+                Rectangle().fill(.gray.opacity(0.1))
             )
     }
     
@@ -309,11 +382,14 @@ private extension View {
             .textFieldStyle(PlainTextFieldStyle())
             .foregroundColor(Color.blackColor)
             .accentColor(Color.blackColor)
-            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, 10)
+            .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 10).fill(.white)
+                RoundedRectangle(cornerRadius: 8).fill(.white)
             )
     }
+    
     @ViewBuilder
     func buttonStyle() -> some View {
         self
