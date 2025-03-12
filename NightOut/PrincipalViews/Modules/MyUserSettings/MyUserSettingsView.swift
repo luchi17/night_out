@@ -6,6 +6,7 @@ struct MyUserSettingsView: View {
     @State private var showAlertDeleteUser = false
     @State private var showPrivacyPolicy = false
     @State private var showTermsAndConditions = false
+    @State private var showTutorial = false
     
     @Binding private var closeAllSheets: Bool
     
@@ -67,6 +68,9 @@ struct MyUserSettingsView: View {
                     .font(.system(size: 18))
                     .foregroundColor(.white)
                     .padding(.top, 30)
+                    .onTapGesture {
+                        showTutorial.toggle()
+                    }
                 
                 HStack {
                     Image(systemName: "arrow.right.square")
@@ -124,6 +128,13 @@ struct MyUserSettingsView: View {
                 },
                 secondaryButton: .cancel()
             )
+        }
+        .sheet(isPresented: $showTutorial) {
+            TutorialSettingsView(close: {
+                showTutorial = false
+            })
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showPrivacyPolicy) {
             PrivacyPolicyView()

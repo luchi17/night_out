@@ -20,6 +20,7 @@ final class HomeViewModel: ObservableObject {
     @Published var selectedTab: HomeSelectedTab = .feed
     @Published var profileImageUrl: String?
     @Published var showCompanyFirstAlert: Bool = false
+    @Published var showUserFirstAlert: Bool = false
     @Published var showNighoutAlert: Bool = false
     @Published var showMyProfile: Bool = false
     @Published var nighoutAlertTitle: String = ""
@@ -37,7 +38,6 @@ protocol HomePresenter {
 final class HomePresenterImpl: HomePresenter {
     
     struct UseCases {
-//        let userDataUseCase: UserDataUseCase
         let saveUserUseCase: SaveUserUseCase
     }
     
@@ -192,6 +192,8 @@ final class HomePresenterImpl: HomePresenter {
                 
                 if (UserDefaults.getIsFirstLoggedIn() ?? false) && !FirebaseServiceImpl.shared.getImUser() {
                     presenter.viewModel.showCompanyFirstAlert = true
+                } else if (UserDefaults.getIsFirstLoggedIn() ?? false) && FirebaseServiceImpl.shared.getImUser() {
+                    presenter.viewModel.showUserFirstAlert = true
                 }
                 
                 UserDefaults.setIsFirstLoggedIn(false)

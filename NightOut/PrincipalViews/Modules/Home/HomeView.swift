@@ -88,6 +88,13 @@ struct HomeView: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $viewModel.showUserFirstAlert) {
+            TutorialSettingsView(close: {
+                viewModel.showUserFirstAlert = false
+            })
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
         .padding(.top, 20)
         .background(
             Color.blackColor
