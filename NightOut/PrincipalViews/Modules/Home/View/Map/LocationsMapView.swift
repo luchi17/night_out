@@ -38,10 +38,18 @@ struct LocationsMapView: View {
             
             ForEach(viewModel.allClubsModels) { club in
                 Annotation(club.name, coordinate: club.coordinate.location) {
-                    CustomAnnotationView(
-                        club: club,
-                        selection: $viewModel.selectedMarkerLocation
-                    )
+                    if viewModel.selectedMarkerFromList == club {
+                        CustomAnnotationView(
+                            club: club,
+                            selection: $viewModel.selectedMarkerFromList
+                        )
+                    } else {
+                        CircleImage(
+                            imageUrl: club.image,
+                            size: viewModel.selectedMarkerLocation == club ? 55 : 45,
+                            border: true
+                        )
+                    }
                 }
                 .tag(club)
             }
@@ -56,13 +64,30 @@ struct LocationsMapView: View {
             .padding(.top, 10)
             
         })
-        .onChange(of: viewModel.selectedMarkerLocation) {
+        .onChange(of: viewModel.selectedMarkerLocation) { oldValue, newValue in
+            //Resetear ubi de lista cuando se selecciona un nuevo item en el mapa
+            if let oldValue = oldValue, oldValue != newValue {
+                viewModel.selectedMarkerFromList = nil
+            }
             if let selectedMarkerLocation = viewModel.selectedMarkerLocation {
                 let newRegion = MKCoordinateRegion(center: selectedMarkerLocation.coordinate.location,
                                                     span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-                position = MapCameraPosition.region(newRegion)
+                
+                withAnimation(.easeInOut(duration: 1.0)) { // Duración de la animación en segundos
+                    position = MapCameraPosition.region(newRegion)
+                    showingDetail = true
+                }
             }
-            showingDetail = viewModel.selectedMarkerLocation != nil
+        }
+        .onChange(of: viewModel.selectedMarkerFromList) { oldValue, newValue in
+            if let selectedMarkerLocation = viewModel.selectedMarkerFromList {
+                let newRegion = MKCoordinateRegion(center: selectedMarkerLocation.coordinate.location,
+                                                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                
+                withAnimation(.easeInOut(duration: 1.0)) {
+                    position = MapCameraPosition.region(newRegion)
+                }
+            }
         }
         .onChange(of: showNavigationAlert, { old, showNavigationAlert in
             if !showNavigationAlert {
@@ -81,14 +106,18 @@ struct LocationsMapView: View {
                         showNavigationAlert = true
                     }
                 )
+                .presentationDetents([.fraction(0.35), .medium])
             }
         }
         .sheet(isPresented: $showingList, onDismiss: {
-            showingList = false
+           
         }) {
             LocationClubsSheetView(
                 locations: $viewModel.currentShowingLocationList,
-                selectedLocation: locationInListSelectedPublisher.send
+                selectedLocation: { location in
+                    showingList = false
+                    locationInListSelectedPublisher.send(location)
+                }
             )
         }
         .alert(isPresented: $viewModel.locationManager.locationPermissionDenied) {
@@ -103,7 +132,7 @@ struct LocationsMapView: View {
                 secondaryButton: .cancel()
             )
         }
-        .alert("Open Location", isPresented: $showNavigationAlert) {
+        .alert("Abrir ubicación", isPresented: $showNavigationAlert) {
             Button("Apple Maps") {
                 if let selectedMarkerLocation = viewModel.selectedMarkerLocation {
                     openAppleMapsPublisher.send(

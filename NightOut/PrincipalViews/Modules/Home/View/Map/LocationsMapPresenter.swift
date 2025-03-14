@@ -7,6 +7,7 @@ import Firebase
 final class LocationsMapViewModel: ObservableObject {
     
     @Published var selectedMarkerLocation: LocationModel? // Discoteca seleccionada
+    @Published var selectedMarkerFromList: LocationModel? // Discoteca seleccionada
     
     @Published var locationManager: LocationManager
     @Published var allClubsModels: [LocationModel] = []
@@ -14,7 +15,7 @@ final class LocationsMapViewModel: ObservableObject {
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
-    @Published var markerFromList: Bool = false
+
     
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
@@ -179,8 +180,8 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .locationInListSelected
             .withUnretained(self)
             .sink { presenter, locationSelected in
-                presenter.viewModel.markerFromList = true
-                presenter.viewModel.selectedMarkerLocation = locationSelected
+                presenter.viewModel.selectedMarkerLocation = nil
+                presenter.viewModel.selectedMarkerFromList = locationSelected
             }
             .store(in: &cancellables)
     }
