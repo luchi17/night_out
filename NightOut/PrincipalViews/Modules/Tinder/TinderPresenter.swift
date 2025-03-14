@@ -164,29 +164,42 @@ final class TinderPresenterImpl: TinderPresenter {
             .withUnretained(self)
             .sink { presenter, clubId in
                 
-#warning("TODO: REMOVE, just to try")
+
                 
                 if let clubId = clubId {
                     presenter.viewModel.clubId = clubId
-                    presenter.viewModel.loadingUsers = true
-                    presenter.loadGenderSubject.send()
                     
-//                    // Validar horario permitido (21:00 - 00:00)
-//                    let calendar = Calendar.current
-//                    let currentHour = calendar.component(.hour, from: Date())
-//                    
-//                    if currentHour >= 21 || currentHour < 2 {
-//                        // Navegar a TinderListView dentro del horario permitido
-//                        presenter.viewModel.loadingUsers = true
-//                        presenter.loadGenderSubject.send()
-//                    } else {
-//                        // Mostrar diálogo indicando fuera de horario
-//                        presenter.viewModel.showAlert = true
-//                        presenter.viewModel.shouldOpenConfig = false
-//                        presenter.viewModel.alertTitle = "Fuera de horario"
-//                        presenter.viewModel.alertMessage = "Solo puedes acceder a las fotos de los demás entre las 21:00 y las 00:00."
-//                        presenter.viewModel.alertButtonText = "ACEPTAR"
-//                    }
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "dd-MM-yyyy"
+                    let currentDateString = dateFormatter.string(from: Date())
+                    
+                    
+                    presenter.hasMultipleUsersInClub(
+                        clubId: clubId,
+                        currentDate: currentDateString) { hasMultipleUsers in
+                            if !hasMultipleUsers {
+                                presenter.showNoUsersInSocialDialog() // ❌ Está solo en el club
+                            } else {
+                                
+                                
+                                 #warning("TODO: REMOVE these 2 lines, just for testing, discomment the others")
+                                presenter.viewModel.loadingUsers = true
+                                presenter.loadGenderSubject.send()
+                                
+                                
+//                                // 🔹 Si hay más usuarios, validamos el horario
+//                                let calendar = Calendar.current
+//                                let currentHour = calendar.component(.hour, from: Date())
+//                                
+//                                if (10...23).contains(currentHour) || (0...2).contains(currentHour) {
+//                                    // ✅ Dentro del horario permitido
+//                                    presenter.viewModel.loadingUsers = true
+//                                    presenter.loadGenderSubject.send()
+//                                } else {
+//                                    presenter.showOutsideScheduleDialog() // ❌ Fuera de horario
+//                                }
+                            }
+                        }
                 } else {
                     presenter.viewModel.showAlert = true
                     presenter.viewModel.shouldOpenConfig = false
@@ -197,6 +210,22 @@ final class TinderPresenterImpl: TinderPresenter {
             }
             .store(in: &cancellables)
         
+    }
+    
+    private func showNoUsersInSocialDialog() {
+        viewModel.showAlert = true
+        viewModel.shouldOpenConfig = false
+        viewModel.alertTitle = "No hay usuarios en Social"
+        viewModel.alertMessage = "Actualmente no hay más usuarios en Social para el club al que vas hoy."
+        viewModel.alertButtonText = "ACEPTAR"
+    }
+    
+    private func showOutsideScheduleDialog() {
+        viewModel.showAlert = true
+        viewModel.shouldOpenConfig = false
+        viewModel.alertTitle = "Fuera de horario"
+        viewModel.alertMessage = "Solo puedes acceder a las fotos de los demás entre las 21:00 y las 00:00."
+        viewModel.alertButtonText = "ACEPTAR"
     }
     
     private func getClubIdForCurrentUser() -> AnyPublisher<String?, Never> {
@@ -329,5 +358,17 @@ final class TinderPresenterImpl: TinderPresenter {
             .collect()
             .map({ $0 as? [TinderUser] })
             .eraseToAnyPublisher()
+    }
+    
+    
+    func hasMultipleUsersInClub(clubId: String, currentDate: String, completion: @escaping (Bool) -> Void) {
+        let assistanceRef = FirebaseServiceImpl.shared.getAssistance(profileId: clubId).child(currentDate)
+        
+        assistanceRef.observeSingleEvent(of: .value) { snapshot in
+            let totalUsers = snapshot.childrenCount
+            completion(totalUsers > 1) // Devuelve true si hay más de un usuario, false si está solo
+        } withCancel: { error in
+            completion(false) // En caso de error, asumimos que está solo
+        }
     }
 }
