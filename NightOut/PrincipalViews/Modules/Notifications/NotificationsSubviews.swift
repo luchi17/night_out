@@ -100,13 +100,25 @@ struct DefaultNotificationView: View {
             
             if notification.isPost {
                 if let postImage = notification.postImage {
-                    KingFisherImage(url: URL(string: postImage))
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 60, height: 60)
-                        .onTapGesture {
-                            goToPost(notification)
-                        }
+                    AsyncImage(url: URL(string: postImage)) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 60, height: 60)
+                            .clipped()
+                            .onTapGesture {
+                                goToPost(notification)
+                            }
+                    } placeholder: {
+                        Image(systemName: "photo.fill")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 60, height: 60)
+                            .clipped()
+                            .onTapGesture {
+                                goToPost(notification)
+                            }
+                    }
                     
                 } else {
                     Image(systemName: "photo.fill")

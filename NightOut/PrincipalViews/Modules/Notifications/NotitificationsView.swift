@@ -56,7 +56,6 @@ struct NotificationsView: View {
                 Spacer()
             }
         }
-        .edgesIgnoringSafeArea(.all)
         .showToast(
             error: (
                 type: viewModel.toast,

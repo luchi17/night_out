@@ -218,18 +218,13 @@ struct MyUserEditProfileView: View {
                     .scaledToFill()
                     .frame(width: 100, height: 100)
                     .clipShape(Circle())
-            } else if let profileImageUrl = viewModel.profileImageUrl {
-                KingFisherImage(url: URL(string: profileImageUrl))
-                    .centerCropped(width: 100, height: 100, placeholder: {
-                        ProgressView()
-                    })
-                    .clipShape(Circle())
             } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
+                
+                CircleImage(
+                    imageUrl: viewModel.profileImageUrl,
+                    size: 100,
+                    border: false
+                )
             }
             
             Text("Cambiar imagen")

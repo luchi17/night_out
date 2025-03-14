@@ -1,6 +1,5 @@
 import SwiftUI
 import Combine
-import Kingfisher
 
 struct CommentsView: View {
     
@@ -111,21 +110,12 @@ struct CommentsView: View {
     
     var bottomView: some View {
         HStack {
-            if let profileImage = viewModel.profileImage {
-                KingFisherImage(url: URL(string: profileImage))
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-                    .padding(.leading, 5)
-                
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-                    .padding(.leading, 5)
-            }
+            CircleImage(
+                imageUrl: viewModel.profileImage,
+                size: 40,
+                border: false
+            )
+            .padding(.leading, 5)
             
             TextField("Escriba aquí ...", text: $viewModel.commentText)
                 .padding(10)

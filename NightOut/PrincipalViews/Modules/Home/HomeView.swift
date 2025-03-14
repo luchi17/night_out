@@ -188,24 +188,11 @@ struct HomeView: View {
     }
     
     var profileImage: some View {
-        VStack {
-            if let userImageUrl = viewModel.profileImageUrl {
-                KingFisherImage(url: URL(string: userImageUrl))
-                    .placeholder({
-                        Image("profile")
-                            .clipShape(Circle())
-                    })
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-            }
-        }
+        CircleImage(
+            imageUrl: viewModel.profileImageUrl,
+            size: 40,
+            border: false
+        )
     }
 }
 

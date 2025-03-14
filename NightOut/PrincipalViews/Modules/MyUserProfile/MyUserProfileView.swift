@@ -69,22 +69,13 @@ struct MyUserProfileView: View {
                 
                 editProfileButton
             }
-            
-            if let profileImageUrl = viewModel.profileImageUrl {
-                KingFisherImage(url: URL(string: profileImageUrl))
-                    .centerCropped(width: 100, height: 100, placeholder: {
-                        ProgressView()
-                    })
-                    .clipShape(Circle())
-                    .padding(.top, 40)
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
-                    .padding(.top, 40)
-            }
+    
+            CircleImage(
+                imageUrl: viewModel.profileImageUrl,
+                size: 100,
+                border: false
+            )
+            .padding(.top, 40)
             
             Text(viewModel.fullname)
                 .font(.system(size: 18, weight: .bold))

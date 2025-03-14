@@ -14,25 +14,12 @@ struct CommentView: View  {
     var body: some View {
         
         HStack(spacing: 8) {
-            if let userImageUrl = commentModel.userImageUrl {
-                KingFisherImage(url: URL(string: userImageUrl))
-                    .placeholder({
-                        Image("profile")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
-                    })
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-            }
+            CircleImage(
+                imageUrl: commentModel.userImageUrl,
+                size: 40,
+                border: false
+            )
+            .padding(.leading, 5)
             
             VStack(spacing: 5) {
                 Text(commentModel.username ?? "Unknown")
