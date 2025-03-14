@@ -71,7 +71,6 @@ struct NotificationsView: View {
             title: "Notificaciones",
             goBack: goBackPublisher.send
         )
-//        .background(Color.blackColor.ignoresSafeArea())
         .onAppear {
             viewDidLoadPublisher.send()
         }
