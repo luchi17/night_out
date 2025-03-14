@@ -93,9 +93,10 @@ final class CommentsPresenterImpl: CommentsPresenter {
                 case .failure(let error):
                     print("Error: \(error)")
                     self.viewModel.loading = false
-                    self.viewModel.toastError = .custom(.init(title: "Error", description: "Could not load comments", image: nil))
+                    self.viewModel.toastError = .custom(.init(title: "Error", description: "No se han podido cargar los comentarios.", image: nil))
                 }
             }, receiveValue: { presenter, comments in
+                presenter.viewModel.loading = false
                 presenter.viewModel.comments = comments
             })
             .store(in: &cancellables)
@@ -114,9 +115,10 @@ final class CommentsPresenterImpl: CommentsPresenter {
                     presenter.viewModel.toastError = nil
                     presenter.viewModel.commentText = ""
                     presenter.viewModel.comments.append(comment)
+                
                     presenter.sendNotification(comment: comment)
                 } else {
-                    presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Could not publish comment", image: nil))
+                    presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Comentario no publicado.", image: nil))
                 }
             }
             .store(in: &cancellables)
@@ -135,7 +137,7 @@ final class CommentsPresenterImpl: CommentsPresenter {
 private extension CommentsPresenterImpl {
     func shouldPublishComment() -> Bool {
         if viewModel.commentText.isEmpty {
-            viewModel.toastError = .custom(.init(title: "Please write comment first", description: nil, image: nil))
+            viewModel.toastError = .custom(.init(title: "Por favor, primero escribe un comentario.", description: nil, image: nil))
             return false
         } else {
             viewModel.toastError = nil
@@ -173,9 +175,9 @@ private extension CommentsPresenterImpl {
                 
                 let username: String = {
                     if FirebaseServiceImpl.shared.getImUser() {
-                        return UserDefaults.getUserModel()?.username ?? "Unknown"
+                        return UserDefaults.getUserModel()?.username ?? "Desconocido"
                     } else {
-                        return UserDefaults.getCompanyUserModel()?.username ?? "Unknown"
+                        return UserDefaults.getCompanyUserModel()?.username ?? "Desconocido"
                     }
                 }()
                 
