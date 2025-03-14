@@ -40,7 +40,6 @@ struct CommentsView: View {
                         }
                     }
                     .scaleEffect(y: -1) // Invierte el contenedor
-                    .padding()
                     .animation(.easeOut(duration: 0.2), value: keyboardObserver.keyboardHeight + 50) // Suaviza la animación del teclado
                     .onChange(of: viewModel.comments.count) {
                         withAnimation {
@@ -63,6 +62,7 @@ struct CommentsView: View {
                 .padding(.bottom)
             
         }
+        .padding(.horizontal, 20)
         .background(Color.blackColor.ignoresSafeArea())
         .showToast(
             error: (
@@ -117,11 +117,12 @@ struct CommentsView: View {
             )
             .padding(.leading, 5)
             
-            TextField("Escriba aquí ...", text: $viewModel.commentText)
+            TextField("", text: $viewModel.commentText, prompt: Text("Escriba aquí ...").foregroundColor(Color.white.opacity(0.6)))
                 .padding(10)
                 .background(Color.grayColor.opacity(0.2))
-                .cornerRadius(8)
+                .cornerRadius(10)
                 .foregroundColor(.white)
+                .accentColor(Color.white)
             
             Button(action: {
                 publishCommentPublisher.send()
