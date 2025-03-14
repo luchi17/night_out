@@ -80,6 +80,7 @@ final class UserProfileViewModel: ObservableObject {
     @Published var toast: ToastType?
     
     @Published var myUserModel: UserModel?
+    @Published var mycompanyModel: CompanyModel?
     
     @Published var images: [IdentifiableImage] = []
     
@@ -193,6 +194,8 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         
         let myUserModel =
         useCases.userDataUseCase.getUserInfo(uid: myUid)
+        let myCompanyModel =
+        useCases.companyDataUseCase.getCompanyInfo(uid: myUid)
         
         input
             .viewDidLoad
@@ -234,10 +237,11 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             })
             .withUnretained(self)
             .flatMap({ presenter, _ in
-                Publishers.CombineLatest3(
+                Publishers.CombineLatest4(
                     assistanceObserver,
                     myFollowObserver,
-                    myUserModel
+                    myUserModel,
+                    myCompanyModel
                 )
             })
             .withUnretained(self)
@@ -245,10 +249,15 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 let usersGoingToClub = data.0
                 let followingPeople = data.1
                 let myUserModel = data.2
+                let myCompanyModel = data.3
                 
                 presenter.viewModel.loading = false
                 
-                presenter.viewModel.myUserModel = myUserModel
+                if FirebaseServiceImpl.shared.getImUser() {
+                    presenter.viewModel.myUserModel = myUserModel
+                } else {
+                    presenter.viewModel.mycompanyModel = myCompanyModel
+                }
                 
                 let myUserFollowsThisProfile = presenter.viewModel.following.first(where: { $0 == presenter.model.profileId }) != nil
                 presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
@@ -352,12 +361,24 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
 private extension UserProfilePresenterImpl {
 
     private func addUserFollowNotification() {
-        let model = NotificationModel(
-            ispost: false,
-            postid: "",
-            text: "\(self.viewModel.myUserModel?.username ?? "Desconocido") \(GlobalStrings.shared.startFollowUserText)",
-            userid: myUid
-        )
+        
+        let model: NotificationModel = {
+            if FirebaseServiceImpl.shared.getImUser() {
+                return NotificationModel(
+                    ispost: false,
+                    postid: "",
+                    text: "\(self.viewModel.myUserModel?.username ?? "Desconocido") \(GlobalStrings.shared.startFollowUserText)",
+                    userid: myUid
+                )
+            } else {
+                return NotificationModel(
+                    ispost: false,
+                    postid: "",
+                    text: "\(self.viewModel.mycompanyModel?.username ?? "Desconocido") \(GlobalStrings.shared.startFollowUserText)",
+                    userid: myUid
+                )
+            }
+        }()
         
         useCases.noficationsUsecase.addNotification(
             model: model,
