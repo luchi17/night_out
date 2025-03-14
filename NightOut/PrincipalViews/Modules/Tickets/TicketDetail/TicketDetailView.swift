@@ -85,7 +85,7 @@ struct TicketDetailView: View {
                 Color.blackColor.ignoresSafeArea()
             )
             .preferredColorScheme(.dark)
-            .alert("Abrir localización", isPresented: $showNavigationAlert) {
+            .alert("Abrir ubicación", isPresented: $showNavigationAlert) {
                 Button("Apple Maps") {
                     openAppleMapsPublisher.send()
                     showNavigationAlert = false

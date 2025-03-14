@@ -64,7 +64,7 @@ struct FeedView: View {
             ),
             isIdle: viewModel.loading
         )
-        .alert("Abrir localización", isPresented: $showNavigationAlert) {
+        .alert("Abrir ubicación", isPresented: $showNavigationAlert) {
             Button("Apple Maps") {
                 if let postSelectedToNavigate = postSelectedToNavigate {
                     openAppleMapsPublisher.send(postSelectedToNavigate)
