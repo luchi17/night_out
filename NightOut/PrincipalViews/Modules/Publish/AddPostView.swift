@@ -76,16 +76,18 @@ struct AddPostView: View {
             }
         }
         .ignoresSafeArea()
+        .preferredColorScheme(.light)
         .sheet(isPresented: $showingClubsPicker) {
             AddPostClubsList(
                 locations: $viewModel.locations,
                 onLocationSelected: { club in
+                    showingClubsPicker = false
                     clubTappedPublisher.send(club)
-                    showingClubsPicker.toggle()
                 }
             )
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
+            .background(Color.white.ignoresSafeArea())
         }
         .sheet(isPresented: $showingLocationAlert) {
             ClubSelectionAlert(onTypeSelected: { type in
@@ -101,6 +103,7 @@ struct AddPostView: View {
             })
             .presentationDetents([.fraction(0.2)])
             .presentationDragIndicator(.visible)
+            .background(Color.white.ignoresSafeArea())
         }
         .sheet(isPresented: $showingIconsView) {
             IconsView { emoji in
@@ -111,6 +114,7 @@ struct AddPostView: View {
             }
             .presentationDetents([.fraction(0.3)])
             .presentationDragIndicator(.visible)
+            .background(Color.white.ignoresSafeArea())
         }
         .alert(isPresented: $viewModel.locationManager.locationPermissionDenied) {
             Alert(
@@ -298,7 +302,7 @@ struct AddPostView: View {
     
     var descriptionTextField: some View {
         TextField("", text: $viewModel.description, prompt: Text("Añadir descripción...").foregroundColor(.white))
-            .padding(10)
+            .padding(.leading, 20)
             .foregroundColor(.white) // Color del texto
             .accentColor(.white)
     }
