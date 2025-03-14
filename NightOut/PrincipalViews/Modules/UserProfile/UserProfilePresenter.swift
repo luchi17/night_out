@@ -477,6 +477,8 @@ private extension UserProfilePresenterImpl {
                         
                         let userRef = dateSnapshot.childSnapshot(forPath: self.myUid)
                         
+                        guard userRef.exists() else { continue }
+                        
                         let hasEntry = userRef.childSnapshot(forPath: "entry").value as? Bool ?? false
                         
                         if !hasEntry {
