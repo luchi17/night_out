@@ -54,13 +54,21 @@ final class SearchPresenterImpl: SearchPresenter {
     
     func transform(input: SearchPresenterImpl.ViewInputs) {
         viewModel.$searchText
-                    .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
-                    .removeDuplicates()
-                    .withUnretained(self)
-                    .sink { presenter, query in
-                        presenter.searchUsers(query: query.lowercased())
-                    }
-                    .store(in: &cancellables)
+            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .withUnretained(self)
+            .flatMap { presenter, query -> AnyPublisher<[ProfileModel], Never> in
+                guard !query.isEmpty else {
+                    return Just([]).eraseToAnyPublisher()
+                }
+                return presenter.searchUsers(query: query.lowercased())
+            }
+            .receive(on: DispatchQueue.main)
+            .withUnretained(self)
+            .sink { presenter, users in
+                presenter.viewModel.searchResults = users
+            }
+            .store(in: &cancellables)
         
         input
             .goToProfile
@@ -75,7 +83,7 @@ final class SearchPresenterImpl: SearchPresenter {
             })
             .withUnretained(self)
             .sink { presenter, data in
-            
+                
                 let profileModel = data.1
                 let following = data.0?.following?.keys.first(where: { $0 == profileModel.profileId }) != nil
                 
@@ -93,98 +101,96 @@ final class SearchPresenterImpl: SearchPresenter {
         
     }
     
-    private func searchUsers(query: String) {
-        
+    private func searchUsers(query: String) -> AnyPublisher<[ProfileModel], Never> {
         guard !query.isEmpty else {
-            viewModel.searchResults.removeAll()
-            return
+            return Just([]).eraseToAnyPublisher()
         }
         
-        viewModel.searchResults.removeAll()
-        
-        // Cancelar escuchadores anteriores
+        // Cancelamos observadores previos antes de hacer nuevas búsquedas
         usersQuery?.removeAllObservers()
         companyUsersQuery?.removeAllObservers()
         
-        let group = DispatchGroup()
-        // Búsqueda en la referencia "Users"
-        group.enter()
-        usersQuery = FirebaseServiceImpl.shared.getUsers()
-                    .queryOrdered(byChild: "username")
-                    .queryStarting(atValue: query)
-                    .queryEnding(atValue: query + "\u{f8ff}")
-        
-        usersQuery?.observeSingleEvent(of: .value, with: { [weak self] snapshot in
-            var users: [ProfileModel] = []
-            
-            for child in snapshot.children {
-                if let childSnapshot = child as? DataSnapshot {
-                    if let userModel = try? childSnapshot.data(as: UserModel.self) {
-                        
-                        let profile = ProfileModel(
-                            profileImageUrl: userModel.image,
-                            username: userModel.username,
-                            fullname: userModel.fullname,
-                            profileId: userModel.uid,
-                            isCompanyProfile: false,
-                            isPrivateProfile: userModel.profileType == .privateProfile
-                        )
-                        
-                        if profile.profileId != FirebaseServiceImpl.shared.getCurrentUserUid() {
-                            users.append(profile)
-                        }
-                        
-                    } else {
-                        print("error")
-                    }
-                }
-            }
-            self?.viewModel._results = users
-            group.leave()
-        })
-        
-//         Buscar en la referencia "Company_Users"
-        group.enter()
-        let companyUsersQuery = FirebaseServiceImpl.shared.getCompanies()
+        let usersQuery = Database.database().reference()
+            .child("Users")
             .queryOrdered(byChild: "username")
             .queryStarting(atValue: query)
             .queryEnding(atValue: query + "\u{f8ff}")
-
-        companyUsersQuery.observeSingleEvent(of: .value, with: { [weak self] snapshot in
-            var companyUsers: [ProfileModel] = []
-            
-            for child in snapshot.children {
-                if let childSnapshot = child as? DataSnapshot {
-                   
-                    if let companyModel = try? childSnapshot.data(as: CompanyModel.self) {
-                        let profile = ProfileModel(
-                            profileImageUrl: companyModel.imageUrl,
-                            username: companyModel.username,
-                            fullname: companyModel.fullname,
-                            profileId: companyModel.uid,
-                            isCompanyProfile: !(companyModel.location?.isEmpty ?? true),
-                            isPrivateProfile: companyModel.profileType == .privateProfile
-                        )
-                        
-                        if profile.profileId != FirebaseServiceImpl.shared.getCurrentUserUid() {
-                            companyUsers.append(profile)
-                        }
-                        
-                    } else {
-                        print("error")
-                    }
-                }
-            }
-            self?.viewModel._results.append(contentsOf: companyUsers)
-            group.leave()
-        })
         
-        group.notify(queue: .main) {
-            if self.viewModel._results != self.viewModel.searchResults { // Evitar actualizar vista
-                self.viewModel.searchResults = self.viewModel._results
-                self.viewModel._results = self.viewModel.searchResults // Actualizar variable auxiliar
-                
+        let companyUsersQuery = Database.database().reference()
+            .child("Company_Users")
+            .queryOrdered(byChild: "username")
+            .queryStarting(atValue: query)
+            .queryEnding(atValue: query + "\u{f8ff}")
+        
+        let usersPublisher = Future<[ProfileModel], Never> { promise in
+            usersQuery.observeSingleEvent(of: .value) { snapshot in
+                let users = snapshot.children.compactMap { child -> ProfileModel? in
+                    guard let childSnapshot = child as? DataSnapshot,
+                          let userModel = try? childSnapshot.data(as: UserModel.self) else {
+                        return nil
+                    }
+                    
+                    let profile = ProfileModel(
+                        profileImageUrl: userModel.image,
+                        username: userModel.username,
+                        fullname: userModel.fullname,
+                        profileId: userModel.uid,
+                        isCompanyProfile: false,
+                        isPrivateProfile: userModel.profileType == .privateProfile
+                    )
+                    
+                    if profile.profileId != FirebaseServiceImpl.shared.getCurrentUserUid() {
+                        return profile
+                    }
+                    
+                    return nil
+                }
+                promise(.success(users))
             }
         }
+        
+        let companyUsersPublisher = Future<[ProfileModel], Never> { promise in
+            
+            companyUsersQuery.observeSingleEvent(of: .value) { snapshot in
+                
+                let companyUsers = snapshot.children.compactMap { child -> ProfileModel? in
+                    guard let childSnapshot = child as? DataSnapshot,
+                          let companyModel = try? childSnapshot.data(as: CompanyModel.self) else {
+                        return nil
+                    }
+                    
+                    let profile = ProfileModel(
+                        profileImageUrl: companyModel.imageUrl,
+                        username: companyModel.username,
+                        fullname: companyModel.fullname,
+                        profileId: companyModel.uid,
+                        isCompanyProfile: !(companyModel.location?.isEmpty ?? true),
+                        isPrivateProfile: companyModel.profileType == .privateProfile
+                    )
+                    
+                    if profile.profileId != FirebaseServiceImpl.shared.getCurrentUserUid() {
+                        return profile
+                    }
+                    
+                    return nil
+                }
+                promise(.success(companyUsers))
+            }
+        }
+        
+        
+        return Publishers.CombineLatest(usersPublisher, companyUsersPublisher)
+            .map { users, companyUsers in
+                let combinedResults = (users + companyUsers).uniqued() // Eliminar duplicados
+                return combinedResults
+            }
+            .eraseToAnyPublisher()
+    }
+}
+
+extension Array where Element: Hashable {
+    func uniqued() -> [Element] {
+        var set = Set<Element>()
+        return filter { set.insert($0).inserted }
     }
 }
