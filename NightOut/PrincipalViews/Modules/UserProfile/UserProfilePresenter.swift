@@ -71,8 +71,7 @@ final class UserProfileViewModel: ObservableObject {
     @Published var imGoingToClub: ImGoingToClub = .notGoing
     @Published var usersGoingToClub: [UserGoingCellModel] = []
     @Published var followingPeopleGoingToClub: [UserGoingCellModel] = []
-    
-    @Published var myCurrentClubModel: CompanyModel?
+
     @Published var isCompanyProfile: Bool
     
     @Published var loading: Bool = false
@@ -83,6 +82,8 @@ final class UserProfileViewModel: ObservableObject {
     
     @Published var images: [IdentifiableImage] = []
     
+    var alreadyAttendingClub: String?
+    var hasEntryToday: Bool = false
     
     init(profileImageUrl: String?, username: String?, fullname: String?, isCompanyProfile: Bool) {
         self.profileImageUrl = profileImageUrl
@@ -186,20 +187,8 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             }
             .eraseToAnyPublisher()
         
-        let myCurrentClubModelPublisher =
+        let myUserModel =
         useCases.userDataUseCase.getUserInfo(uid: myUid)
-            .withUnretained(self)
-            .flatMap { presenter, userModel -> AnyPublisher<(UserModel?, CompanyModel?), Never> in
-                if let attendingClubId = userModel?.attendingClub {
-                    return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: attendingClubId)
-                        .map({ (userModel, $0) })
-                        .eraseToAnyPublisher()
-                } else {
-                    return Just((userModel, nil))
-                        .eraseToAnyPublisher()
-                }
-            }
-            .eraseToAnyPublisher()
         
         input
             .viewDidLoad
@@ -244,20 +233,18 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 Publishers.CombineLatest3(
                     assistanceObserver,
                     myFollowObserver,
-                    myCurrentClubModelPublisher
+                    myUserModel
                 )
             })
             .withUnretained(self)
             .sink { presenter, data in
                 let usersGoingToClub = data.0
                 let followingPeople = data.1
-                let myUserModel = data.2.0
-                let myCurrentClubModel = data.2.1
+                let myUserModel = data.2
                 
                 presenter.viewModel.loading = false
                 
                 presenter.viewModel.myUserModel = myUserModel
-                presenter.viewModel.myCurrentClubModel = myCurrentClubModel
                 
                 let myUserFollowsThisProfile = followingPeople.first(where: { $0.uid == presenter.model.profileId }) != nil
                 presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
@@ -266,7 +253,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 
                 presenter.viewModel.usersGoingToClub = usersGoingToClub.compactMap({ $0 }).map({ $0.toUserGoingCellModel() })
                 presenter.viewModel.imGoingToClub = usersGoingToClub.contains(where: { $0?.uid == presenter.myUid }) ? .going : .notGoing
-
+                
             }
             .store(in: &cancellables)
     }
@@ -314,7 +301,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             .goToClub
             .withUnretained(self)
             .sink { presenter, _ in
-                presenter.whiskyButtonTapped()
+                presenter.checkClubAttendance(profileId: presenter.model.profileId)
             }
             .store(in: &cancellables)
         
@@ -356,13 +343,10 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             }
             .store(in: &cancellables)
     }
-    
-    
 }
 
 private extension UserProfilePresenterImpl {
-    
-    //addNotification()
+
     private func addUserFollowNotification() {
         let model = NotificationModel(
             ispost: false,
@@ -385,6 +369,7 @@ private extension UserProfilePresenterImpl {
         .store(in: &cancellables)
     }
     
+    
     private func followButtonTapped() {
         switch viewModel.followButtonType {
         case .follow:
@@ -396,10 +381,6 @@ private extension UserProfilePresenterImpl {
             )
             .withUnretained(self)
             .sink { presenter, followOk in
-#warning("DO notificationManager")
-                // Enviar notificación
-                // notificationManager.getUsernamesAndSendNotification(it1.toString(), profileId)
-                
                 if followOk {
                     presenter.addUserFollowNotification()
                     print("started following \(presenter.model.profileId)")
@@ -445,70 +426,142 @@ private extension UserProfilePresenterImpl {
         }
     }
     
-    private func whiskyButtonTapped() {
-        switch viewModel.imGoingToClub {
-        case .going:
-            //Ya no quiero seguir asistiendo
-            useCases.clubUseCase.removeAssistingToClub(clubId: model.profileId)
-                .withUnretained(self)
-                .sink { presenter, ok in
-                    if ok {
-                        presenter.viewModel.toast = .custom(
-                            .init(
-                                title: "Has dejado de asistir a este club",
-                                description: nil,
-                                image: nil,
-                                backgroundColor: .green
-                            ))
-                    } else {
-                        presenter.viewModel.toast = .custom(.init(
-                            title: "Error",
-                            description: "Error al procesar la solicitud.",
-                            image: nil
-                        ))
+    func checkClubAttendance(profileId: String) {
+        let clubsRef = FirebaseServiceImpl.shared.getClub()
+        
+//        observe(.value)
+        clubsRef.observeSingleEvent(of: .value) { [weak self] snapshot in
+            
+            guard let self = self else { return }
+            
+            viewModel.alreadyAttendingClub = nil
+            viewModel.hasEntryToday = false
+            
+            for clubSnapshot in snapshot.children {
+                
+                guard let clubSnapshot = clubSnapshot as? DataSnapshot else {
+                    continue
+                }
+                
+                let assistanceDateRef = clubSnapshot.childSnapshot(forPath: "Assistance")
+                
+                for dateSnapshot in assistanceDateRef.children {
+                    
+                    guard let dateSnapshot = dateSnapshot as? DataSnapshot else { continue }
+                    
+                    if dateSnapshot.key == self.currentDateString {  // 🔹 Evento es de hoy
+                        
+                        let userRef = dateSnapshot.childSnapshot(forPath: self.myUid)
+                        
+                        let hasEntry = userRef.childSnapshot(forPath: "entry").value as? Bool ?? false
+                        
+                        if !hasEntry {
+                            self.viewModel.alreadyAttendingClub = clubSnapshot.key
+                            break
+                        } else {
+                            self.viewModel.hasEntryToday = true
+                        }
                     }
                 }
-                .store(in: &cancellables)
-            
-        case .notGoing:
-            //Quiero asistir al club
-            
-            if viewModel.myUserModel?.gender == nil {
-                //Open configuration
-                viewModel.showGenderAlert = true
-                return
             }
-            if let myCurrentClub = viewModel.myCurrentClubModel, myCurrentClub.uid != model.profileId {  //Pero ya estoy asistiendo a otro
-                viewModel.toast = .custom(.init(
-                    title: "Asistencia Actual",
-                    description: "Ya estás asistiendo a \(myCurrentClub.username ?? "otro club"). Cancela la asistencia antes de asistir a otro evento.",
-                    image: nil
-                ))
-            } else {
-                let clubAssistance = ClubAssistance(
-                    uid: myUid,
-                    gender: viewModel.myUserModel?.gender
-                )
-                useCases.clubUseCase.addAssistingToClub(
-                    clubId: model.profileId,
-                    clubAssistance: clubAssistance
-                )
-                .withUnretained(self)
-                .sink { presenter, ok in
-                    if ok {
-                        presenter.useCases.noficationsUsecase.sendNotificationToFollowers(
-                            myName: presenter.viewModel.myUserModel?.username ?? "Desconocido",
-                            clubName: presenter.model.fullname ?? "Sitio desconocido"
-                        )
-                    } else {
-                        presenter.viewModel.toast = .custom(.init(
-                            title: "Error",
-                            description: "Error al procesar la solicitud.",
-                            image: nil
-                        ))
-                    }
+            
+            if let alreadyAttendingClub = self.viewModel.alreadyAttendingClub, alreadyAttendingClub == profileId {
+                // 🔹 Verificar si el usuario realmente está en el club antes de eliminarlo
+                self.checkUserInClub(profileId: profileId, currentDate: self.currentDateString!)
+                
+            } else if self.viewModel.alreadyAttendingClub != nil && !self.viewModel.hasEntryToday {
+                // 🔹 Ya está asistiendo a otro club HOY sin "entry = true" → No se le permite cambiar
+                
+                let companyName = UserDefaults.getCompanies()?.users.first(where: { $0.key == self.viewModel.alreadyAttendingClub })?.value.username
+                
+                DispatchQueue.main.async {
+                    self.viewModel.toast = .custom(.init(
+                        title: "Asistencia Actual",
+                        description: "Ya estás asistiendo a \(companyName ?? "otro club"). Cancela la asistencia antes de asistir a otro evento.",
+                        image: nil
+                    ))
                 }
-                .store(in: &cancellables)
+            } else {
+                // 🔹 Si el usuario NO está asistiendo a ningún club o tiene "entry = true" en otro → Permitir asistencia
+                self.registerUserInClub(profileId: profileId, currentDate: self.currentDateString!)
+            }
+        }
+    }
+    
+    private func checkUserInClub(profileId: String, currentDate: String) {
+        let userInClubRef = FirebaseServiceImpl.shared.getClub().child(self.model.profileId).child("Assistance").child(self.currentDateString!)
+            .child(myUid)
+        
+        userInClubRef.observeSingleEvent(of: .value) { [weak self] snapshot in
+            if snapshot.exists() {
+                self?.removeUserFromClub(profileId: profileId, currentDate: currentDate)
+            } else {
+                self?.registerUserInClub(profileId: profileId, currentDate: currentDate)
+            }
+        }
+    }
+    
+    private func registerUserInClub(profileId: String, currentDate: String) {
+        let assistanceRef = FirebaseServiceImpl.shared.getClub().child(self.model.profileId).child("Assistance").child(self.currentDateString!)
+        
+        let attendingClubRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: myUid).child("attendingClub")
+        
+        let userMap: [String: Any] = [
+            "uid": myUid,
+            "gender": viewModel.myUserModel?.gender ?? ""
+        ]
+        
+        assistanceRef.child(myUid).setValue(userMap) { error, _ in
+            if let error = error {
+                print("Error registering user in club: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.viewModel.toast = .custom(.init(
+                        title: "Error",
+                        description: "Error al procesar la solicitud.",
+                        image: nil
+                    ))
+                }
+            } else {
+                attendingClubRef.setValue(profileId)
+                // Update UI, like the button state
+                print("User registered in club")
+                self.useCases.noficationsUsecase.sendNotificationToFollowers(
+                    myName: self.viewModel.myUserModel?.username ?? "Desconocido",
+                    clubName: self.model.fullname ?? "Sitio desconocido"
+                )
+            }
+        }
+    }
+    
+    private func removeUserFromClub(profileId: String, currentDate: String) {
+        let assistanceRef = FirebaseServiceImpl.shared.getClub().child(self.model.profileId).child("Assistance").child(self.currentDateString!)
+            .child(myUid)
+        
+        let attendingClubRef = FirebaseServiceImpl.shared.getUserInDatabaseFrom(uid: myUid).child("attendingClub")
+        assistanceRef.removeValue { error, _ in
+            if let error = error {
+                print("Error removing user from club: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.viewModel.toast = .custom(.init(
+                        title: "Error",
+                        description: "Error al procesar la solicitud.",
+                        image: nil
+                    ))
+                }
+
+            } else {
+                attendingClubRef.removeValue()
+                // Update UI, like the button state
+                print("User removed from club")
+                DispatchQueue.main.async {
+                    self.viewModel.toast = .custom(
+                        .init(
+                            title: "Has dejado de asistir a este club",
+                            description: nil,
+                            image: nil,
+                            backgroundColor: .green
+                        ))
+                }
             }
         }
     }
@@ -517,16 +570,17 @@ private extension UserProfilePresenterImpl {
         
         let clubRef = FirebaseServiceImpl.shared.getClub().child(self.model.profileId).child("Assistance").child(self.currentDateString!)
         
-        return Future { promise in
-            clubRef.observe(.value) { snapshot in
-                let clubAttendees = Array(snapshot.children.compactMap { ($0 as? DataSnapshot)?.key } )
-                
-                print("clubAttendees \(clubAttendees)")
-                
-                promise(.success(clubAttendees))
-            }
+        let subject = PassthroughSubject<[String], Never>()
+        
+        clubRef.observe(.value) { snapshot in
+            let clubAttendees = Array(snapshot.children.compactMap { ($0 as? DataSnapshot)?.key } )
+            
+            print("clubAttendees \(clubAttendees)")
+            
+            subject.send(clubAttendees)
         }
-        .eraseToAnyPublisher()
+        
+        return subject.eraseToAnyPublisher()
     }
     
     private func filterUsersAttendingClub(_ followingList: [String]) -> AnyPublisher<[UserModel], Never> {
@@ -543,7 +597,7 @@ private extension UserProfilePresenterImpl {
     
     private func checkUserAttendance(_ userId: String, currentDate: String) -> AnyPublisher<UserModel?, Never> {
         
-        let userClubAssistanceRef = FirebaseServiceImpl.shared.getClub().child(self.model.profileId).child("Assistance").child(self.currentDateString!) .child(userId)
+        let userClubAssistanceRef = FirebaseServiceImpl.shared.getClub().child(self.model.profileId).child("Assistance").child(self.currentDateString!).child(userId)
         
         return Future<UserModel?, Never> { promise in
             
