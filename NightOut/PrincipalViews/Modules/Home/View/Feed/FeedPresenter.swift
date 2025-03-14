@@ -316,16 +316,16 @@ private extension FeedPresenterImpl {
     func truncateCoordinates(_ coordinateString: String) -> String? {
         let components = coordinateString.split(separator: ",")
 
-        if let lat = Double(components[0]), let lon = Double(components[1]) {
-            let truncatedLat = String(format: "%.4f", lat)
-            let truncatedLon = String(format: "%.4f", lon)
-            
-            let truncatedCoordinates = "\(truncatedLat),\(truncatedLon)"
-            
-            return truncatedCoordinates// "40.41,-3.70"
-        }
+        guard components.count == 2,
+                  let latString = components.first, let lonString = components.last,
+                  let lat = Double(latString), let lon = Double(lonString) else {
+                return nil
+            }
         
-        return nil
+        let truncatedLat = String(format: "%.4f", lat)
+        let truncatedLon = String(format: "%.4f", lon)
+            
+        return "\(truncatedLat),\(truncatedLon)" // "40.4123,-3.7038"
     }
     
     func getClubNameByPostLocation(postLocation: String?) -> String {
