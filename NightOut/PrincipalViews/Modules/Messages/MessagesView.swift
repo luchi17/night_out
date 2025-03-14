@@ -99,25 +99,11 @@ struct ChatRow: View {
     
     var body: some View {
         HStack(spacing: 8) {
-            if let userImageUrl = chat.profileImage {
-                KingFisherImage(url: URL(string: userImageUrl))
-                    .placeholder({
-                        Image("profile")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
-                    })
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-            }
+            CircleImage(
+                imageUrl: chat.profileImage,
+                size: 40,
+                border: false
+            )
             
             VStack(spacing: 5) {
                 

@@ -1,22 +1,25 @@
 import SwiftUI
-import Kingfisher
 
 struct LocationsListView: View {
     @Binding var locations: [LocationModel]
     var onLocationSelected: InputClosure<LocationModel>
-    
-#warning("PENDING: show correct placeholder image and also in case of error")
     
     var body: some View {
         List {
             ForEach(locations) { location in
                 HStack(spacing: 12) {
                     if let imageUrl = location.image {
-                        KingFisherImage(url: URL(string: imageUrl))
-                            .centerCropped(width: 60, height: 60) {
-                                Image("profile")
-                            }
-                            .cornerRadius(10)
+                        AsyncImage(url: URL(string: imageUrl)) { image in
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 60, height: 60)
+                                .clipped()
+                                .cornerRadius(10)
+                            
+                        } placeholder: {
+                            placeholderImage
+                        }
                     } else {
                         placeholderImage
                     }
@@ -47,10 +50,11 @@ struct LocationsListView: View {
     }
     
     var placeholderImage: some View {
-        Image("profile")
+        Image(systemName: "photo")
             .resizable()
-            .aspectRatio(contentMode: .fill)
+            .scaledToFit()
             .frame(width: 60, height: 60)
+            .clipped()
             .cornerRadius(10)
     }
     
