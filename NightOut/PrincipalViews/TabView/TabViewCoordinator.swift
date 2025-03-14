@@ -42,6 +42,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let locationManager: LocationManager
     private let showMyProfileSubject: PassthroughSubject<Void, Never>
     
+    private let reloadFeedSubject = PassthroughSubject<Void, Never>()
+    
     @Published var path: NavigationPath
     @ObservedObject var tabViewModel: TabViewModel
     
@@ -128,7 +130,8 @@ class TabViewCoordinator: ObservableObject, Hashable {
             feedActions: feedActions(),
             profileActions: profileActions(),
             locationManager: locationManager,
-            showMyProfileSubject: showMyProfileSubject
+            showMyProfileSubject: showMyProfileSubject,
+            reloadFeedSubject: reloadFeedSubject
         )
         return AnyView(coordinator.build())
     }
@@ -140,6 +143,7 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     func makePublishFlow() -> AnyView {
         let coordinator = PublishCoordinator(actions: .init(goToFeed: { [weak self] in
+            self?.reloadFeedSubject.send()
             self?.tabViewModel.selectedTab = .home
         }))
         return AnyView(coordinator.build())

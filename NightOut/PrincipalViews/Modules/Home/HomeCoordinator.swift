@@ -11,15 +11,16 @@ class HomeCoordinator {
     private let locationManager: LocationManager
     private let showMyProfileSubject: PassthroughSubject<Void, Never>
     
-    private let reloadSubject = PassthroughSubject<Void, Never>()
+    private let reloadSubject: PassthroughSubject<Void, Never>
                                         
-    init(actions: HomePresenterImpl.Actions, mapActions: LocationsMapPresenterImpl.Actions, feedActions : FeedPresenterImpl.Actions, profileActions: MyUserProfilePresenterImpl.Actions, locationManager: LocationManager, showMyProfileSubject: PassthroughSubject<Void, Never>) {
+    init(actions: HomePresenterImpl.Actions, mapActions: LocationsMapPresenterImpl.Actions, feedActions : FeedPresenterImpl.Actions, profileActions: MyUserProfilePresenterImpl.Actions, locationManager: LocationManager, showMyProfileSubject: PassthroughSubject<Void, Never>, reloadFeedSubject: PassthroughSubject<Void, Never>) {
         self.actions = actions
         self.mapActions = mapActions
         self.locationManager = locationManager
         self.feedActions = feedActions
         self.profileActions = profileActions
         self.showMyProfileSubject = showMyProfileSubject
+        self.reloadSubject = reloadFeedSubject
     }
     
     @ViewBuilder
