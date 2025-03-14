@@ -3,27 +3,50 @@ import SwiftUI
 struct LocationDetailSheet: View {
     var selectedLocation: LocationModel
     var openMaps: () -> Void
-
-#warning("PENDING: show correct placeholder image")
     
     var body: some View {
         VStack {
             ScrollView {
                 VStack {
+                    
                     if let imageUrl = selectedLocation.image {
-                        KingFisherImage(url: URL(string: imageUrl))
-                            .centerCropped(width: 150, height: 150) {
-                                Image("profile")
-                            }
-                            .cornerRadius(10)
-                            .padding(.vertical, 30)
+                        
+                        AsyncImage(url: URL(string: imageUrl)) { image in
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 150, height: 150)
+                                .clipped()
+                        } placeholder: {
+                            ProgressView()
+                                .frame(width: 150, height: 150)
+                        }
+                        .overlay(alignment: .topTrailing, content: {
+                            Circle()
+                                .fill(getStatusCircleColor())
+                                .frame(width: 10, height: 10)
+                                .offset(x: -5, y: -5)
+                        })
+                        .padding(.top, 15)
+                        .padding(.bottom, 20)
+                    
                     } else {
-                        placeholderImage
+                        Color
+                            .gray
+                            .frame(width: 150, height: 150)
+                            .overlay(alignment: .topTrailing, content: {
+                                Circle()
+                                    .fill(getStatusCircleColor())
+                                    .frame(width: 10, height: 10)
+                                    .offset(x: -5, y: -5)
+                            })
+                            .padding(.top, 15)
+                            .padding(.bottom, 20)
                     }
                     
                     Text(selectedLocation.name)
                         .font(.headline)
-                        .padding(.bottom, 2)
+                        .padding(.bottom, 10)
                     
                     if let endTime = selectedLocation.endTime, let startTime = selectedLocation.startTime {
                         Text("Horario: \(startTime) - \(endTime)")
@@ -53,7 +76,7 @@ struct LocationDetailSheet: View {
                         .foregroundColor(.white)
                         .padding()
                         .background(Color.blue)
-                        .cornerRadius(10)
+                        .cornerRadius(25)
                 }
             }
         }
@@ -71,5 +94,33 @@ struct LocationDetailSheet: View {
             .frame(width: 150, height: 150)
             .cornerRadius(10)
             .padding(.vertical, 30)
+    }
+    
+    func getStatusCircleColor() -> Color {
+        
+        guard let startTime = selectedLocation.startTime, let endTime = selectedLocation.endTime else {
+            return .red
+        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        
+        let now = Date()
+        let calendar = Calendar.current
+        
+        guard let start = formatter.date(from: startTime),
+              let end = formatter.date(from: endTime) else {
+            return .red
+        }
+        
+        let startDate = calendar.date(bySettingHour: calendar.component(.hour, from: start),
+                                      minute: calendar.component(.minute, from: start),
+                                      second: 0, of: now) ?? now
+        
+        let endDate = calendar.date(bySettingHour: calendar.component(.hour, from: end),
+                                    minute: calendar.component(.minute, from: end),
+                                    second: 0, of: now) ?? now
+        
+        return (now >= startDate && now <= endDate) ? .green : .red
+        
     }
 }
