@@ -62,7 +62,7 @@ struct FeedView: View {
                     viewModel.toastError = nil
                 }
             ),
-            isIdle: viewModel.loading
+            isIdle: viewModel.loading && viewModel.posts.isEmpty
         )
         .alert("Abrir ubicación", isPresented: $showNavigationAlert) {
             Button("Apple Maps") {

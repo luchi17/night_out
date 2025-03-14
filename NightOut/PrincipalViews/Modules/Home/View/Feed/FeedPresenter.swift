@@ -153,9 +153,12 @@ final class FeedPresenterImpl: FeedPresenter {
                 self.viewModel.loading = loading
             }, onError: { _ in }
             )
+            .removeDuplicates { oldPosts, newPosts in
+                return Set(oldPosts) == Set(newPosts)
+            }
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
-                
+               
                 if data.isEmpty {
                     presenter.viewModel.showDiscoverEvents = true
                 } else {
