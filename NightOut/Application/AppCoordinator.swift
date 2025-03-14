@@ -292,7 +292,11 @@ private extension AppCoordinator {
         return .init(
             goToProfile: showProfile(model:),
             goToPrivateProfile: showPrivateProfile(model:),
-            goToPost: showPostDetail
+            goToPost: showPostDetail,
+            goBack: {
+                [weak self] in
+                self?.pop()
+            }
         )
     }
     

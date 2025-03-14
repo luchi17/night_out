@@ -8,6 +8,7 @@ struct NotificationsView: View {
     private let onRejectPublisher = PassthroughSubject<(String, String), Never>()
     private let goToPostPublisher = PassthroughSubject<NotificationModelForView, Never>()
     private let goToProfilePublisher = PassthroughSubject<NotificationModelForView, Never>()
+    private let goBackPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: NotificationsViewModel
     let presenter: NotificationsPresenter
@@ -21,43 +22,41 @@ struct NotificationsView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-
-            Text("Notificaciones")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.white)
-                .padding(.all, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Divider()
-                .background(Color.white)
-                .frame(height: 2)
-                .padding(.vertical, 4)
+        
+        ZStack {
+            Color.blackColor.ignoresSafeArea()
             
-            ScrollView {
-                VStack(spacing: 10) {
-                    ForEach(viewModel.notifications.reversed(), id: \.notificationId) { notification in
-                        if notification.type == .friendRequest {
-                            FriendRequestNotificationView(
-                                notification: notification,
-                                onAccept: onAcceptPublisher.send,
-                                onReject: onRejectPublisher.send,
-                                goToProfile: goToProfilePublisher.send
-                            )
-                        } else {
-                            DefaultNotificationView(
-                                notification: notification,
-                                goToPost: goToPostPublisher.send,
-                                goToProfile: goToProfilePublisher.send
-                            )
+            VStack(spacing: 0) {
+
+                if !viewModel.loading {
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            ForEach(viewModel.notifications.reversed(), id: \.notificationId) { notification in
+                                if notification.type == .friendRequest {
+                                    FriendRequestNotificationView(
+                                        notification: notification,
+                                        onAccept: onAcceptPublisher.send,
+                                        onReject: onRejectPublisher.send,
+                                        goToProfile: goToProfilePublisher.send
+                                    )
+                                } else {
+                                    DefaultNotificationView(
+                                        notification: notification,
+                                        goToPost: goToPostPublisher.send,
+                                        goToProfile: goToProfilePublisher.send
+                                    )
+                                }
+                            }
                         }
+                        .padding(.all, 12)
                     }
+                    .scrollIndicators(.hidden)
                 }
-                .padding(.all, 12)
+               
+                Spacer()
             }
-            
-            Spacer()
         }
+        .edgesIgnoringSafeArea(.all)
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -68,7 +67,11 @@ struct NotificationsView: View {
             ),
             isIdle: viewModel.loading
         )
-        .background(Color.blackColor.opacity(0.7))
+        .showCustomNavBar(
+            title: "Notificaciones",
+            goBack: goBackPublisher.send
+        )
+//        .background(Color.blackColor.ignoresSafeArea())
         .onAppear {
             viewDidLoadPublisher.send()
         }
@@ -82,7 +85,8 @@ private extension NotificationsView {
             accept: onAcceptPublisher.eraseToAnyPublisher(),
             reject: onRejectPublisher.eraseToAnyPublisher(),
             goToPost: goToPostPublisher.eraseToAnyPublisher(),
-            goToProfile: goToProfilePublisher.eraseToAnyPublisher()
+            goToProfile: goToProfilePublisher.eraseToAnyPublisher(),
+            goBack: goBackPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

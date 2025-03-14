@@ -30,6 +30,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
         let goToProfile: InputClosure<ProfileModel>
         let goToPrivateProfile: InputClosure<ProfileModel>
         let goToPost: InputClosure<NotificationModelForView>
+        let goBack: VoidClosure
     }
     
     struct ViewInputs {
@@ -38,6 +39,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
         let reject: AnyPublisher<(String, String), Never>
         let goToPost: AnyPublisher<NotificationModelForView, Never>
         let goToProfile: AnyPublisher<NotificationModelForView, Never>
+        let goBack: AnyPublisher<Void, Never>
     }
     
     var viewModel: NotificationsViewModel
@@ -159,6 +161,14 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
             .withUnretained(self)
             .sink { presenter, post in
                 presenter.actions.goToPost(post)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goBack
+            .withUnretained(self)
+            .sink { presenter, post in
+                presenter.actions.goBack()
             }
             .store(in: &cancellables)
         
