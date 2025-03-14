@@ -19,11 +19,14 @@ protocol PostDatasource {
     func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never>
     func addPendingRequest(otherUid: String)
     func removePendingRequest(requesterUid: String, currentUserId: String)
+    func observePosts() -> AnyPublisher<[String: PostUserModel]?, Never>
 }
 
 struct PostDatasourceImpl: PostDatasource {
     
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never> {
+
+        let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
         
         return Future<[String: PostUserModel], Never> { promise in
             
@@ -40,6 +43,26 @@ struct PostDatasourceImpl: PostDatasource {
             }
         }
         .eraseToAnyPublisher()
+    }
+    
+    
+    func observePosts() -> AnyPublisher<[String: PostUserModel]?, Never> {
+        
+        let subject = CurrentValueSubject<[String: PostUserModel]?, Never>(nil)
+        
+        let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
+        
+        ref.observe(.value) { snapshot in
+            do {
+                let posts = try snapshot.data(as: [String: PostUserModel].self)
+                subject.send(posts)
+            } catch {
+                print("Error decoding posts data: \(error.localizedDescription)")
+                subject.send([:])
+            }
+        }
+        
+        return subject.eraseToAnyPublisher()
     }
     
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never> {
@@ -71,6 +94,7 @@ struct PostDatasourceImpl: PostDatasource {
     
     // Observando cambios en firebase
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never> {
+        
         let subject = CurrentValueSubject<FollowModel?, Never>(nil)
         
         let ref = FirebaseServiceImpl.shared.getFollow().child(id)
@@ -90,27 +114,28 @@ struct PostDatasourceImpl: PostDatasource {
     
     
     func getComments(postId: String) -> AnyPublisher<[CommentModel], Never> {
-        return Future<[CommentModel], Never> { promise in
-            
-            guard !postId.isEmpty else {
-                promise(.success([]))
-                return
-            }
-            
-            let ref = FirebaseServiceImpl.shared.getComments().child(postId)
-            
-            ref.observe(.value) { snapshot in
-                var comments: [CommentModel] = []
-                for child in snapshot.children {
-                    if let snapshot = child as? DataSnapshot,
-                       let comment = try? snapshot.data(as: CommentModel.self) {
-                        comments.append(comment)
-                    }
-                }
-                promise(.success(comments))
-            }
+
+        let subject = CurrentValueSubject<[CommentModel], Never>([])
+        
+        let ref = FirebaseServiceImpl.shared.getComments().child(postId)
+        
+        guard !postId.isEmpty else {
+            subject.send([])
+            return subject.eraseToAnyPublisher()
         }
-        .eraseToAnyPublisher()
+
+        ref.observe(.value) { snapshot in
+            var comments: [CommentModel] = []
+            for child in snapshot.children {
+                if let snapshot = child as? DataSnapshot,
+                   let comment = try? snapshot.data(as: CommentModel.self) {
+                    comments.append(comment)
+                }
+            }
+            subject.send(comments)
+        }
+        
+        return subject.eraseToAnyPublisher()
     }
     
     func addComment(comment: CommentModel, postId: String) -> AnyPublisher<Bool, Never> {

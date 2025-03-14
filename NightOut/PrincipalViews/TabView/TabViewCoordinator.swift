@@ -143,7 +143,6 @@ class TabViewCoordinator: ObservableObject, Hashable {
     
     func makePublishFlow() -> AnyView {
         let coordinator = PublishCoordinator(actions: .init(goToFeed: { [weak self] in
-            self?.reloadFeedSubject.send()
             self?.tabViewModel.selectedTab = .home
         }))
         return AnyView(coordinator.build())

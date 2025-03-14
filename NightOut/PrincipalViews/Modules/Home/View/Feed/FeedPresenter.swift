@@ -118,7 +118,8 @@ final class FeedPresenterImpl: FeedPresenter {
             )
             .withUnretained(self)
             .performRequest(request: { presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
-                presenter.useCases.postsUseCase.fetchPosts()
+                presenter.useCases.postsUseCase.observePosts()
+                    .compactMap({ $0 })
                     .map { posts in
                         let matchingPosts = posts.filter { post in
                             let myFollowingPosts = followModel?.following?.keys.contains(post.value.publisherId) ?? false
@@ -158,7 +159,7 @@ final class FeedPresenterImpl: FeedPresenter {
             }
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
-               
+                presenter.viewModel.loading = false
                 if data.isEmpty {
                     presenter.viewModel.showDiscoverEvents = true
                 } else {

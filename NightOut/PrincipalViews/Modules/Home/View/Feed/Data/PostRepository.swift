@@ -12,6 +12,7 @@ protocol PostsRepository {
     func removeFollow(requesterProfileUid: String, profileUid: String) -> AnyPublisher<Bool, Never>
     func addPendingRequest(otherUid: String)
     func removePending(otherUid: String)
+    func observePosts() -> AnyPublisher<[String: PostUserModel]?, Never>
 }
 
 struct PostsRepositoryImpl: PostsRepository {
@@ -29,6 +30,11 @@ struct PostsRepositoryImpl: PostsRepository {
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never> {
         network
             .fetchPosts()
+            .eraseToAnyPublisher()
+    }
+    func observePosts() -> AnyPublisher<[String: PostUserModel]?, Never> {
+        network
+            .observePosts()
             .eraseToAnyPublisher()
     }
     
