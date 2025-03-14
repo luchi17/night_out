@@ -66,6 +66,11 @@ struct UserProfileView: View {
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .background(Color.blackColor)
+        .fullScreenCover(item: $selectedImage) { imageName in
+            FullScreenImageView(imageName: imageName, onClose: {
+                selectedImage = nil
+            })
+        }
         .showCustomNavBar(
             title: viewModel.username,
             goBack: goBackPublisher.send,
