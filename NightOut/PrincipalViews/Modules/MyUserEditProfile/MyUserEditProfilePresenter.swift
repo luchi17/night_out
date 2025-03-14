@@ -106,23 +106,20 @@ final class MyUserEditProfilePresenterImpl: MyUserEditProfilePresenter {
             .sink { presenter, _ in
                 if FirebaseServiceImpl.shared.getImUser() {
                     presenter.userModel = UserDefaults.getUserModel()
-                    presenter.viewModel = MyUserEditProfileViewModel(
-                        profileImageUrl: presenter.userModel?.image,
-                        username: presenter.userModel?.username,
-                        fullname: presenter.userModel?.fullname,
-                        gender: presenter.userModel?.genderType,
-                        profile: presenter.userModel?.profileType ?? .publicProfile,
-                        participate: presenter.userModel?.social
-                    )
+                    presenter.viewModel.profileImageUrl = presenter.userModel?.image
+                    presenter.viewModel.username = presenter.userModel?.username ?? "No disponible"
+                    presenter.viewModel.fullname = presenter.userModel?.fullname ?? "No disponible"
+                    presenter.viewModel.genderType = presenter.userModel?.genderType
+                    presenter.viewModel.isPrivate = presenter.userModel?.profileType == .privateProfile
+                    presenter.viewModel.participate = presenter.userModel?.social == "participando"
+                    
                 } else {
                     presenter.companyModel = UserDefaults.getCompanyUserModel()
-                    presenter.viewModel = MyUserEditProfileViewModel(
-                        profileImageUrl: presenter.companyModel?.imageUrl,
-                        username: presenter.companyModel?.username,
-                        fullname: presenter.companyModel?.fullname,
-                        gender: nil,
-                        profile: presenter.companyModel?.profileType ?? .publicProfile
-                    )
+                    presenter.viewModel.profileImageUrl = presenter.companyModel?.imageUrl
+                    presenter.viewModel.username = presenter.companyModel?.username ?? "No disponible"
+                    presenter.viewModel.fullname = presenter.companyModel?.fullname ?? "No disponible"
+                    presenter.viewModel.genderType = nil
+                    presenter.viewModel.isPrivate = presenter.userModel?.profileType == .privateProfile
                 }
             }
             .store(in: &cancellables)

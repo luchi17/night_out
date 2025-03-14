@@ -121,7 +121,10 @@ struct MyUserEditProfileView: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $openCompanySettings) {
+        .sheet(isPresented: $openCompanySettings, onDismiss: {
+            openCompanySettings = false
+            viewDidLoadPublisher.send()
+        }) {
             MyUserCompanySettingsView(presenter: companySettingsPresenter)
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
@@ -309,7 +312,7 @@ struct MyUserEditProfileView: View {
     
     var settingsButtonView: some View {
         Button(action: {
-            openSettings.toggle()
+            openSettings = true
         }) {
             Image(systemName: "gear")
                 .foregroundColor(.white)
@@ -319,7 +322,7 @@ struct MyUserEditProfileView: View {
     
     var editCompanyInfoView: some View {
         Button(action: {
-            openCompanySettings.toggle()
+            openCompanySettings = true
         }) {
             Text("Editar información de la empresa")
                 .font(.system(size: 16))

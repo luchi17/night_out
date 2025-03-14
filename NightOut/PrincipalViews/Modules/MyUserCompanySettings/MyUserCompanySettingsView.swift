@@ -90,11 +90,9 @@ struct MyUserCompanySettingsView: View {
                     .presentationDragIndicator(.visible)
             }
         )
-        .onChange(of: viewModel.dismiss, { oldValue, newValue in
-            if newValue {
-                dismiss()
-            }
-        })
+        .onChange(of: viewModel.dismiss) { oldValue, newValue in
+            dismiss()
+        }
         .onAppear {
             viewDidLoadPublisher.send()
         }
