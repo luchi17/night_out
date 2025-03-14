@@ -81,17 +81,6 @@ struct ContentView: View {
                         .navigationDestination(for: NotificationsCoordinator.self) { coordinator in
                             coordinator
                                 .build()
-                                .showCustomBackButtonNavBar()
-                                .navigationDestination(for: UserProfileCoordinator.self) { coordinator in
-                                    coordinator
-                                        .build()
-                                        .showCustomBackButtonNavBar()
-                                }
-                                .navigationDestination(for: PostDetailCoordinator.self) { coordinator in
-                                    coordinator
-                                        .build()
-                                        .showCustomBackButtonNavBar()
-                                }
                         }
                         .navigationDestination(for: PrivateUserProfileCoordinator.self) { coordinator in
                             coordinator
