@@ -5,6 +5,7 @@ struct PostDetailView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let openCommentsPubliser = PassthroughSubject<Void, Never>()
+    private let goBackPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: PostDetailViewModel
     let presenter: PostDetailPresenter
@@ -21,13 +22,9 @@ struct PostDetailView: View {
         VStack(spacing: 0) {
             
             VStack(alignment: .leading, spacing: 20) {
-                Text("Post")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.top, 12)
-                    .padding(.bottom, 15)
                 
                 userView
+                    .padding(.top, 25)
                 
                 postView
                 
@@ -47,6 +44,10 @@ struct PostDetailView: View {
         .background(
             Color.blackColor
                 .edgesIgnoringSafeArea(.all)
+        )
+        .showCustomNavBar(
+            title: "Post",
+            goBack: goBackPublisher.send
         )
         .onAppear {
             viewDidLoadPublisher.send()
@@ -90,25 +91,11 @@ struct PostDetailView: View {
     
     var userView: some View {
         HStack(spacing: 8) {
-            if let userProfileImage = viewModel.post.profileImage {
-                KingFisherImage(url: URL(string: userProfileImage))
-                    .placeholder({
-                        Image("profile")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 50, height: 50)
-                            .clipShape(Circle())
-                    })
-                    .scaledToFill()
-                    .clipShape(Circle())
-                    .frame(width: 50, height: 50, alignment: .leading)
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 50, height: 50)
-                    .clipShape(Circle())
-            }
+            CircleImage(
+                imageUrl: viewModel.post.profileImage,
+                size: 50,
+                border: true
+            )
             
             VStack(alignment: .leading, spacing: 5) {
                 Text(viewModel.post.userName)
@@ -126,7 +113,8 @@ private extension PostDetailView {
     func bindViewModel() {
         let input = PostDetailPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            openComments: openCommentsPubliser.eraseToAnyPublisher()
+            openComments: openCommentsPubliser.eraseToAnyPublisher(),
+            goBack: goBackPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

@@ -80,6 +80,10 @@ struct ContentView: View {
                         .navigationDestination(for: NotificationsCoordinator.self) { coordinator in
                             coordinator
                                 .build()
+                                .navigationDestination(for: PostDetailCoordinator.self) { coordinator in
+                                    coordinator
+                                        .build()
+                                }
                         }
                         .navigationDestination(for: PrivateUserProfileCoordinator.self) { coordinator in
                             coordinator

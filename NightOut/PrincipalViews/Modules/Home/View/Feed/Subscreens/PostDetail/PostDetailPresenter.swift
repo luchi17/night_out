@@ -24,11 +24,13 @@ final class PostDetailPresenterImpl: PostDetailPresenter {
     
     struct Actions {
         let openComments: InputClosure<PostCommentsInfo>
+        let goBack: VoidClosure
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let openComments: AnyPublisher<Void, Never>
+        let goBack: AnyPublisher<Void, Never>
     }
     
     var viewModel: PostDetailViewModel
@@ -63,65 +65,7 @@ final class PostDetailPresenterImpl: PostDetailPresenter {
                 presenter.viewModel.postImage = postImage
             }
             .store(in: &cancellables)
-//            .performRequest(request: { presenter, _ -> AnyPublisher<PostUserModel?, Never> in
-//                presenter.useCases.postsUseCase
-//                    .fetchPosts()
-//                    .map({ posts in
-//                        let matchingPost = posts.first(where: { $0.value.postID == presenter.postId })?.value
-//                        
-//                        return matchingPost
-//                    })
-//                    .eraseToAnyPublisher()
-//            }, loadingClosure: { [weak self] loading in
-//                guard let self = self else { return }
-//                self.viewModel.loading = loading
-//            }, onError: { _ in })
-//            .withUnretained(self)
-//            .flatMap({ presenter, post -> AnyPublisher<(PostDetailModel?, PostUserModel?), Never> in
-//                guard let publisherId = post?.publisherId else {
-//                    return Just((nil, post)).eraseToAnyPublisher()
-//                }
-//                if post?.isFromUser ?? true {
-//                    return presenter.useCases.userDataUseCase.getUserInfo(uid: publisherId)
-//                        .map({ userModel in
-//                            (
-//                                PostDetailModel(
-//                                userImage: userModel?.image,
-//                                username: userModel?.username,
-//                                fullname: userModel?.fullname
-//                            )
-//                                ,
-//                                post
-//                            )
-//                        })
-//                        .eraseToAnyPublisher()
-//                } else {
-//                    return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: publisherId)
-//                        .map({ userModel in
-//                            (
-//                                PostDetailModel(
-//                                userImage: userModel?.imageUrl,
-//                                username: userModel?.username,
-//                                fullname: userModel?.fullname
-//                            ),
-//                            
-//                                post
-//                            )
-//                        })
-//                        .eraseToAnyPublisher()
-//                }
-//            })
-//            .withUnretained(self)
-//            .sink { presenter, data in
-//                let matchingPost = data.1
-//                presenter.viewModel.post = data.1
-//                presenter.viewModel.username = data.0?.username ?? "Nombre"
-//                presenter.viewModel.fullName = data.0?.fullname ?? "Nombre Completo"
-//                presenter.viewModel.userProfileImage = data.0?.userImage
-//            }
-//            .store(in: &cancellables)
-//        
-//        
+
         input
             .openComments
             .withUnretained(self)
@@ -133,8 +77,15 @@ final class PostDetailPresenterImpl: PostDetailPresenter {
                     publisherId: presenter.post.userId
                 )
                 
-                
                 presenter.actions.openComments(info)
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goBack
+            .withUnretained(self)
+            .sink { presenter, post in
+                presenter.actions.goBack()
             }
             .store(in: &cancellables)
     }

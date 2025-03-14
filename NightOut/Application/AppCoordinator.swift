@@ -162,7 +162,9 @@ final class AppCoordinator: ObservableObject {
     
     private func showPostDetail(post: NotificationModelForView) {
         let postDetailCoordinator = PostDetailCoordinator(
-            actions: .init(openComments: showPostComments),
+            actions: .init(openComments: showPostComments, goBack: { [weak self] in
+                self?.pop()
+            }),
             post: post
         )
         self.push(postDetailCoordinator)
