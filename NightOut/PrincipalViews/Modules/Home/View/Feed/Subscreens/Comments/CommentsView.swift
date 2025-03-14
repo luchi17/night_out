@@ -6,6 +6,7 @@ struct CommentsView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let publishCommentPublisher = PassthroughSubject<Void, Never>()
+    private let goBackPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject private var keyboardObserver = KeyboardObserver()
     
@@ -25,7 +26,7 @@ struct CommentsView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     topView
-                        .padding()
+                        .padding(.vertical)
                     
                     if viewModel.comments.isEmpty {
                         Spacer()
@@ -60,10 +61,10 @@ struct CommentsView: View {
             }
             
             bottomView
-                .padding()
+                .padding(.bottom)
             
         }
-        .background(Color.blackColor)
+        .background(Color.blackColor.ignoresSafeArea())
         .showToast(
             error: (
                 type: viewModel.toastError,
@@ -73,6 +74,10 @@ struct CommentsView: View {
                 }
             ),
             isIdle: viewModel.loading
+        )
+        .showCustomNavBar(
+            title: "Comentarios",
+            goBack: goBackPublisher.send
         )
         .onAppear {
             viewDidLoadPublisher.send()
@@ -88,13 +93,6 @@ struct CommentsView: View {
     
     var topView: some View {
         VStack(spacing: 0) {
-            Text("Comentarios")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.white)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.blackColor)
-            
             if let postImage = viewModel.postImage {
                 Image(uiImage: postImage)
                     .resizable()
@@ -158,7 +156,8 @@ private extension CommentsView {
     func bindViewModel() {
         let input = CommentsPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            publishComment: publishCommentPublisher.eraseToAnyPublisher()
+            publishComment: publishCommentPublisher.eraseToAnyPublisher(),
+            goback: goBackPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

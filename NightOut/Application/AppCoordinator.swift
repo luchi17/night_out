@@ -124,7 +124,10 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func showPostComments(info: PostCommentsInfo) {
-        let commentsCoordinator = CommentsCoordinator(actions: .init(), info: info)
+        let commentsCoordinator = CommentsCoordinator(actions: .init(goback: {
+            [weak self] in
+            self?.pop()
+        }), info: info)
         self.push(commentsCoordinator)
     }
     

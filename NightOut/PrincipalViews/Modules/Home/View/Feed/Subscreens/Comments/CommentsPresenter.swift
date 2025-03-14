@@ -38,11 +38,13 @@ final class CommentsPresenterImpl: CommentsPresenter {
     }
     
     struct Actions {
+        let goback: VoidClosure
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let publishComment: AnyPublisher<Void, Never>
+        let goback: AnyPublisher<Void, Never>
     }
     
     var viewModel: CommentsViewModel
@@ -116,6 +118,14 @@ final class CommentsPresenterImpl: CommentsPresenter {
                 } else {
                     presenter.viewModel.toastError = .custom(.init(title: "Error", description: "Could not publish comment", image: nil))
                 }
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goback
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.goback()
             }
             .store(in: &cancellables)
 

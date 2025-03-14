@@ -66,7 +66,6 @@ struct ContentView: View {
                         .navigationDestination(for: CommentsCoordinator.self) { coordinator in
                             coordinator
                                 .build()
-                                .showCustomBackButtonNavBar()
                         }
                         .navigationDestination(for: UserPostProfileCoordinator.self) { coordinator in
                             coordinator
