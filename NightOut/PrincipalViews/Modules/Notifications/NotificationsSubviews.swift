@@ -24,7 +24,10 @@ struct FriendRequestNotificationView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             // Imagen de perfil
-            CircleImage(imageUrl: notification.profileImage)
+            CircleImage(
+                imageUrl: notification.profileImage,
+                border: false
+            )
                 .onTapGesture {
                     goToProfile(notification)
                 }
@@ -85,7 +88,10 @@ struct DefaultNotificationView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
 
-            CircleImage(imageUrl: notification.profileImage)
+            CircleImage(
+                imageUrl: notification.profileImage,
+                border: false
+            )
             
             Text(notification.text)
                 .fontWeight(.medium)

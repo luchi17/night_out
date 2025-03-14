@@ -37,7 +37,7 @@ struct MessagesView: View {
                         }
                     }
                 }
-                .padding(.all, 12)
+                .padding(.all, 20)
                 .background(Color.blackColor)
             } else {
                 Color.blackColor
@@ -76,8 +76,6 @@ private extension MessagesView {
     }
 }
 
-
-
 // Modelo de datos para cada chat
 class Chat: Identifiable {
     let id = UUID()
@@ -98,10 +96,10 @@ struct ChatRow: View {
     let chat: Chat
     
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 14) {
             CircleImage(
                 imageUrl: chat.profileImage,
-                size: 40,
+                size: 50,
                 border: false
             )
             

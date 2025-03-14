@@ -82,9 +82,15 @@ struct ChatView: View {
     
     var bottomView: some View {
         HStack {
-            TextField("Escribe un mensaje", text: $viewModel.newMessage)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+            TextField("", text: $viewModel.newMessage, prompt: Text("Escribe un mensaje").foregroundColor(Color.grayColor.opacity(0.6)))
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(
+                    RoundedRectangle(cornerRadius: 10).fill(Color.white)
+                )
+                .foregroundColor(Color.grayColor)
+                .accentColor(Color.grayColor)
             
             Button(action: {
                 sendMessagePublisher.send()
@@ -96,7 +102,7 @@ struct ChatView: View {
                     .clipShape(Circle())
             }
         }
-        .padding()
+        .padding(.horizontal, 20)
     }
 }
 
