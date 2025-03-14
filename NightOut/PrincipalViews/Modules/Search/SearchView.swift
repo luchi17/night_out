@@ -60,7 +60,6 @@ struct SearchView: View {
                 Spacer()
             }
             .frame(height: 40)
-//            .background(Color.grayColor.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
             .background(
                             RoundedRectangle(cornerRadius: 10)
                                 .fill(Color.grayColor.opacity(0.5))
@@ -72,7 +71,7 @@ struct SearchView: View {
             // Resultados de búsqueda
             if !viewModel.searchResults.isEmpty {
                 ScrollView {
-                    VStack(spacing: 10) {
+                    VStack(spacing: 22) {
                         ForEach(viewModel.searchResults, id: \.self) { user in
                             ListUserSubView(user: user)
                                 .onTapGesture {
@@ -81,6 +80,7 @@ struct SearchView: View {
                                 }
                         }
                     }
+                    .padding(.horizontal, 20)
                 }
                 .simultaneousGesture(DragGesture().onChanged { _ in
                     hideKeyboard() // Esconde el teclado cuando el usuario hace scroll
@@ -155,25 +155,24 @@ struct ListUserSubView: View {
         
         HStack(spacing: 10) {
             
-            if let profileImage = user.profileImageUrl {
-                KingFisherImage(url: URL(string: profileImage))
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-                    .padding(.leading, 5)
-                
-            } else {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-                    .padding(.leading, 5)
-            }
+            CircleImage(
+                imageUrl: user.profileImageUrl,
+                size: 50,
+                border: false
+            )
+            .padding(.leading, 5)
             
-            Text(user.username ?? "Nombre desconocido")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.white)
+            VStack(spacing: 5) {
+                Text(user.fullname?.lowercased() ?? "Nombre desconocido")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(user.username?.lowercased() ?? "Nombre desconocido")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+            }
             
             Spacer()
         }
