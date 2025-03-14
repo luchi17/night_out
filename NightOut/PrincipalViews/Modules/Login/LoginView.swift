@@ -135,20 +135,6 @@ struct LoginView: View, Hashable {
         .background(
             Color.blackColor
         )
-        .alert(isPresented: $showRegisterAlert) {
-            Alert(
-                title: Text("Selecciona una opción"),
-                message: Text("¿Cómo quieres registrarte?"),
-                primaryButton: .default(Text("Registrar Empresa"), action: {
-                    showRegisterAlert = false
-                    signupCompanyPublisher.send()
-                }),
-                secondaryButton: .default(Text("Registrar Persona"), action: {
-                    showRegisterAlert = false
-                    signupUserPublisher.send()
-                })
-            )
-        }
         .showToast(
             error: (
                 type: viewModel.toast,
@@ -198,7 +184,7 @@ struct LoginView: View, Hashable {
     
     private var signupButton: some View {
         Button(action: {
-            showRegisterAlert = true
+            signupUserPublisher.send()
         }) {
             Text("¿Cuenta nueva? Regístrate".uppercased())
                 .font(.system(size: 17, weight: .bold))
