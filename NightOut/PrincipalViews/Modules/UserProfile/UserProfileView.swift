@@ -110,24 +110,27 @@ struct UserProfileView: View {
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
             
-            Button(action: {
-                openDiscoPublisher.send()
-            }) {
-                Image("ticket")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 45, height: 45)
-                    .foregroundStyle(.black)
-            }
-            
-            Spacer()
             
             if viewModel.isCompanyProfile && FirebaseServiceImpl.shared.getImUser() {
+                Button(action: {
+                    openDiscoPublisher.send()
+                }) {
+                    Image("ticket")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 45, height: 45)
+                        .foregroundStyle(.black)
+                }
+                
+                Spacer()
+                
                 Button(action: {
                     whiskyTappedPublisher.send()
                 }) {
                     viewModel.imGoingToClub.whiskyImage
                 }
+            } else {
+                Spacer()
             }
         }
         .padding(.horizontal, 20)
