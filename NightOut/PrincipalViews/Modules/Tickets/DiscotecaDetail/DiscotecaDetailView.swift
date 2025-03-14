@@ -6,6 +6,7 @@ struct DiscotecaDetailView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let followTappedPublisher = PassthroughSubject<Void, Never>()
     private let goBackPublisher = PassthroughSubject<Void, Never>()
+    private let goToEventPublisher = PassthroughSubject<Fiesta, Never>()
 
     @State private var showShareSheet = false
     
@@ -29,7 +30,10 @@ struct DiscotecaDetailView: View {
                     
                     clubInfoView
                         .padding([.horizontal, .top], 20)
-                    EventsSection(fiestas: $viewModel.fiestas)
+                    EventsSection(
+                        fiestas: $viewModel.fiestas,
+                        goToEvent: goToEventPublisher.send
+                    )
                         .padding([.horizontal, .top], 20)
                         .padding(.bottom, 50)
                 }
@@ -121,7 +125,8 @@ private extension DiscotecaDetailView {
         let input = DiscotecaDetailPresenterImpl.Input(
             viewIsLoaded: viewDidLoadPublisher.eraseToAnyPublisher(),
             followTapped: followTappedPublisher.eraseToAnyPublisher(),
-            goBack: goBackPublisher.eraseToAnyPublisher()
+            goBack: goBackPublisher.eraseToAnyPublisher(),
+            goToEvent: goToEventPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
@@ -161,6 +166,7 @@ struct CollapsingHeader: View {
 struct EventsSection: View {
     
     @Binding var fiestas: [Fiesta]
+    var goToEvent: InputClosure<Fiesta>
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -170,7 +176,7 @@ struct EventsSection: View {
                     Spacer()
                     
                     Text("No hay eventos para esta discoteca.")
-                        .font(.title)
+                        .font(.system(size: 22))
                         .bold()
                         .foregroundColor(.white)
                     
@@ -192,6 +198,9 @@ struct EventsSection: View {
                             imageHeight: 250 - 16
                         )
                         .frame(maxWidth: .infinity)
+                        .onTapGesture {
+                            goToEvent(fiesta)
+                        }
                         
                         Spacer()
                             .frame(height: 20)

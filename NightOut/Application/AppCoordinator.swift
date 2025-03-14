@@ -188,7 +188,7 @@ final class AppCoordinator: ObservableObject {
         let discotecaDetailCoordinator = DiscotecaDetailCoordinator(
             actions: .init(goBack: { [weak self] in
                 self?.pop()
-            }),
+            }, goToEvent: openTicketDetail(model:)),
             model: model
         )
         self.push(discotecaDetailCoordinator)
