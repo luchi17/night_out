@@ -1,6 +1,6 @@
 import SwiftUI
 import Combine
-
+import Firebase
 
 struct ProfileModel: Hashable, Identifiable {
     var profileImageUrl: String?
@@ -133,6 +133,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     private var model: ProfileModel
     
     let myUid = FirebaseServiceImpl.shared.getCurrentUserUid() ?? ""
+    let currentDateString: String?
     
     init(
         useCases: UseCases,
@@ -150,6 +151,10 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             fullname: model.fullname,
             isCompanyProfile: model.isCompanyProfile
         )
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        currentDateString = dateFormatter.string(from: Date())
     }
     
     func transform(input: UserProfilePresenterImpl.ViewInputs) {
@@ -157,15 +162,25 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         listenToInputs(input: input)
         
         let myFollowObserver =
-        useCases.followUseCase.observeFollow(id: myUid)
+        useCases.followUseCase
+            .observeFollow(id: myUid)
+            .map({
+                let following = $0?.following ?? [:]
+                let keys = following.keys
+                return Array(keys)
+            })
+            .withUnretained(self)
+            .flatMap { presenter, followingList in
+                presenter.filterUsersAttendingClub(followingList)
+            }
             .eraseToAnyPublisher()
         
         //Just for companies
         let assistanceObserver =
-        useCases.clubUseCase.observeAssistance(profileId: self.model.profileId)
+        observeClubAssistance()
             .withUnretained(self)
             .flatMap { presenter, userIds -> AnyPublisher<[UserModel?], Never> in
-                presenter.getInfoOfUsersGoingToClub(usersGoingIds: Array(userIds.keys))
+                presenter.getInfoOfUsersGoingToClub(usersGoingIds: userIds)
             }
             .eraseToAnyPublisher()
         
@@ -232,28 +247,22 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
             })
             .withUnretained(self)
             .sink { presenter, data in
-                
                 let usersGoingToClub = data.0
-                let followingPeople = data.1?.following ?? [:]
+                let followingPeople = data.1
                 let myUserModel = data.2.0
                 let myCurrentClubModel = data.2.1
+                
+                presenter.viewModel.loading = false
                 
                 presenter.viewModel.myUserModel = myUserModel
                 presenter.viewModel.myCurrentClubModel = myCurrentClubModel
                 
-                presenter.viewModel.loading = false
-                
-                let myUserFollowsThisProfile = followingPeople.first(where: { $0.key == presenter.model.profileId }) != nil
+                let myUserFollowsThisProfile = followingPeople.first(where: { $0.uid == presenter.model.profileId }) != nil
                 presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
                 
-                presenter.viewModel.followingPeopleGoingToClub = usersGoingToClub.compactMap({ $0 })
-                    .filter({ userGoing in
-                        followingPeople.contains(where: { $0.key == userGoing.uid })
-                    })
-                    .map({ $0.toUserGoingCellModel() })
+                presenter.viewModel.followingPeopleGoingToClub = followingPeople.map({ $0.toUserGoingCellModel() })
                 
                 presenter.viewModel.usersGoingToClub = usersGoingToClub.compactMap({ $0 }).map({ $0.toUserGoingCellModel() })
-                
                 presenter.viewModel.imGoingToClub = usersGoingToClub.contains(where: { $0?.uid == presenter.myUid }) ? .going : .notGoing
 
             }
@@ -490,6 +499,61 @@ private extension UserProfilePresenterImpl {
                 .store(in: &cancellables)
             }
         }
+    }
+    
+    func observeClubAssistance() -> AnyPublisher<[String], Never> {
+        
+        let clubRef = FirebaseServiceImpl.shared.getClub().child(self.model.profileId).child("Assistance").child(self.currentDateString!)
+        
+        return Future { promise in
+            clubRef.observe(.value) { snapshot in
+                let clubAttendees = Array(snapshot.children.compactMap { ($0 as? DataSnapshot)?.key } )
+                
+                print("clubAttendees \(clubAttendees)")
+                
+                promise(.success(clubAttendees))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    private func filterUsersAttendingClub(_ followingList: [String]) -> AnyPublisher<[UserModel], Never> {
+        
+        let publishers = followingList.map { userId in
+            self.checkUserAttendance(userId, currentDate: self.currentDateString!)
+        }
+        
+        return Publishers.MergeMany(publishers)
+            .collect()
+            .map { $0.compactMap { $0 } }
+            .eraseToAnyPublisher()
+    }
+    
+    private func checkUserAttendance(_ userId: String, currentDate: String) -> AnyPublisher<UserModel?, Never> {
+        
+        let userClubAssistanceRef = FirebaseServiceImpl.shared.getClub().child(self.model.profileId).child("Assistance").child(self.currentDateString!) .child(userId)
+        
+        return Future<UserModel?, Never> { promise in
+            
+            userClubAssistanceRef.observeSingleEvent(of: .value) { snapshot in
+                
+                if snapshot.exists() {
+                    // El usuario está asistiendo al club hoy, agrégalo a la lista
+                    self.useCases.userDataUseCase.getUserInfo(uid: userId)
+                        .sink { userModel in
+                            if let userModel = userModel {
+                                promise(.success(userModel))
+                            } else {
+                                promise(.success(nil))
+                            }
+                        }
+                        .store(in: &self.cancellables)
+                } else {
+                    promise(.success(nil))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
     }
 }
 
