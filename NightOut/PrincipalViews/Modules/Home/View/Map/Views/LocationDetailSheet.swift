@@ -38,7 +38,7 @@ struct LocationDetailSheet: View {
                                 Circle()
                                     .fill(getStatusCircleColor())
                                     .frame(width: 10, height: 10)
-                                    .offset(x: -5, y: -5)
+                                    .offset(x: -5, y: 5)
                             })
                             .padding(.top, 15)
                             .padding(.bottom, 20)
@@ -48,11 +48,19 @@ struct LocationDetailSheet: View {
                         .font(.headline)
                         .padding(.bottom, 10)
                     
-                    if let endTime = selectedLocation.endTime, let startTime = selectedLocation.startTime {
+                    if let endTime = selectedLocation.endTime,
+                        let startTime = selectedLocation.startTime,
+                        !endTime.isEmpty, !startTime.isEmpty {
+                    
                         Text("Horario: \(startTime) - \(endTime)")
                             .font(.subheadline)
                             .padding(.bottom, 10)
+                    } else {
+                        Text("Horario desconocido")
+                            .font(.subheadline)
+                            .padding(.bottom, 10)
                     }
+                    
                     if let selectedTag = selectedLocation.selectedTag, selectedLocation.selectedTag != LocationSelectedTag.none {
                         Text("Etiqueta: \(selectedTag.title)")
                             .font(.subheadline)
