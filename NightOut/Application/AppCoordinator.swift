@@ -143,6 +143,8 @@ final class AppCoordinator: ObservableObject {
                 self?.pop()
                 self?.tabViewModel.selectedTab = .home
                 self?.showMyProfileSubject.send()
+            }, openDiscoDetail: { [weak self] companyModel in
+                self?.openDiscotecaDetail(model: (companyModel, []))
             }
            ),
             model: model

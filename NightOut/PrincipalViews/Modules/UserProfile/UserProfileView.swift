@@ -11,6 +11,7 @@ struct UserProfileView: View {
     private let goBackPublisher = PassthroughSubject<Void, Never>()
     private let userSelectedPublisher = PassthroughSubject<UserGoingCellModel, Never>()
     private let openConfigPublisher = PassthroughSubject<Void, Never>()
+    private let openDiscoPublisher = PassthroughSubject<Void, Never>()
     
     @State private var selectedImage: IdentifiableImage? = nil
     
@@ -109,6 +110,16 @@ struct UserProfileView: View {
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
             
+            Button(action: {
+                openDiscoPublisher.send()
+            }) {
+                Image("ticket")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 45, height: 45)
+                    .foregroundStyle(.black)
+            }
+            
             Spacer()
             
             if viewModel.isCompanyProfile && FirebaseServiceImpl.shared.getImUser() {
@@ -196,7 +207,8 @@ private extension UserProfileView {
             goToClub: whiskyTappedPublisher.eraseToAnyPublisher(),
             goBack: goBackPublisher.eraseToAnyPublisher(),
             onUserSelected: userSelectedPublisher.eraseToAnyPublisher(),
-            openConfig: openConfigPublisher.eraseToAnyPublisher()
+            openConfig: openConfigPublisher.eraseToAnyPublisher(),
+            openDiscoDetail: openDiscoPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

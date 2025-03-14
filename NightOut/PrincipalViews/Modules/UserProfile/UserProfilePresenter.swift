@@ -47,13 +47,13 @@ enum ImGoingToClub {
                 Image("whisky_full")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 60, height: 60)
+                    .frame(width: 50, height: 50)
             case .notGoing:
                 Image("whisky_empty")
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 60, height: 60)
+                    .frame(width: 50, height: 50)
                     .foregroundColor(.white)
             }
         }
@@ -113,6 +113,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         let goBack: VoidClosure
         let openAnotherProfile: InputClosure<ProfileModel>
         let openConfig: VoidClosure
+        let openDiscoDetail: InputClosure<CompanyModel>
     }
     
     struct ViewInputs {
@@ -122,6 +123,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
         let goBack: AnyPublisher<Void, Never>
         let onUserSelected: AnyPublisher<UserGoingCellModel, Never>
         let openConfig: AnyPublisher<Void, Never>
+        let openDiscoDetail: AnyPublisher<Void, Never>
     }
     
     var viewModel: UserProfileViewModel
@@ -289,6 +291,16 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
     }
     
     func listenToInputs(input: UserProfilePresenterImpl.ViewInputs) {
+        
+        input
+            .openDiscoDetail
+            .withUnretained(self)
+            .sink { presenter, _ in
+                if let club = UserDefaults.getCompanies()?.users.first(where: { $0.key == presenter.model.profileId })?.value {
+                    presenter.actions.openDiscoDetail(club)
+                }
+            }
+            .store(in: &cancellables)
         
         input
             .followProfile
