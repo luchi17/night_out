@@ -25,7 +25,7 @@ struct LocationDetailSheet: View {
                             Circle()
                                 .fill(getStatusCircleColor())
                                 .frame(width: 10, height: 10)
-                                .offset(x: -5, y: -5)
+                                .offset(x: -5, y: 5)
                         })
                         .padding(.top, 15)
                         .padding(.bottom, 20)
