@@ -2,8 +2,8 @@ import SwiftUI
 import Combine
 import CoreLocation
 import MapKit
+import Firebase
 
-#warning("Add cache of companies with UserDefaults.getCompanies() ")
 final class LocationsMapViewModel: ObservableObject {
     
     @Published var selectedMarkerLocation: LocationModel? // Discoteca seleccionada
@@ -14,6 +14,7 @@ final class LocationsMapViewModel: ObservableObject {
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
+    @Published var markerFromList: Bool = false
     
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
@@ -65,6 +66,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     }
     
     func transform(input: LocationsMapPresenterImpl.ViewInputs){
+        
         listenToInput(input: input)
         
         let companyModelsPublisher = input
@@ -91,19 +93,18 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                     .eraseToAnyPublisher()
             })
             .withUnretained(self)
-            .flatMap { presenter, data -> AnyPublisher<([(String, [String])], [String], [CompanyModel]), Never> in
+            .flatMap { presenter, data -> AnyPublisher<([(String, Int)], [CompanyModel]), Never> in
                 let companies = data.0?.users.map({ $0.value }) ?? []
                 let followingPeople = Array(data.1.keys)
                 
-                return presenter.getClubAssistance(companies: companies)
-                    .map({ ($0, followingPeople, companies) })
+                return presenter.getClubAssistance(companies: companies, followingPeople: followingPeople)
+                    .map({ ($0, companies) })
                     .eraseToAnyPublisher()
             }
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
                 let assistance = data.0
-                let followingPeople = data.1
-                let companies = data.2
+                let companies = data.1
 
                 if !companies.isEmpty {
                     presenter.viewModel.toastError = nil
@@ -112,8 +113,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                         
                         presenter.transformCompanyModel(
                             companyModel,
-                            assistance: assistance,
-                            followingPeople: followingPeople
+                            assistance: assistance
                         )
                     }
                     presenter.viewModel.currentShowingLocationList = allClubsModel
@@ -179,6 +179,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .locationInListSelected
             .withUnretained(self)
             .sink { presenter, locationSelected in
+                presenter.viewModel.markerFromList = true
                 presenter.viewModel.selectedMarkerLocation = locationSelected
             }
             .store(in: &cancellables)
@@ -192,15 +193,30 @@ private extension LocationsMapPresenterImpl {
         return currentLoc.distance(from: destLoc)
     }
     
-    func getClubAssistance(companies: [CompanyModel]) -> AnyPublisher<[(String, [String])], Never> {
+    func getClubAssistance(companies: [CompanyModel], followingPeople: [String]) -> AnyPublisher<[(String, Int)], Never> {
         
-        let publishers: [AnyPublisher<(String, [String]), Never>] = companies.map { company in
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        let currentDate = dateFormatter.string(from: Date())
+        
+        let publishers: [AnyPublisher<(String, Int), Never>] = companies.map { company in
             
-            return useCases.clubUseCase.getAssistance(profileId: company.uid)
-                .map { clubAssistance in
-                    return (company.uid, Array(clubAssistance.keys))
+            let clubRef = FirebaseServiceImpl.shared.getClub().child(company.uid).child("Assistance").child(currentDate)
+            
+            return Future { promise in
+                clubRef.getData { error, snapshot in
+                    guard error == nil, let clubSnapshot = snapshot else {
+                        promise(.success((company.uid, 0)))
+                        return
+                    }
+                    
+                    let clubAttendees = Set(clubSnapshot.children.compactMap { ($0 as? DataSnapshot)?.key })
+                    let following = Set(followingPeople)
+                    let commonCount = following.intersection(clubAttendees).count
+                    promise(.success((company.uid, commonCount)))
                 }
-                .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
         }
         
         return Publishers.MergeMany(publishers)
@@ -208,18 +224,10 @@ private extension LocationsMapPresenterImpl {
             .eraseToAnyPublisher()
     }
     
-    func transformCompanyModel(_ companyModel: CompanyModel, assistance: [(String, [String])], followingPeople: [String]) -> LocationModel? {
+    func transformCompanyModel(_ companyModel: CompanyModel, assistance: [(String, Int)]) -> LocationModel? {
         
         if let location = companyModel.location,
            let coordinates = viewModel.locationManager.getCoordinatesFromString(location) {
-            
-            let matchingAssistance = assistance.first(where: { $0.0 == companyModel.uid })
-            
-            let usersGoingToClub = matchingAssistance?.1
-            
-            let followingUsersMatchingAssistance = usersGoingToClub?.filter({ userGoing in
-                followingPeople.contains(where: { userGoing == $0 })
-            })
             
             return LocationModel(
                 id: companyModel.uid,
@@ -229,9 +237,10 @@ private extension LocationsMapPresenterImpl {
                 startTime: companyModel.startTime,
                 endTime: companyModel.endTime,
                 selectedTag: LocationSelectedTag(rawValue: companyModel.selectedTag),
-                followingGoing: followingUsersMatchingAssistance?.count ?? 0
+                followingGoing: assistance.first(where: { $0.0 == companyModel.uid })?.1 ?? 0
             )
         }
         return nil
     }
+        
 }
