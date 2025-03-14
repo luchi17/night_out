@@ -170,6 +170,9 @@ struct CircleImage: View {
                         view
                             .overlay(Circle().stroke(Color.white, lineWidth: 2))
                     }
+                    .overlay {
+                        ProgressView()
+                    }
             }
         } else {
             Image("profile")
