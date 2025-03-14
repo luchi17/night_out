@@ -47,16 +47,16 @@ struct TinderCardView: View {
                             .foregroundColor(.red)
                             .scaleEffect(heartScale)
                     }
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 12)
                     
                     // Nombre del usuario
                     Text(user.name)
-                        .font(.title)
+                        .font(.system(size: 20))
                         .padding()
                         .background(Color.blackColor.opacity(0.7))
                         .foregroundColor(.white)
                         .cornerRadius(10)
-                        .padding(.bottom, 32)
+                        .padding(.bottom, 40)
                 }
             }
             .frame(width: geometry.size.width, height: geometry.size.height)

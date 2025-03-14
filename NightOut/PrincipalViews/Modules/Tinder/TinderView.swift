@@ -66,28 +66,18 @@ struct TinderView: View {
                 }
             }
         }
-        .background(
-            Color.blackColor
-        )
         .if(viewModel.showNoUsersForClub, transform: { view in
-            noUsersView
-        })
-        .if(viewModel.showEndView, transform: { view in
-            endView
-        })
-        .if(viewModel.loadingAssistance, transform: { view in
             Color.blackColor
                 .edgesIgnoringSafeArea(.all)
                 .overlay {
-                    
-                    VStack(spacing: 20) {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        
-                        Text("Validando asistencia...")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.white)
-                    }
+                    noUsersView
+                }
+        })
+        .if(viewModel.showEndView, transform: { view in
+            Color.blackColor
+                .edgesIgnoringSafeArea(.all)
+                .overlay {
+                    endView
                 }
         })
         .if(viewModel.loadingUsers, transform: { view in
@@ -136,7 +126,7 @@ struct TinderView: View {
                 .frame(height: 60)
                 .foregroundStyle(.white)
             
-            Text("¡Lo sentimos! No hay usuarios en Social NighOut para el club al que asistes.")
+            Text("¡Lo sentimos! No hay usuarios en Social NighOut para el club al que asistes hoy.")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(.white)
             

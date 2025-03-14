@@ -15,7 +15,6 @@ struct TinderUser: Identifiable {
 final class TinderViewModel: ObservableObject {
     
     @Published var loadingUsers: Bool = false
-    @Published var loadingAssistance: Bool = false
     
     @Published var toast: ToastType?
     
@@ -70,6 +69,8 @@ final class TinderPresenterImpl: TinderPresenter {
     private let loadGenderSubject = PassthroughSubject<Void, Never>()
     private let loadUsersSubject = PassthroughSubject<Void, Never>()
     
+    private let currentDateString: String?
+    
     init(
         useCases: UseCases,
         actions: Actions
@@ -79,6 +80,28 @@ final class TinderPresenterImpl: TinderPresenter {
         
         
         viewModel = TinderViewModel()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        
+        self.currentDateString = dateFormatter.string(from: Date())
+    }
+    
+    func checkViewToShow(users: [TinderUser]?) {
+        
+        viewModel.showEndView = false
+        viewModel.showNoUsersForClub = false
+        viewModel.loadingUsers = false
+        
+        if let users = users {
+            
+            if !users.isEmpty {
+                viewModel.users = users
+            } else {
+                viewModel.showEndView = true
+            }
+        } else {
+            viewModel.showNoUsersForClub = true
+        }
     }
     
     func transform(input: TinderPresenterImpl.ViewInputs) {
@@ -88,7 +111,8 @@ final class TinderPresenterImpl: TinderPresenter {
             .withUnretained(self)
             .sink { presenter, userLikedUid in
                 presenter.setUserLiked(likedUserId: userLikedUid)
-                presenter.viewModel.users = presenter.viewModel.users.filter({ $0.uid != userLikedUid })
+                let users = presenter.viewModel.users.filter({ $0.uid != userLikedUid })
+                presenter.checkViewToShow(users: users)
             }
             .store(in: &cancellables)
         
@@ -123,16 +147,7 @@ final class TinderPresenterImpl: TinderPresenter {
             .withUnretained(self)
             .sink { presenter, users in
                 
-                presenter.viewModel.loadingUsers = false
-                
-                if let users = users {
-                    presenter.viewModel.users = users
-                    if users.isEmpty {
-                        presenter.viewModel.showEndView = true
-                    }
-                } else {
-                    presenter.viewModel.showNoUsersForClub = true
-                }
+                presenter.checkViewToShow(users: users)
             }
             .store(in: &cancellables)
         
@@ -151,34 +166,21 @@ final class TinderPresenterImpl: TinderPresenter {
         input
             .initTinder
             .withUnretained(self)
-            .performRequest(request: { presenter, _ in
+            .flatMap({ presenter, _ in
                 presenter.getClubIdForCurrentUser()
-            }, loadingClosure: { [weak self] loading in
-                self?.viewModel.loadingAssistance = loading
-            }, onError: { [weak self] error in
-                guard let self = self else { return }
-                if error != nil {
-                    self.viewModel.toast = .custom(.init(title: "Error", description: error?.localizedDescription, image: nil))
-                }
             })
             .withUnretained(self)
             .sink { presenter, clubId in
-                
-
-                
+            
                 if let clubId = clubId {
                     presenter.viewModel.clubId = clubId
                     
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "dd-MM-yyyy"
-                    let currentDateString = dateFormatter.string(from: Date())
-                    
-                    
                     presenter.hasMultipleUsersInClub(
                         clubId: clubId,
-                        currentDate: currentDateString) { hasMultipleUsers in
+                        currentDate: presenter.currentDateString!
+                    ) { hasMultipleUsers in
                             if !hasMultipleUsers {
-                                presenter.showNoUsersInSocialDialog() // ❌ Está solo en el club
+                                presenter.viewModel.showNoUsersForClub = true // ❌ Está solo en el club
                             } else {
                                 
                                 
@@ -204,22 +206,14 @@ final class TinderPresenterImpl: TinderPresenter {
                     presenter.viewModel.showAlert = true
                     presenter.viewModel.shouldOpenConfig = false
                     presenter.viewModel.alertTitle = "Confirmar asistencia"
-                    presenter.viewModel.alertMessage = "Debes confirmar tu asistencia a un club para continuar."
+                    presenter.viewModel.alertMessage = "No tienes asistencia para eventos hoy."
                     presenter.viewModel.alertButtonText = "ACEPTAR"
                 }
             }
             .store(in: &cancellables)
         
     }
-    
-    private func showNoUsersInSocialDialog() {
-        viewModel.showAlert = true
-        viewModel.shouldOpenConfig = false
-        viewModel.alertTitle = "No hay usuarios en Social"
-        viewModel.alertMessage = "Actualmente no hay más usuarios en Social para el club al que vas hoy."
-        viewModel.alertButtonText = "ACEPTAR"
-    }
-    
+   
     private func showOutsideScheduleDialog() {
         viewModel.showAlert = true
         viewModel.shouldOpenConfig = false
@@ -239,7 +233,12 @@ final class TinderPresenterImpl: TinderPresenter {
             
             clubsRef.observeSingleEvent(of: .value) { snapshot in
                 for clubSnapshot in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
-                    let assistanceRef = clubSnapshot.childSnapshot(forPath: "Assistance").childSnapshot(forPath: uid)
+                    
+                    let assistanceRef = clubSnapshot
+                        .childSnapshot(forPath: "Assistance")
+                        .childSnapshot(forPath: self.currentDateString!)
+                        .childSnapshot(forPath: uid)
+                    
                     if assistanceRef.exists() {
                         let clubId = clubSnapshot.key
                         promise(.success(clubId))
@@ -272,12 +271,26 @@ final class TinderPresenterImpl: TinderPresenter {
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
             return Just(nil).eraseToAnyPublisher()
         }
+
+        let userSexRef = FirebaseServiceImpl.shared.getAssistance(profileId: self.viewModel.clubId)
+            .child(currentDateString!)
+            .child(currentUserId)
+            .child("gender")
         
-        return useCases.userDataUseCase.getUserInfo(uid: currentUserId)
-            .map { userModel in
-                return userModel?.gender
+        return Future<String?, Never> { promise in
+            
+            userSexRef.getData { error, snapshot in
+                if let error = error {
+                    print("Error al obtener el sexo del usuario: \(error.localizedDescription)")
+                    promise(.success(nil))
+                } else {
+                    let sex = snapshot?.value as? String
+                    promise(.success(sex))
+                }
             }
-            .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
+
     }
     
     private func loadUsers(currentUserSex: String) -> AnyPublisher<[TinderUser]?, Never> {
@@ -297,9 +310,9 @@ final class TinderPresenterImpl: TinderPresenter {
             .eraseToAnyPublisher()
             .withUnretained(self)
             .flatMap { presenter, likedUsers -> AnyPublisher<([ClubAssistance], [String]), Never> in
-                return presenter.useCases.clubUseCase.getAssistance(profileId: presenter.viewModel.clubId)
+                return presenter.getAssistance()
                     .map { users in
-                        return (Array(users.values), likedUsers)
+                        return (users, likedUsers)
                     }
                     .eraseToAnyPublisher()
             }
@@ -314,31 +327,39 @@ final class TinderPresenterImpl: TinderPresenter {
     }
     
     private func loadUsersDetails(users: [ClubAssistance], likedUsers: [String]) -> AnyPublisher<[TinderUser]?, Never> {
-        
+
         guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
             return Just(nil).eraseToAnyPublisher()
         }
+       
+        let otherSexUsers = users
+            .filter({ $0.uid != currentUserId })
+            .filter({ $0.gender != viewModel.currentUserSex })
         
-        let usersToLoad = users.filter { user in
-            return user.uid != currentUserId &&
-            !likedUsers.contains(where: { $0 == user.uid }) //Filter liked users
+        // Ya ha visto todos los matches
+        if otherSexUsers.isEmpty && !likedUsers.isEmpty {
+            return Just([]).eraseToAnyPublisher() //Mostrar endView
+        } else if otherSexUsers.isEmpty && likedUsers.isEmpty {
+            return Just(nil).eraseToAnyPublisher() //Mostrar noUsersView
         }
         
-        if users.filter({ $0.uid != currentUserId }).isEmpty {
-            return Just(nil).eraseToAnyPublisher()
+        let usersToLoad = otherSexUsers.filter { user in
+            return !likedUsers.contains(where: { $0 == user.uid }) //Filter liked users
         }
         
-        let publishers: [AnyPublisher<TinderUser, Never>] = usersToLoad.map { user in
+        let publishers: [AnyPublisher<TinderUser?, Never>] = usersToLoad.map { [weak self] user in
+
+            guard let self = self else {
+                return Just(nil).eraseToAnyPublisher()
+            }
             
-            return useCases.userDataUseCase.getUserInfo(uid: user.uid)
+            return self.useCases.userDataUseCase.getUserInfo(uid: user.uid)
                 .compactMap({ userModel -> TinderUser? in
                     
                     guard let userModel = userModel else {
                         return nil
                     }
-                    if userModel.gender == nil ||
-                        userModel.gender == self.viewModel.currentUserSex ||
-                        userModel.social?.lowercased() == "no participando" ||
+                    if userModel.social?.lowercased() == "no participando" ||
                         userModel.image == nil
                     {
                         return nil
@@ -370,5 +391,27 @@ final class TinderPresenterImpl: TinderPresenter {
         } withCancel: { error in
             completion(false) // En caso de error, asumimos que está solo
         }
+    }
+    
+    func getAssistance() -> AnyPublisher<[ClubAssistance], Never> {
+        
+        let assistanceRef = FirebaseServiceImpl.shared.getAssistance(profileId: self.viewModel.clubId).child(currentDateString!)
+        
+        return Future<[ClubAssistance], Never> { promise in
+            
+            assistanceRef.observeSingleEvent(of: .value) { assistanceSnapshot in
+                let allUsers = assistanceSnapshot.children.allObjects as! [DataSnapshot]
+                
+                if allUsers.isEmpty {
+                    promise(.success([]))
+                }
+                
+                let assistance = allUsers.compactMap { ClubAssistance(snapshot: $0) }
+                
+                promise(.success(assistance))
+            }
+        }
+        .eraseToAnyPublisher()
+        
     }
 }
