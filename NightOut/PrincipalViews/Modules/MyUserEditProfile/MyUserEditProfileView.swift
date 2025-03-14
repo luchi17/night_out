@@ -86,6 +86,7 @@ struct MyUserEditProfileView: View {
                     paymentsView
                     
                     participateView
+                        .ignoresSafeArea(.keyboard, edges: .bottom)
                     
                 } else {
                     
