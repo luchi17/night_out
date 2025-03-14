@@ -146,13 +146,16 @@ private extension CommentsPresenterImpl {
     }
     
     func sendNotification(comment: UserCommentModel) {
-        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid(), let commentText = comment.comment else {
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid(),
+                let commentText = comment.comment,
+               info.publisherId != uid else {
             return
         }
+
         let model = NotificationModel(
             ispost: true,
             postid: info.postId,
-            text: "commented: " + commentText,
+            text: "Ha comentado: " + commentText,
             userid: uid
         )
         _ = self.useCases.notificationsUseCase.addNotification(model: model, publisherId: info.publisherId)
