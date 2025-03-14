@@ -71,6 +71,7 @@ final class UserProfileViewModel: ObservableObject {
     @Published var imGoingToClub: ImGoingToClub = .notGoing
     @Published var usersGoingToClub: [UserGoingCellModel] = []
     @Published var followingPeopleGoingToClub: [UserGoingCellModel] = []
+    @Published var following: [String] = []
 
     @Published var isCompanyProfile: Bool
     
@@ -173,6 +174,9 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 return Array(keys)
             })
             .withUnretained(self)
+            .handleEvents(receiveOutput: { presenter, followingPeople in
+                presenter.viewModel.following = followingPeople
+            })
             .flatMap { presenter, followingList in
                 presenter.filterUsersAttendingClub(followingList)
             }
@@ -246,7 +250,7 @@ final class UserProfilePresenterImpl: UserProfilePresenter {
                 
                 presenter.viewModel.myUserModel = myUserModel
                 
-                let myUserFollowsThisProfile = followingPeople.first(where: { $0.uid == presenter.model.profileId }) != nil
+                let myUserFollowsThisProfile = presenter.viewModel.following.first(where: { $0 == presenter.model.profileId }) != nil
                 presenter.viewModel.followButtonType = myUserFollowsThisProfile ? .following : .follow
                 
                 presenter.viewModel.followingPeopleGoingToClub = followingPeople.map({ $0.toUserGoingCellModel() })
@@ -428,8 +432,7 @@ private extension UserProfilePresenterImpl {
     
     func checkClubAttendance(profileId: String) {
         let clubsRef = FirebaseServiceImpl.shared.getClub()
-        
-//        observe(.value)
+ 
         clubsRef.observeSingleEvent(of: .value) { [weak self] snapshot in
             
             guard let self = self else { return }
