@@ -155,7 +155,7 @@ private extension CommentsPresenterImpl {
         let model = NotificationModel(
             ispost: true,
             postid: info.postId,
-            text: "Ha comentado: " + commentText,
+            text: "\(comment.username ?? "") ha comentado: " + commentText,
             userid: uid
         )
         _ = self.useCases.notificationsUseCase.addNotification(model: model, publisherId: info.publisherId)

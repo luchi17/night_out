@@ -149,8 +149,10 @@ final class HomePresenterImpl: HomePresenter {
             .sink { presenter, _ in
                 if FirebaseServiceImpl.shared.getImUser() {
                     
+#warning("TODO: REMOVE this line, just for testing, discomment the others")
                     presenter.actions.openTinder()
                     
+
 //                    if presenter.myUserModel?.social?.lowercased() == "no participando" {
 //                        
 //                        presenter.viewModel.showNighoutAlert = true
