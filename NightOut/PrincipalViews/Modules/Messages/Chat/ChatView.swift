@@ -7,6 +7,7 @@ struct ChatView: View {
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let sendMessagePublisher = PassthroughSubject<Void, Never>()
     private let goBackPublisher = PassthroughSubject<Void, Never>()
+    private let goToProfilePublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject private var keyboardObserver = KeyboardObserver()
     
@@ -59,7 +60,8 @@ struct ChatView: View {
         .background(Color.blackColor)
         .showCustomNavBar(
             title: viewModel.otherUsername,
-            goBack: goBackPublisher.send
+            goBack: goBackPublisher.send,
+            titleAction: goToProfilePublisher.send
         )
         .showToast(
             error: (
@@ -111,7 +113,8 @@ private extension ChatView {
         let input = ChatPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             goBack: goBackPublisher.eraseToAnyPublisher(),
-            sendMessage: sendMessagePublisher.eraseToAnyPublisher()
+            sendMessage: sendMessagePublisher.eraseToAnyPublisher(),
+            goToProfile: goToProfilePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

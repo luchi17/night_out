@@ -103,7 +103,8 @@ final class AppCoordinator: ObservableObject {
         let messagesView = ChatCoordinator(actions: .init(goBack: {
             [weak self] in
             self?.pop()
-        }), chat: chat)
+        }, goToProfile: showProfile(model:),goToPrivateProfile: showPrivateProfile(model:)), chat: chat
+        )
         
         self.push(messagesView)
     }
@@ -149,7 +150,7 @@ final class AppCoordinator: ObservableObject {
             }, openDiscoDetail: { [weak self] companyModel in
                 self?.openDiscotecaDetail(model: (companyModel, []))
             }
-           ),
+                          ),
             model: model
         )
         self.push(userProfileCoordinator)
@@ -212,7 +213,7 @@ final class AppCoordinator: ObservableObject {
             },
             openTicketInfoPay: openPayTicket
         ),
-        model: model)
+                                                              model: model)
         
         self.push(ticketDetailCoordinator)
     }
@@ -224,7 +225,7 @@ final class AppCoordinator: ObservableObject {
             self?.pop()
             self?.pop()
         }),
-         model: model
+                                                        model: model
         )
         self.push(ticketPayCoordinator)
     }

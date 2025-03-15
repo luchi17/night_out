@@ -25,16 +25,22 @@ final class ChatPresenterImpl: ChatPresenter {
     
     struct UseCases {
         let chatUseCase: ChatUseCase
+        let followUseCase: FollowUseCase
+        let userDataUseCase: UserDataUseCase
+        let companyDataUseCase: CompanyDataUseCase
     }
     
     struct Actions {
         let goBack: VoidClosure
+        let goToProfile: InputClosure<ProfileModel>
+        let goToPrivateProfile: InputClosure<ProfileModel>
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let goBack: AnyPublisher<Void, Never>
         let sendMessage: AnyPublisher<Void, Never>
+        let goToProfile: AnyPublisher<Void, Never>
     }
     
     var viewModel: ChatViewModel
@@ -114,6 +120,70 @@ final class ChatPresenterImpl: ChatPresenter {
             .withUnretained(self)
             .sink { presenter, chat in
                 presenter.actions.goBack()
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goToProfile
+            .withUnretained(self)
+            .flatMap({ presenter, _ -> AnyPublisher<FollowModel?, Never> in
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                    return Just(nil).eraseToAnyPublisher()
+                }
+                return presenter.useCases.followUseCase.fetchFollow(id: uid)
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .flatMap({ presenter, followModel -> AnyPublisher<(FollowModel?, ProfileModel), Never> in
+                
+                if UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == presenter.chat.otherUserUid }) {
+                    presenter.useCases.companyDataUseCase.getCompanyInfo(uid: presenter.chat.otherUserUid)
+                        .compactMap({ $0 })
+                        .map { companyModel in
+                            let profileModel = ProfileModel(
+                                profileImageUrl: companyModel.imageUrl,
+                                username: companyModel.username,
+                                fullname: companyModel.fullname,
+                                profileId: companyModel.uid,
+                                isCompanyProfile: true,
+                                isPrivateProfile: companyModel.profileType == .privateProfile
+                            )
+                            return (followModel, profileModel)
+                        }
+                        .eraseToAnyPublisher()
+                } else {
+                    presenter.useCases.userDataUseCase.getUserInfo(uid: presenter.chat.otherUserUid)
+                        .compactMap({ $0 })
+                        .map { userModel in
+                            let profileModel = ProfileModel(
+                                profileImageUrl: userModel.image,
+                                username: userModel.username,
+                                fullname: userModel.fullname,
+                                profileId: userModel.uid,
+                                isCompanyProfile: false,
+                                isPrivateProfile: userModel.profileType == .privateProfile
+                            )
+                            return (followModel, profileModel)
+                        }
+                        .eraseToAnyPublisher()
+                }
+            })
+            .withUnretained(self)
+            .sink { presenter, data in
+                let profileModel = data.1
+                let follow = data.0
+                
+                let following = follow?.following?.keys.first(where: { $0 == presenter.chat.otherUserUid }) != nil
+                
+                if following {
+                    presenter.actions.goToProfile(profileModel)
+                } else {
+                    if profileModel.isPrivateProfile {
+                        presenter.actions.goToPrivateProfile(profileModel)
+                    } else {
+                        presenter.actions.goToProfile(profileModel)
+                    }
+                }
             }
             .store(in: &cancellables)
     }

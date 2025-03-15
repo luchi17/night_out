@@ -28,7 +28,12 @@ class ChatCoordinator: ObservableObject, Hashable {
     @ViewBuilder
     func build() -> some View {
         let presenter = ChatPresenterImpl(
-            useCases: .init(chatUseCase: ChatUseCaseImpl(repository: ChatRepositoryImpl.shared)),
+            useCases: .init(
+                chatUseCase: ChatUseCaseImpl(repository: ChatRepositoryImpl.shared),
+                followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
+                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
+            ),
             actions: actions,
             chat: chat
         )

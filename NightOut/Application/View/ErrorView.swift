@@ -37,6 +37,7 @@ public extension View {
     func showCustomNavBar<T: View>(
         title: String,
         goBack: @escaping VoidClosure,
+        titleAction: VoidClosure? = nil,
         @ViewBuilder image: @escaping () -> T = { EmptyView() } ) -> some View {
         self
             .navigationBarBackButtonHidden(true)
@@ -56,11 +57,15 @@ public extension View {
                 }
                 
                 ToolbarItem(placement: .principal) {
-                    HStack {
-                        Text(title)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundStyle(.white)
-                        image()
+                    Button(action: {
+                        titleAction?()
+                    }) {
+                        HStack {
+                            Text(title)
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(.white)
+                            image()
+                        }
                     }
                 }
             }
