@@ -136,7 +136,7 @@ final class ChatPresenterImpl: ChatPresenter {
             .withUnretained(self)
             .flatMap({ presenter, followModel -> AnyPublisher<(FollowModel?, ProfileModel), Never> in
                 
-                if UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == presenter.chat.otherUserUid }) {
+                if UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == presenter.chat.otherUserUid }) != nil {
                     presenter.useCases.companyDataUseCase.getCompanyInfo(uid: presenter.chat.otherUserUid)
                         .compactMap({ $0 })
                         .map { companyModel in
