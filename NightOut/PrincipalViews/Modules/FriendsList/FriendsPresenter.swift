@@ -18,6 +18,7 @@ final class FriendsPresenterImpl: FriendsPresenter {
     
     struct UseCases {
         let userDataUseCase: UserDataUseCase
+        let companyDataUseCase: CompanyDataUseCase
     }
     
     struct Actions {
@@ -66,23 +67,44 @@ final class FriendsPresenterImpl: FriendsPresenter {
     private func getInfoOfFollowers(followerIds: [String]) -> AnyPublisher<[ProfileModel], Never> {
         
         let publishers: [AnyPublisher<ProfileModel, Never>] = followerIds.map { followerId in
-            useCases.userDataUseCase.getUserInfo(uid: followerId)
-                .map { userModel in
-                    if let userModel = userModel {
-                        return ProfileModel(
-                            profileImageUrl: userModel.image,
-                            username: userModel.username,
-                            fullname: userModel.fullname,
-                            profileId: userModel.uid,
-                            isCompanyProfile: false,
-                            isPrivateProfile: userModel.profileType == .privateProfile
-                        )
-                    } else {
-                        return ProfileModel(profileId: "", isCompanyProfile: false, isPrivateProfile: false)
+            
+            if UserDefaults.getCompanies()?.users.first(where: { $0.value.uid == followerId }) != nil {
+                
+                useCases.companyDataUseCase.getCompanyInfo(uid: followerId)
+                    .map { companyModel in
+                        if let companyModel = companyModel {
+                            return ProfileModel(
+                                profileImageUrl: companyModel.imageUrl,
+                                username: companyModel.username,
+                                fullname: companyModel.fullname,
+                                profileId: companyModel.uid,
+                                isCompanyProfile: true,
+                                isPrivateProfile: companyModel.profileType == .privateProfile
+                            )
+                        } else {
+                            return ProfileModel(profileId: "", isCompanyProfile: false, isPrivateProfile: false)
+                        }
                     }
-                   
-                }
-                .eraseToAnyPublisher()
+                    .eraseToAnyPublisher()
+            } else {
+                useCases.userDataUseCase.getUserInfo(uid: followerId)
+                    .map { userModel in
+                        if let userModel = userModel {
+                            return ProfileModel(
+                                profileImageUrl: userModel.image,
+                                username: userModel.username,
+                                fullname: userModel.fullname,
+                                profileId: userModel.uid,
+                                isCompanyProfile: false,
+                                isPrivateProfile: userModel.profileType == .privateProfile
+                            )
+                        } else {
+                            return ProfileModel(profileId: "", isCompanyProfile: false, isPrivateProfile: false)
+                        }
+                       
+                    }
+                    .eraseToAnyPublisher()
+            }
         }
         
         return Publishers.MergeMany(publishers)

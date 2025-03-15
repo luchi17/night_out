@@ -25,7 +25,10 @@ class FriendsCoordinator: ObservableObject, Hashable {
     @ViewBuilder
     func build() -> some View {
         let presenter = FriendsPresenterImpl(
-            useCases: .init(userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared)),
+            useCases: .init(
+                userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
+                companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)
+            ),
             actions: actions
         )
         FriendsView(presenter: presenter, followerIds: followerIds)

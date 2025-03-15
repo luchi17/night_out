@@ -117,7 +117,11 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
                 let profileImage = model?.imageUrl
                 let username = model?.username
                 let fullname = model?.fullname
-                
+            
+                if let followers = followModel?.followers?.keys {
+                    presenter.viewModel.followers = Array(followers)
+                }
+    
                 presenter.viewModel.profileImageUrl = profileImage
                 presenter.viewModel.username = username ?? "Username no disponible"
                 presenter.viewModel.fullname = fullname ?? "Fullname no disponible"
