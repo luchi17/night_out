@@ -159,14 +159,17 @@ struct HomeView: View {
                 
                 Spacer()
                 // Botón de mensajes
-                Button(action: {
-                    openMessagesPublisher.send()
-                }) {
-                    Image("message_icon")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundStyle(.white)
+                
+                if FirebaseServiceImpl.shared.getImUser() {
+                    Button(action: {
+                        openMessagesPublisher.send()
+                    }) {
+                        Image("message_icon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundStyle(.white)
+                    }
                 }
                 
                 // Botón de notificaciones
