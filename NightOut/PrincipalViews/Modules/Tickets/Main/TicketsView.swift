@@ -73,7 +73,7 @@ struct TicketsView: View {
                 isGenreVisible = false
                 filterPublisher.send()
             }
-            .presentationDetents([.medium])
+            .presentationDetents([.fraction(0.35), .medium])
             .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: $isCalendarVisible, onDismiss: {
