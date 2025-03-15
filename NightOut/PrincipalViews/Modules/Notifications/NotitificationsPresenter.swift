@@ -24,6 +24,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
         let notificationsUseCase: NotificationsUseCase
         let userDataUseCase: UserDataUseCase
         let followUseCase: FollowUseCase
+        let postsUseCase: PostsUseCase
     }
     
     struct Actions {
@@ -60,7 +61,8 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
     }
     
     func transform(input: NotificationsPresenterImpl.ViewInputs) {
-        input
+        
+        let notificationsPublisher = input
             .viewDidLoad
             .withUnretained(self)
             .performRequest(request: { presenter , _  -> AnyPublisher<[String: NotificationModel], Never> in
@@ -73,15 +75,49 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                 guard let self = self else { return }
                 self.viewModel.loading = loading
             }, onError: { _ in })
+            .eraseToAnyPublisher()
+        
+        
+        notificationsPublisher
             .withUnretained(self)
-            .flatMap({ presenter, notificationsModel ->  AnyPublisher<[NotificationModelForView], Never> in
+            .flatMap({ presenter, notificationsModel in
+                let publishers: [AnyPublisher<(String?, String?), Never>] = notificationsModel.values.map({ $0.postid }).map { postId in
+                    
+                    presenter.useCases.postsUseCase.fetchPosts()
+                        .map({ posts in
+                            let postImage = posts.values.first(where: { $0.postID == postId })?.postImage
+                            
+                            return (postId, postImage)
+                        })
+                        .eraseToAnyPublisher()
+                }
+                
+                return Publishers.MergeMany(publishers)
+                    .collect()
+                    .map({ ($0, notificationsModel)})
+                    .eraseToAnyPublisher()
+            })
+            .withUnretained(self)
+            .flatMap { presenter, data in
+                
+                let notificationsModel = data.1
+                let images = data.0
                 
                 let publishers: [AnyPublisher<NotificationModelForView, Never>] = notificationsModel.map { data in
 
                     if let companyFound = UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == data.value.userid }) {
-                        presenter.getNotificationFromCompany(notificationId: data.key, model: data.value, companyFound: companyFound)
+                        presenter.getNotificationFromCompany(
+                            notificationId: data.key,
+                            model: data.value,
+                            companyFound: companyFound,
+                            images: images
+                        )
                     } else {
-                        presenter.getNotificationFromUser(notificationId: data.key, model: data.value)
+                        presenter.getNotificationFromUser(
+                            notificationId: data.key,
+                            model: data.value,
+                            images: images
+                        )
                     }
                 }
                 
@@ -89,12 +125,14 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                     .collect()
                     .eraseToAnyPublisher()
                 
-            })
+            }
             .withUnretained(self)
             .sink { presenter, notifications in
                 presenter.viewModel.notifications = notifications
             }
             .store(in: &cancellables)
+        
+        
         
         input
             .accept
@@ -215,7 +253,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
 
 private extension NotificationsPresenterImpl {
     
-    func getNotificationFromCompany(notificationId: String, model: NotificationModel, companyFound: CompanyModel) -> AnyPublisher<NotificationModelForView, Never> {
+    func getNotificationFromCompany(notificationId: String, model: NotificationModel, companyFound: CompanyModel, images: [(String?, String?)]) -> AnyPublisher<NotificationModelForView, Never> {
         let modelView = NotificationModelForView(
             isPost: model.ispost,
             text: model.text,
@@ -223,7 +261,7 @@ private extension NotificationsPresenterImpl {
             fullName: companyFound.fullname ?? "Unknown",
             type: model.text == GlobalStrings.shared.followUserText ? .friendRequest : .typedefault,
             profileImage: companyFound.imageUrl,
-            postImage: nil,
+            postImage: images.first(where: { $0.0 == model.postid })?.1,
             userId: model.userid,
             postId: model.postid,
             notificationId: notificationId,
@@ -235,7 +273,7 @@ private extension NotificationsPresenterImpl {
             .eraseToAnyPublisher()
     }
     
-    func getNotificationFromUser(notificationId: String, model: NotificationModel) -> AnyPublisher<NotificationModelForView, Never> {
+    func getNotificationFromUser(notificationId: String, model: NotificationModel, images: [(String?, String?)]) -> AnyPublisher<NotificationModelForView, Never> {
         return useCases.userDataUseCase.getUserInfo(uid: model.userid)
             .map { userModel in
                 let modelView = NotificationModelForView(
@@ -245,7 +283,7 @@ private extension NotificationsPresenterImpl {
                     fullName: userModel?.fullname ?? "Unknown",
                     type: model.text == GlobalStrings.shared.followUserText ? .friendRequest : .typedefault,
                     profileImage: userModel?.image,
-                    postImage: nil,
+                    postImage: images.first(where: { $0.0 == model.postid })?.1,
                     userId: model.userid,
                     postId: model.postid,
                     notificationId: notificationId,

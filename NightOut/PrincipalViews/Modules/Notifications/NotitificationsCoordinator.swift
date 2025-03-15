@@ -28,7 +28,8 @@ class NotificationsCoordinator: ObservableObject, Hashable {
             useCases: .init(
                 notificationsUseCase: NotificationsUseCaseImpl(repository: NotificationsRepositoryImpl.shared),
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared),
-                followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared)
+                followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
+                postsUseCase: PostsUseCaseImpl(repository: PostsRepositoryImpl.shared)
             ),
             actions: actions
         )
