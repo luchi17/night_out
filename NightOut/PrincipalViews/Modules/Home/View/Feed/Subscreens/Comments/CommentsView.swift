@@ -39,6 +39,7 @@ struct CommentsView: View {
                                 .id(commentModel.uid)
                         }
                     }
+                    .padding(.horizontal, 20)
                     .scaleEffect(y: -1) // Invierte el contenedor
                     .animation(.easeOut(duration: 0.2), value: keyboardObserver.keyboardHeight + 50) // Suaviza la animación del teclado
                     .onChange(of: viewModel.comments.count) {
@@ -60,9 +61,9 @@ struct CommentsView: View {
             
             bottomView
                 .padding(.bottom)
+                .padding(.horizontal, 20)
             
         }
-        .padding(.horizontal, 20)
         .background(Color.blackColor.ignoresSafeArea())
         .showToast(
             error: (
