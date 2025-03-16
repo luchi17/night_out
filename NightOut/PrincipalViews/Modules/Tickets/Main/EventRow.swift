@@ -35,10 +35,10 @@ struct EventRow: View {
                             HStack {
                                 EventCardRow(
                                     fiesta: fiesta,
-                                    imageWidth: UIScreen.main.bounds.width / 2 - 35,
+                                    imageWidth: (310 / 2),
                                     imageHeight: 250 - 16
                                 )
-                                .frame(width: 325, height: 250)
+                                .frame(width: 310, height: 250)
                                 .onTapGesture {
                                     goToEvent((company.0, fiesta))
                                 }
@@ -48,7 +48,6 @@ struct EventRow: View {
                             }
                         }
                     }
-                    .padding([.vertical, .leading], 14)
                 }
                 .scrollIndicators(.hidden)
             }
@@ -79,22 +78,36 @@ struct EventCardRow: View {
                 
                 Spacer()
                 
-                HStack(alignment: .top, spacing: 3) {
-                    Text("⏰ Hora: ")
+                HStack(alignment: .top) {
+                    Text("⏰ : ")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Text("\(fiesta.startTime) - \n\((fiesta.endTime))")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
                     Spacer()
+                    VStack {
+                        Text("\(fiesta.startTime)")
+                            .font(.system(size: 16, weight: .regular))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                        Text("-\(fiesta.endTime)")
+                            .font(.system(size: 16, weight: .regular))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                    
                 }
-                Text("🎵 Música: \(fiesta.musicGenre)")
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(alignment: .center, spacing: 3) {
+                    Text("🎵 : ")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Spacer()
+                    Text("\(fiesta.musicGenre)")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+               
             }
             .padding(.vertical, 8)
             .padding(.leading, 8)
