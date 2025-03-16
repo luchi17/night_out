@@ -194,10 +194,11 @@ struct EventsSection: View {
                     VStack {
                         EventCardRow(
                             fiesta: fiesta,
-                            imageWidth: (UIScreen.main.bounds.width / 2) - 35,
+                            imageWidth: (UIScreen.main.bounds.width / 2) - 20,
                             imageHeight: 250 - 16
                         )
                         .frame(maxWidth: .infinity)
+                        .frame(height: 250)
                         .onTapGesture {
                             goToEvent(fiesta)
                         }
