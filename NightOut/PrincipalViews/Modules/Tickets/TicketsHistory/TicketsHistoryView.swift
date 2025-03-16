@@ -8,6 +8,7 @@ struct TicketsHistoryView: View {
     private let goBackPublisher = PassthroughSubject<Void, Never>()
     
     @State private var showBottomSheet: Bool = false
+    @State private var showPDF: Bool = false
     
     @ObservedObject var viewModel: TicketsHistoryViewModel
     let presenter: TicketsHistoryPresenter
@@ -31,7 +32,8 @@ struct TicketsHistoryView: View {
                         ForEach($viewModel.ticketsList, id: \.self) { ticket in
                             TicketHistoryRow(
                                 ticket: ticket,
-                                pdfToShow: $viewModel.ticketNumberToShow
+                                bottomSheetToShow: $viewModel.bottomSheetToShow,
+                                pdfToShow: $viewModel.ticketToShow
                             )
                         }
                     }
@@ -58,21 +60,35 @@ struct TicketsHistoryView: View {
                     .foregroundStyle(Color.white)
             }
         )
-        .onChange(of: viewModel.ticketNumberToShow) { oldValue, newValue in
+        .onChange(of: viewModel.ticketToShow) { oldValue, newValue in
+            if newValue != nil {
+                self.showPDF = true
+            }
+        }
+        .onChange(of: viewModel.bottomSheetToShow) { oldValue, newValue in
             if newValue != nil {
                 self.showBottomSheet = true
             }
         }
         .sheet(isPresented: $showBottomSheet, onDismiss: {
-            viewModel.ticketNumberToShow = nil
+            viewModel.bottomSheetToShow = nil
             showBottomSheet = false
         }) {
-            if let ticketToShow = viewModel.ticketNumberToShow {
+            if let bottomSheetToShow = viewModel.bottomSheetToShow {
                 TicketHistoryBottomSheet(
-                    ticketNumberToShow: ticketToShow,
+                    ticketNumberToShow: bottomSheetToShow,
                     isPresented: $showBottomSheet
                 )
                 .presentationDetents([.fraction(0.8)])
+            }
+        }
+        .sheet(isPresented: $showPDF, onDismiss: {
+            viewModel.ticketToShow = nil
+            showPDF = false
+        }) {
+            if let url = viewModel.ticketToShow?.url {
+                PDFKitView(url: url)
+                    .scaledToFill()
             }
         }
         .showToast(
@@ -103,7 +119,8 @@ private extension TicketsHistoryView {
 struct TicketHistoryRow: View {
     
     @Binding var ticket: TicketHistoryPDFModel
-    @Binding var pdfToShow: String?
+    @Binding var bottomSheetToShow: String?
+    @Binding var pdfToShow: TicketHistoryPDFModel?
    
     var body: some View {
         HStack {
@@ -125,11 +142,14 @@ struct TicketHistoryRow: View {
                 .scaledToFill()
                 .frame(width: 35, height: 35)
                 .onTapGesture {
-                    pdfToShow = ticket.ticketNumber
+                    pdfToShow = ticket
                 }
         }
         .padding(12)
         .background(Color.white)
         .cornerRadius(12)
+        .onTapGesture {
+            bottomSheetToShow = ticket.ticketNumber
+        }
     }
 }

@@ -14,7 +14,8 @@ class TicketsHistoryViewModel: ObservableObject {
     
     @Published var ticketsList: [TicketHistoryPDFModel] = []
     
-    @Published var ticketNumberToShow: String?
+    @Published var ticketToShow: TicketHistoryPDFModel?
+    @Published var bottomSheetToShow: String?
     
 }
 
@@ -115,8 +116,27 @@ final class TicketsHistoryPresenterImpl: TicketsHistoryPresenter {
             for child in snapshot.children.allObjects as? [DataSnapshot] ?? [] {
                 let ticketUid = child.key
                 let fecha = (child.value as? [String: Any])?["fecha"] as? String ?? "Fecha no disponible"
+                let personName = (child.value as? [String: Any])?["nombre"] as? String ?? "Nombre no disponible"
                 
-                let model = TicketHistoryPDFModel(date: fecha, ticketNumber: ticketUid)
+//                /var/mobile/Containers/Data/Application/ECE6BF95-FEE9-4A25-A9E5-CC360F2461A9/Documents/EventTickets/ticket_Mari_TICKET-2.pdf
+                let pdfURL: URL? = {
+                    let pdfFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                        .appendingPathComponent("EventTickets")
+                    
+                    let pdfFilename = pdfFolder.appendingPathComponent("ticket_\(personName)_\(ticketUid).pdf")
+                    
+                    if FileManager.default.fileExists(atPath: pdfFilename.path()) {
+                        return pdfFilename
+                    } else {
+                        return nil
+                    }
+                }()
+
+                let model = TicketHistoryPDFModel(
+                    date: fecha,
+                    ticketNumber: ticketUid,
+                    url: pdfURL
+                )
                 tickets.append(model)
             }
             
@@ -128,4 +148,5 @@ final class TicketsHistoryPresenterImpl: TicketsHistoryPresenter {
 struct TicketHistoryPDFModel: Hashable {
     let date: String
     let ticketNumber: String
+    let url: URL?
 }
