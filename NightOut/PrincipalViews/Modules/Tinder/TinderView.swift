@@ -143,7 +143,7 @@ struct TinderView: View {
                 .frame(height: 70)
                 .foregroundStyle(.white)
             
-            Text("!Gracias por ver todos los perfiles!")
+            Text("¡Gracias por ver todos los perfiles!")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.white)
             
