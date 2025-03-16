@@ -41,29 +41,29 @@ struct SearchView: View {
                     .padding(.leading, 8)
                 
                 TextField("", text: $viewModel.searchText, prompt: Text("Buscar...").foregroundColor(.white))
-                .padding(8)
-                .textFieldStyle(PlainTextFieldStyle())
-                .autocorrectionDisabled()
-                .foregroundColor(.white)
-                .accentColor(.white)
-                .overlay(
-                    textfieldOverlay
-                )
-                .focused($isTextFieldFocused)
-                .onChange(of: isTextFieldFocused) { oldValue, newValue in
-                                    isCancelVisible = newValue || !viewModel.searchText.isEmpty
-                 }
-                .onChange(of: viewModel.searchText) { oldValue, newValue in
-                   isCancelVisible = isTextFieldFocused || !newValue.isEmpty
-                }
+                    .padding(8)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .autocorrectionDisabled()
+                    .foregroundColor(.white)
+                    .accentColor(.white)
+                    .overlay(
+                        textfieldOverlay
+                    )
+                    .focused($isTextFieldFocused)
+                    .onChange(of: isTextFieldFocused) { oldValue, newValue in
+                        isCancelVisible = newValue || !viewModel.searchText.isEmpty
+                    }
+                    .onChange(of: viewModel.searchText) { oldValue, newValue in
+                        isCancelVisible = isTextFieldFocused || !newValue.isEmpty
+                    }
                 
                 Spacer()
             }
             .frame(height: 40)
             .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.grayColor.opacity(0.5))
-                                .stroke(Color.white, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.grayColor.opacity(0.5))
+                    .stroke(Color.white, lineWidth: 2)
             )
             .shadow(radius: 5)
             .padding(.horizontal, 12)
@@ -73,15 +73,28 @@ struct SearchView: View {
                 ScrollView {
                     VStack(spacing: 22) {
                         ForEach(viewModel.searchResults, id: \.self) { user in
-                            ListUserSubView(user: user)
-                                .onTapGesture {
-                                    hideKeyboard()
-                                    goToProfilePublisher.send(user)
-                                }
+                            
+                            Button(action: {
+                                // Navegar al perfil del usuario
+                                hideKeyboard()
+                                goToProfilePublisher.send(user)
+                            }) {
+                                ListUserSubView(user: user)
+                            }
+                            
                         }
                     }
                     .padding(.horizontal, 20)
                 }
+                .gesture(
+                    // Tap Gesture para ocultar el teclado si el tap no es en la barra de búsqueda ni en un usuario
+                    TapGesture()
+                        .onEnded {
+                            if isTextFieldFocused {
+                                isTextFieldFocused = false  // Ocultar teclado
+                            }
+                        }
+                )
                 .simultaneousGesture(DragGesture().onChanged { _ in
                     hideKeyboard() // Esconde el teclado cuando el usuario hace scroll
                 })
@@ -91,6 +104,12 @@ struct SearchView: View {
             }
             
             Spacer()
+        }
+        .onTapGesture {
+            // Aseguramos que el tap en toda la vista también puede ocultar el teclado
+            if isTextFieldFocused {
+                isTextFieldFocused = false
+            }
         }
         .background(
             Color.blackColor
