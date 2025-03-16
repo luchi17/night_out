@@ -7,10 +7,10 @@ struct HomePickerView: View {
     var body: some View {
         ZStack {
             // Fondo para el selector, es un contenedor de los botones
-            RoundedRectangle(cornerRadius: 15)
+            RoundedRectangle(cornerRadius: 10)
                 .fill(Color.white)
                 .shadow(radius: 5)
-                .frame(height: 50)
+                .frame(height: 35)
             
             HStack {
                 // Botón "Feed"
@@ -25,9 +25,9 @@ struct HomePickerView: View {
                             .fontWeight(.bold)
                     }
                     .frame(maxWidth: .infinity) // Ocupa el mismo espacio
-                    .padding()
+                    .padding(.vertical, 8)
                     .background(selectedTab == .feed ? Color.yellow : Color.clear)
-                    .cornerRadius(15)
+                    .cornerRadius(10)
                 }
                 
                 // Botón "Mapa"
@@ -42,14 +42,14 @@ struct HomePickerView: View {
                             .fontWeight(.bold)
                     }
                     .frame(maxWidth: .infinity) // Ocupa el mismo espacio
-                    .padding()
+                    .padding(.vertical, 8)
                     .background(selectedTab == .map ? Color.yellow : Color.clear)
-                    .cornerRadius(15)
+                    .cornerRadius(10)
                 }
             }
         }
         .padding(.horizontal, 70)
-        .padding(.bottom, 10)
-        .frame(height: 50)
+        .padding(.bottom, 15)
+        .frame(height: 35)
     }
 }
