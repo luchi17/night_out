@@ -28,9 +28,9 @@ struct FriendRequestNotificationView: View {
                 imageUrl: notification.profileImage,
                 border: false
             )
-                .onTapGesture {
-                    goToProfile(notification)
-                }
+            .onTapGesture {
+                goToProfile(notification)
+            }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(notification.userName)
@@ -46,7 +46,7 @@ struct FriendRequestNotificationView: View {
             .onTapGesture {
                 goToProfile(notification)
             }
-           
+            
             Spacer()
             
             if notification.type == .friendRequest {
@@ -84,10 +84,10 @@ struct DefaultNotificationView: View {
     var notification: NotificationModelForView
     var goToPost: InputClosure<NotificationModelForView>
     var goToProfile: InputClosure<NotificationModelForView>
-
+    
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
-
+            
             CircleImage(
                 imageUrl: notification.profileImage,
                 border: false
@@ -150,29 +150,48 @@ struct CircleImage: View {
     
     var body: some View {
         if let imageUrl = imageUrl {
-            AsyncImage(url: URL(string: imageUrl)) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .clipShape(Circle())
-                    .frame(width: size, height: size)
-                    .if(border) { view in
-                        view
-                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                    }
-            } placeholder: {
-                Image("profile")
-                    .resizable()
-                    .scaledToFill()
-                    .clipShape(Circle())
-                    .frame(width: size, height: size)
-                    .if(border) { view in
-                        view
-                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                    }
-                    .overlay {
-                        ProgressView()
-                    }
+            
+            AsyncImage(url: URL(string: imageUrl)) { phase in
+                switch phase {
+                case .empty:
+                    Image("profile")
+                        .resizable()
+                        .scaledToFill()
+                        .clipShape(Circle())
+                        .frame(width: size, height: size)
+                        .if(border) { view in
+                            view
+                                .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        }
+                        .overlay {
+                            ProgressView()
+                        }
+                    
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .clipShape(Circle())
+                        .frame(width: size, height: size)
+                        .if(border) { view in
+                            view
+                                .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        }
+                    
+                case .failure:
+                    Image("profile")
+                        .resizable()
+                        .scaledToFill()
+                        .clipShape(Circle())
+                        .frame(width: size, height: size)
+                        .if(border) { view in
+                            view
+                                .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        }
+                    
+                @unknown default:
+                    EmptyView()
+                }
             }
         } else {
             Image("profile")
