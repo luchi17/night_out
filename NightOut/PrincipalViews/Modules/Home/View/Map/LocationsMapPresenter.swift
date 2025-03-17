@@ -15,6 +15,7 @@ final class LocationsMapViewModel: ObservableObject {
     
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
+    @Published var followingPeople: [String] = []
 
     
     init(locationManager: LocationManager) {
@@ -39,6 +40,8 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
     struct Actions {
         let onOpenMaps: InputClosure<(Double, Double)>
         let onOpenAppleMaps: InputClosure<(CLLocationCoordinate2D, String?)>
+        let goToProfile: InputClosure<ProfileModel>
+        let goToPrivateProfile: InputClosure<ProfileModel>
     }
     
     struct ViewInputs {
@@ -47,6 +50,7 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
         let onFilterSelected: AnyPublisher<MapFilterType, Never>
         let locationInListSelected: AnyPublisher<LocationModel, Never>
         let viewDidLoad: AnyPublisher<Void, Never>
+        let goToProfile: AnyPublisher<LocationModel, Never>
     }
     
     var viewModel: LocationsMapViewModel
@@ -94,19 +98,24 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                     .eraseToAnyPublisher()
             })
             .withUnretained(self)
-            .flatMap { presenter, data -> AnyPublisher<([(String, Int)], [CompanyModel]), Never> in
+            .flatMap { presenter, data -> AnyPublisher<([(String, Int)], [CompanyModel], [String]?), Never> in
                 let companies = data.0?.users.map({ $0.value }) ?? []
                 let followingPeople = Array(data.1.keys)
                 
                 return presenter.getClubAssistance(companies: companies, followingPeople: followingPeople)
-                    .map({ ($0, companies) })
+                    .map({ ($0, companies, followingPeople) })
                     .eraseToAnyPublisher()
             }
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
                 let assistance = data.0
                 let companies = data.1
+                let followingPeople = data.2
 
+                print("didLOAD")
+                
+                presenter.viewModel.followingPeople = followingPeople ?? []
+                
                 if !companies.isEmpty {
                     presenter.viewModel.toastError = nil
                     
@@ -182,6 +191,35 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
             .sink { presenter, locationSelected in
                 presenter.viewModel.selectedMarkerLocation = nil
                 presenter.viewModel.selectedMarkerFromList = locationSelected
+            }
+            .store(in: &cancellables)
+        
+        input
+            .goToProfile
+            .withUnretained(self)
+            .sink { presenter, locationModel in
+                
+                let following = presenter.viewModel.followingPeople
+                
+                let companyModel = UserDefaults.getCompanies()?.users.values.first(where: { $0.uid == locationModel.id })
+                let profileModel = ProfileModel(
+                    profileImageUrl: locationModel.image,
+                    username: locationModel.name,
+                    fullname: companyModel?.fullname,
+                    profileId: locationModel.id,
+                    isCompanyProfile: true,
+                    isPrivateProfile: companyModel?.profileType == .privateProfile
+                )
+                
+                if following.contains(locationModel.id) {
+                    presenter.actions.goToProfile(profileModel)
+                } else {
+                    if profileModel.isPrivateProfile {
+                        presenter.actions.goToPrivateProfile(profileModel)
+                    } else {
+                        presenter.actions.goToProfile(profileModel)
+                    }
+                }
             }
             .store(in: &cancellables)
     }

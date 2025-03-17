@@ -170,7 +170,9 @@ private extension TabViewCoordinator {
     func mapActions() -> LocationsMapPresenterImpl.Actions {
         .init(
             onOpenMaps: openMaps,
-            onOpenAppleMaps: openAppleMaps
+            onOpenAppleMaps: openAppleMaps,
+            goToProfile: showProfile,
+            goToPrivateProfile: showPrivateProfile
         )
     }
     

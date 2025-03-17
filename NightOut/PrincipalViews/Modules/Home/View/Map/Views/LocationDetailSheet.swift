@@ -3,6 +3,7 @@ import SwiftUI
 struct LocationDetailSheet: View {
     var selectedLocation: LocationModel
     var openMaps: () -> Void
+    let goToProfile: InputClosure<LocationModel>
     
     var body: some View {
         VStack {
@@ -29,6 +30,9 @@ struct LocationDetailSheet: View {
                         })
                         .padding(.top, 15)
                         .padding(.bottom, 20)
+                        .onTapGesture {
+                            goToProfile(selectedLocation)
+                        }
                     
                     } else {
                         Color
@@ -42,6 +46,9 @@ struct LocationDetailSheet: View {
                             })
                             .padding(.top, 15)
                             .padding(.bottom, 20)
+                            .onTapGesture {
+                                goToProfile(selectedLocation)
+                            }
                     }
                     
                     Text(selectedLocation.name)

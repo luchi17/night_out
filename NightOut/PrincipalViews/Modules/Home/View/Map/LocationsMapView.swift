@@ -11,6 +11,7 @@ struct LocationsMapView: View {
     private let openAppleMapsPublisher = PassthroughSubject<(CLLocationCoordinate2D, String?), Never>()
     private let filterSelectedPublisher = PassthroughSubject<MapFilterType, Never>()
     private let locationInListSelectedPublisher = PassthroughSubject<LocationModel, Never>()
+    private let goToProfilePublisher = PassthroughSubject<LocationModel, Never>()
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private var cancellables = Set<AnyCancellable>()
     
@@ -104,9 +105,13 @@ struct LocationsMapView: View {
                     selectedLocation: location,
                     openMaps: {
                         showNavigationAlert = true
+                    },
+                    goToProfile: { profile in
+                        showingDetail = false
+                        goToProfilePublisher.send(profile)
                     }
                 )
-                .presentationDetents([.fraction(0.35), .medium])
+                .presentationDetents([.fraction(0.45), .fraction(0.6)])
             }
         }
         .sheet(isPresented: $showingList, onDismiss: {
@@ -183,7 +188,8 @@ private extension LocationsMapView {
             openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher(),
             onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
             locationInListSelected: locationInListSelectedPublisher.eraseToAnyPublisher(),
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher()
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            goToProfile: goToProfilePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }
