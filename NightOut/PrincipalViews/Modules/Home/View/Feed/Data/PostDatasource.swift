@@ -26,8 +26,6 @@ struct PostDatasourceImpl: PostDatasource {
     
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never> {
 
-        let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
-        
         return Future<[String: PostUserModel], Never> { promise in
             
             let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
