@@ -67,7 +67,7 @@ final class HomePresenterImpl: HomePresenter {
     private let useCases: UseCases
     private let outinput: Input
     
-    private let reloadSubject: PassthroughSubject<Void, Never>
+    private let reloadFeedSubject: PassthroughSubject<Void, Never>
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -78,12 +78,12 @@ final class HomePresenterImpl: HomePresenter {
     init(
         useCases: UseCases,
         actions: Actions,
-        reloadSubject: PassthroughSubject<Void, Never>,
+        reloadFeedSubject: PassthroughSubject<Void, Never>,
         input: Input
     ) {
         self.actions = actions
         self.useCases = useCases
-        self.reloadSubject = reloadSubject
+        self.reloadFeedSubject = reloadFeedSubject
         self.outinput = input
         
         viewModel = HomeViewModel()
@@ -212,7 +212,7 @@ final class HomePresenterImpl: HomePresenter {
                     presenter.viewModel.profileImageUrl =  UserDefaults.getCompanyUserModel()?.imageUrl
                 }
                 
-                presenter.reloadSubject.send()
+                presenter.reloadFeedSubject.send()
             }
             .store(in: &cancellables)
     }

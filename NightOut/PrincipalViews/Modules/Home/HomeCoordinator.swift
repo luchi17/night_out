@@ -11,7 +11,7 @@ class HomeCoordinator {
     private let locationManager: LocationManager
     private let showMyProfileSubject: PassthroughSubject<Void, Never>
     
-    private let reloadSubject: PassthroughSubject<Void, Never>
+    private let reloadFeedSubject: PassthroughSubject<Void, Never>
                                         
     init(actions: HomePresenterImpl.Actions, mapActions: LocationsMapPresenterImpl.Actions, feedActions : FeedPresenterImpl.Actions, profileActions: MyUserProfilePresenterImpl.Actions, locationManager: LocationManager, showMyProfileSubject: PassthroughSubject<Void, Never>, reloadFeedSubject: PassthroughSubject<Void, Never>) {
         self.actions = actions
@@ -20,7 +20,7 @@ class HomeCoordinator {
         self.feedActions = feedActions
         self.profileActions = profileActions
         self.showMyProfileSubject = showMyProfileSubject
-        self.reloadSubject = reloadFeedSubject
+        self.reloadFeedSubject = reloadFeedSubject
     }
     
     @ViewBuilder
@@ -28,7 +28,7 @@ class HomeCoordinator {
         let presenter = HomePresenterImpl(
             useCases: .init(saveUserUseCase: SaveUserUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: actions,
-            reloadSubject: reloadSubject,
+            reloadFeedSubject: reloadFeedSubject,
             input: .init(openProfile: showMyProfileSubject.eraseToAnyPublisher())
         )
         
@@ -47,7 +47,7 @@ class HomeCoordinator {
                 followUseCase: FollowUseCaseImpl(repository: PostsRepositoryImpl.shared),
                 userDataUseCase: UserDataUseCaseImpl(repository: AccountRepositoryImpl.shared), companyDataUseCase: CompanyDataUseCaseImpl(repository: AccountRepositoryImpl.shared)),
             actions: feedActions,
-            input: .init(reload: reloadSubject.eraseToAnyPublisher())
+            input: .init(reload: reloadFeedSubject.eraseToAnyPublisher())
         )
         let userPresenter = MyUserProfilePresenterImpl(
             useCases: .init(
