@@ -311,7 +311,7 @@ struct AddPostView: View {
 private extension AddPostView {
     func bindViewModel() {
         let input = PublishPresenterImpl.ViewInputs(
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
             uploadPost: uploadPostPublisher.eraseToAnyPublisher(),
             getClubs: getClubsPublisher.eraseToAnyPublisher(),
             myLocationTapped: getMyLocationPublisher.eraseToAnyPublisher(),
