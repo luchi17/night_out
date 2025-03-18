@@ -155,7 +155,6 @@ final class LeaguePresenterImpl: LeaguePresenter {
         
         input
             .viewDidLoad
-            .filter({ FirebaseServiceImpl.shared.getImUser() })
             .withUnretained(self)
             .flatMap { presenter, _ -> AnyPublisher<[String: Bool]?, Never>in
                 guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else {

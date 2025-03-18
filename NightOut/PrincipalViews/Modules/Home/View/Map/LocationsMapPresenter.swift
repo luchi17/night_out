@@ -111,8 +111,6 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
                 let assistance = data.0
                 let companies = data.1
                 let followingPeople = data.2
-
-                print("didLOAD")
                 
                 presenter.viewModel.followingPeople = followingPeople ?? []
                 
