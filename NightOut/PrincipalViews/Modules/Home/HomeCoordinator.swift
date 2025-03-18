@@ -88,15 +88,15 @@ class HomeCoordinator {
                                                     actions: .init()
         )
 
-        HomeView(
+        return HomeView(
             presenter: presenter,
-            mapPresenter: mapPresenter,
-            feedPresenter: feedPresenter,
             userPresenter: userPresenter,
             settingsPresenter: settingsPresenter,
             companySettingsPresenter: companySettingsPresenter,
             friendsPresenter: friendsPresenter,
-            editProfilePresenter: editProfilePresenter
+            editProfilePresenter: editProfilePresenter,
+            locationsMapView: LocationsMapView(presenter: mapPresenter),
+            feedView: FeedView(presenter: feedPresenter)
         )
     }
 }

@@ -6,8 +6,6 @@ struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel
     
     let presenter: HomePresenter
-    let mapPresenter: LocationsMapPresenter
-    let feedPresenter: FeedPresenter
     let userPresenter: MyUserProfilePresenter
     let settingsPresenter: MyUserSettingsPresenter
     let companySettingsPresenter: MyUserCompanySettingsPresenter
@@ -21,27 +19,30 @@ struct HomeView: View {
     private let openTinderPublisher = PassthroughSubject<Void, Never>()
     private let openHubPublisher = PassthroughSubject<Void, Never>()
     
+    let locationsMapView: LocationsMapView
+    let feedView: FeedView
     
     @State private var updateProfileImage: Bool = false
     
     init(
         presenter: HomePresenter,
-        mapPresenter: LocationsMapPresenter,
-        feedPresenter: FeedPresenter,
         userPresenter: MyUserProfilePresenter,
         settingsPresenter: MyUserSettingsPresenter,
         companySettingsPresenter: MyUserCompanySettingsPresenter,
         friendsPresenter: FriendsPresenter,
-        editProfilePresenter: MyUserEditProfilePresenter
+        editProfilePresenter: MyUserEditProfilePresenter,
+        locationsMapView: LocationsMapView,
+        feedView: FeedView
     ) {
         self.presenter = presenter
-        self.mapPresenter = mapPresenter
-        self.feedPresenter = feedPresenter
         self.userPresenter = userPresenter
         self.settingsPresenter = settingsPresenter
         self.companySettingsPresenter = companySettingsPresenter
         self.editProfilePresenter = editProfilePresenter
         self.friendsPresenter = friendsPresenter
+        
+        self.locationsMapView = locationsMapView
+        self.feedView = feedView
         viewModel = presenter.viewModel
         bindViewModel()
     }
@@ -53,9 +54,9 @@ struct HomeView: View {
             HomePickerView(selectedTab: $viewModel.selectedTab)
             
             if viewModel.selectedTab == .map {
-                LocationsMapView(presenter: mapPresenter)
+                locationsMapView
             } else {
-                FeedView(presenter: feedPresenter)
+                feedView
             }
         }
         .overlay {
@@ -123,7 +124,7 @@ struct HomeView: View {
     var topButtonView: some View {
         HStack(spacing: 0) {
             // Botón de perfil
-            HStack(spacing: 12) {
+            HStack(spacing: 16) {
                 Button(action: {
                     viewModel.showMyProfile.toggle()
                 }) {
@@ -205,7 +206,7 @@ private extension HomeView {
         let input = HomePresenterImpl.ViewInputs(
             openNotifications: openNotificationsPublisher.eraseToAnyPublisher(),
             openMessages: openMessagesPublisher.eraseToAnyPublisher(),
-            viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
+            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
             updateProfileImage: updateProfileImagePublisher.eraseToAnyPublisher(),
             openHub: openHubPublisher.eraseToAnyPublisher(),
             openTinder: openTinderPublisher.eraseToAnyPublisher()

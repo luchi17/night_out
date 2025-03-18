@@ -43,6 +43,18 @@ class TabViewCoordinator: ObservableObject, Hashable {
     private let showMyProfileSubject: PassthroughSubject<Void, Never>
     
     private let reloadFeedSubject = PassthroughSubject<Void, Never>()
+
+    private lazy var homeCoordinator: HomeCoordinator = getHomeCoordinator()
+    private lazy var searchCoordinator: SearchCoordinator = getSearchCoordinator()
+    private lazy var publishCoordinator: PublishCoordinator = getPublishCoordinator()
+    private lazy var leaguesCoordinator: LeagueCoordinator = getLeaguesCoordinator()
+    private lazy var ticketsCoordinator: TicketsCoordinator = getTicketsCoordinator()
+
+    private lazy var homeView: AnyView = AnyView(homeCoordinator.build())
+    private lazy var searchView: AnyView = AnyView(searchCoordinator.build())
+    private lazy var publishView: AnyView = AnyView(publishCoordinator.build())
+    private lazy var leaguesView: AnyView = AnyView(leaguesCoordinator.build())
+    private lazy var ticketsView: AnyView = AnyView(ticketsCoordinator.build())
     
     @Published var path: NavigationPath
     @ObservedObject var tabViewModel: TabViewModel
@@ -109,60 +121,18 @@ class TabViewCoordinator: ObservableObject, Hashable {
             guard let self = self else { return AnyView(EmptyView()) }
             switch selectedTab {
             case .home:
-                return self.makeHomeFlow()
+                return self.homeView
             case .search:
-                return self.makeSearchFlow()
+                return self.searchView
             case .publish:
-                return self.makePublishFlow()
+                return self.publishView
             case .leagues:
-                return self.makeLeaguesFlow()
+                return self.leaguesView
             case .calendar:
-                return self.makeCalendarFlow()
+                return self.ticketsView
             }
         }
         TabViewScreen(presenter: presenter)
-    }
-    
-    func makeHomeFlow() -> AnyView {
-        let coordinator = HomeCoordinator(
-            actions: homeActions(),
-            mapActions: mapActions(),
-            feedActions: feedActions(),
-            profileActions: profileActions(),
-            locationManager: locationManager,
-            showMyProfileSubject: showMyProfileSubject,
-            reloadFeedSubject: reloadFeedSubject
-        )
-        return AnyView(coordinator.build())
-    }
-    
-    func makeSearchFlow() -> AnyView {
-        let coordinator = SearchCoordinator(actions: searchActions())
-        return AnyView(coordinator.build())
-    }
-    
-    func makePublishFlow() -> AnyView {
-        let coordinator = PublishCoordinator(actions: .init(goToFeed: { [weak self] in
-            self?.tabViewModel.selectedTab = .home
-        }))
-        return AnyView(coordinator.build())
-    }
-    
-    func makeLeaguesFlow() -> AnyView {
-        let coordinator = LeagueCoordinator(actions: .init(
-            goToCreateLeague: openCreateLeague,
-            goToLeagueDetail: openLeagueDetail
-        ))
-        return AnyView(coordinator.build())
-    }
-    
-    func makeCalendarFlow() -> AnyView {
-        let coordinator = TicketsCoordinator(actions: .init(
-            goToCompany: openDiscotecaDetail,
-            goToEvent: openTicketDetail,
-            openHistoryTickets: openHistoryTickets
-        ))
-        return AnyView(coordinator.build())
     }
 }
 
@@ -206,5 +176,43 @@ private extension TabViewCoordinator {
             goToProfile: showProfile,
             goToPrivateProfile: showPrivateProfile
         )
+    }
+    
+    func getHomeCoordinator() -> HomeCoordinator {
+        let homeCoordinator = HomeCoordinator(
+            actions: homeActions(),
+            mapActions: mapActions(),
+            feedActions: feedActions(),
+            profileActions: profileActions(),
+            locationManager: locationManager,
+            showMyProfileSubject: showMyProfileSubject,
+            reloadFeedSubject: reloadFeedSubject
+        )
+        return homeCoordinator
+    }
+    
+    func getSearchCoordinator() -> SearchCoordinator {
+        return SearchCoordinator(actions: searchActions())
+    }
+    
+    func getPublishCoordinator() -> PublishCoordinator {
+        return PublishCoordinator(actions: .init(goToFeed: { [weak self] in
+            self?.tabViewModel.selectedTab = .home
+        }))
+    }
+    
+    func getLeaguesCoordinator() -> LeagueCoordinator {
+        return LeagueCoordinator(actions: .init(
+            goToCreateLeague: openCreateLeague,
+            goToLeagueDetail: openLeagueDetail
+        ))
+    }
+    
+    func getTicketsCoordinator() -> TicketsCoordinator {
+        return TicketsCoordinator(actions: .init(
+            goToCompany: openDiscotecaDetail,
+            goToEvent: openTicketDetail,
+            openHistoryTickets: openHistoryTickets
+        ))
     }
 }
