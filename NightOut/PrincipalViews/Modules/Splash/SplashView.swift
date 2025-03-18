@@ -119,6 +119,9 @@ class VideoPlayerViewModel: ObservableObject {
     @Published var isReady: Bool = false
     @Published var isFinished: Bool = false
     
+    private var appWillResignActiveObserver: Any?
+    private var appDidBecomeActiveObserver: Any?
+    
     func configurePlayer(with url: URL) {
         // Crea el AVPlayerItem
         self.playerItem = AVPlayerItem(url: url)
@@ -158,6 +161,19 @@ class VideoPlayerViewModel: ObservableObject {
             name: .AVPlayerItemDidPlayToEndTime,
             object: playerItem
         )
+        
+        // **Observadores para manejar el segundo plano y primer plano**
+                appWillResignActiveObserver = NotificationCenter.default.addObserver(
+                    forName: UIApplication.willResignActiveNotification, object: nil, queue: .main
+                ) { [weak self] _ in
+                    self?.pause()
+                }
+                
+                appDidBecomeActiveObserver = NotificationCenter.default.addObserver(
+                    forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main
+                ) { [weak self] _ in
+                    self?.play()
+                }
     }
     
     @objc func didFinishPlaying() {
@@ -173,11 +189,19 @@ class VideoPlayerViewModel: ObservableObject {
     }
     
     // Método para remover observadores
-    func removeObservers() {
-        // Eliminar observador de la notificación
-        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
-        
-        // Cancelar los publishers de Combine
-        playerObserver?.cancel()
-    }
+        func removeObservers() {
+            // Eliminar los observadores de la notificación
+            if let appWillResignActiveObserver = appWillResignActiveObserver {
+                NotificationCenter.default.removeObserver(appWillResignActiveObserver)
+            }
+            if let appDidBecomeActiveObserver = appDidBecomeActiveObserver {
+                NotificationCenter.default.removeObserver(appDidBecomeActiveObserver)
+            }
+            
+            // Eliminar el observador del video
+            NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
+            
+            // Cancelar los publishers de Combine
+            playerObserver?.cancel()
+        }
 }
