@@ -86,7 +86,7 @@ final class FeedPresenterImpl: FeedPresenter {
         
         listenToInput(input: input)
         
-        let userPostsPublisher = input
+        input
             .viewDidLoad
             .merge(with: outinput.reload)
             .withUnretained(self)
@@ -114,49 +114,12 @@ final class FeedPresenterImpl: FeedPresenter {
             }, loadingClosure: { [weak self] loading in
                 guard let self = self else { return }
                 self.viewModel.loading = loading
-            }, onError: { _ in }
-            )
+            }, onError: { _ in })
             .withUnretained(self)
-            .performRequest(request: { presenter, followModel -> AnyPublisher<[PostUserModel], Never> in
-                presenter.useCases.postsUseCase.observePosts()
-                    .compactMap({ $0 })
-                    .map { posts in
-                        let matchingPosts = posts.filter { post in
-                            let myFollowingPosts = followModel?.following?.keys.contains(post.value.publisherId) ?? false
-                            let myPosts = post.value.publisherId == FirebaseServiceImpl.shared.getCurrentUserUid()
-                            
-                            return myFollowingPosts || myPosts
-                        }.values
-                        return Array(matchingPosts)
-                    }
-                    .eraseToAnyPublisher()
+            .flatMap({ presenter, followModel -> AnyPublisher<[PostModel], Never> in
+                // Procesar los posts dependiendo de followModel
+                return presenter.observePosts(followModel: followModel)
             })
-            .withUnretained(self)
-            .eraseToAnyPublisher()
-        
-        userPostsPublisher
-            .performRequest(request: { presenter, userPosts -> AnyPublisher<[PostModel], Never> in
-                let publishers: [AnyPublisher<PostModel, Never>] = userPosts.map { post in
-                    
-                    if post.isFromUser ?? true {
-                        presenter.getPostFromUserInfo(post: post)
-                    } else {
-                        presenter.getPostFromCompanyInfo(post: post)
-                    }
-                }
-                
-                return Publishers.MergeMany(publishers)
-                    .collect()
-                    .eraseToAnyPublisher()
-                
-            }, loadingClosure: { [weak self] loading in
-                guard let self = self else { return }
-                self.viewModel.loading = loading
-            }, onError: { _ in }
-            )
-            .removeDuplicates { oldPosts, newPosts in
-                return Set(oldPosts) == Set(newPosts)
-            }
             .withUnretained(self)
             .sink(receiveValue: { presenter, data in
                 presenter.viewModel.loading = false
@@ -215,7 +178,7 @@ final class FeedPresenterImpl: FeedPresenter {
             .showUserOrCompanyProfile
             .withUnretained(self)
             .sink { presenter, model in
-            
+                
                 let profileInfo = UserPostProfileInfo(
                     profileId: model.publisherId,
                     profileImageUrl: model.profileImageUrl,
@@ -242,7 +205,7 @@ final class FeedPresenterImpl: FeedPresenter {
                 presenter.actions.onShowPostComments(model)
             }
             .store(in: &cancellables)
-            
+        
     }
 }
 
@@ -301,13 +264,51 @@ private extension FeedPresenterImpl {
             .eraseToAnyPublisher()
     }
     
+    func observePosts(followModel: FollowModel?) -> AnyPublisher<[PostModel], Never> {
+        
+        return useCases.postsUseCase.observePosts()
+            .compactMap({ $0 })
+            .map { posts -> [PostUserModel] in
+                return posts.values.filter { post in
+                    let isFollowing = followModel?.following?.keys.contains(post.publisherId) ?? false
+                    let isOwnPost = post.publisherId == FirebaseServiceImpl.shared.getCurrentUserUid()
+                    return isFollowing || isOwnPost
+                }
+            }
+            .replaceError(with: [])
+            .withUnretained(self)
+            .performRequest(request: { presenter, userPosts -> AnyPublisher<[PostModel], Never> in
+                let publishers: [AnyPublisher<PostModel, Never>] = userPosts.map { post in
+                    
+                    if post.isFromUser ?? true {
+                        presenter.getPostFromUserInfo(post: post)
+                    } else {
+                        presenter.getPostFromCompanyInfo(post: post)
+                    }
+                }
+                
+                return Publishers.MergeMany(publishers)
+                    .collect()
+                    .eraseToAnyPublisher()
+                
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in }
+            )
+            .removeDuplicates { oldPosts, newPosts in
+                return Set(oldPosts) == Set(newPosts)
+            }
+            .eraseToAnyPublisher()
+    }
+    
     func getLocationFromCompanyPost(postLocation: String?, companylocation: String?) -> String {
         if let location = postLocation, let coord = truncateCoordinates(location) {
             return "📍 \(coord)"
-           
+            
         } else {
             if let companyLocation = companylocation,
-                let coord = truncateCoordinates(companyLocation) {
+               let coord = truncateCoordinates(companyLocation) {
                 return "📍 \(coord)"
             }
             return "📍 \(companylocation ?? "")"
@@ -316,16 +317,16 @@ private extension FeedPresenterImpl {
     
     func truncateCoordinates(_ coordinateString: String) -> String? {
         let components = coordinateString.split(separator: ",")
-
+        
         guard components.count == 2,
-                  let latString = components.first, let lonString = components.last,
-                  let lat = Double(latString), let lon = Double(lonString) else {
-                return nil
-            }
+              let latString = components.first, let lonString = components.last,
+              let lat = Double(latString), let lon = Double(lonString) else {
+            return nil
+        }
         
         let truncatedLat = String(format: "%.4f", lat)
         let truncatedLon = String(format: "%.4f", lon)
-            
+        
         return "\(truncatedLat),\(truncatedLon)" // "40.4123,-3.7038"
     }
     
@@ -359,7 +360,7 @@ private extension FeedPresenterImpl {
                let coordinate = LocationManager.shared.getCoordinatesFromString(locationFromName) {
                 return coordinate
             }
-
+            
         } else {
             if let cleanedPostLocation = cleanedPostLocation,
                let coordinate = LocationManager.shared.getCoordinatesFromString(cleanedPostLocation) {
