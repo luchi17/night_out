@@ -28,6 +28,8 @@ class TicketsViewModel: ObservableObject {
     
     @Published var companies: [(CompanyModel, [Fiesta])] = []
     
+    var lastFetchTime: Date? = nil
+    
     init() {
         
     }
@@ -85,6 +87,17 @@ final class TicketsPresenterImpl: TicketsPresenter {
             .viewIsLoaded
             .withUnretained(self)
             .sink { presenter, _ in
+                
+                let currentTime = Date()
+                // Si no hay última consulta o han pasado más de 2 minutos, hacer la llamada
+                if let lastFetch = presenter.viewModel.lastFetchTime, currentTime.timeIntervalSince(lastFetch) < 120 {
+                    print("TICKETVIEW - Se omite la llamada, no han pasado 2 minutos")
+                    return
+                }
+                print("TICKETVIEW - Han pasado 2 minutos, llamando a loadEvents()")
+                // Actualiza el tiempo de la última consulta
+                presenter.viewModel.lastFetchTime = currentTime
+                        
                 presenter.loadEvents()
             }
             .store(in: &cancellables)
