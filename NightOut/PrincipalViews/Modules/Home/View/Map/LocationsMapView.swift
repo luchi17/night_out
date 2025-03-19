@@ -65,6 +65,16 @@ struct LocationsMapView: View {
             .padding(.top, 10)
             
         })
+        .overlay(alignment: .bottomTrailing, content: {
+            UserLocationButtonView(onTap: {
+                withAnimation(.easeInOut(duration: 1.0)) {
+                    position = MapCameraPosition.region(viewModel.locationManager.userRegion)
+                }
+            })
+            .padding(.bottom, 25)
+            .padding(.trailing, 20)
+            
+        })
         .onChange(of: viewModel.selectedMarkerLocation) { oldValue, newValue in
             //Resetear ubi de lista cuando se selecciona un nuevo item en el mapa
             if let oldValue = oldValue, oldValue != newValue {
@@ -111,7 +121,7 @@ struct LocationsMapView: View {
                         goToProfilePublisher.send(profile)
                     }
                 )
-                .presentationDetents([.fraction(0.45), .fraction(0.6)])
+                .presentationDetents([.fraction(0.55), .fraction(0.6)])
             }
         }
         .sheet(isPresented: $showingList, onDismiss: {
@@ -188,7 +198,7 @@ private extension LocationsMapView {
             openAppleMaps: openAppleMapsPublisher.eraseToAnyPublisher(),
             onFilterSelected: filterSelectedPublisher.eraseToAnyPublisher(),
             locationInListSelected: locationInListSelectedPublisher.eraseToAnyPublisher(),
-            viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
+            viewDidLoad: viewDidLoadPublisher.eraseToAnyPublisher(),
             goToProfile: goToProfilePublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)

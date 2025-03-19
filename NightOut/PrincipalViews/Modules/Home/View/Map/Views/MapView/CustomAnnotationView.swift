@@ -41,3 +41,19 @@ struct UserAnnotationView: View {
         }
     }
 }
+
+struct UserLocationButtonView: View {
+    let onTap: VoidClosure
+    
+    var body: some View {
+        
+        Button(action: {
+            onTap()
+        }) {
+            Image(systemName: "location.fill")
+                .font(.title)
+                .foregroundStyle(.blue)
+                .frame(width: 30, height: 30)
+        }
+    }
+}

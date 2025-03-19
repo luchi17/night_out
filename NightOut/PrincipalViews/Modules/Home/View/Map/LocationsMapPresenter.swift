@@ -16,7 +16,8 @@ final class LocationsMapViewModel: ObservableObject {
     @Published var loading: Bool = false
     @Published var toastError: ToastType?
     @Published var followingPeople: [String] = []
-
+    
+    var lastFetchTime: Date? = nil
     
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
@@ -76,6 +77,18 @@ final class LocationsMapPresenterImpl: LocationsMapPresenter {
         
         let companyModelsPublisher = input
             .viewDidLoad
+            .filter({ [weak self] in
+                let currentTime = Date()
+                // Si no hay última consulta o han pasado más de 2 minutos, hacer la llamada
+                if let lastFetch = self?.viewModel.lastFetchTime, currentTime.timeIntervalSince(lastFetch) < 120 {
+                    print("MAPVIEW - Se omite la llamada, no han pasado 2 minutos")
+                    return false
+                }
+                print("MAPVIEW - Han pasado 2 minutos, llamando a loadEvents()")
+                // Actualiza el tiempo de la última consulta
+                self?.viewModel.lastFetchTime = currentTime
+                return true
+            })
             .withUnretained(self)
             .performRequest(request: { presenter, _ in
                 presenter.useCases.companyLocationsUseCase.fetchCompanyLocations()
