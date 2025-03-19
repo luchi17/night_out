@@ -113,6 +113,7 @@ struct LoginView: View, Hashable {
                             forgotPasswordButton
 
                         }
+                        .padding(.horizontal, 20)
                     }
                     
                 }
@@ -130,8 +131,8 @@ struct LoginView: View, Hashable {
                 signupButton
             }
             .ignoresSafeArea(.keyboard)
+            .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 20)
         .background(
             Color.blackColor
         )

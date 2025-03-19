@@ -61,12 +61,12 @@ struct SignupView: View {
                             
                             TextField("", text: $viewModel.userName, prompt: Text("Usuario...").foregroundColor(.white))
                                 .textFieldStyle(PlainTextFieldStyle())
+                                .foregroundColor(.white)
+                                .accentColor(.white)
                                 .padding(.all, 8)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1)
                                 )
-                                .foregroundColor(.white)
-                                .accentColor(.white)
                                 .focused($focusedField, equals: .username)
                                 .onSubmit {
                                     self.focusNextField($focusedField)
@@ -112,6 +112,8 @@ struct SignupView: View {
                             Spacer()
                             
                         }
+                        .padding(.horizontal, 20)
+                        
                     }
                 }
                 .ignoresSafeArea(.keyboard, edges: .bottom)
@@ -128,7 +130,6 @@ struct SignupView: View {
             }
             .ignoresSafeArea(.keyboard)
         }
-        .padding(.horizontal, 20)
         .background(
             Color.blackColor
         )
