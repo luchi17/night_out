@@ -17,8 +17,6 @@ final class FeedViewModel: ObservableObject {
     
     @Published var showDiscoverEvents: Bool = false
     
-    private var matchingPosts: [PostsUser] = []
-    
     init() {
         
     }
