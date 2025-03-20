@@ -14,6 +14,9 @@ final class FeedViewModel: ObservableObject {
     @Published var toastError: ToastType?
     @Published var headerError: ErrorState?
     @Published var followersCount: Int = 0
+    @Published var followModel: FollowModel?
+    @Published var userModel: UserModel?
+    @Published var companyModel: CompanyModel?
     
     @Published var showDiscoverEvents: Bool = false
     
@@ -86,54 +89,55 @@ final class FeedPresenterImpl: FeedPresenter {
         
         input
             .viewDidLoad
-            .merge(with: outinput.reload)
             .withUnretained(self)
             .flatMap { presenter, _ in //Get user info and save it when feed appears
-                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-                    return Just(()).eraseToAnyPublisher()
-                }
-                if FirebaseServiceImpl.shared.getImUser() {
-                    return presenter.useCases.userDataUseCase.getUserInfo(uid: uid)
-                        .map({ _ in })
-                        .eraseToAnyPublisher()
-                } else {
-                    return presenter.useCases.companyDataUseCase.getCompanyInfo(uid: uid)
-                        .map({ _ in })
-                        .eraseToAnyPublisher()
-                }
+                presenter.getUserInfo()
             }
             .withUnretained(self)
-            .performRequest(request: { presenter, _ -> AnyPublisher<FollowModel?, Never> in
-                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-                    return Just(nil).eraseToAnyPublisher()
-                }
-                return presenter.useCases.followUseCase.observeFollow(id: uid)
-                
-            }, loadingClosure: { [weak self] loading in
-                guard let self = self else { return }
-                self.viewModel.loading = loading
-            }, onError: { _ in })
-            .withUnretained(self)
-            .flatMap({ presenter, followModel -> AnyPublisher<[PostModel], Never> in
-                // Procesar los posts dependiendo de followModel
-                return presenter.observePosts(followModel: followModel)
-            })
-            .withUnretained(self)
-            .sink(receiveValue: { presenter, data in
-                presenter.viewModel.loading = false
-                if data.isEmpty {
-                    presenter.viewModel.showDiscoverEvents = true
-                } else {
-                    presenter.viewModel.showDiscoverEvents = false
-                    
-                    //Update view only when posts have changed
-                    if data.count != presenter.viewModel.posts.count {
-                        presenter.viewModel.posts = data
-                    }
-                }
-            })
+            .sink { presenter, _ in
+                presenter.observeFollowInRealTime()
+            }
             .store(in: &cancellables)
         
+        outinput
+            .reload
+            .withUnretained(self)
+            .flatMap { presenter, _ in
+                //Get user info and save it when feed appears
+                presenter.getUserInfo()
+            }
+            .withUnretained(self)
+            .sink { presenter, _ in
+                
+                // update Posts After Editing User
+                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+                
+                presenter.viewModel.posts = presenter.viewModel.posts.map({ postModel in
+                    
+                    if postModel.publisherId == uid {
+                        
+                        var newPostModel = postModel
+                        
+                        if postModel.isFromUser {
+                            newPostModel.fullName = presenter.viewModel.userModel?.fullname
+                            newPostModel.username = presenter.viewModel.userModel?.username
+                            newPostModel.profileImageUrl = presenter.viewModel.userModel?.image
+                            
+                            return newPostModel
+                        } else {
+                            newPostModel.fullName = presenter.viewModel.companyModel?.fullname
+                            newPostModel.username = presenter.viewModel.companyModel?.username
+                            newPostModel.profileImageUrl = presenter.viewModel.companyModel?.imageUrl
+                            
+                            return newPostModel
+                        }
+                       
+                    } else {
+                        return postModel
+                    }
+                })
+            }
+            .store(in: &cancellables)
     }
     
     func listenToInput(input: FeedPresenterImpl.ViewInputs) {
@@ -208,6 +212,29 @@ final class FeedPresenterImpl: FeedPresenter {
 }
 
 private extension FeedPresenterImpl {
+    
+    func getUserInfo() -> AnyPublisher<Void, Never> {
+        
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            return Just(()).eraseToAnyPublisher()
+        }
+        if FirebaseServiceImpl.shared.getImUser() {
+            return useCases.userDataUseCase.getUserInfo(uid: uid)
+                .handleEvents(receiveOutput: { [weak self] output in
+                    self?.viewModel.userModel = output
+                })
+                .map({ _ in })
+                .eraseToAnyPublisher()
+        } else {
+            return useCases.companyDataUseCase.getCompanyInfo(uid: uid)
+                .handleEvents(receiveOutput: { [weak self] output in
+                    self?.viewModel.companyModel = output
+                })
+                .map({ _ in })
+                .eraseToAnyPublisher()
+        }
+    }
+    
     func getPostFromUserInfo(post: PostUserModel) -> AnyPublisher<PostModel, Never> {
         return useCases.userDataUseCase.getUserInfo(uid: post.publisherId)
             .withUnretained(self)
@@ -262,13 +289,43 @@ private extension FeedPresenterImpl {
             .eraseToAnyPublisher()
     }
     
-    func observePosts(followModel: FollowModel?) -> AnyPublisher<[PostModel], Never> {
+    func observeFollowInRealTime() {
+        guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+            return
+        }
         
-        return useCases.postsUseCase.observePosts()
+        useCases.followUseCase.observeFollow(id: uid)
+            .handleEvents(receiveOutput: { [weak self] output in
+                self?.viewModel.followModel = output
+            })
+            .map({ _ in })
+            .withUnretained(self)
+            .flatMap { presenter, _ in
+                presenter.getPosts()
+            }.withUnretained(self)
+            .sink { presenter, posts in
+                presenter.viewModel.loading = false
+                if posts.isEmpty {
+                    presenter.viewModel.showDiscoverEvents = true
+                } else {
+                    presenter.viewModel.showDiscoverEvents = false
+                    
+                    //Update view only when posts have changed
+                    if posts.count != presenter.viewModel.posts.count {
+                        presenter.viewModel.posts = posts
+                    }
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func getPosts() -> AnyPublisher<[PostModel], Never> {
+        return useCases.postsUseCase.fetchPosts()
+            .merge(with: useCases.postsUseCase.observePosts().compactMap({ $0 }))
             .compactMap({ $0 })
             .map { posts -> [PostUserModel] in
                 return posts.values.filter { post in
-                    let isFollowing = followModel?.following?.keys.contains(post.publisherId) ?? false
+                    let isFollowing = self.viewModel.followModel?.following?.keys.contains(post.publisherId) ?? false
                     let isOwnPost = post.publisherId == FirebaseServiceImpl.shared.getCurrentUserUid()
                     return isFollowing || isOwnPost
                 }
@@ -298,6 +355,7 @@ private extension FeedPresenterImpl {
                 return Set(oldPosts) == Set(newPosts)
             }
             .eraseToAnyPublisher()
+        
     }
     
     func getLocationFromCompanyPost(postLocation: String?, companylocation: String?) -> String {

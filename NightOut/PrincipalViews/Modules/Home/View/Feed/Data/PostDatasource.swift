@@ -53,6 +53,7 @@ struct PostDatasourceImpl: PostDatasource {
         ref.observe(.value) { snapshot in
             do {
                 let posts = try snapshot.data(as: [String: PostUserModel].self)
+                print("NEW POST OBSERVED")
                 subject.send(posts)
             } catch {
                 print("Error decoding posts data: \(error.localizedDescription)")
@@ -100,6 +101,7 @@ struct PostDatasourceImpl: PostDatasource {
         ref.observe(.value) { snapshot in
             do {
                 let followModel = try snapshot.data(as: FollowModel.self)
+                print("NEW FOLLOW OBSERVED")
                 subject.send(followModel)
             } catch {
                 print("Error decoding follow data: \(error.localizedDescription)")
