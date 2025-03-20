@@ -30,8 +30,8 @@ final class TinderViewModel: ObservableObject {
     @Published var showEndView: Bool = false
     
     @Published var currentIndex: Int = 0
+    @Published var currentUserSex: String = ""
     
-    var currentUserSex: String = ""
     var clubId: String = ""
 }
 
@@ -65,8 +65,6 @@ final class TinderPresenterImpl: TinderPresenter {
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
     
-    
-    private let loadGenderSubject = PassthroughSubject<Void, Never>()
     private let loadUsersSubject = PassthroughSubject<Void, Never>()
     
     private let currentDateString: String?
@@ -116,28 +114,6 @@ final class TinderPresenterImpl: TinderPresenter {
             }
             .store(in: &cancellables)
         
-        loadGenderSubject
-            .withUnretained(self)
-            .flatMap { presenter, _ in
-                presenter.loadCurrentUserSex()
-            }
-            .withUnretained(self)
-            .sink { presenter, currentUserSex in
-                
-                if let currentSex = currentUserSex {
-                    presenter.viewModel.currentUserSex = currentSex
-                    presenter.loadUsersSubject.send()
-                } else {
-                    presenter.viewModel.showAlert = true
-                    presenter.viewModel.shouldOpenConfig = true
-                    presenter.viewModel.alertButtonText = "Abrir configuración"
-                    presenter.viewModel.alertTitle = "Género"
-                    presenter.viewModel.alertMessage = "Debes seleccionar el género en los ajustes de tu perfil."
-                }
-            }
-            .store(in: &cancellables)
-        
-        
         loadUsersSubject
             .withUnretained(self)
             .flatMap { presenter, currentSex -> AnyPublisher<[TinderUser]?, Never> in
@@ -172,6 +148,8 @@ final class TinderPresenterImpl: TinderPresenter {
             .withUnretained(self)
             .sink { presenter, clubId in
             
+                presenter.viewModel.currentUserSex = UserDefaults.getUserModel()?.gender ?? "Hombre"
+                
                 if let clubId = clubId {
                     presenter.viewModel.clubId = clubId
                     
@@ -183,10 +161,9 @@ final class TinderPresenterImpl: TinderPresenter {
                                 presenter.viewModel.showNoUsersForClub = true // ❌ Está solo en el club
                             } else {
                                 
-                                
                                  #warning("TODO: REMOVE these 2 lines, just for testing, discomment the others")
                                 presenter.viewModel.loadingUsers = true
-                                presenter.loadGenderSubject.send()
+                                presenter.loadUsersSubject.send()
                                 
                                 
 //                                // 🔹 Si hay más usuarios, validamos el horario
@@ -196,7 +173,7 @@ final class TinderPresenterImpl: TinderPresenter {
 //                                if (10...23).contains(currentHour) || (0...2).contains(currentHour) {
 //                                    // ✅ Dentro del horario permitido
 //                                    presenter.viewModel.loadingUsers = true
-//                                    presenter.loadGenderSubject.send()
+//                                     presenter.loadUsersSubject.send()
 //                                } else {
 //                                    presenter.showOutsideScheduleDialog() // ❌ Fuera de horario
 //                                }
@@ -265,32 +242,6 @@ final class TinderPresenterImpl: TinderPresenter {
                 print("Usuario \(likedUserId) liked exitosamente")
             }
         }
-    }
-    
-    private func loadCurrentUserSex() -> AnyPublisher<String?, Never> {
-        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else {
-            return Just(nil).eraseToAnyPublisher()
-        }
-
-        let userSexRef = FirebaseServiceImpl.shared.getAssistance(profileId: self.viewModel.clubId)
-            .child(currentDateString!)
-            .child(currentUserId)
-            .child("gender")
-        
-        return Future<String?, Never> { promise in
-            
-            userSexRef.getData { error, snapshot in
-                if let error = error {
-                    print("Error al obtener el sexo del usuario: \(error.localizedDescription)")
-                    promise(.success(nil))
-                } else {
-                    let sex = snapshot?.value as? String
-                    promise(.success(sex))
-                }
-            }
-        }
-        .eraseToAnyPublisher()
-
     }
     
     private func loadUsers(currentUserSex: String) -> AnyPublisher<[TinderUser]?, Never> {
