@@ -107,6 +107,8 @@ final class HomePresenterImpl: HomePresenter {
                 }
                 
                 userModel.gender = gender?.firebaseTitle
+                print("GENDER CHANGED")
+                print(userModel.gender)
                 return presenter.useCases.saveUserUseCase.execute(model: userModel)
             }
             .withUnretained(self)
@@ -204,8 +206,8 @@ final class HomePresenterImpl: HomePresenter {
                 
                 let imUser = FirebaseServiceImpl.shared.getImUser()
                 if imUser {
-                    presenter.viewModel.profileImageUrl =  UserDefaults.getUserModel()?.image
-                    if presenter.myUserModel?.gender == nil {
+                    presenter.viewModel.profileImageUrl = UserDefaults.getUserModel()?.image
+                    if presenter.myUserModel?.gender == nil, presenter.myUserModel?.gender?.isEmpty ?? true {
                         presenter.viewModel.showGenderAlert = true
                     }
                 } else {
