@@ -51,7 +51,7 @@ struct LoginView: View, Hashable {
                             Image("logo_amarillo")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 162, height: 157)
+                                .frame(width: 140, height: 140)
                                 .padding(.top, 90)
                             
                             // Email Input

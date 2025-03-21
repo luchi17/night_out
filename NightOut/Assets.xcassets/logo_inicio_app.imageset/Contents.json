@@ -1,19 +1,8 @@
 {
   "images" : [
     {
-      "filename" : "logo_inicio_app.png",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "filename" : "logo_inicio_app@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "filename" : "logo_inicio_app@3x.png",
-      "idiom" : "universal",
-      "scale" : "3x"
+      "filename" : "logo_inicio_app-removebg-preview (1).png",
+      "idiom" : "universal"
     }
   ],
   "info" : {
