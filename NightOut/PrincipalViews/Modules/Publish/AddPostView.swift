@@ -144,6 +144,8 @@ struct AddPostView: View {
         }
         .onDisappear {
             cameraModel.stopSession()
+            viewModel.capturedImage = nil
+            viewModel.emojiSelected = nil
         }
         .onTapGesture {
             // Cerrar el teclado cuando tocas fuera de él
