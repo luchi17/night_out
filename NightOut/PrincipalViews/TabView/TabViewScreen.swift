@@ -77,7 +77,7 @@ struct TabViewScreen: View {
                     viewModel.selectedTab = .calendar
                 }) {
                     VStack {
-                        Image("post_clicked")
+                        Image("calendar")
                             .resizable()
                             .scaledToFill()
                             .frame(width: 20, height: 20)
