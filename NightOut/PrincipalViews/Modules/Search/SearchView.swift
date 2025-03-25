@@ -86,15 +86,6 @@ struct SearchView: View {
                     }
                     .padding(.horizontal, 20)
                 }
-                .gesture(
-                    // Tap Gesture para ocultar el teclado si el tap no es en la barra de búsqueda ni en un usuario
-                    TapGesture()
-                        .onEnded {
-                            if isTextFieldFocused {
-                                isTextFieldFocused = false  // Ocultar teclado
-                            }
-                        }
-                )
                 .simultaneousGesture(DragGesture().onChanged { _ in
                     hideKeyboard() // Esconde el teclado cuando el usuario hace scroll
                 })
@@ -109,6 +100,7 @@ struct SearchView: View {
             // Aseguramos que el tap en toda la vista también puede ocultar el teclado
             if isTextFieldFocused {
                 isTextFieldFocused = false
+                hideKeyboard()
             }
         }
         .background(
