@@ -28,7 +28,7 @@ struct PostDatasourceImpl: PostDatasource {
 
         return Future<[String: PostUserModel], Never> { promise in
             
-            let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
+            let ref = FirebaseServiceImpl.shared.getPosts()
             
             ref.getData { error, snapshot in
                 do {
@@ -48,7 +48,7 @@ struct PostDatasourceImpl: PostDatasource {
         
         let subject = CurrentValueSubject<[String: PostUserModel]?, Never>(nil)
         
-        let ref = FirebaseServiceImpl.shared.getPosts().queryOrderedByKey()
+        let ref = FirebaseServiceImpl.shared.getPosts()
         
         ref.observe(.value) { snapshot in
             do {

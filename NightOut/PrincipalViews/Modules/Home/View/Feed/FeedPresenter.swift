@@ -256,7 +256,8 @@ private extension FeedPresenterImpl {
                     fullName: userInfo?.fullname,
                     uid: post.postID,
                     isFromUser: post.isFromUser ?? true,
-                    publisherId: post.publisherId
+                    publisherId: post.publisherId,
+                    timestamp: post.timestamp ?? 0
                 )
             })
             .eraseToAnyPublisher()
@@ -283,7 +284,8 @@ private extension FeedPresenterImpl {
                     fullName: companyInfo?.fullname,
                     uid: post.postID,
                     isFromUser: post.isFromUser ?? false,
-                    publisherId: post.publisherId
+                    publisherId: post.publisherId,
+                    timestamp: post.timestamp ?? 0
                 )
             })
             .eraseToAnyPublisher()
@@ -312,7 +314,7 @@ private extension FeedPresenterImpl {
                     
                     //Update view only when posts have changed
                     if posts.count != presenter.viewModel.posts.count {
-                        presenter.viewModel.posts = posts
+                        presenter.viewModel.posts = posts.sorted(by: { ($0.timestamp) > ($1.timestamp) })
                     }
                 }
             }

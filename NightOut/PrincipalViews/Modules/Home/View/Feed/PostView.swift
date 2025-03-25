@@ -11,8 +11,9 @@ struct PostModel: Hashable {
     var uid: String
     var isFromUser: Bool
     var publisherId: String
+    var timestamp: Int64
     
-    init(profileImageUrl: String?, postImage: UIImage, description: String?, location: String? , username: String?, fullName: String?, uid: String, isFromUser: Bool, publisherId: String) {
+    init(profileImageUrl: String?, postImage: UIImage, description: String?, location: String? , username: String?, fullName: String?, uid: String, isFromUser: Bool, publisherId: String, timestamp: Int64) {
         self.profileImageUrl = profileImageUrl
         self.postImage = postImage
         self.description = description
@@ -22,6 +23,7 @@ struct PostModel: Hashable {
         self.uid = uid
         self.isFromUser = isFromUser
         self.publisherId = publisherId
+        self.timestamp = timestamp
     }
 }
 
