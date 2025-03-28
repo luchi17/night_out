@@ -27,7 +27,6 @@ struct CommentsView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     topView
-                        .padding(.vertical)
                     
                     if viewModel.comments.isEmpty {
                         Spacer()
@@ -68,14 +67,24 @@ struct CommentsView: View {
         }
         .background(Color.blackColor.ignoresSafeArea())
         .offset(x: offset)
-                    .gesture(
-                        DragGesture()
-                            .onEnded { gesture in
-                                if gesture.translation.width > 50 { // Detecta si el usuario arrastró lo suficiente hacia la derecha
-                                    print("BACK")
-                                }
-                            }
-                    )
+        .gesture(
+            DragGesture()
+            
+                .onChanged { gesture in
+                    if gesture.translation.width > 0 {
+                        offset = gesture.translation.width
+                    }
+                }
+                .onEnded { gesture in
+                    if gesture.translation.width > 50 { // Detecta si el usuario arrastró lo suficiente hacia la derecha
+                        goBackPublisher.send()
+                    } else {
+                        withAnimation {
+                            offset = 0
+                        }
+                    }
+                }
+        )
         .showToast(
             error: (
                 type: viewModel.toastError,

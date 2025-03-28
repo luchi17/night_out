@@ -53,11 +53,13 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     
     struct Actions {
         let goToFriendsList: InputClosure<[String]>
+        let goBack: VoidClosure
     }
     
     struct ViewInputs {
         let viewDidLoad: AnyPublisher<Void, Never>
         let goToFriendsList: AnyPublisher<Void, Never>
+        let goBack: AnyPublisher<Void, Never>
     }
     
     var viewModel: UserPostProfileViewModel

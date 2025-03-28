@@ -14,6 +14,7 @@ struct UserProfileView: View {
     private let openDiscoPublisher = PassthroughSubject<Void, Never>()
     
     @State private var selectedImage: IdentifiableImage? = nil
+    @State private var offset: CGFloat = 0
     
     @ObservedObject var viewModel: UserProfileViewModel
     let presenter: UserProfilePresenter
@@ -65,6 +66,25 @@ struct UserProfileView: View {
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
+        .offset(x: offset)
+        .gesture(
+            DragGesture()
+            
+                .onChanged { gesture in
+                    if gesture.translation.width > 0 {
+                        offset = gesture.translation.width
+                    }
+                }
+                .onEnded { gesture in
+                    if gesture.translation.width > 50 { // Detecta si el usuario arrastró lo suficiente hacia la derecha
+                        goBackPublisher.send()
+                    } else {
+                        withAnimation {
+                            offset = 0
+                        }
+                    }
+                }
+        )
         .background(Color.blackColor)
         .fullScreenCover(item: $selectedImage) { imageName in
             FullScreenImageView(imageName: imageName, onClose: {

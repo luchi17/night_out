@@ -110,7 +110,12 @@ final class AppCoordinator: ObservableObject {
     }
     
     private func showPostUserProfileView(info: UserPostProfileInfo) {
-        let postUserProfileView = UserPostProfileCoordinator(actions: .init(goToFriendsList: goToFriendsList), info: info)
+        let postUserProfileView = UserPostProfileCoordinator(actions: .init(
+            goToFriendsList: goToFriendsList,
+            goBack: { [weak self] in
+                self?.pop()
+            }
+        ), info: info)
         self.push(postUserProfileView)
     }
     

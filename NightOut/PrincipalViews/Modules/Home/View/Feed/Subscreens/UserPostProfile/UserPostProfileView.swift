@@ -7,11 +7,14 @@ struct UserPostProfileView: View {
     
     private let viewDidLoadPublisher = PassthroughSubject<Void, Never>()
     private let goToFriendsListPublisher = PassthroughSubject<Void, Never>()
+    private let goBackPublisher = PassthroughSubject<Void, Never>()
     
     @ObservedObject var viewModel: UserPostProfileViewModel
     @ObservedObject var levelsViewModel: LevelsViewModel
     
     let presenter: UserPostProfilePresenter
+    
+    @State private var offset: CGFloat = 0
     
     init(
         presenter: UserPostProfilePresenter
@@ -85,6 +88,25 @@ struct UserPostProfileView: View {
                 Spacer()
             }
         }
+        .offset(x: offset)
+        .gesture(
+            DragGesture()
+            
+                .onChanged { gesture in
+                    if gesture.translation.width > 0 {
+                        offset = gesture.translation.width
+                    }
+                }
+                .onEnded { gesture in
+                    if gesture.translation.width > 50 { // Detecta si el usuario arrastró lo suficiente hacia la derecha
+                        goBackPublisher.send()
+                    } else {
+                        withAnimation {
+                            offset = 0
+                        }
+                    }
+                }
+        )
         .fullScreenCover(item: $selectedImage) { imageName in
             FullScreenImageView(imageName: imageName, onClose: {
                 selectedImage = nil
@@ -101,7 +123,8 @@ private extension UserPostProfileView {
     func bindViewModel() {
         let input = UserPostProfilePresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadPublisher.first().eraseToAnyPublisher(),
-            goToFriendsList: goToFriendsListPublisher.eraseToAnyPublisher()
+            goToFriendsList: goToFriendsListPublisher.eraseToAnyPublisher(),
+            goBack: goBackPublisher.eraseToAnyPublisher()
         )
         presenter.transform(input: input)
     }

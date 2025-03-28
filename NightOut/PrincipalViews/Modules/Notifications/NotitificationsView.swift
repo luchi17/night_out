@@ -13,6 +13,8 @@ struct NotificationsView: View {
     @ObservedObject var viewModel: NotificationsViewModel
     let presenter: NotificationsPresenter
     
+    @State private var offset: CGFloat = 0
+    
     init(
         presenter: NotificationsPresenter
     ) {
@@ -56,6 +58,25 @@ struct NotificationsView: View {
                 Spacer()
             }
         }
+        .offset(x: offset)
+        .gesture(
+            DragGesture()
+            
+                .onChanged { gesture in
+                    if gesture.translation.width > 0 {
+                        offset = gesture.translation.width
+                    }
+                }
+                .onEnded { gesture in
+                    if gesture.translation.width > 50 { // Detecta si el usuario arrastró lo suficiente hacia la derecha
+                        goBackPublisher.send()
+                    } else {
+                        withAnimation {
+                            offset = 0
+                        }
+                    }
+                }
+        )
         .showToast(
             error: (
                 type: viewModel.toast,
