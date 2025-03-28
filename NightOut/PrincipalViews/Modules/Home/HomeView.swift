@@ -147,11 +147,18 @@ struct HomeView: View {
             Button(action: {
                 openTinderPublisher.send()
             }) {
-                Image(viewModel.nighoutLogo)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 150, height: 60)
-                    .foregroundStyle(.white)
+                if presenter.isPastNinePM() {
+                    Image("n_social_logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 60)
+                } else {
+                    Image("n_logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 60)
+                        .foregroundStyle(.white)
+                }
             }
             
             Spacer()

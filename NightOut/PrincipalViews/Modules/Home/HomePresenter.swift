@@ -33,6 +33,7 @@ final class HomeViewModel: ObservableObject {
 protocol HomePresenter {
     var viewModel: HomeViewModel { get }
     func transform(input: HomePresenterImpl.ViewInputs)
+    func isPastNinePM() -> Bool
 }
 
 final class HomePresenterImpl: HomePresenter {
@@ -87,12 +88,6 @@ final class HomePresenterImpl: HomePresenter {
         self.outinput = input
         
         viewModel = HomeViewModel()
-        
-        if isPastNinePM() {
-            viewModel.nighoutLogo = "n_social_logo"
-        } else {
-            viewModel.nighoutLogo = "n_logo"
-        }
     }
     
     func transform(input: HomePresenterImpl.ViewInputs) {
