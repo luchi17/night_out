@@ -19,10 +19,10 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never> {
         return Future<Bool, Never> { promise in
             
-            let commentData = structToDictionary(model)
+            let notificationData = structToDictionary(model)
             let ref = FirebaseServiceImpl.shared.getNotifications().child(publisherId)
             
-            ref.childByAutoId().setValue(commentData) { error, _ in
+            ref.childByAutoId().setValue(notificationData) { error, _ in
                 if let error = error {
                     print("Error al guardar la notificacion en la base de datos: \(error.localizedDescription)")
                     promise(.success(false))
@@ -112,7 +112,8 @@ struct NotificationsDatasourceImpl: NotificationsDatasource {
             ispost: false,
             postid: "",
             text: "\(myName): asistirá a \(clubName)",
-            userid: currentUserId
+            userid: currentUserId,
+            timestamp: Int64(Date().timeIntervalSince1970 * 1000)
         )
         let notificationData = structToDictionary(notificationModel)
         

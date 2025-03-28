@@ -368,14 +368,16 @@ private extension UserProfilePresenterImpl {
                     ispost: false,
                     postid: "",
                     text: "\(self.viewModel.myUserModel?.username ?? "Desconocido") \(GlobalStrings.shared.startFollowUserText)",
-                    userid: myUid
+                    userid: myUid,
+                    timestamp: Int64(Date().timeIntervalSince1970 * 1000)
                 )
             } else {
                 return NotificationModel(
                     ispost: false,
                     postid: "",
                     text: "\(self.viewModel.mycompanyModel?.username ?? "Desconocido") \(GlobalStrings.shared.startFollowUserText)",
-                    userid: myUid
+                    userid: myUid,
+                    timestamp: Int64(Date().timeIntervalSince1970 * 1000)
                 )
             }
         }()

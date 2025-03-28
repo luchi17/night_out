@@ -128,7 +128,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
             }
             .withUnretained(self)
             .sink { presenter, notifications in
-                presenter.viewModel.notifications = notifications
+                presenter.viewModel.notifications = notifications.sorted(by: { ($0.timestamp) > ($1.timestamp) })
             }
             .store(in: &cancellables)
         
@@ -266,7 +266,8 @@ private extension NotificationsPresenterImpl {
             postId: model.postid,
             notificationId: notificationId,
             isFromCompany: !(companyFound.location?.isEmpty ?? true),
-            isPrivateProfile: companyFound.profileType == .privateProfile
+            isPrivateProfile: companyFound.profileType == .privateProfile,
+            timestamp: model.timestamp ?? 0
         )
         
         return Just(modelView)
@@ -288,7 +289,8 @@ private extension NotificationsPresenterImpl {
                     postId: model.postid,
                     notificationId: notificationId,
                     isFromCompany: false,
-                    isPrivateProfile: userModel?.profileType == .privateProfile
+                    isPrivateProfile: userModel?.profileType == .privateProfile,
+                    timestamp: model.timestamp ?? 0
                 )
                 
                 return modelView

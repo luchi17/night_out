@@ -31,7 +31,7 @@ struct NotificationsView: View {
                 if !viewModel.loading {
                     ScrollView {
                         VStack(spacing: 10) {
-                            ForEach(viewModel.notifications.reversed(), id: \.notificationId) { notification in
+                            ForEach(viewModel.notifications, id: \.notificationId) { notification in
                                 if notification.type == .friendRequest {
                                     FriendRequestNotificationView(
                                         notification: notification,

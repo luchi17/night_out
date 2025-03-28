@@ -13,6 +13,7 @@ struct NotificationModelForView {
     let notificationId: String
     let isFromCompany: Bool
     let isPrivateProfile: Bool
+    let timestamp: Int64
 }
 
 struct FriendRequestNotificationView: View {

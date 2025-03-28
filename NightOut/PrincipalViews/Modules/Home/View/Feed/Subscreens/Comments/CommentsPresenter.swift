@@ -156,7 +156,8 @@ private extension CommentsPresenterImpl {
             ispost: true,
             postid: info.postId,
             text: "\(comment.username ?? "") ha comentado: " + commentText,
-            userid: uid
+            userid: uid,
+            timestamp: Int64(Date().timeIntervalSince1970 * 1000)
         )
         _ = self.useCases.notificationsUseCase.addNotification(model: model, publisherId: info.publisherId)
     }

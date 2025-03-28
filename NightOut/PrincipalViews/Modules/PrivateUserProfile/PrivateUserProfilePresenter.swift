@@ -105,7 +105,8 @@ private extension PrivateUserProfilePresenterImpl {
             ispost: false,
             postid: "",
             text: "\(GlobalStrings.shared.followUserText)",
-            userid: myUid
+            userid: myUid,
+            timestamp: Int64(Date().timeIntervalSince1970 * 1000)
         )
         
         useCases.noficationsUsecase.addNotification(

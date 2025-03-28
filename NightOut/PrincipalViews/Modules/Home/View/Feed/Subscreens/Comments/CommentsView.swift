@@ -9,6 +9,8 @@ struct CommentsView: View {
     
     @ObservedObject private var keyboardObserver = KeyboardObserver()
     
+    @State private var offset: CGFloat = 0
+    
     @ObservedObject var viewModel: CommentsViewModel
     let presenter: CommentsPresenter
     
@@ -65,6 +67,15 @@ struct CommentsView: View {
             
         }
         .background(Color.blackColor.ignoresSafeArea())
+        .offset(x: offset)
+                    .gesture(
+                        DragGesture()
+                            .onEnded { gesture in
+                                if gesture.translation.width > 50 { // Detecta si el usuario arrastró lo suficiente hacia la derecha
+                                    print("BACK")
+                                }
+                            }
+                    )
         .showToast(
             error: (
                 type: viewModel.toastError,
