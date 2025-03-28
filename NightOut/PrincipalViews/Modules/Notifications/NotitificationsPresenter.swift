@@ -65,22 +65,18 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
         let notificationsPublisher = input
             .viewDidLoad
             .withUnretained(self)
-            .performRequest(request: { presenter , _  -> AnyPublisher<[String: NotificationModel], Never> in
+            .flatMap({ presenter, _  -> AnyPublisher<[String: NotificationModel], Never> in
                 guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
                     return Just([:]).eraseToAnyPublisher()
                 }
                 return presenter.useCases.notificationsUseCase.observeNotifications(publisherId: uid)
-                
-            }, loadingClosure: { [weak self] loading in
-                guard let self = self else { return }
-                self.viewModel.loading = loading
-            }, onError: { _ in })
+            })
             .eraseToAnyPublisher()
         
         
         notificationsPublisher
             .withUnretained(self)
-            .flatMap({ presenter, notificationsModel in
+            .performRequest(request: { presenter, notificationsModel in
                 let publishers: [AnyPublisher<(String?, String?), Never>] = notificationsModel.values.map({ $0.postid }).map { postId in
                     
                     presenter.useCases.postsUseCase.fetchPosts()
@@ -96,7 +92,11 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
                     .collect()
                     .map({ ($0, notificationsModel)})
                     .eraseToAnyPublisher()
-            })
+                
+            }, loadingClosure: { [weak self] loading in
+                guard let self = self else { return }
+                self.viewModel.loading = loading
+            }, onError: { _ in })
             .withUnretained(self)
             .flatMap { presenter, data in
                 
