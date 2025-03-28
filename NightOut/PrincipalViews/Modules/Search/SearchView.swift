@@ -106,6 +106,12 @@ struct SearchView: View {
         .background(
             Color.blackColor
                 .edgesIgnoringSafeArea(.top)
+                .onTapGesture(perform: {
+                    if isTextFieldFocused {
+                        isTextFieldFocused = false
+                        hideKeyboard()
+                    }
+                })
         )
         .showToast(
             error: (
