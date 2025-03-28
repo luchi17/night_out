@@ -39,7 +39,7 @@ struct UserPostProfileView: View {
                 .padding(.top, 40)
                 
                 // Nombre y username
-                ZStack(alignment: .leading) {
+                ZStack(alignment: .trailing) {
                     Text(viewModel.fullname)
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
@@ -51,7 +51,7 @@ struct UserPostProfileView: View {
                             .scaledToFit()
                             .frame(width: 50, height: 50)
                             .clipShape(Circle())
-                            .offset(x: 190)
+                            .offset(x: 60)
                     }
                 }
                 
