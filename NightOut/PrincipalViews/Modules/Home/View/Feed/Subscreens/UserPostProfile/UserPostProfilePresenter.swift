@@ -93,6 +93,14 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
     func transform(input: UserPostProfilePresenterImpl.ViewInputs) {
         
         input
+            .goBack
+            .withUnretained(self)
+            .sink { presenter, _ in
+                presenter.actions.goBack()
+            }
+            .store(in: &cancellables)
+        
+        input
             .goToFriendsList
             .withUnretained(self)
             .sink { presenter, _ in

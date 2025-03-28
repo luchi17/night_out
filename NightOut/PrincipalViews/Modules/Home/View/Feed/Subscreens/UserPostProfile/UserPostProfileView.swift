@@ -91,7 +91,6 @@ struct UserPostProfileView: View {
         .offset(x: offset)
         .gesture(
             DragGesture()
-            
                 .onChanged { gesture in
                     if gesture.translation.width > 0 {
                         offset = gesture.translation.width
