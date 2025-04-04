@@ -174,6 +174,10 @@ struct MyUserProfileView: View {
                 GestionEconomicaView(onClose: {
                     viewModel.companyMenuSelection = nil
                 })
+            case .datosEvento:
+                DatosEventoView(onClose: {
+                    viewModel.companyMenuSelection = nil
+                })
             }
         })
         .onChange(of: closeAllSheets, { oldValue, newValue in

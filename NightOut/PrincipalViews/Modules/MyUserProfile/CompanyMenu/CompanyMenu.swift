@@ -57,6 +57,16 @@ struct CompanyMenu: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                
+                Button(action: {
+                    selection = .datosEvento
+                    showSheet = false
+                }) {
+                    Text(CompanyMenuSelection.datosEvento.title)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
             
             Spacer()
@@ -76,6 +86,7 @@ enum CompanyMenuSelection: Identifiable {
     case metodosDePago
     case gestorEventos
     case publicidad
+    case datosEvento
     
     var title: String {
         switch self {
@@ -89,6 +100,8 @@ enum CompanyMenuSelection: Identifiable {
             return "Gestor eventos"
         case .publicidad:
             return "Publicidad"
+        case .datosEvento:
+            return "Datos del evento"
         }
     }
 }
