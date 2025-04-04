@@ -126,7 +126,7 @@ struct TinderView: View {
                 .frame(height: 60)
                 .foregroundStyle(.white)
             
-            Text("¡Lo sentimos! No hay usuarios en Social NighOut para el club al que asistes hoy.")
+            Text("¡Lo sentimos! No hay usuarios en Nocheo para el club al que asistes hoy.")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(.white)
             

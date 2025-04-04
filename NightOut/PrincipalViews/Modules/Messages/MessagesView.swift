@@ -46,7 +46,7 @@ struct MessagesView: View {
         }
         .background(Color.blackColor)
         .showCustomNavBar(
-            title: "NIGHOUT MENSAJES",
+            title: "NOCHEO MENSAJES",
             goBack: goBackPublisher.send
         )
         .showToast(
