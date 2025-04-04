@@ -27,7 +27,7 @@ struct DatosEventoView: View {
                     .foregroundStyle(Color.black)
             }
             .padding(.top, 10)
-            .padding(.trailing, 12)
+            .padding(.trailing, 15)
         }
         .background(
             Color.whiteHTML.ignoresSafeArea()
