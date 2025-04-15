@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -17,6 +15,11 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>16597384086-uf4a5k28qlrdp53n2st8uv8rciqgaog0.apps.googleusercontent.com</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram</string>
+		<string>tiktok</string>
+	</array>
 	<key>MKDirectionsApplicationSupportedModes</key>
 	<array>
 		<string>MKDirectionsModeBike</string>
@@ -28,7 +31,5 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Necesitamos acceso a tu galería.</string>
 </dict>
 </plist>

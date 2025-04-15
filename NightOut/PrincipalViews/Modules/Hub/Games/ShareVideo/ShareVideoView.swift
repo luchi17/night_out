@@ -183,8 +183,13 @@ struct ShareVideoView: View {
             
             VStack(spacing: 0) {
                 socialMediaRow(iconName: "instagram_icon", platformName: "Instagram")
-                socialMediaRow(iconName: "x_icon", platformName: "X")
+                    .onTapGesture {
+                        abrirInstagram()
+                    }
                 socialMediaRow(iconName: "tiktok_icon", platformName: "TikTok")
+                    .onTapGesture {
+                        abrirTikTok()
+                    }
             }
         }
     }
@@ -196,6 +201,30 @@ struct ShareVideoView: View {
         viewModel.selectedItem = nil
         viewModel.loadingVideo = false
         videoPlayer = nil
+    }
+    
+    func abrirTikTok() {
+        // Intenta abrir la app de TikTok directamente
+        let urlApp = URL(string: "tiktok://user/@nocheeo")!
+        let webURL = URL(string: "https://www.tiktok.com/@nocheeo")!
+        
+        if UIApplication.shared.canOpenURL(urlApp) {
+            UIApplication.shared.open(urlApp, options: [:], completionHandler: nil)
+        } else {
+            UIApplication.shared.open(webURL, options: [:], completionHandler: nil)
+        }
+    }
+
+    func abrirInstagram() {
+        let username = "nocheeo"
+        let appURL = URL(string: "instagram://user?username=\(username)")!
+        let webURL = URL(string: "https://www.instagram.com/\(username)/")!
+
+        if UIApplication.shared.canOpenURL(appURL) {
+            UIApplication.shared.open(appURL, options: [:], completionHandler: nil)
+        } else {
+            UIApplication.shared.open(webURL, options: [:], completionHandler: nil)
+        }
     }
 }
 
