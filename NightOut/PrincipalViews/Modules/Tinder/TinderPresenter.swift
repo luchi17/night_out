@@ -75,13 +75,30 @@ final class TinderPresenterImpl: TinderPresenter {
     ) {
         self.actions = actions
         self.useCases = useCases
-        
-        
         viewModel = TinderViewModel()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd-MM-yyyy"
         
-        self.currentDateString = dateFormatter.string(from: Date())
+        let currentHour = Calendar.current.component(.hour, from: Date())
+
+        // Determinamos la fecha a usar dependiendo de la hora
+        let currentDate: String = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd-MM-yyyy"
+            formatter.locale = Locale.current
+
+            if (0...2).contains(currentHour) {
+                // Si está entre las 00:00 y las 02:00, usamos la fecha de ayer
+                if let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) {
+                    return formatter.string(from: yesterday)
+                }
+            }
+
+            // Si no, usamos la fecha actual
+            return formatter.string(from: Date())
+        }()
+
+        print("Fecha seleccionada: \(currentDate)")
+
+        self.currentDateString = currentDate
     }
     
     func checkViewToShow(users: [TinderUser]?) {

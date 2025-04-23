@@ -437,21 +437,32 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                         
                         let assistanceRef = dbRef.child("Club").child(clubId).child("Assistance").child(date).child(userId)
                         let attendingClubRef = dbRef.child("Users").child(userId).child("attendingClub")
+                        let socialRef = dbRef.child("Users").child(userId).child("social")
+                        
+                        socialRef.observeSingleEvent(of: .value) { snapshot in
+                            print("SOCIAL")
+       
+                            if snapshot.exists(), let userSnapshot = snapshot.children.allObjects.first as? DataSnapshot {
+                                let social = userSnapshot.value as? String ?? "no participando"
+                                print(social)
+                                let userMap: [String: Any] = [
+                                    "uid": userId,
+                                    "gender": gender,
+                                    "entry": true, // 🔹 Se añade "entry: true",
+                                    "social": social
+                                ]
 
-                        let userMap: [String: Any] = [
-                            "uid": userId,
-                            "gender": gender,
-                            "entry": true // 🔹 Se añade "entry: true"
-                        ]
-
-                        assistanceRef.setValue(userMap) { error, _ in
-                            if let error = error {
-                                print("Error al añadir asistencia para \(person.name): \(error.localizedDescription)")
-                            } else {
-                                attendingClubRef.setValue(clubId)
-                                print("Usuario \(person.name) añadido a la asistencia de \(clubId) en la fecha \(date) con entry=true")
+                                assistanceRef.setValue(userMap) { error, _ in
+                                    if let error = error {
+                                        print("Error al añadir asistencia para \(person.name): \(error.localizedDescription)")
+                                    } else {
+                                        attendingClubRef.setValue(clubId)
+                                        print("Usuario \(person.name) añadido a la asistencia de \(clubId) en la fecha \(date) con entry=true")
+                                    }
+                                }
                             }
                         }
+                        
                     } else {
                         print("No se encontró UID para \(person.name) con correo \(email)")
                     }
