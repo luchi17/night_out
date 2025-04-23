@@ -2,7 +2,6 @@ import Combine
 import SwiftUI
 import Firebase
 import CoreLocation
-import CommonCrypto
 
 struct PayDetailModel: Identifiable, Equatable {
     let fiesta: Fiesta
@@ -44,14 +43,8 @@ class PayDetailViewModel: ObservableObject {
     @Published var timerIsRunning = false
     @Published var showingToastExpired = false
     
-    @Published var urlToLoad: URL? = nil
-    @Published var isPaymentProcessing: Bool = false
     
     @Published var users: [UserViewTicketModel] = []
-    
-    func saveUserData(at index: Int, name: String, email: String, confirmEmail: String, birthDate: String) {
-        users[index] = UserViewTicketModel(name: name, email: email, confirmEmail: confirmEmail, birthDate: birthDate)
-    }
     
     init(model: PayDetailModel) {
         self.model = model
@@ -159,7 +152,6 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 Task {
-                    self.startPayment()
                     await presenter.confirmPurchase()
                 }
             }
@@ -273,183 +265,6 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
         }
     }
     
-    // Iniciar el proceso de pago
-        func startPayment() {
-            self.viewModel.isPaymentProcessing = true
-            generatePaymentForm()
-        }
-    
-    let claveComercio = "999008881"
-    // Crear el formulario HTML y calcular la URL para cargar
-        func generatePaymentForm() {
-            
-            let dsSignatureVersion = "HMAC_SHA256_V1"
-            let dsMerchantParameters = createMerchantParameters()
-            let dsSignature = try? createMerchantSignature(claveComercio: self.claveComercio)
-            
-            let html = """
-            <html>
-            <body>
-            <form name="form" action="https://sis-t.redsys.es:25443/sis/realizarPago" method="POST">
-                <input type="hidden" name="Ds_SignatureVersion" value="HMAC_SHA256_V1"/>
-                <input type="hidden" name="Ds_MerchantParameters" value="\(dsMerchantParameters)"/>
-                <input type="hidden" name="Ds_Signature" value="\(dsSignature)"/>
-                <input type="submit" value="Pagar ahora"/>
-            </form>
-            <script>
-                document.forms["form"].submit();
-            </script>
-            </body>
-            </html>
-            """
-            
-            // Crear una URL de datos codificada en base64
-            if let htmlData = html.data(using: .utf8) {
-                let base64HTML = htmlData.base64EncodedString()
-                if let url = URL(string: "data:text/html;base64,\(base64HTML)") {
-                    self.viewModel.urlToLoad = url
-                }
-            }
-        }
-    
-    func createMerchantSignature(claveComercio: String) throws -> String {
-        // Crea los parámetros del comercio (suponiendo que ya tengas la función createMerchantParameters implementada)
-        let merchantParams = createMerchantParameters()
-
-        // Decodificar la clave de comercio desde Base64
-        guard let claveData = Data(base64Encoded: claveComercio) else {
-            throw NSError(domain: "Invalid Base64 encoding", code: 1, userInfo: nil)
-        }
-
-        let secretKc = toHexadecimal(data: claveData)
-
-        // Cifrar la clave con 3DES (suponiendo que tienes implementado encrypt_3DES)
-        let secretKo = try encrypt3DES(key: secretKc, order: getOrder())
-
-        // Calcular el HMAC-SHA256
-        let hash = try mac256(merchantParams: merchantParams, secretKo: secretKo)
-
-        // Codificar el resultado en Base64
-        let base64Hash = hash.base64EncodedString()
-        
-        return base64Hash
-    }
-
-    func createMerchantParameters() -> String {
-        // Implementa la creación de los parámetros del comercio según lo que necesites
-        let parameters = [
-            "DS_MERCHANT_AMOUNT": "145",  // Importe en céntimos (por ejemplo, 10€ = 1000 céntimos)
-                "DS_MERCHANT_CURRENCY": "978", // Código de moneda (978 = EUR)
-            "DS_MERCHANT_MERCHANTCODE": self.claveComercio,
-                "DS_MERCHANT_MERCHANTURL": "http://www.prueba.com/urlNotificacion.php", // URL de notificación
-                "DS_MERCHANT_ORDER": "1446068581", // ID único de la orden
-                "DS_MERCHANT_TERMINAL": "1",
-                "DS_MERCHANT_TRANSACTIONTYPE": "0", // Tu código de comercio
-                "DS_MERCHANT_URLKO": "http://www.prueba.com/urlKO.php", // URL de error
-                "DS_MERCHANT_URLOK": "http://www.prueba.com/urlOK.php"  // URL de exito
-        ]
-        
-        // Convertir el diccionario a JSON
-        if let jsonData = try? JSONSerialization.data(withJSONObject: parameters, options: []) {
-            // Codificar en base64
-            let Ds_MerchantParameters = jsonData.base64EncodedString()
-            
-            // Imprimir el resultado
-            print("JSON en base64: \(Ds_MerchantParameters)")
-            
-            return Ds_MerchantParameters
-            
-        } else {
-            print("Error al convertir el diccionario a JSON")
-            return ""
-        }
-    }
-
-    func toHexadecimal(data: Data) -> String {
-        return data.map { String(format: "%02hhx", $0) }.joined()
-    }
-
-    func getOrder() -> String {
-        // Devuelve el número de orden del pedido
-        return "123456789"
-    }
-
-    // Encrypt 3DES
-    func encrypt3DES(key: String, order: String) throws -> Data {
-        // Implementa la lógica de 3DES usando CommonCrypto
-        let keyData = key.data(using: .utf8)!
-        let orderData = order.data(using: .utf8)!
-
-        var cryptData = Data(count: orderData.count + kCCBlockSize3DES)
-        var numBytesEncrypted: size_t = 0
-
-        // Crea una copia de cryptData para evitar conflictos de acceso
-        var cryptDataCopy = cryptData
-        
-        let status = cryptDataCopy.withUnsafeMutableBytes { cryptBytes in
-            orderData.withUnsafeBytes { dataBytes in
-                keyData.withUnsafeBytes { keyBytes in
-                    CCCrypt(
-                        CCOperation(kCCEncrypt),
-                        CCAlgorithm(kCCAlgorithm3DES),
-                        CCOptions(kCCOptionPKCS7Padding),
-                        keyBytes.baseAddress, kCCKeySize3DES,
-                        nil,
-                        dataBytes.baseAddress, dataBytes.count,
-                        cryptBytes.baseAddress, cryptData.count,
-                        &numBytesEncrypted
-                    )
-                }
-            }
-        }
-
-        if status == kCCSuccess {
-            cryptData.removeSubrange(numBytesEncrypted..<cryptData.count)
-            return cryptData
-        } else {
-            throw NSError(domain: "3DES encryption failed", code: Int(status), userInfo: nil)
-        }
-    }
-
-    // Calcular HMAC-SHA256
-    func mac256(merchantParams: String, secretKo: Data) throws -> Data {
-        let message = merchantParams.data(using: .utf8)!
-        var hmac = Data(count: Int(CC_SHA256_DIGEST_LENGTH))
-
-        hmac.withUnsafeMutableBytes { hmacBytes in
-            message.withUnsafeBytes { messageBytes in
-                secretKo.withUnsafeBytes { keyBytes in
-                    CCHmac(CCHmacAlgorithm(kCCHmacAlgSHA256), keyBytes.baseAddress, secretKo.count,
-                           messageBytes.baseAddress, message.count, hmacBytes.baseAddress)
-                }
-            }
-        }
-
-        return hmac
-    }
-    
-//    func openPaymentGateway(with parameters: [String: String]) {
-//            //PROD: https://sis.redsys.es/sis/realizarPago
-//            let paymentUrl = "https://sis-t.redsys.es:25443/sis/realizarPago"
-//        
-//            var components = URLComponents(string: paymentUrl)!
-//            components.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
-//
-//            // Creamos una vista de pago (WKWebView)
-//            let webView = WKWebView()
-//            guard let url = components.url else { return }
-//            
-//            let request = URLRequest(url: url)
-//            webView.load(request)
-//            
-//            // Presentar la vista del web view (puedes presentarla en tu UI de la app)
-//            // Aquí depende de cómo quieras manejar la UI, podrías presentar el web view en una nueva vista.
-//            let viewController = UIViewController()
-//            viewController.view = webView
-//            navigationController?.pushViewController(viewController, animated: true)
-//    }
-
-    
     @MainActor
     func confirmPurchase() async {
         
@@ -518,7 +333,7 @@ final class PayDetailPresenterImpl: PayDetailPresenter {
                     break
                 }
                 
-                personDataList.append(PersonTicketData(name: user.name, email: user.email, birthDate: user.birthDate))
+                personDataList.append(PersonTicketData(name: user.name, email: user.email, birthDate: user.birthDate, social: user.social))
                 
             }
             
@@ -591,12 +406,14 @@ struct UserViewTicketModel: Equatable {
     var email: String
     var confirmEmail: String
     var birthDate: String
+    var social: String
     
-    init(name: String, email: String, confirmEmail: String, birthDate: String) {
+    init(name: String, email: String, confirmEmail: String, birthDate: String, social: String) {
         self.name = name
         self.email = email
         self.confirmEmail = confirmEmail
         self.birthDate = birthDate
+        self.social = social
     }
     
     func hash(into hasher: inout Hasher) {
@@ -608,7 +425,7 @@ struct UserViewTicketModel: Equatable {
     }
     
     static func empty() -> UserViewTicketModel {
-        return UserViewTicketModel(name: "", email: "", confirmEmail: "", birthDate: "")
+        return UserViewTicketModel(name: "", email: "", confirmEmail: "", birthDate: "", social: "")
     }
 }
 
@@ -616,12 +433,14 @@ struct PersonTicketData: Hashable {
     let name: String
     let email: String
     let birthDate: String
+    let social: String
     let id = UUID()
     
-    init(name: String, email: String, birthDate: String) {
+    init(name: String, email: String, birthDate: String, social: String) {
         self.name = name
         self.email = email
         self.birthDate = birthDate
+        self.social = social
     }
     
     func hash(into hasher: inout Hasher) {

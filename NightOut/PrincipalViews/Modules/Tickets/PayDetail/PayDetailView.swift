@@ -1,6 +1,5 @@
 import SwiftUI
 import Combine
-import WebKit
 
 struct PayDetailView: View {
     
@@ -26,69 +25,53 @@ struct PayDetailView: View {
     }
     
     var body: some View {
-        VStack {
+        ZStack(alignment: .bottom) {
             
-            if let url = viewModel.urlToLoad {
-                PaymentWebView(
-                    urlRequest: URLRequest(url: url),
-                    isPaymentProcessing: $viewModel.isPaymentProcessing
-                )
-                    .edgesIgnoringSafeArea(.all)
-            } else if viewModel.isPaymentProcessing {
-                ProgressView("Cargando...")
-                     .progressViewStyle(CircularProgressViewStyle())
-                     .padding()
-            }
-             else {
-                ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                ScrollView(.vertical) {
                     
-                    VStack(spacing: 0) {
-                        ScrollView(.vertical) {
-                            
-                            ScrollViewReader { proxy in
-                                
-                                VStack(spacing: 0) {
-                                    
-                                    topView
-                                        .padding(.top, 20)
-                                    
-                                    Text(viewModel.countdownText)
-                                        .font(.headline)
-                                        .foregroundColor(.white)
-                                        .padding(.vertical, 15)
-                                    
-                                    secondView
-                                    
-                                    ForEach(0..<viewModel.users.count, id: \.self) { index in
-                                        
-                                        PayUserCardView(
-                                            user: $viewModel.users[index],
-                                            showDatePicker: $showDatePicker,
-                                            selectedUserIndex: $selectedUserIndex,
-                                            index: index
-                                        )
-                                        .padding(.bottom, 15)
-                                    }
-                                    .padding(.top, 15)
-                                    
-                                    Spacer()
-                                        .frame(minHeight: 200)
-                                }
-                                
-                            }
-                        }
-                        .ignoresSafeArea(.keyboard, edges: .bottom)
-                        .scrollIndicators(.hidden)
-                        .scrollDismissesKeyboard(.interactively)
+                    ScrollViewReader { proxy in
                         
-                        Spacer()
+                        VStack(spacing: 0) {
+                            
+                            topView
+                                .padding(.top, 20)
+                            
+                            Text(viewModel.countdownText)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.vertical, 15)
+                            
+                            secondView
+                            
+                            ForEach(0..<viewModel.users.count, id: \.self) { index in
+                                
+                                PayUserCardView(
+                                    user: $viewModel.users[index],
+                                    showDatePicker: $showDatePicker,
+                                    selectedUserIndex: $selectedUserIndex,
+                                    index: index
+                                )
+                                .padding(.bottom, 15)
+                            }
+                            .padding(.top, 15)
+                            
+                            Spacer()
+                                .frame(minHeight: 200)
+                        }
+                        
                     }
-                    .padding(.horizontal, 20)
-                    
-                    payButton
-                        .ignoresSafeArea(.keyboard)
                 }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .scrollIndicators(.hidden)
+                .scrollDismissesKeyboard(.interactively)
+                
+                Spacer()
             }
+            .padding(.horizontal, 20)
+            
+            payButton
+                .ignoresSafeArea(.keyboard)
         }
         .background(
             Color.blackColor
@@ -128,9 +111,7 @@ struct PayDetailView: View {
             ),
             isIdle: viewModel.loading
         )
-        .onAppear {
-            viewDidLoadPublisher.send()
-        }
+        .onAppear(perform: viewDidLoadPublisher.send)
     }
     
     var payButton : some View {
@@ -192,7 +173,7 @@ struct PayDetailView: View {
         .background(Color.grayColor)
         .cornerRadius(20)
     }
-    
+
     var secondView: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
@@ -283,50 +264,5 @@ private extension PayDetailView {
         // Convertir la fecha a la cadena formateada
         return dateFormatter.string(from: date)
     }
-}
-
-
-struct PaymentWebView: UIViewRepresentable {
-    var urlRequest: URLRequest
-    @Binding var isPaymentProcessing: Bool
     
-    func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView()
-        webView.navigationDelegate = context.coordinator
-        return webView
-    }
-    
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        uiView.load(urlRequest)
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(self)
-    }
-
-    // Función para manejar la respuesta
-    func handleRedsysResponse(_ url: String) {
-        // Aquí procesas la URL de confirmación de Redsys
-        self.isPaymentProcessing = false
-        print("Respuesta de Redsys: \(url)")
-    }
-    
-    
-    class Coordinator: NSObject, WKNavigationDelegate {
-        var parent: PaymentWebView
-        
-        init(_ parent: PaymentWebView) {
-            self.parent = parent
-        }
-        
-        // Aquí puedes manejar la respuesta de Redsys
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            if let url = webView.url?.absoluteString {
-                if url.contains("respuesta_confirmacion") {  // Verifica la URL de respuesta
-                    // Procesa la respuesta de Redsys
-                    parent.handleRedsysResponse(url)
-                }
-            }
-        }
-    }
 }
