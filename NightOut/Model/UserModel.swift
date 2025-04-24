@@ -1,7 +1,7 @@
 import Foundation
 import Firebase
 
-struct UserModel: Codable {
+public struct UserModel: Codable {
     var uid: String = ""
     var fullname: String = ""
     var username: String = ""

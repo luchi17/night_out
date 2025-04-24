@@ -5,7 +5,12 @@ import FirebaseAuth
 import FirebaseDatabase
 import SwiftUI
 
-final class FirebaseServiceImpl: ObservableObject {
+public protocol FirebaseServiceProtocol {
+    func getImUser() -> Bool
+    func getCurrentUserUid() -> String?
+}
+
+final class FirebaseServiceImpl: ObservableObject, FirebaseServiceProtocol {
     static let shared = FirebaseServiceImpl()
     
     var currentUser: User? {

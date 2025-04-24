@@ -1,6 +1,6 @@
 import Foundation
 
-struct FollowModel: Codable {
+public struct FollowModel: Codable {
     let followers: [String: Bool]?
     let following: [String: Bool]?
     let pending: [String: Bool]?

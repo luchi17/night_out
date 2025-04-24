@@ -1,7 +1,7 @@
 import Combine
 import FirebaseAuth
 
-protocol FollowUseCase {
+public protocol FollowUseCase {
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
     func rejectFollowRequest(requesterUid: String)
     func observeFollow(id: String) -> AnyPublisher<FollowModel?, Never>

@@ -1,7 +1,7 @@
 import Combine
 import Foundation
 
-protocol UserDataUseCase {
+public protocol UserDataUseCase {
     func getUserInfo(uid: String) -> AnyPublisher<UserModel?, Never>
     func findUserByEmail(_ email: String) -> AnyPublisher<UserModel?, Never>
 }

@@ -22,6 +22,8 @@ protocol MyUserProfilePresenter {
 
 final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
     
+    private let firebaseService: FirebaseServiceProtocol
+    
     struct UseCases {
         let followUseCase: FollowUseCase
         let userDataUseCase: UserDataUseCase
@@ -45,10 +47,12 @@ final class MyUserProfilePresenterImpl: MyUserProfilePresenter {
     
     init(
         useCases: UseCases,
-        actions: Actions
+        actions: Actions,
+        firebaseService: FirebaseServiceProtocol = FirebaseServiceImpl.shared
     ) {
         self.actions = actions
         self.useCases = useCases
+        self.firebaseService = firebaseService
 
         viewModel = MyUserProfileViewModel()
     }
