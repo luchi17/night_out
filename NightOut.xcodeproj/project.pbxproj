@@ -51,6 +51,7 @@
 		18AE86302CA6AC29007448F3 /* Exceptions for "Tests" folder in "NightOut" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				NightOutTests/NighOutFeedViewModelTests.swift,
 				NightOutTests/NighOutMyUserProfileTests.swift,
 				NightOutTests/NightOutTests.swift,
 				NightOutUITests/NightOutUITests.swift,
@@ -61,6 +62,7 @@
 		18AE86312CA6AC29007448F3 /* Exceptions for "Tests" folder in "NightOutTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				NightOutTests/NighOutFeedViewModelTests.swift,
 				NightOutTests/NighOutMyUserProfileTests.swift,
 				NightOutTests/NightOutTests.swift,
 			);
