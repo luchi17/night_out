@@ -64,9 +64,18 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
         viewModel.$searchText
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
             .removeDuplicates()
+            .receive(on: DispatchQueue.main)
             .withUnretained(self)
-            .sink { presenter, query in
-                presenter.searchUsers(query: query.lowercased())
+            .flatMap { presenter, query -> AnyPublisher<[CreateLeagueUser], Never> in
+                guard !query.isEmpty else {
+                    return Just([]).eraseToAnyPublisher()
+                }
+                return presenter.searchUsers(query: query.lowercased())
+            }
+            .receive(on: DispatchQueue.main)
+            .withUnretained(self)
+            .sink { presenter, users in
+                presenter.viewModel.searchResults = users
             }
             .store(in: &cancellables)
         
@@ -126,28 +135,24 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
         }
     }
     
-    private func searchUsers(query: String) {
-        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
-        
-        guard !query.isEmpty else {
-            viewModel.searchResults.removeAll()
-            return
+    private func searchUsers(query: String)  -> AnyPublisher<[CreateLeagueUser], Never> {
+        guard let currentUserId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return Just([]).eraseToAnyPublisher()
         }
         
-        viewModel.searchResults.removeAll()
-        
+        guard !query.isEmpty else {
+            return Just([]).eraseToAnyPublisher()
+        }
+
         usersQuery?.removeAllObservers()
         
-        usersQuery = FirebaseServiceImpl.shared.getUsers()
+        let usersQuery = FirebaseServiceImpl.shared.getUsers()
                     .queryOrdered(byChild: "username")
                     .queryStarting(atValue: query)
                     .queryEnding(atValue: query + "\u{f8ff}")
         
-        usersQuery?
-            .observeSingleEvent(of: .value) { [weak self] snapshot in
-                guard let self = self else { return }
-                self.viewModel.searchResults =
-                snapshot.children.compactMap { $0 as? DataSnapshot }
+        return Future<[CreateLeagueUser], Never> { promise in
+            usersQuery.observeSingleEvent(of: .value) { snapshot in
+                let users = snapshot.children.compactMap { $0 as? DataSnapshot }
                     .compactMap { try? $0.data(as: UserModel.self) }
                     .map({ userModel in
                         return CreateLeagueUser(
@@ -160,7 +165,9 @@ final class CreateLeaguePresenterImpl: CreateLeaguePresenter {
                         user.uid != currentUserId &&
                         !self.viewModel.selectedFriends.contains(where: { $0.uid == user.uid })
                     }
+                promise(.success(users))
             }
+        }.eraseToAnyPublisher()
     }
     
     private func addFriend(_ user: CreateLeagueUser) {
