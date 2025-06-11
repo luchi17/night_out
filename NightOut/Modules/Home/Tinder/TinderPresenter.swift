@@ -178,22 +178,22 @@ final class TinderPresenterImpl: TinderPresenter {
                                 presenter.viewModel.showNoUsersForClub = true // ❌ Está solo en el club
                             } else {
                                 
-                                 #warning("TODO: REMOVE these 2 lines, just for testing, discomment the others")
-                                presenter.viewModel.loadingUsers = true
-                                presenter.loadUsersSubject.send()
-                                
-                                
-//                                // 🔹 Si hay más usuarios, validamos el horario
-//                                let calendar = Calendar.current
-//                                let currentHour = calendar.component(.hour, from: Date())
+                                 #warning("TODO: these 2 lines for testing, comment if else below")
+//                                presenter.viewModel.loadingUsers = true
+//                                presenter.loadUsersSubject.send()
 //                                
-//                                if (10...23).contains(currentHour) || (0...2).contains(currentHour) {
-//                                    // ✅ Dentro del horario permitido
-//                                    presenter.viewModel.loadingUsers = true
-//                                     presenter.loadUsersSubject.send()
-//                                } else {
-//                                    presenter.showOutsideScheduleDialog() // ❌ Fuera de horario
-//                                }
+                                
+                                // 🔹 Si hay más usuarios, validamos el horario
+                                let calendar = Calendar.current
+                                let currentHour = calendar.component(.hour, from: Date())
+                                
+                                if (10...23).contains(currentHour) || (0...2).contains(currentHour) {
+                                    // ✅ Dentro del horario permitido
+                                    presenter.viewModel.loadingUsers = true
+                                     presenter.loadUsersSubject.send()
+                                } else {
+                                    presenter.showOutsideScheduleDialog() // ❌ Fuera de horario
+                                }
                             }
                         }
                 } else {

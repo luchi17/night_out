@@ -218,7 +218,6 @@ struct ShareVideoView: View {
     func abrirInstagram() {
         let username = "nocheeo"
         let appURL = URL(string: "instagram://user?username=\(username)")!
-//        let webURL = URL(string: "https://www.instagram.com/\(username)/")!
         let webURL = URL(string: "https://instagram.com/\(username.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")")!
 
         
