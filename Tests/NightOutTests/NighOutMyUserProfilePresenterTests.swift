@@ -44,15 +44,6 @@ final class MockUserDataUseCase: UserDataUseCase {
     }
 }
 
-final class MockFirebaseService: FirebaseServiceProtocol {
-    var imUser: Bool = true
-    var currentUserUid: String? = "test_uid"
-
-    func getImUser() -> Bool { imUser }
-    func getCurrentUserUid() -> String? { currentUserUid }
-}
-
-
 enum MockUserDefaults {
     static var userModel: UserModel? = nil
     static var companyUserModel: UserModel? = nil
