@@ -109,6 +109,7 @@ final class LeaguePresenterImpl: LeaguePresenter {
     
     var viewModel: LeagueViewModel
     
+    private let firebaseService: FirebaseServiceProtocol
     private let actions: Actions
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
@@ -119,10 +120,12 @@ final class LeaguePresenterImpl: LeaguePresenter {
     
     init(
         useCases: UseCases,
-        actions: Actions
+        actions: Actions,
+        firebaseService: FirebaseServiceProtocol = FirebaseServiceImpl.shared
     ) {
         self.actions = actions
         self.useCases = useCases
+        self.firebaseService = firebaseService
         
         viewModel = LeagueViewModel()
     }
@@ -211,7 +214,7 @@ final class LeaguePresenterImpl: LeaguePresenter {
     }
     
     private func deleteLeague(_ league: League) {
-        guard let userId = FirebaseServiceImpl.shared.getCurrentUserUid() else { return }
+        guard let userId = firebaseService.getCurrentUserUid() else { return }
         
         userRef.child(userId).child("misLigas").child(league.leagueId).removeValue()
         leaguesRef.child(league.leagueId).removeValue()
