@@ -109,7 +109,7 @@ extension HubPresenterImpl {
                 }
         }
     
-    private func startImageSwitcher() {
+    public func startImageSwitcher() {
         self.viewModel.timer = Timer.scheduledTimer(withTimeInterval: self.viewModel.imageSwitchInterval, repeats: true) { [weak self] _ in
             
             guard let self = self else { return }
