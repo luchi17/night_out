@@ -52,7 +52,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				NightOutTests/NighOutFeedViewModelTests.swift,
-				NightOutTests/NighOutMyUserProfileTests.swift,
+				NightOutTests/NighOutMyUserProfilePresenterTests.swift,
+				NightOutTests/NightOutLeaguesPresenterTests.swift,
 				NightOutTests/NightOutTests.swift,
 				NightOutUITests/NightOutUITests.swift,
 				NightOutUITests/NightOutUITestsLaunchTests.swift,
@@ -63,7 +64,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				NightOutTests/NighOutFeedViewModelTests.swift,
-				NightOutTests/NighOutMyUserProfileTests.swift,
+				NightOutTests/NighOutMyUserProfilePresenterTests.swift,
+				NightOutTests/NightOutLeaguesPresenterTests.swift,
 				NightOutTests/NightOutTests.swift,
 			);
 			target = 18AE86092CA6A903007448F3 /* NightOutTests */;

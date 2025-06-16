@@ -1,7 +1,7 @@
 import Combine
 import Foundation
 
-protocol CompanyDataUseCase {
+public protocol CompanyDataUseCase {
     func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never>
 }
 

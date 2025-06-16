@@ -1,10 +1,10 @@
 import Foundation
 import AnyCodable
 
-struct CompanyUsersModel: Codable {
+public struct CompanyUsersModel: Codable {
     let users: [String: CompanyModel]  // Un diccionario de usuarios donde la clave es el UID
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKey.self)
         var usersDict = [String: CompanyModel]()
         
@@ -15,7 +15,7 @@ struct CompanyUsersModel: Codable {
         self.users = usersDict
     }
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: DynamicCodingKey.self)
 
             for (key, user) in users {
@@ -28,7 +28,7 @@ struct CompanyUsersModel: Codable {
 }
 
 //Not specifying type of data with AnyCodable as I won´t decode the content of those attributes. Accessing them directly as data[""]
-struct CompanyModel: Codable {
+public struct CompanyModel: Codable {
     var email: String? = ""
     var endTime: String? = ""
     var selectedTag: String? = ""
