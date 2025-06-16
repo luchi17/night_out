@@ -101,7 +101,13 @@ final class SearchPresenterImpl: SearchPresenter {
         
     }
     
-    private func searchUsers(query: String) -> AnyPublisher<[ProfileModel], Never> {
+    var searchUsersClosure: ((String) -> AnyPublisher<[ProfileModel], Never>)?
+    
+    public func searchUsers(query: String) -> AnyPublisher<[ProfileModel], Never> {
+        if let closure = searchUsersClosure {
+            return closure(query)
+        }
+        
         guard !query.isEmpty else {
             return Just([]).eraseToAnyPublisher()
         }
