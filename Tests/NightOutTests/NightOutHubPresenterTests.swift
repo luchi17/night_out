@@ -59,8 +59,6 @@ final class HubPresenterImplTests: XCTestCase {
             self?.openUrlCalledWith = url
         })
 
-        // Aquí inyectarías mock para UseCases si tuvieses
-
         presenter = HubPresenterImpl(useCases: HubPresenterImpl.UseCases(), actions: actions)
     }
 
@@ -80,7 +78,7 @@ final class HubPresenterImplTests: XCTestCase {
     }
 
     func testStopImageSwitcherStopsTimer() {
-        // Iniciar timer para test
+    
         presenter.viewModel.timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in }
 
         XCTAssertNotNil(presenter.viewModel.timer)
@@ -100,23 +98,13 @@ final class HubPresenterImplTests: XCTestCase {
     }
 
     func testLoadAdvertisementContentUpdatesImageListAndStartsTimer() {
-        // Como loadAdvertisementContent es privado y usa Firebase real,
-        // puedes exponer una función testable o simular el llamado.
-        // Aquí simplemente llamaremos a la función directamente (si fuera interna testable).
-
-        // Para el test, mockeamos FirebaseServiceImpl.shared.getAdvertisement()
-        // y controlamos la respuesta para enviar un snapshot simulado.
-
-        // Esto requiere modificar el código para poder inyectar el servicio Firebase mockeado,
-        // pero aquí te muestro el concepto:
 
         let expectation = self.expectation(description: "Image list is updated")
 
-        // Simulamos la lista de URLs
+      
         let urls = ["url1", "url2", "url3"]
         presenter.viewModel.imageList = []
 
-        // Aquí forzamos el cambio de imageList simulando la respuesta Firebase
         DispatchQueue.main.async {
             self.presenter.viewModel.imageList = urls
             self.presenter.viewModel.currentIndex = Int.random(in: 0..<urls.count)
