@@ -33,7 +33,7 @@ final class MockFollowUseCase: FollowUseCase {
     }
 }
 
-final class MockUserDataUseCase: UserDataUseCase {
+private final class MockUserDataUseCase: UserDataUseCase {
     func findUserByEmail(_ email: String) -> AnyPublisher<UserModel?, Never> {
         return Just(userModelToReturn).eraseToAnyPublisher()
     }
