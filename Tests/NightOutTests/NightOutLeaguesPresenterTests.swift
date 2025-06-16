@@ -29,6 +29,15 @@ final class MockCompanyDataUseCase: CompanyDataUseCase {
     var companyModel: CompanyModel?
 }
 
+final class MockFirebaseService: FirebaseServiceProtocol {
+    func getImUser() -> Bool {
+        return true
+    }
+    
+    func getCurrentUserUid() -> String? {
+        return "test_user_id"
+    }
+}
 
 final class LeaguePresenterTests: XCTestCase {
     private var sut: LeaguePresenterImpl!
@@ -50,7 +59,11 @@ final class LeaguePresenterTests: XCTestCase {
         )
 
         
-        sut = LeaguePresenterImpl(useCases: useCases, actions: actions)
+        sut = LeaguePresenterImpl(
+            useCases: useCases,
+            actions: actions,
+            firebaseService: MockFirebaseService()
+        )
     }
     
     func test_viewDidLoad_showsNoLeaguesDialog_whenUserHasNoLeagues() {
