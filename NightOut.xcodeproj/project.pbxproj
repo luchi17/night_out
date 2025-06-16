@@ -60,6 +60,7 @@
 				NightOutTests/NightOutLeaguesPresenterTests.swift,
 				NightOutTests/NightOutNotificationsPresenterTests.swift,
 				NightOutTests/NightOutPayDetailPresenterTests.swift,
+				NightOutTests/NightOutSearchPresenterTests.swift,
 				NightOutTests/NightOutTicketsPresenterTests.swift,
 				NightOutTests/NightOutTinderPresenterTests.swift,
 				NightOutUITests/NightOutUITests.swift,
@@ -79,6 +80,7 @@
 				NightOutTests/NightOutLeaguesPresenterTests.swift,
 				NightOutTests/NightOutNotificationsPresenterTests.swift,
 				NightOutTests/NightOutPayDetailPresenterTests.swift,
+				NightOutTests/NightOutSearchPresenterTests.swift,
 				NightOutTests/NightOutTicketsPresenterTests.swift,
 				NightOutTests/NightOutTinderPresenterTests.swift,
 			);
@@ -505,8 +507,8 @@
 				CODE_SIGN_ENTITLEMENTS = NightOut/NightOut.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"NightOut/Preview Content\"";
-				DEVELOPMENT_TEAM = 4QM99W37M3;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = Y8JMHQWXVL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NightOut/Info.plist;
@@ -549,8 +551,8 @@
 				CODE_SIGN_ENTITLEMENTS = NightOut/NightOut.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"NightOut/Preview Content\"";
-				DEVELOPMENT_TEAM = 4QM99W37M3;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = Y8JMHQWXVL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NightOut/Info.plist;
