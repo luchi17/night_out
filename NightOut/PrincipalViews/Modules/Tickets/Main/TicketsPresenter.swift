@@ -2,8 +2,8 @@ import Combine
 import SwiftUI
 import Firebase
 
-struct Fiesta: Identifiable {
-    let id = UUID()
+public struct Fiesta: Identifiable {
+    public let id = UUID()
     let name: String
     let fecha: String
     let imageUrl: String

@@ -3,8 +3,8 @@ import SwiftUI
 import Firebase
 import CoreLocation
 
-struct Entrada: Identifiable, Equatable {
-    let id = UUID()
+public struct Entrada: Identifiable, Equatable {
+    public let id = UUID()
     let type: String
     let price: Double
     let description: String
@@ -21,7 +21,7 @@ struct Entrada: Identifiable, Equatable {
         hasher.combine(id)
     }
     
-    static func == (lhs: Entrada, rhs: Entrada) -> Bool {
+    public static func == (lhs: Entrada, rhs: Entrada) -> Bool {
         return lhs.id == rhs.id
     }
 }
