@@ -142,7 +142,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
         self.viewModel.filteredResults.removeAll()
     }
     
-    private func filterList() {
+    public func filterList() {
         let query = viewModel.searchText.lowercased()
         
         let filteredResults = viewModel.companies.map { data -> (CompanyModel, [Fiesta]) in

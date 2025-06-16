@@ -53,12 +53,14 @@
 			membershipExceptions = (
 				NightOutTests/NighOutFeedViewModelTests.swift,
 				NightOutTests/NighOutMyUserProfilePresenterTests.swift,
+				NightOutTests/NighOutTicketsViewModelTests.swift,
 				NightOutTests/NightOutChatPresenterTests.swift,
 				NightOutTests/NightOutHomePresenterTests.swift,
 				NightOutTests/NightOutHubPresenterTests.swift,
 				NightOutTests/NightOutLeaguesPresenterTests.swift,
 				NightOutTests/NightOutNotificationsPresenterTests.swift,
 				NightOutTests/NightOutPayDetailPresenterTests.swift,
+				NightOutTests/NightOutTicketsPresenterTests.swift,
 				NightOutTests/NightOutTinderPresenterTests.swift,
 				NightOutUITests/NightOutUITests.swift,
 				NightOutUITests/NightOutUITestsLaunchTests.swift,
@@ -70,12 +72,14 @@
 			membershipExceptions = (
 				NightOutTests/NighOutFeedViewModelTests.swift,
 				NightOutTests/NighOutMyUserProfilePresenterTests.swift,
+				NightOutTests/NighOutTicketsViewModelTests.swift,
 				NightOutTests/NightOutChatPresenterTests.swift,
 				NightOutTests/NightOutHomePresenterTests.swift,
 				NightOutTests/NightOutHubPresenterTests.swift,
 				NightOutTests/NightOutLeaguesPresenterTests.swift,
 				NightOutTests/NightOutNotificationsPresenterTests.swift,
 				NightOutTests/NightOutPayDetailPresenterTests.swift,
+				NightOutTests/NightOutTicketsPresenterTests.swift,
 				NightOutTests/NightOutTinderPresenterTests.swift,
 			);
 			target = 18AE86092CA6A903007448F3 /* NightOutTests */;
