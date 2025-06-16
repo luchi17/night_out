@@ -1,7 +1,7 @@
 import SwiftUI
 import Firebase
 
-struct PostModel: Hashable {
+public struct PostModel: Hashable {
     var profileImageUrl: String?
     var postImage: UIImage
     var description: String?
@@ -13,7 +13,7 @@ struct PostModel: Hashable {
     var publisherId: String
     var timestamp: Int64
     
-    init(profileImageUrl: String?, postImage: UIImage, description: String?, location: String? , username: String?, fullName: String?, uid: String, isFromUser: Bool, publisherId: String, timestamp: Int64) {
+    public init(profileImageUrl: String?, postImage: UIImage, description: String?, location: String? , username: String?, fullName: String?, uid: String, isFromUser: Bool, publisherId: String, timestamp: Int64) {
         self.profileImageUrl = profileImageUrl
         self.postImage = postImage
         self.description = description

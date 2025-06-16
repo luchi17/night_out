@@ -1,7 +1,7 @@
 import Combine
 import FirebaseAuth
 
-protocol NotificationsUseCase {
+public protocol NotificationsUseCase {
     func observeNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func fetchNotifications(publisherId: String) -> AnyPublisher<[String: NotificationModel], Never>
     func addNotification(model: NotificationModel, publisherId: String) -> AnyPublisher<Bool, Never>

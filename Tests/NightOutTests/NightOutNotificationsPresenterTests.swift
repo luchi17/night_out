@@ -67,11 +67,6 @@ private final class MockFollowUseCase: FollowUseCase {
 
 final class MockPostsUseCase: PostsUseCase {
     
-    func fetchPosts() -> AnyPublisher<[String : PostModel], Never> {
-        let post = PostModel(postID: "post1", postImage: "imageURL")
-        return Just(["post1": post]).eraseToAnyPublisher()
-    }
-    
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never> {
         return Just([:]).eraseToAnyPublisher()
     }
@@ -97,7 +92,7 @@ final class NotificationsPresenterTests: XCTestCase {
     fileprivate var followUseCase: MockFollowUseCase!
     var postsUseCase: MockPostsUseCase!
     var cancellables: Set<AnyCancellable>!
-    
+
     override func setUp() {
         super.setUp()
         notificationsUseCase = MockNotificationsUseCase()
@@ -105,14 +100,14 @@ final class NotificationsPresenterTests: XCTestCase {
         followUseCase = MockFollowUseCase()
         postsUseCase = MockPostsUseCase()
         cancellables = []
-        
+
         let useCases = NotificationsPresenterImpl.UseCases(
             notificationsUseCase: notificationsUseCase,
             userDataUseCase: userDataUseCase,
             followUseCase: followUseCase,
             postsUseCase: postsUseCase
         )
-        
+
         let actions = NotificationsPresenterImpl.Actions(
             goToProfile: { _ in },
             goToPrivateProfile: { _ in },
@@ -120,24 +115,28 @@ final class NotificationsPresenterTests: XCTestCase {
             goBack: { }
         )
         
-        presenter = NotificationsPresenterImpl(useCases: useCases, actions: actions, firebaseService: MockFirebaseService())
+        // MockFirebaseService que devuelva UID fijo para el test
+        presenter = NotificationsPresenterImpl(
+            useCases: useCases,
+            actions: actions,
+            firebaseService: MockFrebaseService(uid: "user123")
+        )
     }
-    
+
     func testLoadNotificationsOnViewDidLoad() {
         // Preparar input
         let viewDidLoadSubject = PassthroughSubject<Void, Never>()
-        
+
+        // Notificación mock
         let notificationModel = NotificationModel(
-                    ispost: false,
-                    text: GlobalStrings.shared.followUserText,
-                    userid: "user1",
-                    postid: "post1",
-                    timestamp: 1234567890
-                )
-        
+            ispost: false,
+            postid: "post1",
+            text: GlobalStrings.shared.followUserText,
+            userid: "user1", // coincide con uid del MockFirebaseService
+            timestamp: Int64(Date().timeIntervalSince1970)
+        )
         notificationsUseCase.notificationsToReturn = ["notif1": notificationModel]
-        
-        let viewDidLoadSubject = PassthroughSubject<Void, Never>()
+
         let input = NotificationsPresenterImpl.ViewInputs(
             viewDidLoad: viewDidLoadSubject.eraseToAnyPublisher(),
             accept: Empty().eraseToAnyPublisher(),
@@ -146,36 +145,42 @@ final class NotificationsPresenterTests: XCTestCase {
             goToProfile: Empty().eraseToAnyPublisher(),
             goBack: Empty().eraseToAnyPublisher()
         )
-        
+
         presenter.transform(input: input)
-        
+
         let expectation = expectation(description: "notifications loaded")
-        
+
         presenter.viewModel.$notifications
             .dropFirst()
             .sink { notifications in
                 if notifications.count == 1,
-                                   notifications.first?.userName == "user1" {
-                                    expect.fulfill()
-                                }
+                   notifications.first?.userName == "user1" {
+                    expectation.fulfill()
+                }
             }
             .store(in: &cancellables)
-        
-        // Enviar notificación mockeada
-        let notificationModel = NotificationModel(
-            ispost: false,
-            postid: "",
-            text: GlobalStrings.shared.followUserText,
-            userid: "user123",
-            timestamp: Int64(Date().timeIntervalSince1970)
-        )
-        
+
         // Simular viewDidLoad
         viewDidLoadSubject.send(())
-        
+
         waitForExpectations(timeout: 1)
     }
 }
 
 
+// MockFirebaseService simple para el test
+private final class MockFrebaseService: FirebaseServiceProtocol {
+    func getImUser() -> Bool {
+        return true
+    }
+    
+    private let uid: String?
 
+    init(uid: String?) {
+        self.uid = uid
+    }
+
+    func getCurrentUserUid() -> String? {
+        return uid
+    }
+}

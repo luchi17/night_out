@@ -48,14 +48,17 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
     private let actions: Actions
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
+    private let firebaseService: FirebaseServiceProtocol
     
     
     init(
         useCases: UseCases,
-        actions: Actions
+        actions: Actions,
+        firebaseService: FirebaseServiceProtocol = FirebaseServiceImpl()
     ) {
         self.actions = actions
         self.useCases = useCases
+        self.firebaseService = firebaseService
         
         viewModel = NotificationsViewModel()
     }
@@ -66,7 +69,7 @@ final class NotificationsPresenterImpl: NotificationsPresenter {
             .viewDidLoad
             .withUnretained(self)
             .flatMap({ presenter, _  -> AnyPublisher<[String: NotificationModel], Never> in
-                guard let uid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                guard let uid = self.firebaseService.getCurrentUserUid() else {
                     return Just([:]).eraseToAnyPublisher()
                 }
                 return presenter.useCases.notificationsUseCase.observeNotifications(publisherId: uid)

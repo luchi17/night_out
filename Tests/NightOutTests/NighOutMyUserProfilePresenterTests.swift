@@ -3,7 +3,7 @@ import Combine
 
 @testable import NightOut
 
-final class MockFollowUseCase: FollowUseCase {
+private final class MockFollowUseCase: FollowUseCase {
     
     func rejectFollowRequest(requesterUid: String) {
     }

@@ -1,9 +1,9 @@
 import Foundation
 
 // Modelo para cada post
-struct PostUserModel: Codable {
+public struct PostUserModel: Codable {
     
-    init(description: String? = nil, postID: String, postImage: String? = nil, publisherId: String, location: String? = nil, isFromUser: Bool? = nil, timestamp: Int64? = nil) {
+    public init(description: String? = nil, postID: String, postImage: String? = nil, publisherId: String, location: String? = nil, isFromUser: Bool? = nil, timestamp: Int64? = nil) {
         self.description = description
         self.postID = postID
         self.postImage = postImage
@@ -34,7 +34,7 @@ struct PostUserModel: Codable {
     }
     
     // Decodificación personalizada para manejar la ausencia de timestamp
-        init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
             description = try container.decodeIfPresent(String.self, forKey: .description)

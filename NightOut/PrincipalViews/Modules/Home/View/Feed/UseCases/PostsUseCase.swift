@@ -1,7 +1,7 @@
 import Combine
 import FirebaseAuth
 
-protocol PostsUseCase {
+public protocol PostsUseCase {
     func fetchPosts() -> AnyPublisher<[String: PostUserModel], Never>
     func observePosts() -> AnyPublisher<[String: PostUserModel]?, Never>
     func fetchFollow(id: String) -> AnyPublisher<FollowModel?, Never>
