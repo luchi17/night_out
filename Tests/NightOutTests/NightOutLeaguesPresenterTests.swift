@@ -21,7 +21,7 @@ final class MockLeaguesUserDataUseCase: UserDataUseCase {
     }
 }
 
-final class MockCompanyDataUseCase: CompanyDataUseCase {
+private final class MockCompanyDataUseCase: CompanyDataUseCase {
     
     func getCompanyInfo(uid: String) -> AnyPublisher<CompanyModel?, Never> {
         Just(companyModel).eraseToAnyPublisher()

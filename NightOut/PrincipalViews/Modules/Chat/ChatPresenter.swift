@@ -48,17 +48,20 @@ final class ChatPresenterImpl: ChatPresenter {
     private let actions: Actions
     private let useCases: UseCases
     private var cancellables = Set<AnyCancellable>()
+    private let firebaseService: FirebaseServiceProtocol
     
     let chat: Chat
     
     init(
         useCases: UseCases,
         actions: Actions,
-        chat: Chat
+        chat: Chat,
+        firebaseService: FirebaseServiceProtocol = FirebaseServiceImpl()
     ) {
         self.actions = actions
         self.useCases = useCases
         self.chat = chat
+        self.firebaseService = firebaseService
         
         viewModel = ChatViewModel(otherUsername: chat.username, myUid: FirebaseServiceImpl.shared.getCurrentUserUid() ?? "")
     }
@@ -71,7 +74,7 @@ final class ChatPresenterImpl: ChatPresenter {
                 self?.viewModel.loading = true
             })
             .flatMap({ presenter, _ -> AnyPublisher<[MessageModel], Never> in
-                guard let myUid = FirebaseServiceImpl.shared.getCurrentUserUid() else {
+                guard let myUid = self.firebaseService.getCurrentUserUid() else {
                     return Just([]).eraseToAnyPublisher()
                 }
                 return presenter.useCases.chatUseCase.getChats(

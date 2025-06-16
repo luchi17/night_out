@@ -77,14 +77,14 @@ private extension MessagesView {
 }
 
 // Modelo de datos para cada chat
-class Chat: Identifiable {
-    let id = UUID()
+public class Chat: Identifiable {
+    public let id = UUID()
     let otherUserUid: String
     let username: String
     let lastMessage: String
     let profileImage: String?
     
-    init(otherUserUid: String, username: String, lastMessage: String, profileImage: String?) {
+    public init(otherUserUid: String, username: String, lastMessage: String, profileImage: String?) {
         self.otherUserUid = otherUserUid
         self.username = username
         self.lastMessage = lastMessage
