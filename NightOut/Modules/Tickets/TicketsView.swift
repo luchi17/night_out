@@ -37,32 +37,19 @@ struct TicketsView: View {
             
             Spacer()
             // Lista de eventos
-            if viewModel.isFirstTime {
-                Image("icono_calendar")
-                    .resizable()
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 400, height: 300)
-                    .foregroundColor(.white)
-                    .padding(.top, 20)
-                
-                Spacer()
-                
-            } else {
-                ScrollView(.vertical) {
-                    VStack {
-                        ForEach(viewModel.filteredResults, id: \.0.uid) { result in
-                            EventRow(
-                                company: result,
-                                goToCompany: goToCompanyPublisher.send,
-                                goToEvent: goToEventPublisher.send
-                            )
-                        }
+            ScrollView(.vertical) {
+                VStack {
+                    ForEach(viewModel.filteredResults, id: \.0.uid) { result in
+                        EventRow(
+                            company: result,
+                            goToCompany: goToCompanyPublisher.send,
+                            goToEvent: goToEventPublisher.send
+                        )
                     }
                 }
-                .padding(.top, 20)
-                .scrollIndicators(.hidden)
             }
+            .padding(.top, 20)
+            .scrollIndicators(.hidden)
         }
         .padding(.horizontal, 20)
         .background(

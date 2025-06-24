@@ -88,15 +88,15 @@ final class TicketsPresenterImpl: TicketsPresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 
-                let currentTime = Date()
-                // Si no hay última consulta o han pasado más de 2 minutos, hacer la llamada
-                if let lastFetch = presenter.viewModel.lastFetchTime, currentTime.timeIntervalSince(lastFetch) < 120 {
-                    print("TICKETVIEW - Se omite la llamada, no han pasado 2 minutos")
-                    return
-                }
-                print("TICKETVIEW - Han pasado 2 minutos, llamando a loadEvents()")
-                // Actualiza el tiempo de la última consulta
-                presenter.viewModel.lastFetchTime = currentTime
+//                let currentTime = Date()
+//                // Si no hay última consulta o han pasado más de 2 minutos, hacer la llamada
+//                if let lastFetch = presenter.viewModel.lastFetchTime, currentTime.timeIntervalSince(lastFetch) < 120 {
+//                    print("TICKETVIEW - Se omite la llamada, no han pasado 2 minutos")
+//                    return
+//                }
+//                print("TICKETVIEW - Han pasado 2 minutos, llamando a loadEvents()")
+//                // Actualiza el tiempo de la última consulta
+//                presenter.viewModel.lastFetchTime = currentTime
 
                 presenter.loadEvents()
             }
@@ -127,11 +127,6 @@ final class TicketsPresenterImpl: TicketsPresenter {
             .withUnretained(self)
             .sink { presenter, _ in
                 
-                presenter.viewModel.isFirstTime = presenter.viewModel.isFirstTime &&
-                                                    presenter.viewModel.selectedDateFilter == nil &&
-                                                    presenter.viewModel.selectedMusicGenre == nil &&
-                                                    presenter.viewModel.searchText.isEmpty
-                
                 presenter.filterList()
             }
             .store(in: &cancellables)
@@ -143,6 +138,7 @@ final class TicketsPresenterImpl: TicketsPresenter {
     }
     
     private func filterList() {
+        
         let query = viewModel.searchText.lowercased()
         
         let filteredResults = viewModel.companies.map { data -> (CompanyModel, [Fiesta]) in
@@ -296,17 +292,19 @@ final class TicketsPresenterImpl: TicketsPresenter {
                             
                             tempEvents.append(fiesta)
                             
-//                            print("🎉 Fiesta agregada: \(fiesta.name) - Fecha: \(fiesta.fecha)")
+                            print("🎉 Fiesta agregada: \(fiesta.name) - Fecha: \(fiesta.fecha)")
                         }
                         
                     } else {
-//                        print("⏳ Evento descartado (fecha pasada): \(fecha)")
+                        print("⏳ Evento descartado (fecha pasada): \(fecha)")
                     }
                 }
                 
 //                print("🏢 \(company.username) - Total fiestas cargadas: \(tempEvents.count)")
                 self.viewModel.companies.append((company, tempEvents)) // ✅ Asignamos solo las fiestas futuras a la discoteca
             }
+            
+            self.filterList()
             
         }
     }
