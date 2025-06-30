@@ -312,9 +312,9 @@ private extension FeedPresenterImpl {
                 } else {
                     presenter.viewModel.showDiscoverEvents = false
                     
-                    //Update view only when posts have changed
+//                    Update view only when posts have changed
                     if posts.count != presenter.viewModel.posts.count {
-                        presenter.viewModel.posts = posts.sorted(by: { ($0.timestamp) > ($1.timestamp) })
+                        presenter.viewModel.posts = posts.sorted(by: { ($0.timestamp) < ($1.timestamp) })
                     }
                 }
             }
