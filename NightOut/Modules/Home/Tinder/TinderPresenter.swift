@@ -179,21 +179,21 @@ final class TinderPresenterImpl: TinderPresenter {
                             } else {
                                 
                                  #warning("TODO: these 2 lines for testing, comment if else below")
-//                                presenter.viewModel.loadingUsers = true
-//                                presenter.loadUsersSubject.send()
+                                presenter.viewModel.loadingUsers = true
+                                presenter.loadUsersSubject.send()
 //                                
                                 
                                 // 🔹 Si hay más usuarios, validamos el horario
-                                let calendar = Calendar.current
-                                let currentHour = calendar.component(.hour, from: Date())
-                                
-                                if (10...23).contains(currentHour) || (0...2).contains(currentHour) {
-                                    // ✅ Dentro del horario permitido
-                                    presenter.viewModel.loadingUsers = true
-                                     presenter.loadUsersSubject.send()
-                                } else {
-                                    presenter.showOutsideScheduleDialog() // ❌ Fuera de horario
-                                }
+//                                let calendar = Calendar.current
+//                                let currentHour = calendar.component(.hour, from: Date())
+//                                
+//                                if (10...23).contains(currentHour) || (0...2).contains(currentHour) {
+//                                    // ✅ Dentro del horario permitido
+//                                    presenter.viewModel.loadingUsers = true
+//                                     presenter.loadUsersSubject.send()
+//                                } else {
+//                                    presenter.showOutsideScheduleDialog() // ❌ Fuera de horario
+//                                }
                             }
                         }
                 } else {
@@ -280,6 +280,10 @@ final class TinderPresenterImpl: TinderPresenter {
             .flatMap { presenter, likedUsers -> AnyPublisher<([ClubAssistance], [String]), Never> in
                 return presenter.getAssistance()
                     .map { users in
+                        print("users")
+                        print(users)
+                        print("likedUsers")
+                        print(likedUsers)
                         return (users, likedUsers)
                     }
                     .eraseToAnyPublisher()
@@ -304,14 +308,17 @@ final class TinderPresenterImpl: TinderPresenter {
             .filter({ $0.uid != currentUserId })
             .filter({ $0.gender != viewModel.currentUserSex })
         
-        // Ya ha visto todos los matches
+        print("Ya ha visto todos los matches")
         if otherSexUsers.isEmpty && !likedUsers.isEmpty {
-            return Just([]).eraseToAnyPublisher() //Mostrar endView
+            print("Mostrar endView")
+            return Just([]).eraseToAnyPublisher()
         } else if otherSexUsers.isEmpty && likedUsers.isEmpty {
-            return Just(nil).eraseToAnyPublisher() //Mostrar noUsersView
+            print("Mostrar noUsersView")
+            return Just(nil).eraseToAnyPublisher()
         }
         
         let usersToLoad = otherSexUsers.filter { user in
+            print("filtrando liked users")
             return !likedUsers.contains(where: { $0 == user.uid }) //Filter liked users
         }
         
@@ -330,8 +337,10 @@ final class TinderPresenterImpl: TinderPresenter {
                     if userModel.social?.lowercased() == "no participando" ||
                         userModel.image == nil
                     {
+                        print("usuario con uid \(userModel.uid) sin imagen o no participando")
                         return nil
                     } else {
+                        print("usuario con uid \(userModel.uid) añadido")
                         return TinderUser(
                             uid: userModel.uid,
                             name: userModel.username,
@@ -355,13 +364,17 @@ final class TinderPresenterImpl: TinderPresenter {
         
         assistanceRef.observeSingleEvent(of: .value) { snapshot in
             let totalUsers = snapshot.childrenCount
-            completion(totalUsers > 1) // Devuelve true si hay más de un usuario, false si está solo
+            print("Usuarios totales que van al club = mas de 1 \(totalUsers > 1)")
+            completion(totalUsers > 1)
         } withCancel: { error in
-            completion(false) // En caso de error, asumimos que está solo
+            print("Numero usuarios totales que van al club 1 o menos, Error")
+            completion(false)
         }
     }
     
     func getAssistance() -> AnyPublisher<[ClubAssistance], Never> {
+        
+        print("Mirando asistencia del dia \(String(describing: currentDateString))")
         
         let assistanceRef = FirebaseServiceImpl.shared.getAssistance(profileId: self.viewModel.clubId).child(currentDateString!)
         

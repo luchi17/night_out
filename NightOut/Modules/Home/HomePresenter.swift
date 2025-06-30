@@ -147,25 +147,25 @@ final class HomePresenterImpl: HomePresenter {
                 if FirebaseServiceImpl.shared.getImUser() {
                     
 #warning("TODO: this line just for testing, comment the if else below")
-//                    presenter.actions.openTinder()
+                    presenter.actions.openTinder()
                     
 
-                    if presenter.myUserModel?.social?.lowercased() == "no participando" {
-                        
-                        presenter.viewModel.showNighoutAlert = true
-                        presenter.viewModel.nighoutAlertTitle = "Social NightOut"
-                        presenter.viewModel.nighoutAlertMessage = "Eligió no participar en Social NightOut. Puede cambiar la configuración en ajustes."
-                    } else {
-                        
-                        if presenter.isPastNinePM() {
-                            presenter.actions.openTinder()
-                        } else {
-                            presenter.viewModel.showNighoutAlert = true
-                            presenter.viewModel.nighoutAlertTitle = "Social NightOut"
-                            presenter.viewModel.nighoutAlertMessage = "Social NightOut no estará disponible hasta las 21:00."
-                            
-                        }
-                    }
+//                    if presenter.myUserModel?.social?.lowercased() == "no participando" {
+//                        
+//                        presenter.viewModel.showNighoutAlert = true
+//                        presenter.viewModel.nighoutAlertTitle = "Social NightOut"
+//                        presenter.viewModel.nighoutAlertMessage = "Eligió no participar en Social NightOut. Puede cambiar la configuración en ajustes."
+//                    } else {
+//                        
+//                        if presenter.isPastNinePM() {
+//                            presenter.actions.openTinder()
+//                        } else {
+//                            presenter.viewModel.showNighoutAlert = true
+//                            presenter.viewModel.nighoutAlertTitle = "Social NightOut"
+//                            presenter.viewModel.nighoutAlertMessage = "Social NightOut no estará disponible hasta las 21:00."
+//                            
+//                        }
+//                    }
                    
                 } else {
                     presenter.viewModel.showNighoutAlert = true
