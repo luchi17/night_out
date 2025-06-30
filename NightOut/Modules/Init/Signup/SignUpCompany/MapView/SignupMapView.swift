@@ -86,9 +86,9 @@ struct SignupMapView: View {
             position = MapCameraPosition.region(locationManager.userRegion)
             isLoadingUserLocation = newValue.location.latitude == 0.0
         })
-        .applyStates(
-            error: nil,
-            isIdle: isLoadingUserLocation
-        )
+//        .applyStates(
+//            error: nil,
+//            isIdle: isLoadingUserLocation
+//        )
     }
 }

@@ -148,7 +148,7 @@ struct SignupCompanyView: View {
             isPresented: $showLocation,
             onDismiss: {
                 viewModel.locationString = locationModel.coordinate.location.latitude.description + "," + locationModel.coordinate.location.longitude.description
-                locationName = locationModel.name.isEmpty ? ( "(" + viewModel.locationString + ")") : locationModel.name
+                locationName = locationModel.name
                 
             }, content: {
                 SignupMapView(locationModel: $locationModel)
