@@ -36,24 +36,35 @@ struct TicketsView: View {
                 .padding(.top, 12)
             
             Spacer()
-            // Lista de eventos
-            ScrollView(.vertical) {
-                VStack {
-                    ForEach(viewModel.filteredResults, id: \.0.uid) { result in
-                        EventRow(
-                            company: result,
-                            goToCompany: goToCompanyPublisher.send,
-                            goToEvent: goToEventPublisher.send
-                        )
+            
+            if viewModel.filteredResults.isEmpty {
+                Text("No hay resultados con los filtros seleccionados.")
+                    .foregroundStyle(.white)
+                    .font(.system(size: 22, weight: .bold))
+                    .padding(.all, 20)
+                    .frame(maxWidth: .infinity)
+                    
+            } else {
+                // Lista de eventos
+                ScrollView(.vertical) {
+                    VStack {
+                        ForEach(viewModel.filteredResults, id: \.0.uid) { result in
+                            EventRow(
+                                company: result,
+                                goToCompany: goToCompanyPublisher.send,
+                                goToEvent: goToEventPublisher.send
+                            )
+                        }
                     }
                 }
+                .padding(.top, 20)
+                .scrollIndicators(.hidden)
             }
-            .padding(.top, 20)
-            .scrollIndicators(.hidden)
         }
         .padding(.horizontal, 20)
         .background(
-            Color.blackColor.ignoresSafeArea()
+            Color.blackColor
+//                .ignoresSafeArea()
         )
         .sheet(isPresented: $isGenreVisible) {
             GenreSheetView(genre: $viewModel.selectedMusicGenre) {
