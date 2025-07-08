@@ -442,8 +442,8 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                         socialRef.observeSingleEvent(of: .value) { snapshot in
                             print("SOCIAL")
        
-                            if snapshot.exists(), let userSnapshot = snapshot.children.allObjects.first as? DataSnapshot {
-                                let social = userSnapshot.value as? String ?? "no participando"
+                            if snapshot.exists() {
+                                let social = snapshot.value as? String ?? "no participando"
                                 print(social)
                                 let userMap: [String: Any] = [
                                     "uid": userId,
@@ -451,8 +451,11 @@ final class PayPDFPresenterImpl: PayPDFPresenter {
                                     "entry": true, // 🔹 Se añade "entry: true",
                                     "social": social
                                 ]
-
+                                
+                                print(assistanceRef)
+                                print(attendingClubRef)
                                 assistanceRef.setValue(userMap) { error, _ in
+                                    print("entring")
                                     if let error = error {
                                         print("Error al añadir asistencia para \(person.name): \(error.localizedDescription)")
                                     } else {

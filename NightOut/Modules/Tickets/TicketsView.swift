@@ -37,7 +37,7 @@ struct TicketsView: View {
             
             Spacer()
             
-            if viewModel.filteredResults.isEmpty {
+            if viewModel.filteredResults.isEmpty && !viewModel.loading {
                 Text("No hay resultados con los filtros seleccionados.")
                     .foregroundStyle(.white)
                     .font(.system(size: 22, weight: .bold))
@@ -301,6 +301,14 @@ struct GenreSheetView: View {
                             genre = .reggaeton
                             close()
                         }
+                    Text(TicketGenreType.electronica.title)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .onTapGesture {
+                            genre = .electronica
+                            close()
+                    }
                     
                     Text(TicketGenreType.pop.title)
                         .font(.system(size: 16, weight: .medium))
@@ -362,6 +370,7 @@ enum TicketGenreType {
     case jazz
     case clasica
     case latina
+    case electronica
     
     var title: String {
         switch self {
@@ -371,6 +380,8 @@ enum TicketGenreType {
             return "Pop"
         case .techno:
             return "Techno"
+        case .electronica:
+            return "Electrónica"
         case .jazz:
             return "Jazz"
         case .clasica:
@@ -396,8 +407,10 @@ enum TicketGenreType {
         else if rawValue == TicketGenreType.clasica.title {
             self = .clasica
         }
-        else {
-            self = .latina
+        else if rawValue == TicketGenreType.latina.title {
+            self = .electronica
+        } else {
+            self = .electronica
         }
     }
 }

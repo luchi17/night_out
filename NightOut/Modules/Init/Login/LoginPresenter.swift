@@ -235,7 +235,7 @@ private extension LoginPresenterImpl {
         let userModel = UserModel(
             uid: FirebaseServiceImpl.shared.getCurrentUserUid()!,
             fullname: fullName,
-            username: userName,
+            username: userName.lowercased(),
             email: googleUser.profile?.email ?? "",
             image: photoURL,
             fcm_token: "Sin Token"

@@ -62,24 +62,20 @@ struct UserPostProfileView: View {
                 
                 // Contadores
                 HStack(spacing: 8) {
-                    if !viewModel.isCompanyProfile {
-                        CounterView(count: viewModel.discosCount, label: "Discotecas")
-                        CounterView(count: viewModel.copasCount, label: "Copas")
-                    } else {
+                    if viewModel.isCompanyProfile {
                         CounterView(count: viewModel.followersCount, label: "Seguidores")
                             .onTapGesture {
                                 goToFriendsListPublisher.send()
                             }
+                    } else {
                     }
                 }
                 .padding(.vertical, 16)
                 
-                if viewModel.isCompanyProfile {
-                    ImagesGrid(
-                        images: $viewModel.images,
-                        selectedImage: $selectedImage
-                    )
-                }
+                ImagesGrid(
+                    images: $viewModel.images,
+                    selectedImage: $selectedImage
+                )
                 
                 if !viewModel.isCompanyProfile && !levelsViewModel.levelList.isEmpty {
                     RookieLevelsView(viewModel: levelsViewModel)

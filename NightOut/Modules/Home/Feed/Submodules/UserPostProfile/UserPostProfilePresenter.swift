@@ -141,7 +141,7 @@ final class UserPostProfilePresenterImpl: UserPostProfilePresenter {
                     })
                     .eraseToAnyPublisher()
             })
-            .filter({ [weak self] _ in  self?.info.isCompanyProfile ?? false })
+//            .filter({ [weak self] _ in  self?.info.isCompanyProfile ?? false })
             .withUnretained(self)
             .flatMap({ presenter, _ in
                 presenter.useCases.postsUseCase.fetchPosts()

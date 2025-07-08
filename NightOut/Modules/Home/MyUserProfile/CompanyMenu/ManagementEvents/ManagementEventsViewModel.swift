@@ -30,7 +30,7 @@ class ManagementEventsViewModel: ObservableObject {
     
     @Published var selectedItem: PhotosPickerItem?
     
-    let musicGenres = ["Selecciona", "Rock", "Pop", "Electrónica", "Reggaetón"]
+    let musicGenres = ["Selecciona", "Reggaeton", "Pop", "Techno", "Jazz", "Clasica", "Latina"]
     
     func addEntrada() {
         entradas.append(NewEntrada(nombre: "", precio: "", aforo: ""))

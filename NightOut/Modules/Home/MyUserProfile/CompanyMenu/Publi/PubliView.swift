@@ -19,17 +19,17 @@ struct PublicidadView: View {
             
             VStack(spacing: 16) {
                 
-                HStack {
-                    Spacer()
-                    
-                    Button(action: onClose) {
-                        Image(systemName: "xmark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .foregroundStyle(Color.white)
-                    }
-                }
+//                HStack {
+//                    Spacer()
+//                    
+//                    Button(action: onClose) {
+//                        Image(systemName: "xmark")
+//                            .resizable()
+//                            .scaledToFit()
+//                            .frame(width: 20, height: 20)
+//                            .foregroundStyle(Color.white)
+//                    }
+//                }
                 
                 // Logo
                 Image("logo_inicio_app")
@@ -121,6 +121,17 @@ struct PublicidadView: View {
             .padding(.horizontal, 20)
             
         }
+        .overlay(alignment: .topTrailing, content: {
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .foregroundStyle(Color.white)
+            }
+            .padding(.trailing, 20)
+            .padding(.leading)
+        })
         .showToast(
             error: (
                 type: toast,
