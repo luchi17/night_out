@@ -108,7 +108,7 @@ struct LoginView: View, Hashable {
                             
                             googleLoginButton
                             
-                            appleLoginButton
+//                            appleLoginButton
                             
                             forgotPasswordButton
 
