@@ -132,16 +132,15 @@ struct TicketsReaderView: View {
         //Discomment FOR testing
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd-MM-yyyy"
-//        
-//        var dateComponents = DateComponents()
-//        dateComponents.year = 2025
-//        dateComponents.month = 3
-//        dateComponents.day = 12
+        var dateComponents = DateComponents()
+        dateComponents.year = 2025
+        dateComponents.month = 7
+        dateComponents.day = 20
         
-//        let date = Calendar.current.date(from: dateComponents)
-//        let currentDate = dateFormatter.string(from: date!)
+        let date = Calendar.current.date(from: dateComponents)
+        let currentDate = dateFormatter.string(from: date!)
         
-        let currentDate = dateFormatter.string(from: Date())
+//        let currentDate = dateFormatter.string(from: Date())
         
         let dbRef = Database.database().reference()
             .child("Company_Users")

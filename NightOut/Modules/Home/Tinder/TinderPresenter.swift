@@ -77,24 +77,35 @@ final class TinderPresenterImpl: TinderPresenter {
         self.useCases = useCases
         viewModel = TinderViewModel()
         
-        let currentHour = Calendar.current.component(.hour, from: Date())
-
-        // Determinamos la fecha a usar dependiendo de la hora
-        let currentDate: String = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "dd-MM-yyyy"
-            formatter.locale = Locale.current
-
-            if (0...2).contains(currentHour) {
-                // Si está entre las 00:00 y las 02:00, usamos la fecha de ayer
-                if let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) {
-                    return formatter.string(from: yesterday)
-                }
-            }
-
-            // Si no, usamos la fecha actual
-            return formatter.string(from: Date())
-        }()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        var dateComponents = DateComponents()
+        dateComponents.year = 2025
+        dateComponents.month = 7
+        dateComponents.day = 20
+        
+        let date = Calendar.current.date(from: dateComponents)
+        let currentDate = dateFormatter.string(from: date!)
+        
+        
+//        let currentHour = Calendar.current.component(.hour, from: Date())
+//
+//        // Determinamos la fecha a usar dependiendo de la hora
+//        let currentDate: String = {
+//            let formatter = DateFormatter()
+//            formatter.dateFormat = "dd-MM-yyyy"
+//            formatter.locale = Locale.current
+//
+//            if (0...2).contains(currentHour) {
+//                // Si está entre las 00:00 y las 02:00, usamos la fecha de ayer
+//                if let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) {
+//                    return formatter.string(from: yesterday)
+//                }
+//            }
+//
+//            // Si no, usamos la fecha actual
+//            return formatter.string(from: Date())
+//        }()
 
         print("Fecha seleccionada: \(currentDate)")
 
